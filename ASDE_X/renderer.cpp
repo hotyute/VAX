@@ -867,6 +867,8 @@ void RenderInterfaces() {
 	glPushMatrix();
 	glLoadIdentity();
 
+	glLineWidth((GLfloat)1.0f);
+
 	for (InterfaceFrame *frame : frames) {
 		if (frame && frame->render) {
 			int pos = 0;
@@ -888,6 +890,14 @@ void RenderInterfaces() {
 						glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 						glRasterPos2f(textXPos, textYPos);
 						glPrint(title.c_str(), &titleBase);
+
+						//border line
+						glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+						int b_offset_Y = 25;
+						glBegin(GL_LINES);
+						glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+						glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+						glEnd();
 					}
 				}
 				pos++;
@@ -903,6 +913,9 @@ void RenderInterfaces() {
 			}
 		}
 	}
+
+	glLineWidth((GLfloat)1.0f);
+
 	//Restore old ortho
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
