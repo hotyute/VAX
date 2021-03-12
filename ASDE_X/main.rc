@@ -3,7 +3,7 @@
 #include "main.h"
 
 //Define the files as IDW_SOUND! (resource name) and of type WAVE then filepath
-IDW_SOUND1 WAVE "Sounds/atcmessage.wav"
+IDW_SOUND1 WAVE "../Sounds/atcmessage.wav"
 
 MyIcon ICON "favicon.ico"
 
