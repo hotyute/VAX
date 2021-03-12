@@ -6,6 +6,10 @@
 #include <windows.h>
 #include <vector>
 #include <sstream>
+#include <boost/math/special_functions/round.hpp>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 extern std::wstring s2ws(const std::string& s);
 
@@ -28,3 +32,13 @@ extern bool pnpoly(int nvert, int *vertx, int *verty, int testx, int testy);
 extern long long doubleToRawBits(double x);
 
 extern void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent);
+
+double radians(double degrees);
+
+double degrees(double radians);
+
+double dist(double lat1, double lon1, double lat2, double lon2);
+
+void getRunwayBounds(double* p1, double* p2, double w, double** l);
+
+double round_up(double value, int decimal_places);

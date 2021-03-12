@@ -92,6 +92,8 @@ int FileReader::LoadADX(std::string path) {
 							point2d = new Point2D();
 							if (header == "RUNWAY") {
 								point2d->set_type(RUNWAY);
+							} else if (header == "RUNWAY LINE") {
+								point2d->set_type(RUNWAY);
 							} else if (header == "PARKING") {
 								point2d->set_type(PARKING);
 							} else if (header == "TAXIWAY") {
@@ -103,34 +105,57 @@ int FileReader::LoadADX(std::string path) {
 					}
 				}
 			} else if (line.length() > 0) {
-				std::string slatitude, slongitude;
+				std::string slatitude, slongitude, whole_line;
 				std::stringstream stream(line);
-				if (header == "HOLE" || header == "RUNWAY" || header == "PARKING" || header == "APRON" 
+				if (header == "HOLE" || header == "RUNWAY" || "RUNWAY LINE" || header == "PARKING" || header == "APRON" 
 					|| header == "TAXIWAY" || header == "CENTER") {
-						for (int i = 0; i < 2; i++) {
-							if (i == 0) {
-								getline(stream, slatitude, ' ');
-							} else {
-								getline(stream, slongitude);
-							}
-						}
-						if (header == "CENTER") {
-							CENTER_LAT = atof(slatitude.c_str());
-							CENTER_LON = atof(slongitude.c_str());
-						} else if (point2d != NULL) {
-							if (header == "HOLE") {
-								double *coords = new double[3];
-								coords[1] = atof(slatitude.c_str());
-								coords[0] = atof(slongitude.c_str());
-								coords[2] = 0;
-								point2d->add_holes(coords);
-							} else {
-								double *coords = new double[3];
-								coords[1] = atof(slatitude.c_str());
-								coords[0] = atof(slongitude.c_str());
-								//std::cout << std::setprecision(16) << (double)coords[1] << ", " << (double)coords[0] << std::endl;
+						if (header == "RUNWAY LINE") {
+							getline(stream, whole_line);
+							//std::cout << whole_line << std::endl;
+							std::vector<std::string> args = split(whole_line, " ");
+							double p1[2] = { atof(args[0].c_str()),  atof(args[1].c_str()) };
+							double p2[2] = { atof(args[2].c_str()),  atof(args[3].c_str()) };
+							double *bounds[5];
+							for (int i = 0; i < 5; ++i)
+								bounds[i] = new double[2];
+							getRunwayBounds(p1, p2, atof(args[4].c_str()) + 2, bounds);
+							for (int i = 0; i < 5; i++) {
+								double* coords = new double[3];
+								coords[1] = bounds[i][1];
+								coords[0] = bounds[i][0];
 								coords[2] = 0;
 								point2d->add_coordinates(coords);
+							}
+							for (int i = 0; i < 5; ++i)
+								delete[] bounds[i];
+						} else {
+							for (int i = 0; i < 2; i++) {
+								if (i == 0) {
+									getline(stream, slatitude, ' ');
+								}
+								else {
+									getline(stream, slongitude);
+								}
+							}
+							if (header == "CENTER") {
+								CENTER_LAT = atof(slatitude.c_str());
+								CENTER_LON = atof(slongitude.c_str());
+							}
+							else if (point2d != NULL) {
+								if (header == "HOLE") {
+									double* coords = new double[3];
+									coords[1] = atof(slatitude.c_str());
+									coords[0] = atof(slongitude.c_str());
+									coords[2] = 0;
+									point2d->add_holes(coords);
+								}
+								else {
+									double* coords = new double[3];
+									coords[1] = atof(slatitude.c_str());
+									coords[0] = atof(slongitude.c_str());
+									coords[2] = 0;
+									point2d->add_coordinates(coords);
+								}
 							}
 						}
 				}
@@ -148,3 +173,4 @@ int FileReader::LoadADX(std::string path) {
 		return 0;
 	}
 }
+

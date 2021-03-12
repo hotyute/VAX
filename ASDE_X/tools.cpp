@@ -3,7 +3,7 @@
 
 #include "tools.h"
 
-std::vector<std::string> &split(const std::string &str, const std::string &delimiters, std::vector<std::string> &elems) {
+std::vector<std::string>& split(const std::string& str, const std::string& delimiters, std::vector<std::string>& elems) {
 	// Skip delimiters at beginning.
 	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
 	// Find first "non-delimiter".
@@ -21,7 +21,7 @@ std::vector<std::string> &split(const std::string &str, const std::string &delim
 }
 
 
-std::vector<std::string> split(const std::string &s, const std::string &delim) {
+std::vector<std::string> split(const std::string& s, const std::string& delim) {
 	std::vector<std::string> elems;
 	return split(s, delim, elems);
 }
@@ -29,7 +29,7 @@ std::vector<std::string> split(const std::string &s, const std::string &delim) {
 std::wstring s2ws(const std::string& s) {
 	int len;
 	int slength = (int)s.length() + 1;
-	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
 	wchar_t* buf = new wchar_t[len];
 	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
 	std::wstring r(buf);
@@ -41,7 +41,7 @@ SIZE getBitTextLength(HDC hDC, HFONT font, std::string text) {
 	HFONT oldfont = (HFONT)SelectObject(hDC, font);
 	SIZE extent;
 	std::wstring wStr = s2ws(text);
-	GetTextExtentPoint32(hDC, wStr.c_str(), text.length(), &extent );
+	GetTextExtentPoint32(hDC, wStr.c_str(), text.length(), &extent);
 	//std::cout << ((extent.cx) / 2) << std::endl;
 	SelectObject(hDC, oldfont);
 	return extent;
@@ -49,13 +49,13 @@ SIZE getBitTextLength(HDC hDC, HFONT font, std::string text) {
 
 // trim from start
 std::string ltrim(std::string s) {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {return !std::isspace(c); }));
 	return s;
 }
 
 // trim from end
 std::string rtrim(std::string s) {
-	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](int c) {return !std::isspace(c); }).base(), s.end());
 	return s;
 }
 
@@ -80,9 +80,9 @@ int binarySearch1(double sortedArray[], int first, int last, double key) {
 
 	while (first <= last) {
 		int mid = (first + last) / 2;  // compute mid point.
-		if (key > sortedArray[mid]) 
+		if (key > sortedArray[mid])
 			first = mid + 1;  // repeat search in top half.
-		else if (key < sortedArray[mid]) 
+		else if (key < sortedArray[mid])
 			last = mid - 1; // repeat search in bottom half.
 		else
 			return mid;     // found it. return position /////
@@ -94,13 +94,13 @@ int binarySearch(double sortedArray[], int length, double key) {
 	return binarySearch1(sortedArray, 0, length, key);
 }
 
-bool pnpoly(int nvert, int *vertx, int *verty, int testx, int testy ) {
+bool pnpoly(int nvert, int* vertx, int* verty, int testx, int testy) {
 	bool c = false;
 	int i, j;
-	for(i = 0, j = nvert-1; i < nvert; j = i++) {
+	for (i = 0, j = nvert - 1; i < nvert; j = i++) {
 		if (((verty[i] > testy) != (verty[j] > testy)) &&
 			(testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i])) {
-				c = !c;
+			c = !c;
 		}
 	}
 	return c;
@@ -112,15 +112,15 @@ long long doubleToRawBits(double x) {
 	return bits;
 }
 
-char *s2ca1(const std::string &s) {
-	char* res = new char[s.size()+1];
-	strncpy_s(res, s.size()+1, s.c_str(), s.size()+1);
+char* s2ca1(const std::string& s) {
+	char* res = new char[s.size() + 1];
+	strncpy_s(res, s.size() + 1, s.c_str(), s.size() + 1);
 	return res;
 }
 
 void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent) {
 	size_t count, buflen;
-	const char *ptr, *endptr;
+	const char* ptr, * endptr;
 	count = 0;
 	buflen = strlen(buffer);
 	do {
@@ -134,18 +134,77 @@ void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxleng
 			endptr = buffer + buflen;
 		/* back up EOL to a null terminator or space */
 
-		while (*(endptr) && !isspace(*(endptr)) )
+		while (*(endptr) && !isspace(*(endptr)))
 			endptr--;
 		const int size = (endptr - ptr);
 		char* out;
-		out = (char*) malloc (size);
+		out = (char*)malloc(size);
 		strncpy(out, ptr, size);
 		out[size] = '\0';
 		rtrim(out);
 		dest.push_back(out);
 		count += size;
-//TODO FIx bug where word is longer than max length (word as in no spaces)
+		//TODO FIx bug where word is longer than max length (word as in no spaces)
 	} while (*endptr);
+}
+
+double radians(double degrees) {
+	return (degrees * M_PI) / 180;
+}
+
+double degrees(double radians) {
+	return (radians * 180) / M_PI;
+}
+
+double dist(double lat1, double lon1, double lat2, double lon2) {
+	double dist, dlon = lon2 - lon1;
+	lat1 *= M_PI / 180.0;
+	lat2 *= M_PI / 180.0;
+	dlon *= M_PI / 180.0;
+	dist = (sin(lat1) * sin(lat2)) + (cos(lat1) * cos(lat2) * cos(dlon));
+	if (dist > 1.0) dist = 1.0;
+	dist = acos(dist) * 60 * 180 / M_PI;
+	return dist;
+}
+
+void getRunwayBounds(double* p1, double* p2, double w, double** l) {
+	int degree_dist_at_equator = 111120;
+	int lat_degree_dist_average = 111000;
+	int degree_dist_at_lat = cos(radians(p1[0])) * degree_dist_at_equator;
+	double dx, dy;
+	using boost::math::round;
+	if (round_up(p1[1], 6) == round_up(p2[1], 6)) { //runway exactly east - west direction
+		dx = 0;   //difference for longitute in meters to reach corner from center end
+		dy = w / 2; //difference for latitude in meters to reach corner from center end
+	}
+	else if (round_up(p1[0], 6) == round_up(p2[0], 6)) { //runway is exactly north - south direction
+		dx = w / 2;
+		dy = 0;
+	}
+	else {
+		double m = -1 / ((p2[0] - p1[0]) / (p2[1] - p1[1])); //gradient of perpendicular line
+		dx = sqrt(std::pow((w / 2), 2) / std::pow(1 + m, 2));
+		dy = dx * m;
+	}
+	dx /= degree_dist_at_lat; //convert meters in longitute coordinate difference at geographical latitude
+	dy /= lat_degree_dist_average; //convert meters in latitude coordinate difference
+	if ((p1[1] <= p2[1] && dy >= 0) || (p1[1] > p2[1] && dy < 0)) { //make sure to always insert in clockwise order
+		l[0][0] = round_up(p1[1] - dx, 8), l[0][1] = round_up(p1[0] - dy, 8); //buttom corner1
+		l[1][0] = round_up(p1[1] + dx, 8), l[1][1] = round_up(p1[0] + dy, 8); //buttom corner2
+		l[2][0] = round_up(p2[1] + dx, 8), l[2][1] = round_up(p2[0] + dy, 8); //top corner1
+		l[3][0] = round_up(p2[1] - dx, 8), l[3][1] = round_up(p2[0] - dy, 8); //top corner2
+	} else { //insert vertices in different order to assure clockwise orientation
+		l[0][0] = round_up(p1[1] + dx, 8), l[0][1] = round_up(p1[0] + dy, 8);
+		l[1][0] = round_up(p1[1] - dx, 8), l[1][1] = round_up(p1[0] - dy, 8);
+		l[2][0] = round_up(p2[1] - dx, 8), l[2][1] = round_up(p2[0] - dy, 8);
+		l[3][0] = round_up(p2[1] + dx, 8), l[3][1] = round_up(p2[0] + dy, 8);
+	}
+	l[4][0] = l[0][0], l[4][1] = l[0][1]; //add first corner to form closed loop
+}
+
+double round_up(double value, int decimal_places) {
+	const double multiplier = std::pow(10.0, decimal_places);
+	return std::ceil(value * multiplier) / multiplier;
 }
 
 #endif // !1
