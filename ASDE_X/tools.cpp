@@ -183,7 +183,7 @@ void getRunwayBounds(double* p1, double* p2, double w, double** l) {
 	}
 	else {
 		double m = -1 / ((p2[0] - p1[0]) / (p2[1] - p1[1])); //gradient of perpendicular line
-		dx = sqrt(std::pow((w / 2), 2) / std::pow(1 + m, 2));
+		dx = sqrt(std::pow((w / 2.0), 2.0) / (1.0 + std::pow(m, 2.0)));
 		dy = dx * m;
 	}
 	dx /= degree_dist_at_lat; //convert meters in longitute coordinate difference at geographical latitude
