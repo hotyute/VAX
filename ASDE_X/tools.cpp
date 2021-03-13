@@ -182,24 +182,25 @@ void getRunwayBounds(double* p1, double* p2, double w, double** l) {
 		dy = 0;
 	}
 	else {
-		double m = -1 / ((p2[0] - p1[0]) / (p2[1] - p1[1])); //gradient of perpendicular line
+		double m = -1 / ((p2[0] - p1[0]) / (p2[1] - p1[1])); //gradient of the perpendicular runway line
 		dx = sqrt(std::pow((w / 2.0), 2.0) / (1.0 + std::pow(m, 2.0)));
 		dy = dx * m;
 	}
-	dx /= degree_dist_at_lat; //convert meters in longitute coordinate difference at geographical latitude
+	dx /= degree_dist_at_lat; //convert distance into meters in longitute coordinate difference at geographical latitude
 	dy /= lat_degree_dist_average; //convert meters in latitude coordinate difference
-	if ((p1[1] <= p2[1] && dy >= 0) || (p1[1] > p2[1] && dy < 0)) { //make sure to always insert in clockwise order
+	if ((p1[1] <= p2[1] && dy >= 0) || (p1[1] > p2[1] && dy < 0)) { //make sure to always add in clockwise order
 		l[0][0] = round_up(p1[1] - dx, 8), l[0][1] = round_up(p1[0] - dy, 8); //buttom corner1
 		l[1][0] = round_up(p1[1] + dx, 8), l[1][1] = round_up(p1[0] + dy, 8); //buttom corner2
 		l[2][0] = round_up(p2[1] + dx, 8), l[2][1] = round_up(p2[0] + dy, 8); //top corner1
 		l[3][0] = round_up(p2[1] - dx, 8), l[3][1] = round_up(p2[0] - dy, 8); //top corner2
-	} else { //insert vertices in different order to assure clockwise orientation
+	}
+	else { //insert all those vertices in different order please to assure clockwise orientation
 		l[0][0] = round_up(p1[1] + dx, 8), l[0][1] = round_up(p1[0] + dy, 8);
 		l[1][0] = round_up(p1[1] - dx, 8), l[1][1] = round_up(p1[0] - dy, 8);
 		l[2][0] = round_up(p2[1] - dx, 8), l[2][1] = round_up(p2[0] - dy, 8);
 		l[3][0] = round_up(p2[1] + dx, 8), l[3][1] = round_up(p2[0] + dy, 8);
 	}
-	l[4][0] = l[0][0], l[4][1] = l[0][1]; //add first corner to form closed loop
+	l[4][0] = l[0][0], l[4][1] = l[0][1]; //add the very first corner to form closed loop
 }
 
 double round_up(double value, int decimal_places) {
