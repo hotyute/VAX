@@ -102,6 +102,7 @@
     <ClCompile Include="guicon.cpp" />
     <ClCompile Include="later.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mirror.cpp" />
     <ClCompile Include="packets.cpp" />
     <ClCompile Include="point2d.cpp" />
     <ClCompile Include="projection.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="guicon.h" />
     <ClInclude Include="later.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="mirror.h" />
     <ClInclude Include="packets.h" />
     <ClInclude Include="point2d.h" />
     <ClInclude Include="projection.h" />

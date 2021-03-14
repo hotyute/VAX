@@ -32,17 +32,15 @@ void Load_FlightPlan_Interface(User& user, bool refresh)
 }
 
 void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
-
+	if (_openedframe && !_openedframe->multi_open) {
+		return;
+	}
 	std::string call = strings[0], name = strings[1], pilot_rating = strings[2], 
 		ac_type_txt = strings[3], fr_text = strings[4], depart = strings[5], 
 		arrive = strings[6], alternate = strings[7], cruise = strings[8], 
 		scratch = strings[9], a_squawk = strings[10];
 	InterfaceFrame* fp_frame = frames[FP_INTERFACE];
 	if (!fp_frame || refresh) {
-		if (fp_frame) {
-			delete fp_frame;
-			frames[FP_INTERFACE] = NULL;
-		}
 		fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
 		int width = 500, x = (CLIENT_WIDTH / 2) - (width / 2);
@@ -117,10 +115,10 @@ void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
 		Label* route_label = new Label(fp_frame, "Route:", x + (width - (width * start_x)), 70.0, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		route_label->centered = 2;
 		fp_frame->children[route_label->index = FP_ROUTE_LABEL] = route_label;
-		std::vector<std::string> list;
-		list.push_back("SKIPS1.SKIPS");
-		list.push_back("");
-		list.push_back("");
+		std::vector<ChatLine*> list;
+		list.push_back(new ChatLine("SKIPS1.SKIPS", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		double route_box_size = 50.0;
 		DisplayBox* displayBox = new DisplayBox(fp_frame, list, 3, x + (width - (width * (start_x -= spacing))), width * 0.75, 5, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
@@ -132,9 +130,9 @@ void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
 		Label* remarks_label = new Label(fp_frame, "Remarks:", x + (width - (width * start_x)), 70.0, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		remarks_label->centered = 2;
 		fp_frame->children[remarks_label->index = FP_REMARKS_LABEL] = remarks_label;
-		std::vector<std::string> remarks_list;
-		remarks_list.push_back("/v/");
-		remarks_list.push_back("");
+		std::vector<ChatLine*> remarks_list;
+		remarks_list.push_back(new ChatLine("/v/", CHAT_TYPE::MAIN));
+		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		route_box_size = 30.0;
 		DisplayBox* remarks_box = new DisplayBox(fp_frame, remarks_list, 2, x + (width - (width * (start_x -= spacing))), width * 0.75, 5, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
@@ -144,18 +142,10 @@ void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
 		fp_frame->children[fp_closeb->index = FP_CLOSE_BUTTON] = fp_closeb;
 
 
-		frames[FP_INTERFACE] = fp_frame;
-		fp_frame->renderAllInputText = true;
-		renderInputText = true;
-		renderInterfaces = true;
-		renderDrawings = true;
+		fp_frame->doOpen(FP_INTERFACE, false);
 	} else {
 		if (!fp_frame->render) {
-			fp_frame->render = true;
-			renderInterfaces = true;
-			renderDrawings = true;
-			fp_frame->renderAllInputText = true;
-			fp_frame->children[0]->setFocus();
+			fp_frame->doOpen(FP_INTERFACE, false);
 		}
 	}
 }

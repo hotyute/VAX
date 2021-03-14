@@ -12,6 +12,7 @@ std::vector<InterfaceFrame*> frames(256);
 ChildFrame* focusChild = NULL, * lastFocus = NULL;
 std::vector<InterfaceFrame*> deleteInterfaces;
 bool updateLastFocus = false;
+InterfaceFrame* _openedframe = NULL;
 
 InterfaceFrame::InterfaceFrame(int index) {
 	InterfaceFrame::children.resize(256);
@@ -57,6 +58,45 @@ void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
 	InterfaceFrame::interfaces.push_back(bounds);
+}
+
+void InterfaceFrame::doOpen(int index, bool multi_open)
+{
+	if (frames[index] != this) {
+		InterfaceFrame *frame = frames[index];
+		if (frame) {
+			delete frame;
+			frames[index] = NULL;
+		}
+		frames[index] = this;
+	}
+	InterfaceFrame::renderAllInputText = true;
+	InterfaceFrame::render = true;
+	InterfaceFrame::multi_open = multi_open;
+	renderInputText = true;
+	renderInterfaces = true;
+	renderDrawings = true;
+	_openedframe = this;
+	if (index == CONNECT_INTERFACE)
+		InterfaceFrame::children[CONN_CALLSIGN_LABEL]->setFocus();
+}
+
+void InterfaceFrame::doClose()
+{
+	switch (InterfaceFrame::index)
+	{
+	case FP_INTERFACE:
+	{
+		opened_fp = NULL;
+	}
+	break;
+	}
+	InterfaceFrame::render = false;
+	renderInterfaces = true;
+	renderInputText = true;
+	renderDrawings = true;
+	renderFocus = true;
+	_openedframe = NULL;
 }
 
 /*void InterfaceFrame::addInputField(InputField* field) {
@@ -231,14 +271,7 @@ void CloseButton::removeFocus() {
 }
 
 void CloseButton::doAction() {
-	CloseButton::frame->render = false;
-	if (CloseButton::frame->index == FP_INTERFACE) {
-		opened_fp = NULL;
-	}
-	renderInterfaces = true;
-	renderInputText = true;
-	renderDrawings = true;
-	renderFocus = true;
+	CloseButton::frame->doClose();
 }
 
 void CloseButton::focusDrawing() {
@@ -303,10 +336,11 @@ void ClickButton::doAction() {
 		{
 		case CONN_OKAY_BUTTON:
 		{
-			USER->getIdentity()->callsign = connect_callsign->input.c_str();
-			USER->getIdentity()->login_name = connect_fullname->input.c_str();
-			USER->getIdentity()->username = connect_username->input.c_str();
-			USER->getIdentity()->password = connect_password->input.c_str();
+			Identity id = *USER->getIdentity();
+			id.callsign = connect_callsign->input.c_str();
+			id.login_name = connect_fullname->input.c_str();
+			id.username = connect_username->input.c_str();
+			id.password = connect_password->input.c_str();
 			connect_closeb->doAction();
 			connect();
 		}
@@ -419,7 +453,7 @@ void ComboBox::focusDrawing() {
 	}
 }
 
-DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<std::string> list, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
+DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> list, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
 	DisplayBox::frame = frame;
 	DisplayBox::list = list;
 	DisplayBox::centered = centerText;
@@ -452,7 +486,7 @@ void DisplayBox::doDrawing() {
 	int maxChars = aW / ave;
 	int noncp = 2;
 	for (size_t i = 0; i < DisplayBox::list.size(); i++) {
-		std::string text = DisplayBox::list[i];
+		std::string text = DisplayBox::list[i]->getText();
 		SIZE size = getTextExtent(text);
 		if (size.cx > param.getActualWidth()) {
 			std::vector<std::string> store;
@@ -461,21 +495,21 @@ void DisplayBox::doDrawing() {
 			int s_size = store.size();
 			int timesShifted = 0;
 			while (timesShifted < (s_size - 1)) {
-				std::string temp = DisplayBox::list[0];
+				std::string temp = DisplayBox::list[0]->getText();
 				for (i3 = 0; i3 < i; i3++) {
 					DisplayBox::list[i3] = DisplayBox::list[i3 + 1];
 				}
-				DisplayBox::list[i] = temp;
+				DisplayBox::list[i]->setText(temp);
 				timesShifted++;
 			}
 			for (size_t i2 = 0; i2 < s_size; i2++) {
 				std::string s_text = store[i2];
-				DisplayBox::list[i - ((s_size - 1) - i2)] = ltrim(s_text);
+				DisplayBox::list[i - ((s_size - 1) - i2)]->setText(ltrim(s_text));
 			}
 		}
 	}
 	for (size_t i = 0; i < DisplayBox::list.size(); i++) {
-		std::string text = DisplayBox::list[i];
+		std::string text = DisplayBox::list[i]->getText();
 		double y, endY;
 		if (last_end_y != -1) {
 			y = (last_end_y - (y_height / 2));
@@ -547,9 +581,13 @@ void DisplayBox::focusDrawing() {
 	}
 }
 
-void DisplayBox::addLine(std::string text) {
+
+
+void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
+	ChatLine *line = DisplayBox::list.front();
 	DisplayBox::list.erase(DisplayBox::list.begin());
-	DisplayBox::list.push_back(text);
+	delete line;
+	DisplayBox::list.push_back(new ChatLine(text, type));
 }
 
 Label::Label(InterfaceFrame* interfaceFrame, std::string label, double width, double height)
@@ -591,4 +629,34 @@ void Label::doAction() {
 
 void Label::focusDrawing()
 {
+}
+
+ChatLine::ChatLine(std::string line, CHAT_TYPE type)
+{
+	ChatLine::line = line;
+	ChatLine::type = type;
+}
+
+ChatLine::~ChatLine()
+{
+}
+
+void ChatLine::setType(CHAT_TYPE type)
+{
+	ChatLine::type = type;
+}
+
+CHAT_TYPE ChatLine::getType()
+{
+	return ChatLine::type;
+}
+
+void ChatLine::setText(std::string text)
+{
+	ChatLine::line = text;
+}
+
+std::string ChatLine::getText()
+{
+	return ChatLine::line;
 }

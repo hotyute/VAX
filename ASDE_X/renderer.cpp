@@ -17,6 +17,8 @@
 #include "events.h"
 #include "flightplan.h"
 
+std::vector<Mirror*> mirrors(256);
+
 bool renderAircraft = false, renderSector  = false, renderButtons = false, 
 	renderLegend = false, renderAllCallsigns = false, renderInterfaces = false,
 	renderInputText = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false;
@@ -25,8 +27,9 @@ bool loadInterfaces = false;
 
 bool resize = false;
 int sectorDl, legendDl, buttonsDl, interfacesDl, confDl, aircraftDl, heavyDl, unkTarDl, focusDl, drawingDl;
-unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase;
-HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL;
+unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
+HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL, 
+errorFont = NULL;
 
 void RenderChatInterface(ChatInterface&);
 void RenderInputText(ChatInterface&, int&, std::string&, bool);
@@ -69,31 +72,33 @@ void InitOpenGL(GLvoid) {
 	BuildFont(L"Consolas", -13, false, &confBase, &confFont);
 	BuildFont(L"Courier New", -12, false, &callSignBase, &callSignFont);
 	BuildFont(L"Times New Roman", -11, true, &labelBase, &labelFont);
+	BuildFont(L"Consolas", -11, false, &errorBase, &errorFont);
 }
 
-void ResizeGLScene2(int x, int y, int width, int height) {
+void ResizeMirrorGLScene(Mirror &mirror) {
 	// Set up the viewport.
 
-	int clientWidth = width;
-	int clientHeight = height;
-	if (clientWidth <= 0)
-		clientWidth = 1;
-	if (clientHeight <= 0)
-		clientHeight = 1;
+	int width = mirror.getWidth();
+	int height = mirror.getHeight();
+	if (width <= 0)
+		width = 1;
+	if (height <= 0)
+		height = 1;
 	glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
 	glLoadIdentity();                                    // Reset The Projection Matrix
-	glViewport(x, y, width, height);
+	glViewport(mirror.getX(), mirror.getY(), width, height);
 	// Clamp the zoom.
-	if (mZoom > MAX_ZOOM) {
-		mZoom = MAX_ZOOM;
-	} else if (mZoom < MIN_ZOOM) {
-		mZoom = MIN_ZOOM;
+	int zoom = mirror.getZoom();
+	if (zoom > MAX_ZOOM) {
+		zoom = MAX_ZOOM;
+	} else if (zoom < MIN_ZOOM) {
+		zoom = MIN_ZOOM;
 	}
 	// Set the min/max lat/lon based on center point, zoom, and client aspect.
-	double coordSysMinLon = CENTER_LON - ((clientWidth / 2.0) * (mZoom / NM_PER_DEG));
-	double coordSysMaxLon = CENTER_LON + ((clientWidth / 2.0) * (mZoom / NM_PER_DEG));
-	double coordSysMinLat = CENTER_LAT - ((clientHeight / 2.0) * (mZoom / NM_PER_DEG));
-	double coordSysMaxLat = CENTER_LAT + ((clientHeight / 2.0) * (mZoom / NM_PER_DEG));
+	double coordSysMinLon = CENTER_LON - ((width / 2.0) * (zoom / NM_PER_DEG));
+	double coordSysMaxLon = CENTER_LON + ((width / 2.0) * (zoom / NM_PER_DEG));
+	double coordSysMinLat = CENTER_LAT - ((height / 2.0) * (zoom / NM_PER_DEG));
+	double coordSysMaxLat = CENTER_LAT + ((height / 2.0) * (zoom / NM_PER_DEG));
 
 	// Calculate coordinate system boundaries.
 	double coordSysWidth = coordSysMaxLon - coordSysMinLon;
@@ -688,7 +693,7 @@ void RenderButtons() {
 	int last_x = 0;
 	int last_end_x = 0;
 	int last_end_y = 0;
-	for (int i = 0; i < BUTTONS.size(); i++) {
+	for (size_t i = 0; i < BUTTONS.size(); i++) {
 		TopButton &curButton = *BUTTONS[i];
 		int index = curButton.getIndex();
 		bool half = curButton.getIsHalf();
@@ -1135,24 +1140,24 @@ void LoadInterfaces() {
 	const int width_offset = (controller_list_width + (arrow_offset + arrow_offset) + c_padding + m_padding);
 
 	//controller list
-	std::vector<std::string> list;
-	list.push_back("--Delivery--");
-	list.push_back("1A - MIA_DEL");
-	list.push_back("");
-	list.push_back("");
-	list.push_back("");
-	list.push_back("");
-	DisplayBox *displayBox = new DisplayBox(textBox, list, c_padding, x, controller_list_width, 5, 5, 114, 5, true);
+	std::vector<ChatLine*> list;
+	list.push_back(new ChatLine("--Delivery--", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("1A - MIA_DEL", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	DisplayBox *displayBox = new DisplayBox(textBox, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
 
 	//chatbox
 	textBox->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
-	std::vector<std::string> list2;
-	list2.push_back("");
-	list2.push_back("");
-	list2.push_back("");
-	list2.push_back("");
-	list2.push_back("");
-	list2.push_back("[Performing Version Check..]");
+	std::vector<ChatLine*> list2;
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
 
 	main_chat = new DisplayBox(textBox, list2, 6, x + (controller_list_width + arrow_offset), 
 		(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);

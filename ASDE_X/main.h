@@ -47,5 +47,6 @@ extern InputField *connect_callsign, *connect_fullname, *connect_username, *conn
 extern Label* callsign_label;
 extern CloseButton *connect_closeb;
 extern DisplayBox *main_chat;
+extern bool connected;
 
 #endif

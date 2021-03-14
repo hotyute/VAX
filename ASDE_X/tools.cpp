@@ -42,7 +42,6 @@ SIZE getBitTextLength(HDC hDC, HFONT font, std::string text) {
 	SIZE extent;
 	std::wstring wStr = s2ws(text);
 	GetTextExtentPoint32(hDC, wStr.c_str(), text.length(), &extent);
-	//std::cout << ((extent.cx) / 2) << std::endl;
 	SelectObject(hDC, oldfont);
 	return extent;
 }
@@ -170,7 +169,7 @@ double dist(double lat1, double lon1, double lat2, double lon2) {
 void getRunwayBounds(double* p1, double* p2, double w, double** l) {
 	int degree_dist_at_equator = 111120;
 	int lat_degree_dist_average = 111000;
-	int degree_dist_at_lat = cos(radians(p1[0])) * degree_dist_at_equator;
+	double degree_dist_at_lat = cos(radians(p1[0])) * degree_dist_at_equator;
 	double dx, dy;
 	using boost::math::round;
 	if (round_up(p1[1], 6) == round_up(p2[1], 6)) { //runway exactly east - west direction

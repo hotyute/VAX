@@ -14,13 +14,16 @@
 #define COMBO_BOX 62446
 #define DISPLAY_BOX 62447
 
+enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM };
+
 class InterfaceFrame;
 class ChildFrame;
+class ChatLine;
 
 class InterfaceFrame {
 private:
 public:
-	bool render, renderAllInputText;
+	bool render, renderAllInputText, multi_open = true;
 	int index;
 	std::string title;
 	std::vector<ChatInterface*> interfaces;
@@ -29,6 +32,8 @@ public:
 	InterfaceFrame(int, double, double);
 	InterfaceFrame(int, double, double, double, double);
 	void Pane1(double, double, double, double);
+	void doOpen(int, bool multi_open);
+	void doClose();
 };
 
 class ChildFrame {
@@ -43,6 +48,19 @@ public:
 	virtual void removeFocus() = 0;
 	virtual void doAction() = 0;
 	virtual void focusDrawing() = 0;
+};
+
+class ChatLine {
+private:
+	CHAT_TYPE type;
+	std::string line;
+public:
+	ChatLine(std::string, CHAT_TYPE);
+	~ChatLine();
+	void setType(CHAT_TYPE type);
+	CHAT_TYPE getType();
+	void setText(std::string text);
+	std::string getText();
 };
 
 class InputField : public ChildFrame {
@@ -103,7 +121,7 @@ private:
 public:
 	ComboBox(InterfaceFrame*, std::vector<std::string>, double, double, double, double, double, double);
 public:
-	int pos;
+	size_t pos;
 	std::vector<std::string> options;
 	std::vector<SIZE> extents;
 	SIZE largestExtent;
@@ -118,17 +136,17 @@ class DisplayBox : public ChildFrame {
 private:
 	InterfaceFrame* frame;
 public:
-	DisplayBox(InterfaceFrame*, std::vector<std::string>, int, double, double, double, double, double, double, bool);
+	DisplayBox(InterfaceFrame*, std::vector<ChatLine*>, int, double, double, double, double, double, double, bool);
 public:
 	int numBlocks;
 	bool centered;
-	std::vector<std::string> list;
+	std::vector<ChatLine*> list;
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
-	void addLine(std::string);
+	void addLine(std::string, CHAT_TYPE type);
 };
 
 class Label : public ChildFrame {
@@ -154,5 +172,6 @@ extern std::vector<InterfaceFrame*> frames;
 extern ChildFrame *focusChild, *lastFocus;
 extern std::vector<InterfaceFrame*> deleteInterfaces;
 extern bool updateLastFocus;
+extern InterfaceFrame* _openedframe;
 
 #endif

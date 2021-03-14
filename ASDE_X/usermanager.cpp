@@ -113,7 +113,7 @@ void decodePackets(int opCode, Stream &stream) {
 		stream.readString(msg);
 		User *user1 = userStorage1.at(index);
 		if (user1 != NULL) {
-			main_chat->addLine(user1->getIdentity()->callsign + std::string(": ") + msg);
+			main_chat->addLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
 			renderDrawings = true;
 		}
 	}

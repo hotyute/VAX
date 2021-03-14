@@ -4,6 +4,10 @@
 #include <iostream>
 #include <vector>
 
+#include "mirror.h"
+
+extern std::vector<Mirror*> mirrors;
+
 extern bool renderAircraft, renderSector, renderButtons, 
 	renderLegend, renderAllCallsigns, renderInterfaces,
 	renderInputText, renderConf, renderFocus, renderDrawings, what;
@@ -14,8 +18,8 @@ extern bool resize;
 
 extern int sectorDl, legendDl, buttonsDl, interfacesDl, confDl, aircraftDl, heavyDl, unkTarDl, focusDl, drawingDl;
 
-extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase;
-extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont;
+extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
+extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont, errorFont;
 
 static const int scale[] = {4, 60};
 static const int LOCKED_FPS = 30;
@@ -24,7 +28,7 @@ static const double MIN_ZOOM = 0.00002;
 static const double MAX_ZOOM = 30.0;
 
 const static double BUTTON_PADDING = 0.05;
-static int BUTTON_HEIGHT = 0;
+static double BUTTON_HEIGHT = 0;
 const static double BUTTON_LAYOUT_HEIGHT = 0.1;
 
 const static float day_background[] = {0.0f, 0.35686274509f, 0.49019607843f};
@@ -44,7 +48,7 @@ const static float unknown_clr[] = {0.0f, 0.85490196078f, 0.81176470588f};
 
 void InitOpenGL();
 void ResizeGLScene();
-void ResizeGLScene2(int, int, int, int);
+void ResizeMirrorGLScene(Mirror*);
 void SetView(double, double);
 void DrawGLScene();
 DWORD WINAPI OpenGLThread(LPVOID lpParameter);

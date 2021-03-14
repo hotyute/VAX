@@ -28,7 +28,7 @@ PAINTSTRUCT ps;
 TCHAR szClassName[ ] = TEXT("WindowsApp");
 HWND text123, text124, lblNone, strUsers, lblNumUsrs;
 
-bool done = false;
+bool done = false, connected = false;
 
 const int proto_version = 32698;
 
@@ -408,7 +408,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 											sendUserMessage(*curUsr, focusField->input);
 										}
 									}
-									main_chat->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input);
+									main_chat->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
 									renderDrawings = true;
 									focusField->clearInput();
 									focusField->pushInput(true, input_cursor);
@@ -548,6 +548,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 }
 
 void handleConnect() {
+	if (_openedframe && !_openedframe->multi_open) {
+		return;
+	}
+	if (connected) {
+		return;
+	}
 	if (connectFrame == NULL) {
 		connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
 		connectFrame->title = "CONNECT";
@@ -603,17 +609,10 @@ void handleConnect() {
 		connectFrame->children[okButton->index = CONN_OKAY_BUTTON] = okButton;
 		ClickButton *cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 		connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
-		frames[CONNECT_INTERFACE] = connectFrame;
-		renderInterfaces = true;
-		renderDrawings = true;
-		connect_callsign->setFocus();
+		connectFrame->doOpen(CONNECT_INTERFACE, false);
 	} else {
 		if (!connectFrame->render) {
-			connectFrame->render = true;
-			renderInterfaces = true;
-			renderDrawings = true;
-			connectFrame->renderAllInputText = true;
-			connectFrame->children[0]->setFocus();
+			connectFrame->doOpen(CONNECT_INTERFACE, false);
 		}
 	}
 }
@@ -648,6 +647,7 @@ bool processCommands(std::string command)
 
 void connect() {
 	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
+		connected = true;
 		Stream stream = Stream(200);
 		int type = USER->getIdentity()->type;
 		intter->hand_shake = true;
