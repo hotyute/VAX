@@ -3,6 +3,58 @@
 
 #include "tools.h"
 
+#define N_SEG 20 // num points
+
+void quad_bezier(double x1, double y1, double x2, double y2, double x3, double y3, PointTess *point2d) {
+	unsigned int i;
+	double pts[N_SEG + 1][2];
+	for (i = 0; i <= N_SEG; ++i)
+	{
+		double t = (double)i / (double)N_SEG;
+		double a = pow((1.0 - t), 2.0);
+		double b = 2.0 * t * (1.0 - t);
+		double c = pow(t, 2.0);
+		double x = a * x1 + b * x2 + c * x3;
+		double y = a * y1 + b * y2 + c * y3;
+		pts[i][0] = x;
+		pts[i][1] = y;
+	}
+
+	/* draw segments */
+	for (i = 0; i < N_SEG; ++i)
+	{
+		int j = i + 1;
+		point2d->add_vector(pts[i][1], pts[i][0], 0, pts[j][1], pts[j][0], 0);
+	}
+}
+
+void cubic_bezier(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, PointTess *point2d)
+{
+	unsigned int i;
+	double pts[N_SEG + 1][2];
+	for (i = 0; i <= N_SEG; ++i)
+	{
+		double t = (double)i / (double)N_SEG;
+
+		double a = pow((1.0 - t), 3.0);
+		double b = 3.0 * t * pow((1.0 - t), 2.0);
+		double c = 3.0 * pow(t, 2.0) * (1.0 - t);
+		double d = pow(t, 3.0);
+
+		double x = a * x1 + b * x2 + c * x3 + d * x4;
+		double y = a * y1 + b * y2 + c * y3 + d * y4;
+		pts[i][0] = x;
+		pts[i][1] = y;
+	}
+
+	/* draw segments */
+	for (i = 0; i < N_SEG; ++i)
+	{
+		int j = i + 1;
+		point2d->add_vector(pts[i][1], pts[i][0], 0, pts[j][1], pts[j][0], 0);
+	}
+}
+
 std::vector<std::string>& split(const std::string& str, const std::string& delimiters, std::vector<std::string>& elems) {
 	// Skip delimiters at beginning.
 	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
@@ -207,4 +259,12 @@ double round_up(double value, int decimal_places) {
 	return std::ceil(value * multiplier) / multiplier;
 }
 
-#endif // !1
+bool is_curved(std::vector<std::string> str) {
+	return str.size() > 2;
+}
+
+inline Point2 recip(const Point2& pt, const Point2& ctrl) { 
+	return pt + Vector2(ctrl, pt); 
+}
+
+#endif

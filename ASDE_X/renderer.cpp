@@ -488,14 +488,14 @@ int DrawSceneryData() {
 	gluTessCallback(tess, GLU_TESS_COMBINE, (void (__stdcall *)(void)) &combineCallback);
 
 
-	std::vector<Point2D*> runways;
-	std::vector<Point2D*> parking;
-	std::vector<Point2D*> taxiways;
-	std::vector<Point2D*> aprons;
+	std::vector<PointTess*> runways;
+	std::vector<PointTess*> parking;
+	std::vector<PointTess*> taxiways;
+	std::vector<PointTess*> aprons;
 
 	glNewList(sectorDl, GL_COMPILE);
 	for (size_t i = 0; i < ALL.size(); i++) {
-		Point2D *point2d = ALL[i];
+		PointTess *point2d = ALL[i];
 		int type = point2d->get_type();
 		if (type == RUNWAY) {
 			runways.push_back(point2d);
@@ -508,15 +508,16 @@ int DrawSceneryData() {
 		}
 	}
 	//order rendered counts for overlapping
-	for (Point2D *point2d1 : taxiways) {
-		std::vector<double*> coordinates11 = point2d1->get_coordinates();
-		std::vector<double*> holes11 = point2d1->get_holes();
+	for (PointTess *point2d1 : taxiways) {
+		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
+		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
 		glColor3f(taxiway_clr[0], taxiway_clr[1], taxiway_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
-		for (double *aCoordinates11 : coordinates11) {
-			gluTessVertex(tess, aCoordinates11, aCoordinates11);
+		for (LinearSegment *aCoordinates11 : coordinates11) {
+			double* data = aCoordinates11->pt.as_array();
+			gluTessVertex(tess, data, data);
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
@@ -524,8 +525,9 @@ int DrawSceneryData() {
 			glColor3f(day_background[0], day_background[1], day_background[2]);
 			gluTessBeginPolygon(tess, 0);
 			gluTessBeginContour(tess);
-			for (double* aHoles11 : holes11) {
-				gluTessVertex(tess, aHoles11, aHoles11);
+			for (LinearSegment* aHoles11 : holes11) {
+				double* data = aHoles11->pt.as_array();
+				gluTessVertex(tess, data, data);
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
@@ -534,15 +536,16 @@ int DrawSceneryData() {
 		}
 		//delete point2d;
 	}
-	for (Point2D *point2d1 : aprons) {
-		std::vector<double*> coordinates11 = point2d1->get_coordinates();
-		std::vector<double*> holes11 = point2d1->get_holes();
+	for (PointTess *point2d1 : aprons) {
+		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
+		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
 		glColor3f(apron_clr[0], apron_clr[1], apron_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
-		for (double* aCoordinates11 : coordinates11) {
-			gluTessVertex(tess, aCoordinates11, aCoordinates11);
+		for (LinearSegment* aCoordinates11 : coordinates11) {
+			double* data = aCoordinates11->pt.as_array();
+			gluTessVertex(tess, data, data);
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
@@ -550,8 +553,9 @@ int DrawSceneryData() {
 			glColor3f(day_background[0], day_background[1], day_background[2]);
 			gluTessBeginPolygon(tess, 0);
 			gluTessBeginContour(tess);
-			for (double* aHoles11 : holes11) {
-				gluTessVertex(tess, aHoles11, aHoles11);
+			for (LinearSegment* aHoles11 : holes11) {
+				double* data = aHoles11->pt.as_array();
+				gluTessVertex(tess, data, data);
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
@@ -560,15 +564,16 @@ int DrawSceneryData() {
 		}
 		//delete point2d;
 	}
-	for (Point2D *point2d1 : runways) {
-		std::vector<double*> coordinates11 = point2d1->get_coordinates();
-		std::vector<double*> holes11 = point2d1->get_holes();
+	for (PointTess *point2d1 : runways) {
+		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
+		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
 		glColor3f(runway_clr[0], runway_clr[1], runway_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
-		for (double* aCoordinates11 : coordinates11) {
-			gluTessVertex(tess, aCoordinates11, aCoordinates11);
+		for (LinearSegment* aCoordinates11 : coordinates11) {
+			double* data = aCoordinates11->pt.as_array();
+			gluTessVertex(tess, data, data);
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
@@ -576,8 +581,9 @@ int DrawSceneryData() {
 			glColor3f(day_background[0], day_background[1], day_background[2]);
 			gluTessBeginPolygon(tess, 0);
 			gluTessBeginContour(tess);
-			for (double* aHoles11 : holes11) {
-				gluTessVertex(tess, aHoles11, aHoles11);
+			for (LinearSegment* aHoles11 : holes11) {
+				double* data = aHoles11->pt.as_array();
+				gluTessVertex(tess, data, data);
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
@@ -586,15 +592,16 @@ int DrawSceneryData() {
 		}
 		//delete point2d;
 	}
-	for (Point2D *point2d1 : parking) {
-		std::vector<double*> coordinates11 = point2d1->get_coordinates();
-		std::vector<double*> holes11 = point2d1->get_holes();
+	for (PointTess *point2d1 : parking) {
+		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
+		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
 		glColor3f(parking_clr[0], parking_clr[1], parking_clr[2]);
 		gluTessBeginPolygon(tess, 0);                   // with NULL data
 		gluTessBeginContour(tess);
-		for (double* aCoordinates11 : coordinates11) {
-			gluTessVertex(tess, aCoordinates11, aCoordinates11);
+		for (LinearSegment* aCoordinates11 : coordinates11) {
+			double* data = aCoordinates11->pt.as_array();
+			gluTessVertex(tess, data, data);
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
@@ -602,8 +609,9 @@ int DrawSceneryData() {
 			glColor3f(day_background[0], day_background[1], day_background[2]);
 			gluTessBeginPolygon(tess, 0);
 			gluTessBeginContour(tess);
-			for (double* aHoles11 : holes11) {
-				gluTessVertex(tess, aHoles11, aHoles11);
+			for (LinearSegment* aHoles11 : holes11) {
+				double* data = aHoles11->pt.as_array();
+				gluTessVertex(tess, data, data);
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);

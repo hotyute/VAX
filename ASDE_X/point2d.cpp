@@ -1,19 +1,71 @@
 #include "point2d.h"
 
-std::vector<Point2D*>ALL;
+std::vector<PointTess*>ALL;
 
-void Point2D::add_holes(double* holes) {
-	Point2D::holes.push_back(holes);
+void PointTess::add_holes(double lat, double lon, double z) {
+	Point2 p = Point2(lon, lat);
+	LinearSegment* seg = new LinearSegment();
+	seg->pt = p;
+	PointTess::holes.push_back(seg);
 }
 
-std::vector<double*> Point2D::get_holes() {
-	return Point2D::holes;
+std::vector<LinearSegment*> PointTess::get_holes() {
+	return PointTess::holes;
 }
 
-void Point2D::add_coordinates(double* coordinates1) {
-	Point2D::coordinates.push_back(coordinates1);
+PointTess::~PointTess()
+{
+	for (size_t i = 0; i < coordinates.size(); i++) {
+		delete coordinates[i];
+	}
+	for (size_t i = 0; i < holes.size(); i++) {
+		delete holes[i];
+	}
 }
 
-std::vector<double*> Point2D::get_coordinates() {
-	return Point2D::coordinates;
+void PointTess::add_coordinates(LinearSegment *seg) 
+{
+	PointTess::coordinates.push_back(seg);
+}
+
+void PointTess::add_coordinates(double lat, double lon, double z)
+{
+	Point2 pt = Point2(lon, lat);
+	LinearSegment *seg = new LinearSegment();
+	seg->pt = pt;
+	PointTess::coordinates.push_back(seg);
+}
+
+void PointTess::add_vector(double lat, double lon, double z, double lat2, double lon2, double z2) 
+{
+	PointTess::add_coordinates(lat, lon, z);
+	PointTess::add_coordinates(lat2, lon2, z2);
+}
+
+void PointTess::add_holes(LinearSegment* p)
+{
+	PointTess::holes.push_back(p);
+}
+
+std::vector<LinearSegment*> PointTess::get_coordinates() 
+{
+	return PointTess::coordinates;
+}
+
+void PointTess::remove_coordinates() 
+{
+	PointTess::coordinates.pop_back();
+}
+
+LinearSegment* PointTess::get_last_coordinate() 
+{
+	return PointTess::coordinates.front();
+}
+
+double* Point2::as_array()
+{
+	Point2::p[0] = x_;
+	Point2::p[1] = y_;
+	Point2::p[2] = 0;
+	return Point2::p;
 }
