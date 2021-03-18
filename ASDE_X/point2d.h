@@ -11,7 +11,9 @@
 struct	Point2;
 struct	Vector2;
 
-enum class LINE_TYPE {NODE, NODE_CTRL};
+enum class LINE_TYPE { NODE, NODE_CTRL};
+
+enum class LOOP_TYPE { LOOP, CLOSE, END };
 
 struct Point2 {
 	Point2() : x_(0.0), y_(0.0), p{ 0.0, 0.0, 0.0 } { }
@@ -59,11 +61,27 @@ struct Vector2 {
 	double dx, dy;
 };
 
+struct HiLo {
+	Point2 hi;
+	Point2 lo;
+
+	bool split, has_hi, has_lo;
+
+	void SetLo(Point2 f) { lo = Point2(f.x_, f.y_); has_lo = true; }
+	void SetHi(Point2 f) { hi = Point2(f.x_, f.y_); has_hi = true; }
+
+	Point2 GetLo() { return lo; }
+	Point2 GetHi() { return hi; }
+};
+
 struct	LinearSegment {
 	~LinearSegment() { }
 	LINE_TYPE	type;
+	LOOP_TYPE	loop_type;
 	Point2		pt;
 	Point2		ctrl;
+
+	HiLo ctrl_hdl;
 };
 
 // These must be defined below because Point2 is declared before Vector2.
@@ -87,8 +105,10 @@ public:
 	void add_coordinates(double lat, double lon, double z);
 	void add_vector(double lat, double lon, double z, double lat2, double lon2, double z2);
 	void add_holes(LinearSegment* p);
+	void add_coord(LinearSegment* p);
 	void add_holes(double x, double y, double z);
 	std::vector<LinearSegment*> get_coordinates();
+	void set_coordinates(std::vector<LinearSegment*> new_seg);
 	void remove_coordinates();
 	LinearSegment* get_last_coordinate();
 	std::vector<LinearSegment*> get_holes();

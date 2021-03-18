@@ -5,7 +5,7 @@
 
 #define N_SEG 20 // num points
 
-void quad_bezier(double x1, double y1, double x2, double y2, double x3, double y3, PointTess *point2d) {
+void quad_bezier(Point2 &p1, Point2 &p2, Point2 &p3, std::vector<LinearSegment*> &add_to) {
 	unsigned int i;
 	double pts[N_SEG + 1][2];
 	for (i = 0; i <= N_SEG; ++i)
@@ -14,21 +14,23 @@ void quad_bezier(double x1, double y1, double x2, double y2, double x3, double y
 		double a = pow((1.0 - t), 2.0);
 		double b = 2.0 * t * (1.0 - t);
 		double c = pow(t, 2.0);
-		double x = a * x1 + b * x2 + c * x3;
-		double y = a * y1 + b * y2 + c * y3;
+		double x = a * p1.x_ + b * p2.x_ + c * p3.x_;
+		double y = a * p1.y_ + b * p2.y_ + c * p3.y_;
 		pts[i][0] = x;
 		pts[i][1] = y;
 	}
 
 	/* draw segments */
-	for (i = 0; i < N_SEG; ++i)
+	for (i = 1; i < N_SEG; ++i)
 	{
 		int j = i + 1;
-		point2d->add_vector(pts[i][1], pts[i][0], 0, pts[j][1], pts[j][0], 0);
+		LinearSegment* f = new LinearSegment();// , * g = new LinearSegment();
+		f->pt = Point2(pts[i][0], pts[i][1]);// , g->pt = Point2(pts[j][0], pts[j][1]);
+		add_to.push_back(f);// , add_to.push_back(g);
 	}
 }
 
-void cubic_bezier(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, PointTess *point2d)
+void cubic_bezier(Point2& p1, Point2& p2, Point2& p3, Point2 &p4, std::vector<LinearSegment*> &add_to)
 {
 	unsigned int i;
 	double pts[N_SEG + 1][2];
@@ -41,17 +43,19 @@ void cubic_bezier(double x1, double y1, double x2, double y2, double x3, double 
 		double c = 3.0 * pow(t, 2.0) * (1.0 - t);
 		double d = pow(t, 3.0);
 
-		double x = a * x1 + b * x2 + c * x3 + d * x4;
-		double y = a * y1 + b * y2 + c * y3 + d * y4;
+		double x = a * p1.x_ + b * p2.x_ + c * p3.x_ + d * p4.x_;
+		double y = a * p1.y_ + b * p2.y_ + c * p3.y_ + d * p4.y_;
 		pts[i][0] = x;
 		pts[i][1] = y;
 	}
 
 	/* draw segments */
-	for (i = 0; i < N_SEG; ++i)
+	for (i = 1; i < N_SEG; ++i)
 	{
-		int j = i + 1;
-		point2d->add_vector(pts[i][1], pts[i][0], 0, pts[j][1], pts[j][0], 0);
+		//int j = i + 1;
+		LinearSegment* f = new LinearSegment();// , * g = new LinearSegment();
+		f->pt = Point2(pts[i][0], pts[i][1]);// , g->pt = Point2(pts[j][0], pts[j][1]);
+		add_to.push_back(f);// , add_to.push_back(g);
 	}
 }
 
@@ -259,12 +263,38 @@ double round_up(double value, int decimal_places) {
 	return std::ceil(value * multiplier) / multiplier;
 }
 
-bool is_curved(std::vector<std::string> str) {
-	return str.size() > 2;
+bool is_closed(LinearSegment& seg) {
+	return seg.loop_type == LOOP_TYPE::CLOSE;
 }
 
-inline Point2 recip(const Point2& pt, const Point2& ctrl) { 
+bool is_curved_node(LinearSegment &seg) {
+	return seg.type == LINE_TYPE::NODE_CTRL;
+}
+
+bool is_curved(LinearSegment& seg) {
+	return seg.ctrl_hdl.has_lo || seg.ctrl_hdl.has_hi;
+}
+
+Point2 recip(const Point2& pt, const Point2& ctrl) { 
 	return pt + Vector2(ctrl, pt); 
+}
+
+LinearSegment* get_prev(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*>& segs) {
+	LinearSegment* prev;
+	if (it == segs.begin())
+		prev = *(segs.end() - 1);
+	else
+		prev = *(it - 1);
+	return prev;
+}
+
+LinearSegment* get_next(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*> &segs) {
+	LinearSegment* next;
+	if ((it + 1) == segs.end())
+		next = *segs.begin();
+	else
+		next = *(it + 1);
+	return next;
 }
 
 #endif

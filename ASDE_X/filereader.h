@@ -11,3 +11,7 @@ public:
 };
 
 #endif
+
+void sort_beziers();
+
+void split_polygons();

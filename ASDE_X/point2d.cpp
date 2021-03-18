@@ -47,14 +47,24 @@ void PointTess::add_holes(LinearSegment* p)
 	PointTess::holes.push_back(p);
 }
 
+void PointTess::add_coord(LinearSegment* p)
+{
+	PointTess::coordinates.push_back(p);
+}
+
 std::vector<LinearSegment*> PointTess::get_coordinates() 
 {
 	return PointTess::coordinates;
 }
 
+void PointTess::set_coordinates(std::vector<LinearSegment*> new_seg)
+{
+	PointTess::coordinates = new_seg; 
+}
+
 void PointTess::remove_coordinates() 
 {
-	PointTess::coordinates.pop_back();
+	PointTess::coordinates.clear();
 }
 
 LinearSegment* PointTess::get_last_coordinate() 

@@ -26,9 +26,9 @@ extern std::string rtrim(std::string s);
 
 extern std::string trim(std::string s);
 
-void quad_bezier(double x1, double y1, double x2, double y2, double x3, double y3, PointTess *point2d);
+void quad_bezier(Point2&, Point2&, Point2&, std::vector<LinearSegment*> &add_to);
 
-void cubic_bezier(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, PointTess* point2d);
+void cubic_bezier(Point2&, Point2&, Point2&, Point2&, std::vector<LinearSegment*> &add_to);
 
 extern std::vector<std::string> split(const std::string&, const std::string&);
 
@@ -50,8 +50,16 @@ void getRunwayBounds(double* p1, double* p2, double w, double** l);
 
 double round_up(double value, int decimal_places);
 
-bool is_curved(std::vector<std::string> str);
+bool is_closed(LinearSegment& seg);
+
+bool is_curved_node(LinearSegment& node);
+
+bool is_curved(LinearSegment& node);
 
 Point2 recip(const Point2& pt, const Point2& ctrl);
+
+LinearSegment* get_prev(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*>& segs);
+
+LinearSegment* get_next(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*>& segs);
 
 #endif
