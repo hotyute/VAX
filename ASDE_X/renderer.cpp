@@ -201,21 +201,15 @@ void DrawGLScene() {
 		what = false;
 	}
 	if (renderSector) {
-		glDeleteLists(sectorDl, 1);
 		glPushMatrix();
 		DrawSceneryData(nullptr);
 		glPopMatrix();
-		renderSector = false;
 	}
 	glCallList(sectorDl);
 	if (renderAircraft) {
-		glDeleteLists(aircraftDl, 1);
 		RenderAircraft(false, aircraftDl, r_aircraft_size);
-		glDeleteLists(heavyDl, 1);
 		RenderAircraft(true, heavyDl, h_aircraft_size);
-		glDeleteLists(unkTarDl, 1);
 		RenderUnknown(false, unkTarDl, u_aircraft_size);
-		renderAircraft = false;
 	}
 	if (AcfMap.size() > 0) {
 		std::map<std::string, Aircraft*>::iterator iter;
@@ -276,9 +270,6 @@ void DrawGLScene() {
 				}
 				glPopMatrix();
 			}
-		}
-		if (renderAllCallsigns) {
-			renderAllCallsigns = false;
 		}
 	}
 }
@@ -417,14 +408,70 @@ void DrawMirrorScenes(Mirror& mirror)
 	{
 	}
 
-	if (mirror.renderSector) {
-		glDeleteLists(mirror.sectorDl, 1);
-		glPushMatrix();
-		DrawSceneryData(&mirror);
-		glPopMatrix();
-		mirror.renderSector = false;
+
+	glCallList(sectorDl);
+
+	if (AcfMap.size() > 0) {
+		std::map<std::string, Aircraft*>::iterator iter;
+		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+			// iterator->first = key
+			Aircraft* aircraft = iter->second;
+			if (aircraft != NULL) {
+				aircraft->lock();
+				float acf_lat = aircraft->getLatitude();
+				float acf_lon = aircraft->getLongitude();
+				double acf_heading = aircraft->getHeading();
+				bool renderCallsign = aircraft->getRenderCallsign();
+				bool heavy = aircraft->isHeavy();
+				bool standby = aircraft->getMode() == 0 ? true : false;
+				aircraft->unlock();
+
+				//move the aircraft first so we have proper movement along the map scale
+				glPushMatrix();
+				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
+
+				//keep the aircraft drawing in correct aspect ratio
+				glTranslated(+longitude, +latitude, 0.0f);
+				glScaled(normMapScaleX, 1.0, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
+
+				//set the aircraft heading - this needs to come after scaling aspect for proper rotation
+				glTranslated(+longitude, +latitude, 0.0f);
+				glRotatef(((float)acf_heading), 0.0f, 0.0f, -1.0f);
+				glTranslated(-longitude, -latitude, 0.0f);
+				if (standby) {
+					glCallList(mirror.unkTarDl);
+				}
+				else {
+					if (!heavy) {
+						glCallList(mirror.aircraftDl);
+					}
+					else {
+						glCallList(mirror.heavyDl);
+					}
+				}
+				glPopMatrix();
+
+
+				glPushMatrix();
+
+				if (renderCallsign || renderAllCallsigns) {
+					RenderCallsign(*aircraft, heavy, latitude, longitude);
+				}
+
+				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
+
+				//keep the callsign drawing in correct aspect ratio
+				glTranslated(+longitude, +latitude, 0.0f);
+				glScaled(normMapScaleX, 1.0, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
+				if (!standby) {
+					glCallList(aircraft->Ccallsign);
+				}
+				glPopMatrix();
+			}
+		}
 	}
-	glCallList(mirror.sectorDl);
 
 	if (mirror.renderBorder) {
 		glDeleteLists(mirror.borderDl, 1);
@@ -432,16 +479,6 @@ void DrawMirrorScenes(Mirror& mirror)
 		mirror.renderBorder = false;
 	}
 	glCallList(mirror.borderDl);
-
-	if (mirror.renderAircraft) {
-		glDeleteLists(mirror.aircraftDl, 1);
-		RenderAircraft(false, mirror.aircraftDl, r_aircraft_size);
-		glDeleteLists(mirror.heavyDl, 1);
-		RenderAircraft(true, mirror.heavyDl, h_aircraft_size);
-		glDeleteLists(mirror.unkTarDl, 1);
-		RenderUnknown(false, mirror.unkTarDl, u_aircraft_size);
-		mirror.renderAircraft = false;
-	}
 }
 
 void SetPixelFormat(HDC hDC) {

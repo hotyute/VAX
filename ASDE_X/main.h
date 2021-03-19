@@ -43,6 +43,8 @@ void pass_command(char* cmd);
 
 void pass_chars(char* chars);
 
+void preFlags();
+
 void resetFlags();
 
 extern InterfaceFrame *connectFrame;

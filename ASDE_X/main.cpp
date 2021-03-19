@@ -693,8 +693,6 @@ bool processCommands(std::string command)
 			if (!opened)
 			{
 				mir->renderBorder = true;
-				mir->renderSector = true;
-				mir->renderAircraft = true;
 				mirrors.push_back(mir);
 			}
 		}
@@ -806,6 +804,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	event_manager1->addEvent(&position_updates);
 	while (!done) {
 		start = boost::posix_time::microsec_clock::local_time();
+		preFlags();
 		ResizeGLScene();
 		DrawGLScene();
 		for (Mirror* mirror : mirrors) {
@@ -861,6 +860,52 @@ void pass_chars(char* chars) {
 	}
 }
 
-void resetFlags() {
+void preFlags() {
+	if (renderSector) {
+		glDeleteLists(sectorDl, 1);
+	}
+	if (renderAircraft) {
+		glDeleteLists(aircraftDl, 1);
+		glDeleteLists(heavyDl, 1);
+		glDeleteLists(unkTarDl, 1);
+	}
+	if (AcfMap.size() > 0) {
+		std::map<std::string, Aircraft*>::iterator iter;
+		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+			// iterator->first = key
+			Aircraft* aircraft = iter->second;
+			if (aircraft != NULL) {
+				aircraft->lock();
+				bool renderCallsign = aircraft->getRenderCallsign();
+				aircraft->unlock();
+				if (renderCallsign || renderAllCallsigns) {
+					glDeleteLists(aircraft->Ccallsign, 1);
+				}
+			}
+		}
+	}
+}
 
+void resetFlags() {
+	if (renderSector)
+		renderSector = false;
+	if (renderAircraft)
+		renderAircraft = false;
+	if (AcfMap.size() > 0) {
+		std::map<std::string, Aircraft*>::iterator iter;
+		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+			// iterator->first = key
+			Aircraft* aircraft = iter->second;
+			if (aircraft != NULL) {
+				aircraft->lock();
+				bool renderCallsign = aircraft->getRenderCallsign();
+				aircraft->unlock();
+				if (renderCallsign || renderAllCallsigns) {
+					aircraft->setRenderCallsign(false);
+				}
+			}
+		}
+	}
+	if (renderAllCallsigns)
+		renderAllCallsigns = false;
 }

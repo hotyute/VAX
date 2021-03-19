@@ -15,7 +15,7 @@ private:
 public:
 	std::string id_;
 	int borderDl, sectorDl, aircraftDl, heavyDl, unkTarDl;
-	bool renderBorder, renderSector, renderAircraft;
+	bool renderBorder;
 	int getX() { return x_; }
 	int getY() { return y_; }
 	void setX(int x) { x_ = x; }
