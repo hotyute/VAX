@@ -681,10 +681,17 @@ bool processCommands(std::string command)
 		if (array3.size() == 2) {
 			std::string id = array3[1];
 			Mirror* mir = mirrors_storage.at(id);
-			mir->renderBorder = true;
-			mir->renderSector = true;
-			mir->renderAircraft = true;
-			mirrors.push_back(mir);
+			bool opened = false;
+			auto it = std::find(mirrors.begin(), mirrors.end(), mir);
+			if (it != mirrors.end())
+				opened = true;
+			if (!opened)
+			{
+				mir->renderBorder = true;
+				mir->renderSector = true;
+				mir->renderAircraft = true;
+				mirrors.push_back(mir);
+			}
 		}
 		return true;
 	}
@@ -843,5 +850,5 @@ void pass_chars(char* chars) {
 }
 
 void resetFlags() {
-	
+
 }
