@@ -297,4 +297,10 @@ LinearSegment* get_next(std::vector<LinearSegment*>::iterator it, std::vector<Li
 	return next;
 }
 
+template <typename T>
+void remove(std::vector<T>& vec, void* pos)
+{
+	
+}
+
 #endif

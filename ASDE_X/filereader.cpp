@@ -96,7 +96,7 @@ int FileReader::LoadADX(std::string path) {
 					}
 					else
 					{
-						if (header == "CENTER" || header == "HOLE") {
+						if (header == "CENTER" || header == "HOLE" || header == "MIRROR") {
 
 						}
 						else
@@ -135,7 +135,7 @@ int FileReader::LoadADX(std::string path) {
 			{
 				std::string slatitude, slongitude;
 				if (header == "HOLE" || header == "RUNWAY" || "RUNWAY LINE" || header == "PARKING" || header == "APRON"
-					|| header == "TAXIWAY" || header == "CENTER") {
+					|| header == "TAXIWAY" || header == "CENTER" || header == "MIRROR") {
 					if (header == "RUNWAY LINE") {
 						//std::cout << whole_line << std::endl;
 						std::vector<std::string> args = split(line, " ");
@@ -158,6 +158,20 @@ int FileReader::LoadADX(std::string path) {
 						double lon = atof(args[1].c_str()), lat = atof(args[0].c_str());
 						CENTER_LAT = lat;
 						CENTER_LON = lon;
+					}
+					else if (header == "MIRROR")
+					{
+						std::vector<std::string> args = split(line, " ");
+						double lon = atof(args[2].c_str()), lat = atof(args[1].c_str());
+						std::string id = args[0];
+						Mirror* mir = new Mirror();
+						mir->setX(atof(args[3].c_str())), mir->setY(atof(args[4].c_str()));
+						mir->setWidth(atof(args[5].c_str())), mir->setHeight(atof(args[6].c_str()));
+						mir->setZoom(atof(args[7].c_str()));
+						mir->setLat(lat);
+						mir->setLon(lon);
+						mirrors_storage.emplace(id, mir);
+						mir->id_ = id;
 					}
 					else
 					{

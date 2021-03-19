@@ -14,7 +14,8 @@
 #include "events.h"
 #include "flightplan.h"
 
-std::vector<Mirror*> mirrors(256);
+std::unordered_map<std::string, Mirror*> mirrors_storage;
+std::vector<Mirror*> mirrors;
 
 bool renderAircraft = false, renderSector  = false, renderButtons = false, 
 	renderLegend = false, renderAllCallsigns = false, renderInterfaces = false,
@@ -204,6 +205,7 @@ void DrawGLScene() {
 		glPushMatrix();
 		DrawSceneryData(nullptr);
 		glPopMatrix();
+		renderSector = false;
 	}
 	glCallList(sectorDl);
 	if (renderAircraft) {
@@ -279,6 +281,9 @@ void DrawGLScene() {
 			renderAllCallsigns = false;
 		}
 	}
+}
+
+void DrawInterfaces() {
 	if (renderLegend) {
 		glDeleteLists(legendDl, 1);
 		RenderLegend();
@@ -317,51 +322,54 @@ void DrawGLScene() {
 	glCallList(focusDl);
 	if (renderInputText) {
 		if (updateLastFocus && lastFocus != NULL && lastFocus->type == INPUT_FIELD) {
-			InputField *lastFocusField = (InputField*)lastFocus;
+			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
-			ChatInterface *last_border = lastFocus->child_interfaces[0];
+			ChatInterface* last_border = lastFocus->child_interfaces[0];
 			std::string l_input;
 			if (lastFocusField->p_protected) {
 				l_input = lastFocusField->pp_input;
-			} else {
+			}
+			else {
 				l_input = lastFocusField->input;
 			}
 			RenderInputText(*last_border, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
 			updateLastFocus = false;
 		}
 		if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
-			InputField *focusField = (InputField*)focusChild;
+			InputField* focusField = (InputField*)focusChild;
 			glDeleteLists(focusField->inputTextDl, 1);
-			ChatInterface *border = focusField->border;
+			ChatInterface* border = focusField->border;
 			std::string f_input;
 			if (focusField->p_protected) {
 				f_input = focusField->pp_input;
-			} else {
+			}
+			else {
 				f_input = focusField->input;
 			}
 			RenderInputText(*border, focusField->inputTextDl, f_input, focusField->centered);
 		}
 		renderInputText = false;
 	}
-	for (InterfaceFrame *frame : frames) {
+	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
 			if (frame->renderAllInputText) {
-				for (ChildFrame *child : frame->children) {
+				for (ChildFrame* child : frame->children) {
 					if (child != NULL && child->type == INPUT_FIELD) {
-						InputField *field = (InputField*)child;
+						InputField* field = (InputField*)child;
 						glDeleteLists(field->inputTextDl, 1);
-						ChatInterface *border = field->border;
+						ChatInterface* border = field->border;
 						std::string f_input;
 						if (field->p_protected) {
 							f_input = field->pp_input;
-						} else {
+						}
+						else {
 							f_input = field->input;
 						}
 						RenderInputText(*border, field->inputTextDl, f_input, field->centered);
 					}
 				}
 			}
-			for (ChildFrame *child : frame->children) {
+			for (ChildFrame* child : frame->children) {
 				if (child) {
 					if (child->type == INPUT_FIELD) {
 						InputField* field = (InputField*)child;
@@ -373,14 +381,14 @@ void DrawGLScene() {
 	}
 	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
-				for (ChildFrame* child : frame->children) {
-					if (child != NULL && child->type == LABEL_D) {
-						Label* label = (Label*)child;
-						glDeleteLists(label->labelTextDl, 1);
-						ChatInterface* border = label->border;
-						RenderLabel(*border, label->labelTextDl, label->input, label->centered);
-					}
+			for (ChildFrame* child : frame->children) {
+				if (child != NULL && child->type == LABEL_D) {
+					Label* label = (Label*)child;
+					glDeleteLists(label->labelTextDl, 1);
+					ChatInterface* border = label->border;
+					RenderLabel(*border, label->labelTextDl, label->input, label->centered);
 				}
+			}
 			for (ChildFrame* child : frame->children) {
 				if (child) {
 					if (child->type == LABEL_D) {
@@ -394,7 +402,7 @@ void DrawGLScene() {
 	if (renderConf) {
 		glDeleteLists(confDl, 1);
 		RenderConf();
-		renderConf = false; 
+		renderConf = false;
 	}
 	glCallList(confDl);
 }
@@ -409,11 +417,12 @@ void DrawMirrorScenes(Mirror& mirror)
 	{
 	}
 
-	if (renderSector) {
+	if (mirror.renderSector) {
 		glDeleteLists(mirror.sectorDl, 1);
 		glPushMatrix();
 		DrawSceneryData(&mirror);
 		glPopMatrix();
+		mirror.renderSector = false;
 	}
 	glCallList(mirror.sectorDl);
 
@@ -423,6 +432,16 @@ void DrawMirrorScenes(Mirror& mirror)
 		mirror.renderBorder = false;
 	}
 	glCallList(mirror.borderDl);
+
+	if (mirror.renderAircraft) {
+		glDeleteLists(mirror.aircraftDl, 1);
+		RenderAircraft(false, mirror.aircraftDl, r_aircraft_size);
+		glDeleteLists(mirror.heavyDl, 1);
+		RenderAircraft(true, mirror.heavyDl, h_aircraft_size);
+		glDeleteLists(mirror.unkTarDl, 1);
+		RenderUnknown(false, mirror.unkTarDl, u_aircraft_size);
+		mirror.renderAircraft = false;
+	}
 }
 
 void SetPixelFormat(HDC hDC) {

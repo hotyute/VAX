@@ -1,6 +1,8 @@
 #ifndef MIRROR_H
 #define MIRROR_H
 
+#include <string>
+
 #ifndef MIRROR_CLS_h
 #define MIRROR_CLS_h
 class Mirror;
@@ -9,8 +11,9 @@ private:
 	int x_, y_, width, height;
 	double zoom_, lat_, lon_;
 public:
-	int borderDl, sectorDl;
-	bool renderBorder;
+	std::string id_;
+	int borderDl, sectorDl, aircraftDl, heavyDl, unkTarDl;
+	bool renderBorder, renderSector, renderAircraft;
 	int getX() { return x_; }
 	int getY() { return y_; }
 	void setX(int x) { x_ = x; }

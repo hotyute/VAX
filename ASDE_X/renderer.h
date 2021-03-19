@@ -7,9 +7,11 @@
 #include "main.h"
 #include <gl/GL.h>
 #include <gl/GLU.h>
+#include <unordered_map>
 
 #include "mirror.h"
 
+extern std::unordered_map<std::string, Mirror*> mirrors_storage;
 extern std::vector<Mirror*> mirrors;
 
 extern bool renderAircraft, renderSector, renderButtons, 
@@ -56,6 +58,7 @@ void ResizeGLScene();
 void ResizeMirrorGLScene(Mirror*);
 void SetView(double, double);
 void DrawGLScene();
+void DrawInterfaces();
 void DrawMirrorScenes(Mirror&);
 void SetPixelFormat(HDC);
 int DrawSceneryData(Mirror* mirror);

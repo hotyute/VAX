@@ -673,6 +673,30 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
+	else if (boost::starts_with(command, ".AN")) {
+		return true;
+	}
+	else if (boost::starts_with(command, ".omir")) {
+		std::vector<std::string> array3 = split(command, " ");
+		if (array3.size() == 2) {
+			std::string id = array3[1];
+			Mirror* mir = mirrors_storage.at(id);
+			mir->renderBorder = true;
+			mir->renderSector = true;
+			mir->renderAircraft = true;
+			mirrors.push_back(mir);
+		}
+		return true;
+	}
+	else if (boost::starts_with(command, ".cmir")) {
+		std::vector<std::string> array3 = split(command, " ");
+		if (array3.size() == 2) {
+			std::string id = array3[1];
+			Mirror* mir = mirrors_storage.at(id);
+			mirrors.erase(std::remove(mirrors.begin(), mirrors.end(), mir), mirrors.end());
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -761,20 +785,9 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	Event& position_updates = ConfigUpdates();
 	position_updates.eAction.setTicks(0);
 	event_manager1->addEvent(&position_updates);
-	Mirror* mir = new Mirror();
-	mir->setX(300), mir->setY(200);
-	mir->setWidth(400), mir->setHeight(250);
-	mir->setZoom(0.003);
-	mir->setLat(25.80070055);
-	mir->setLon(-080.30143039);
-	mir->renderBorder = true;
-	mirrors.push_back(mir);
 	while (!done) {
 		start = boost::posix_time::microsec_clock::local_time();
-		if (resize || mirrors.size() > 0) {
-			ResizeGLScene();
-			resize = false;
-		}
+		ResizeGLScene();
 		DrawGLScene();
 		for (Mirror* mirror : mirrors) {
 			if (mirror)
@@ -783,6 +796,9 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 				DrawMirrorScenes(*mirror);
 			}
 		}
+		if (mirrors.size() > 0)
+			ResizeGLScene();
+		DrawInterfaces();
 		resetFlags();
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR) {
@@ -827,7 +843,5 @@ void pass_chars(char* chars) {
 }
 
 void resetFlags() {
-	if (renderSector) {
-		renderSector = false;
-	}
+	
 }

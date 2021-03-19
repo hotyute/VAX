@@ -1,4 +1,4 @@
-zoom=0.003
+zoom=0.002
 raircraftsize=0.000032
 haircraftsize=0.000038
 uaircraftsize=0.000032
@@ -17,6 +17,9 @@ uaircraftsize=0.000032
 
 <<RUNWAY LINE>>;08L/26R
 25.80289700 -080.30154400 25.80398100 -080.27543100 46.02 2
+
+<<MIRROR>>
+8R 25.80070055 -080.30143039 600 300 400 250 0.003 ;lat, lon, pos x, pos y, width, height, zoom
 
 <<TAXIWAY>> ;AA
 L 25.80312638 -080.26740439
