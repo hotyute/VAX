@@ -6,13 +6,26 @@
 class Mirror;
 class Mirror {
 private:
-	int x, y, width, height, zoom;
+	int x_, y_, width, height;
+	double zoom_, lat_, lon_;
 public:
-	int getX();
-	int getY();
+	int borderDl, sectorDl;
+	bool renderBorder;
+	int getX() { return x_; }
+	int getY() { return y_; }
+	void setX(int x) { x_ = x; }
+	void setY(int y) { y_ = y; }
+	void setWidth(int w) { width = w; }
+	void setHeight(int h) { height = h; }
 	int getWidth();
 	int getHeight();
-	int getZoom();
+	void setZoom(double zoom) { zoom_ = zoom; }
+	double getZoom();
+	void setLat(double lat) { lat_ = lat; }
+	void setLon(double lon) { lon_ = lon; }
+	double getLat() { return lat_; }
+	double getLon() { return lon_; }
+
 };
 #endif
 

@@ -402,24 +402,5 @@ void split_polygons() {
 		++i;
 	}
 	ALL = new_all;
-
-	/*auto i2 = ALL.begin();
-	while (i2 != ALL.end())
-	{
-		PointTess* point2d = *i2;
-		int type = point2d->get_type();
-		if (type != RUNWAY)
-		{
-			std::cout << "NEW POLYGON " << type << std::endl;
-			std::vector<LinearSegment*> segs = point2d->get_coordinates();
-			for (auto it = segs.begin(); it != segs.end(); it++)
-			{
-				LinearSegment* cur = *it;
-				std::cout << cur->pt.y_ << ", " << cur->pt.x_ << std::endl;
-			}
-			printf("\n");
-		}
-		++i2;
-	}*/
 }
 

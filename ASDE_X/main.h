@@ -36,11 +36,14 @@ extern PAINTSTRUCT ps;
 
 void connect();
 void disconnect();
+DWORD WINAPI OpenGLThread(LPVOID lpParameter);
 DWORD WINAPI EventThread1(LPVOID lpParameter);
 
 void pass_command(char* cmd);
 
 void pass_chars(char* chars);
+
+void resetFlags();
 
 extern InterfaceFrame *connectFrame;
 extern InputField *connect_callsign, *connect_fullname, *connect_username, *connect_password, *textField;

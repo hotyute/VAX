@@ -1,6 +1,3 @@
-#include "main.h"
-#include <gl/GL.h>
-#include <gl/GLU.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <thread>
 #include <chrono>
@@ -32,6 +29,7 @@ HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL
 errorFont = NULL;
 
 void RenderChatInterface(ChatInterface&);
+void RenderMirrorBorder(Mirror& mirror);
 void RenderInputText(ChatInterface&, int&, std::string&, bool);
 void RenderLabel(ChatInterface&, int&, std::string&, int);
 void RenderFocuses();
@@ -63,8 +61,10 @@ void InitOpenGL(GLvoid) {
 	//glClearDepth(1.0f);                                    // Depth Buffer Setup
 	//glEnable(GL_DEPTH_TEST);                            // Enables Depth Testing
 	glDisable(GL_DEPTH_TEST);                            // Disables Depth Testing
+	glEnable(GL_SCISSOR_TEST);
 	//glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Testing To Do
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);    // Really Nice Perspective Calculations
+	glDrawBuffer(GL_FRONT_AND_BACK);
 
 	BuildFont(L"SansSerif", -15, true, &legendBase, &legendFont);
 	BuildFont(L"Consolas", -11, false, &topButtonBase, &topBtnFont);
@@ -77,18 +77,19 @@ void InitOpenGL(GLvoid) {
 
 void ResizeMirrorGLScene(Mirror &mirror) {
 	// Set up the viewport.
-
 	int width = mirror.getWidth();
 	int height = mirror.getHeight();
 	if (width <= 0)
 		width = 1;
 	if (height <= 0)
 		height = 1;
+	//glClear(GL_DEPTH_BUFFER_BIT);
+	glViewport(mirror.getX(), mirror.getY(), width, height);
+	glScissor(mirror.getX(), mirror.getY(), width, height);
 	glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
 	glLoadIdentity();                                    // Reset The Projection Matrix
-	glViewport(mirror.getX(), mirror.getY(), width, height);
 	// Clamp the zoom.
-	int zoom = mirror.getZoom();
+	double zoom = mirror.getZoom();
 	if (zoom > MAX_ZOOM) {
 		zoom = MAX_ZOOM;
 	} else if (zoom < MIN_ZOOM) {
@@ -108,8 +109,6 @@ void ResizeMirrorGLScene(Mirror &mirror) {
 	double minY = 0.0 - (coordSysHeight / 2.0);
 	double maxY = coordSysHeight / 2.0;
 
-	//System.out.println(coordSysMinLon + ", " + coordSysMaxLon);
-
 	// Set up the projection matrix based on these boundaries.
 	gluOrtho2D(minX, maxX, minY, maxY);
 
@@ -117,10 +116,11 @@ void ResizeMirrorGLScene(Mirror &mirror) {
 	double mapScaleX = (nmPerLon / 60.0);
 	//normMapScaleX = 1.0 / mapScaleX;
 	glScaled(mapScaleX, 1.0, 1.0);
-	SetView(CENTER_LAT, CENTER_LON);
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
 	glLoadIdentity();                                    // Reset The Modelview Matrix
+
+	SetView(mirror.getLat(), mirror.getLon());
 }
 
 void ResizeGLScene() {
@@ -143,9 +143,10 @@ void ResizeGLScene() {
 	} else if (mZoom < MIN_ZOOM) {
 		mZoom = MIN_ZOOM;
 	}
+	glViewport(0, 0, clientWidth, clientHeight);
+	glScissor(0, 0, clientWidth, clientHeight);
 	glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
 	glLoadIdentity();                                    // Reset The Projection Matrix
-	glViewport(0, 0, clientWidth, clientHeight);
 	// Set the min/max lat/lon based on center point, zoom, and client aspect.
 	double coordSysMinLon = CENTER_LON - ((clientWidth / 2.0) * (mZoom / NM_PER_DEG));
 	double coordSysMaxLon = CENTER_LON + ((clientWidth / 2.0) * (mZoom / NM_PER_DEG));
@@ -160,8 +161,6 @@ void ResizeGLScene() {
 	double minY = 0.0 - (coordSysHeight / 2.0);
 	double maxY = coordSysHeight / 2.0;
 
-	//System.out.println(coordSysMinLon + ", " + coordSysMaxLon);
-
 	// Set up the projection matrix based on these boundaries.
 	gluOrtho2D(minX, maxX, minY, maxY);
 
@@ -169,10 +168,11 @@ void ResizeGLScene() {
 	double mapScaleX = (nmPerLon / 60.0);
 	normMapScaleX = 1.0 / mapScaleX;
 	glScaled(mapScaleX, 1.0, 1.0);
-	SetView(CENTER_LAT, CENTER_LON);
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
-	glLoadIdentity();                                    // Reset The Modelview Matrix
+	glLoadIdentity();                                   // Reset The Modelview Matrix
+
+	SetView(CENTER_LAT, CENTER_LON);
 }
 
 void SetView(double latitude, double longitude) {
@@ -180,8 +180,7 @@ void SetView(double latitude, double longitude) {
 }
 
 void DrawGLScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
+	glClear(GL_COLOR_BUFFER_BIT);
 	if (DAY) {
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
 	} else {
@@ -203,9 +202,8 @@ void DrawGLScene() {
 	if (renderSector) {
 		glDeleteLists(sectorDl, 1);
 		glPushMatrix();
-		DrawSceneryData();
+		DrawSceneryData(nullptr);
 		glPopMatrix();
-		renderSector = false;
 	}
 	glCallList(sectorDl);
 	if (renderAircraft) {
@@ -401,6 +399,32 @@ void DrawGLScene() {
 	glCallList(confDl);
 }
 
+void DrawMirrorScenes(Mirror& mirror) 
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	if (DAY) {
+		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
+	}
+	else 
+	{
+	}
+
+	if (renderSector) {
+		glDeleteLists(mirror.sectorDl, 1);
+		glPushMatrix();
+		DrawSceneryData(&mirror);
+		glPopMatrix();
+	}
+	glCallList(mirror.sectorDl);
+
+	if (mirror.renderBorder) {
+		glDeleteLists(mirror.borderDl, 1);
+		RenderMirrorLines(mirror);
+		mirror.renderBorder = false;
+	}
+	glCallList(mirror.borderDl);
+}
+
 void SetPixelFormat(HDC hDC) {
 	static	PIXELFORMATDESCRIPTOR pfd=				// pfd Tells Windows How We Want Things To Be
 	{
@@ -427,55 +451,16 @@ void SetPixelFormat(HDC hDC) {
 	SetPixelFormat(hDC, index, &pfd);
 }
 
-DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
-	boost::posix_time::ptime start;
-	boost::posix_time::ptime end;
 
-	hDC = BeginPaint(hWnd, &ps);
-	// Setup pixel format for the device context
-	SetPixelFormat(hDC);
-	// Create a rendering context associated to the device context
 
-	if (!(hRC=wglCreateContext(hDC)))				// Are We Able To Get A Rendering Context?
+int DrawSceneryData(Mirror *mirror) {
+	if (mirror) {
+		mirror->sectorDl = glGenLists(1);
+	}
+	else 
 	{
-		//KillGLWindow();								// Reset The Display
-		MessageBox(NULL,L"Unabled to Create Rendering Context.",L"ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// Return FALSE
+		sectorDl = glGenLists(1);
 	}
-
-	if(!wglMakeCurrent(hDC,hRC))					// Try To Activate The Rendering Context
-	{
-		//KillGLWindow();								// Reset The Display
-		MessageBox(NULL,L"Can't Activate The GL Rendering Context.",L"ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// Return FALSE
-	}
-
-	InitOpenGL();
-	Event &position_updates = ConfigUpdates();
-	position_updates.eAction.setTicks(0);
-	event_manager1->addEvent(&position_updates);
-	while (!done) {
-		start = boost::posix_time::microsec_clock::local_time();
-		if (resize) {
-			ResizeGLScene();
-			resize = false;
-		}
-		DrawGLScene();
-		SwapBuffers(hDC);
-		end = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration time2 = end - start;
-		long long time1 = (1000 / LOCKED_FPS);
-		long long time = time1 - time2.total_milliseconds();
-		if (time < 1) {
-			time = 1;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(time));
-	}
-	return 0;
-}
-
-int DrawSceneryData() {
-	sectorDl = glGenLists(1);
 	GLUtesselator *tess = gluNewTess(); // create a tessellator
 	if(tess == NULL)
 		return 0;  // failed to create tessellation object, return 0
@@ -493,7 +478,7 @@ int DrawSceneryData() {
 	std::vector<PointTess*> taxiways;
 	std::vector<PointTess*> aprons;
 
-	glNewList(sectorDl, GL_COMPILE);
+	glNewList(mirror ? mirror->sectorDl : sectorDl, GL_COMPILE);
 	for (size_t i = 0; i < ALL.size(); i++) {
 		PointTess *point2d = ALL[i];
 		int type = point2d->get_type();
@@ -938,6 +923,42 @@ void RenderInterfaces() {
 	glEndList();
 }
 
+void RenderMirrorLines(Mirror &mirror) {
+	int width = mirror.getWidth();
+	int height = mirror.getHeight();
+
+	mirror.borderDl = glGenLists(1);
+
+	glNewList(mirror.borderDl, GL_COMPILE);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0.0, width, 0.0, height);
+
+	int viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glLineWidth((GLfloat)2.0f);
+
+	RenderMirrorBorder(mirror);
+
+	glLineWidth((GLfloat)1.0f);
+
+	//Restore old ortho
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glEndList();
+}
+
 void RenderDrawings() {
 	int w_width = CLIENT_WIDTH;
 	if (w_width < FIXED_CLIENT_WIDTH) {
@@ -996,6 +1017,16 @@ void RenderChatInterface(ChatInterface &interface1) {
 	glVertex2d(interface1.getStartX(), interface1.getEndY());
 	glVertex2d(interface1.getEndX(), interface1.getEndY());
 	glVertex2d(interface1.getEndX(), interface1.getStartY());
+	glEnd();
+}
+
+void RenderMirrorBorder(Mirror& mirror) {
+	glColor4f(0.5f, 0.5f, 0.5f, 1.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(1, 1);
+	glVertex2d(1, mirror.getHeight() - 1);
+	glVertex2d(mirror.getWidth() - 1, mirror.getHeight() - 1);
+	glVertex2d(mirror.getWidth() - 1 , 1);
 	glEnd();
 }
 

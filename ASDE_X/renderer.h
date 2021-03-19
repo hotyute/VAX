@@ -4,6 +4,10 @@
 #include <iostream>
 #include <vector>
 
+#include "main.h"
+#include <gl/GL.h>
+#include <gl/GLU.h>
+
 #include "mirror.h"
 
 extern std::vector<Mirror*> mirrors;
@@ -47,16 +51,18 @@ const static float conf_clr[] = {0.00392156862f, 0.72549019607f, 0.00392156862f}
 const static float unknown_clr[] = {0.0f, 0.85490196078f, 0.81176470588f};
 
 void InitOpenGL();
+void ResizeMirrorGLScene(Mirror& mirror);
 void ResizeGLScene();
 void ResizeMirrorGLScene(Mirror*);
 void SetView(double, double);
 void DrawGLScene();
-DWORD WINAPI OpenGLThread(LPVOID lpParameter);
+void DrawMirrorScenes(Mirror&);
 void SetPixelFormat(HDC);
-int DrawSceneryData();
+int DrawSceneryData(Mirror* mirror);
 void RenderLegend();
 void RenderButtons();
 void RenderInterfaces();
+void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
 void LoadInterfaces();
 void GetOGLPos(int, int, double*);
