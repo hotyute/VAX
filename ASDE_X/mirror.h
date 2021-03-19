@@ -2,6 +2,8 @@
 #define MIRROR_H
 
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 #ifndef MIRROR_CLS_h
 #define MIRROR_CLS_h
@@ -28,9 +30,11 @@ public:
 	void setLon(double lon) { lon_ = lon; }
 	double getLat() { return lat_; }
 	double getLon() { return lon_; }
-
 };
 #endif
+
+extern std::vector<Mirror*>::iterator get_mir(std::vector<Mirror*>& vec, std::string search);
+extern std::unordered_map<std::string, Mirror*>::iterator get_mir(std::unordered_map<std::string, Mirror*>& vec, std::string search);
 
 #endif
 

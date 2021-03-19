@@ -680,10 +680,15 @@ bool processCommands(std::string command)
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
-			Mirror* mir = mirrors_storage.at(id);
+			auto it = get_mir(mirrors_storage, id);
+			bool found_store = it != mirrors_storage.end();
+			if (!found_store)
+				return true;
+
+			Mirror* mir = (*it).second;
 			bool opened = false;
-			auto it = std::find(mirrors.begin(), mirrors.end(), mir);
-			if (it != mirrors.end())
+			auto it2 = std::find(mirrors.begin(), mirrors.end(), mir);
+			if (it2 != mirrors.end())
 				opened = true;
 			if (!opened)
 			{
@@ -699,8 +704,15 @@ bool processCommands(std::string command)
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
-			Mirror* mir = mirrors_storage.at(id);
-			mirrors.erase(std::remove(mirrors.begin(), mirrors.end(), mir), mirrors.end());
+			auto it = get_mir(mirrors_storage, id);
+			bool found_store = it != mirrors_storage.end();
+			if (!found_store)
+				return true;
+			Mirror* mir = (*it).second;
+			auto it2 = std::find(mirrors.begin(), mirrors.end(), mir);
+			if (it2 == mirrors.end())
+				return true;
+			mirrors.erase(it2);
 		}
 		return true;
 	}

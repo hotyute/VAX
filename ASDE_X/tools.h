@@ -40,9 +40,9 @@ extern long long doubleToRawBits(double x);
 
 extern void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent);
 
-double radians(double degrees);
+extern double radians(double degrees);
 
-double degrees(double radians);
+extern double degrees(double radians);
 
 double dist(double lat1, double lon1, double lat2, double lon2);
 
