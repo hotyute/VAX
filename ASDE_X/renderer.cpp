@@ -19,7 +19,8 @@ std::vector<Mirror*> mirrors;
 
 bool renderAircraft = false, renderSector = false, renderButtons = false,
 renderLegend = false, renderAllCallsigns = false, renderInterfaces = false,
-renderInputText = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false;
+renderInputText = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false,
+renderAllCollision = false;
 
 bool loadInterfaces = false;
 
@@ -41,6 +42,8 @@ int RenderCallsign(Aircraft&, bool, float, float);
 void deleteFrame(InterfaceFrame*);
 
 void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, bool top_bar);
+
+int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_segments);
 
 const std::string* currentDateTime();
 
@@ -121,7 +124,7 @@ void ResizeGLScene() {
 
 	glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
 	glLoadIdentity();                                    // Reset The Projection Matrix
-	
+
 	set_projection(clientWidth, clientHeight, CENTER_LAT, CENTER_LON, mZoom, true);
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
@@ -184,10 +187,9 @@ void DrawGLScene() {
 				float acf_lon = aircraft->getLongitude();
 				double acf_heading = aircraft->getHeading();
 				bool renderCallsign = aircraft->getRenderCallsign();
+				bool renderCollision = aircraft->getRenderCollision();
 				bool heavy = aircraft->isHeavy();
 				bool standby = aircraft->getMode() == 0 ? true : false;
-				double maxX = aircraftBlip->getMaxX();
-				double maxY = aircraftBlip->getMaxY();
 				aircraft->unlock();
 
 				//move the aircraft first so we have proper movement along the map scale
@@ -224,8 +226,35 @@ void DrawGLScene() {
 				glPopMatrix();
 
 
+				//begin Collision drawing
 				glPushMatrix();
 
+				if (renderCollision || renderAllCollision) {
+					glDeleteLists(aircraft->collisionDl, 1);
+					DrawCircle(*aircraft, heavy, longitude, latitude, 100);
+					aircraft->setRenderCollision(false);
+				}
+
+				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
+
+				//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+				glTranslated(+longitude, +latitude, 0.0f);
+				glScaled(a_size, a_size, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
+
+				//keep the callsign drawing in correct aspect ratio
+				glTranslated(+longitude, +latitude, 0.0f);
+				glScaled(normMapScaleX, 1.0, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
+
+				if (!standby && aircraft->isCollision()) {
+					glCallList(aircraft->collisionDl);
+				}
+
+				glPopMatrix();
+
+				//Begin Callsign Drawing
+				glPushMatrix();
 				if (renderCallsign || renderAllCallsigns) {
 					glDeleteLists(aircraft->Ccallsign, 1);
 					RenderCallsign(*aircraft, heavy, latitude, longitude);
@@ -252,6 +281,9 @@ void DrawGLScene() {
 		}
 		if (renderAllCallsigns) {
 			renderAllCallsigns = false;
+		}
+		if (renderAllCollision) {
+			renderAllCollision = false;
 		}
 	}
 }
@@ -432,12 +464,12 @@ void DrawMirrorScenes(Mirror& mirror)
 				if (standby) {
 					glCallList(unkTarDl);
 				}
-				else 
+				else
 				{
 					if (!heavy) {
 						glCallList(aircraftDl);
 					}
-					else 
+					else
 					{
 						glCallList(heavyDl);
 					}
@@ -1657,4 +1689,34 @@ void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lo
 	double mapScaleX = (nmPerLon / 60.0);
 	normMapScaleX = 1.0 / mapScaleX;
 	glScaled(mapScaleX, 1.0, 1.0);
+}
+
+int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_segments) {
+	double aircraft_size = get_default_asize(heavy, false);
+	double maxX = aircraftBlip->getMaxX();
+	double maxY = aircraftBlip->getMaxY();
+
+	double r = (maxX > maxY ? maxX : maxY);
+	r += r * 0.8;
+
+	aircraft.collisionDl = glGenLists(1);
+
+	glNewList(aircraft.collisionDl, GL_COMPILE);
+
+	glColor4f(collision_clr[0], collision_clr[1], collision_clr[2], 1.0f);
+
+	//glTranslatef(+longitude, +latitude, 0.0f);
+	//glRotatef(((float)heading), 0.0f, 0.0f, -1.0f);
+	//glTranslatef(-longitude, -latitude, 0.0f);
+	glScaled(aircraft_size, aircraft_size, 1);
+	glBegin(GL_LINE_LOOP);
+	for (int ii = 0; ii < num_segments; ii++) {
+		float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle 
+		double x = r * cosf(theta);//calculate the x component 
+		double y = r * sinf(theta);//calculate the y component 
+		glVertex2f(x + cx, y + cy);//output vertex 
+	}
+	glEnd();
+	glEndList();
+	return 1;
 }

@@ -38,6 +38,7 @@ void decodePackets(int opCode, Stream &stream) {
 			aircraft1->lock();
 			aircraft1->setCallsign(callSign1);
 			aircraft1->setRenderCallsign(true);
+			aircraft1->setRenderCollision(true);
 			aircraft1->setMode(squawkMode);
 			aircraft1->unlock();
 			user1->setAircraft(aircraft1);

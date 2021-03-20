@@ -5,6 +5,9 @@ Aircraft::Aircraft() {
 	Aircraft::mode = 0;
 	Aircraft::squawkCode = "0000";
 	Aircraft::flight_plan = new FlightPlan();
+	renderCallsign = false;
+	renderCollision = false;
+	collision = false;
 }
 
 Aircraft::~Aircraft()
@@ -28,6 +31,14 @@ bool Aircraft::getRenderCallsign() {
 
 void Aircraft::setRenderCallsign(bool value) {
 	Aircraft::renderCallsign = value;
+}
+
+bool Aircraft::getRenderCollision() {
+	return Aircraft::renderCollision;
+}
+
+void Aircraft::setRenderCollision(bool value) {
+	Aircraft::renderCollision = value;
 }
 
 FlightPlan* Aircraft::getFlightPlan()

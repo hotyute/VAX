@@ -190,28 +190,31 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setSpeed(0.0);
 			cur->setHeading(87.0);
 			cur->setRenderCallsign(true);
+			cur->setRenderCollision(true);
+			cur->setCollision(true);
 			cur->setMode(1);
 			AcfMap[cur->getCallsign()] = cur;
 			cur->unlock();
 		}
 		userStorage1[0] = user1;
-		user1 = new User("EGF4427", PILOT_CLIENT, 0, 0);
-		cur = new Aircraft();
+		User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
+		Aircraft *cur2 = new Aircraft();
 		user1->setAircraft(cur);
-		if (cur != NULL) {
-			cur->lock();
-			cur->setHeavy(false);
-			cur->setCallsign("EGF4427");
-			cur->setLatitude(25.798267);
-			cur->setLongitude(-80.282544);
-			cur->setSpeed(0.0);
-			cur->setHeading(180.0);
-			cur->setRenderCallsign(true);
-			cur->setMode(1);
-			AcfMap[cur->getCallsign()] = cur;
-			cur->unlock();
+		if (cur2 != NULL) {
+			cur2->lock();
+			cur2->setHeavy(false);
+			cur2->setCallsign("EGF4427");
+			cur2->setLatitude(25.798267);
+			cur2->setLongitude(-80.282544);
+			cur2->setSpeed(0.0);
+			cur2->setHeading(180.0);
+			cur2->setRenderCallsign(true);
+			cur2->setRenderCollision(true);
+			cur2->setMode(1);
+			AcfMap[cur2->getCallsign()] = cur2;
+			cur2->unlock();
 		}
-		userStorage1[2] = user1;
+		userStorage1[2] = user2;
 		break;
 	}
 	case WM_SIZE:

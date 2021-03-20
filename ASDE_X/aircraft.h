@@ -29,7 +29,7 @@ class Aircraft {
 private:
 	HANDLE aMutex;
 	int index;
-	bool renderCallsign;
+	bool renderCallsign, renderCollision;
 	bool collision;
 	bool heavy;
 	int mode;
@@ -44,11 +44,13 @@ public:
 	Aircraft *collisionAcf;
 	Aircraft();
 	~Aircraft();
-	unsigned int Ccallsign;
+	unsigned int Ccallsign, collisionDl;
 	int getIndex();
 	void setIndex(int);
 	bool getRenderCallsign();
 	void setRenderCallsign(bool);
+	bool getRenderCollision();
+	void setRenderCollision(bool value);
 	FlightPlan* getFlightPlan();
 	std::string getCallsign();
 	void setCallsign(std::string);

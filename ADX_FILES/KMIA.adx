@@ -1,6 +1,6 @@
 zoom=0.002
 raircraftsize=0.1
-haircraftsize=0.12
+haircraftsize=0.105
 uaircraftsize=0.1
 
 <<CENTER>>
@@ -19,7 +19,7 @@ uaircraftsize=0.1
 25.80289700 -080.30154400 25.80398100 -080.27543100 46.02 2
 
 <<MIRROR>>
-8R 25.80070055 -080.30143039 600 250 400 250 0.003 ;lat, lon, pos x, pos y, width, height, zoom
+8R 25.80070055 -080.30143039 600 100 400 250 0.003 ;lat, lon, pos x, pos y, width, height, zoom
 
 <<TAXIWAY>> ;AA
 L 25.80312638 -080.26740439
