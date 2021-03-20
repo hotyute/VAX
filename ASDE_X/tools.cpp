@@ -297,6 +297,50 @@ LinearSegment* get_next(std::vector<LinearSegment*>::iterator it, std::vector<Li
 	return next;
 }
 
+double get_asize(bool heavy, bool standby, double zo)
+{
+	double size;
+	if (standby) {
+		double u_size = (zo * u_aircraft_size);
+		size = u_size;
+	}
+	else
+	{
+		if (heavy) {
+			double h_size = (zo * h_aircraft_size);
+			size = h_size;
+		}
+		else
+		{
+			double r_size = (zo * r_aircraft_size);
+			size = r_size;
+		}
+	}
+	return size;
+}
+
+double get_default_asize(bool heavy, bool standby)
+{
+	double size;
+	if (standby) {
+		double u_size = (DEFAULT_ZOOM * default_u_size);
+		size = u_size;
+	}
+	else
+	{
+		if (heavy) {
+			double h_size = (DEFAULT_ZOOM * default_h_size);
+			size = h_size;
+		}
+		else
+		{
+			double r_size = (DEFAULT_ZOOM * default_r_size);
+			size = r_size;
+		}
+	}
+	return size;
+}
+
 template <typename T>
 void remove(std::vector<T>& vec, void* pos)
 {

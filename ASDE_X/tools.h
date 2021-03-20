@@ -13,6 +13,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "point2d.h"
+#include "renderer.h"
 
 extern std::wstring s2ws(const std::string& s);
 
@@ -61,5 +62,9 @@ Point2 recip(const Point2& pt, const Point2& ctrl);
 LinearSegment* get_prev(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*>& segs);
 
 LinearSegment* get_next(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*>& segs);
+
+extern double get_asize(bool heavy, bool standby, double zoom);
+
+double get_default_asize(bool heavy, bool standby);
 
 #endif

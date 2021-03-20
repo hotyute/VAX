@@ -14,7 +14,7 @@ private:
 	double zoom_, lat_, lon_;
 public:
 	std::string id_;
-	int borderDl, sectorDl, aircraftDl, heavyDl, unkTarDl;
+	int borderDl;
 	bool renderBorder;
 	int getX() { return x_; }
 	int getY() { return y_; }

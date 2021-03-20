@@ -1,7 +1,7 @@
 zoom=0.002
-raircraftsize=0.000032
-haircraftsize=0.000038
-uaircraftsize=0.000032
+raircraftsize=0.1
+haircraftsize=0.12
+uaircraftsize=0.1
 
 <<CENTER>>
 25.795361 -80.290115

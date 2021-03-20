@@ -17,16 +17,16 @@
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
-bool renderAircraft = false, renderSector  = false, renderButtons = false, 
-	renderLegend = false, renderAllCallsigns = false, renderInterfaces = false,
-	renderInputText = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false;
+bool renderAircraft = false, renderSector = false, renderButtons = false,
+renderLegend = false, renderAllCallsigns = false, renderInterfaces = false,
+renderInputText = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false;
 
 bool loadInterfaces = false;
 
 bool resize = false;
 int sectorDl, legendDl, buttonsDl, interfacesDl, confDl, aircraftDl, heavyDl, unkTarDl, focusDl, drawingDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
-HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL, 
+HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
 
 void RenderChatInterface(ChatInterface&);
@@ -35,12 +35,14 @@ void RenderInputText(ChatInterface&, int&, std::string&, bool);
 void RenderLabel(ChatInterface&, int&, std::string&, int);
 void RenderFocuses();
 void RenderDrawings();
-int RenderAircraft(bool, int&, double);
-int RenderUnknown(bool, int&, double);
+int RenderAircraft(bool, int&);
+int RenderUnknown(bool, int&);
 int RenderCallsign(Aircraft&, bool, float, float);
 void deleteFrame(InterfaceFrame*);
 
-const std::string *currentDateTime();
+void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, bool top_bar);
+
+const std::string* currentDateTime();
 
 std::vector<GLdouble*> tesses;
 
@@ -52,7 +54,7 @@ void CALLBACK beginCallback(GLenum);
 void CALLBACK endCallback(void);
 void CALLBACK errorCallback(GLenum);
 void CALLBACK vertexCallback(GLvoid*);
-void CALLBACK combineCallback(GLdouble *const, GLdouble **const, GLfloat *const, GLdouble**);
+void CALLBACK combineCallback(GLdouble* const, GLdouble** const, GLfloat* const, GLdouble**);
 
 void InitOpenGL(GLvoid) {
 	glEnable(GL_BLEND);
@@ -76,7 +78,7 @@ void InitOpenGL(GLvoid) {
 	BuildFont(L"Consolas", -11, false, &errorBase, &errorFont);
 }
 
-void ResizeMirrorGLScene(Mirror &mirror) {
+void ResizeMirrorGLScene(Mirror& mirror) {
 	// Set up the viewport.
 	int width = mirror.getWidth();
 	int height = mirror.getHeight();
@@ -91,32 +93,8 @@ void ResizeMirrorGLScene(Mirror &mirror) {
 	glLoadIdentity();                                    // Reset The Projection Matrix
 	// Clamp the zoom.
 	double zoom = mirror.getZoom();
-	if (zoom > MAX_ZOOM) {
-		zoom = MAX_ZOOM;
-	} else if (zoom < MIN_ZOOM) {
-		zoom = MIN_ZOOM;
-	}
-	// Set the min/max lat/lon based on center point, zoom, and client aspect.
-	double coordSysMinLon = CENTER_LON - ((width / 2.0) * (zoom / NM_PER_DEG));
-	double coordSysMaxLon = CENTER_LON + ((width / 2.0) * (zoom / NM_PER_DEG));
-	double coordSysMinLat = CENTER_LAT - ((height / 2.0) * (zoom / NM_PER_DEG));
-	double coordSysMaxLat = CENTER_LAT + ((height / 2.0) * (zoom / NM_PER_DEG));
 
-	// Calculate coordinate system boundaries.
-	double coordSysWidth = coordSysMaxLon - coordSysMinLon;
-	double coordSysHeight = coordSysMaxLat - coordSysMinLat;
-	double minX = 0.0 - (coordSysWidth / 2.0);
-	double maxX = coordSysWidth / 2.0;
-	double minY = 0.0 - (coordSysHeight / 2.0);
-	double maxY = coordSysHeight / 2.0;
-
-	// Set up the projection matrix based on these boundaries.
-	gluOrtho2D(minX, maxX, minY, maxY);
-
-	double nmPerLon = 54.0;
-	double mapScaleX = (nmPerLon / 60.0);
-	//normMapScaleX = 1.0 / mapScaleX;
-	glScaled(mapScaleX, 1.0, 1.0);
+	set_projection(width, height, mirror.getLat(), mirror.getLon(), zoom, false);
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
 	glLoadIdentity();                                    // Reset The Modelview Matrix
@@ -138,37 +116,13 @@ void ResizeGLScene() {
 		clientWidth = 1;
 	if (clientHeight <= 0)
 		clientHeight = 1;
-	// Clamp the zoom.
-	if (mZoom > MAX_ZOOM) {
-		mZoom = MAX_ZOOM;
-	} else if (mZoom < MIN_ZOOM) {
-		mZoom = MIN_ZOOM;
-	}
 	glViewport(0, 0, clientWidth, clientHeight);
 	glScissor(0, 0, clientWidth, clientHeight);
+
 	glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
 	glLoadIdentity();                                    // Reset The Projection Matrix
-	// Set the min/max lat/lon based on center point, zoom, and client aspect.
-	double coordSysMinLon = CENTER_LON - ((clientWidth / 2.0) * (mZoom / NM_PER_DEG));
-	double coordSysMaxLon = CENTER_LON + ((clientWidth / 2.0) * (mZoom / NM_PER_DEG));
-	double coordSysMinLat = CENTER_LAT - (((clientHeight + BUTTON_HEIGHT) / 2.0) * (mZoom / NM_PER_DEG));
-	double coordSysMaxLat = CENTER_LAT + (((clientHeight + BUTTON_HEIGHT) / 2.0) * (mZoom / NM_PER_DEG));
-
-	// Calculate coordinate system boundaries.
-	double coordSysWidth = coordSysMaxLon - coordSysMinLon;
-	double coordSysHeight = coordSysMaxLat - coordSysMinLat;
-	double minX = 0.0 - (coordSysWidth / 2.0);
-	double maxX = coordSysWidth / 2.0;
-	double minY = 0.0 - (coordSysHeight / 2.0);
-	double maxY = coordSysHeight / 2.0;
-
-	// Set up the projection matrix based on these boundaries.
-	gluOrtho2D(minX, maxX, minY, maxY);
-
-	double nmPerLon = 54.0;
-	double mapScaleX = (nmPerLon / 60.0);
-	normMapScaleX = 1.0 / mapScaleX;
-	glScaled(mapScaleX, 1.0, 1.0);
+	
+	set_projection(clientWidth, clientHeight, CENTER_LAT, CENTER_LON, mZoom, true);
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
 	glLoadIdentity();                                   // Reset The Modelview Matrix
@@ -184,7 +138,8 @@ void DrawGLScene() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (DAY) {
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
-	} else {
+	}
+	else {
 	}
 	/*if (MOUSE_MOVE) {
 	double lol[3];
@@ -201,21 +156,28 @@ void DrawGLScene() {
 		what = false;
 	}
 	if (renderSector) {
+		glDeleteLists(sectorDl, 1);
 		glPushMatrix();
 		DrawSceneryData(nullptr);
 		glPopMatrix();
+		renderSector = false;
 	}
 	glCallList(sectorDl);
 	if (renderAircraft) {
-		RenderAircraft(false, aircraftDl, r_aircraft_size);
-		RenderAircraft(true, heavyDl, h_aircraft_size);
-		RenderUnknown(false, unkTarDl, u_aircraft_size);
+		//We use default zoom because they all get downsized by glScale anyway
+		glDeleteLists(aircraftDl, 1);
+		RenderAircraft(false, aircraftDl);
+		glDeleteLists(heavyDl, 1);
+		RenderAircraft(true, heavyDl);
+		glDeleteLists(unkTarDl, 1);
+		RenderUnknown(false, unkTarDl);
+		renderAircraft = false;
 	}
 	if (AcfMap.size() > 0) {
 		std::map<std::string, Aircraft*>::iterator iter;
-		for(iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
 			// iterator->first = key
-			Aircraft *aircraft = iter->second;
+			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
 				aircraft->lock();
 				float acf_lat = aircraft->getLatitude();
@@ -224,11 +186,20 @@ void DrawGLScene() {
 				bool renderCallsign = aircraft->getRenderCallsign();
 				bool heavy = aircraft->isHeavy();
 				bool standby = aircraft->getMode() == 0 ? true : false;
+				double maxX = aircraftBlip->getMaxX();
+				double maxY = aircraftBlip->getMaxY();
 				aircraft->unlock();
 
 				//move the aircraft first so we have proper movement along the map scale
 				glPushMatrix();
 				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
+
+				//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+				glTranslated(+longitude, +latitude, 0.0f);
+				double zo = mZoom;
+				double a_size = get_asize(heavy, standby, zo);
+				glScaled(a_size, a_size, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
 
 				//keep the aircraft drawing in correct aspect ratio
 				glTranslated(+longitude, +latitude, 0.0f);
@@ -237,14 +208,16 @@ void DrawGLScene() {
 
 				//set the aircraft heading - this needs to come after scaling aspect for proper rotation
 				glTranslated(+longitude, +latitude, 0.0f);
-				glRotatef(((float) acf_heading), 0.0f, 0.0f, -1.0f);
+				glRotatef(((float)acf_heading), 0.0f, 0.0f, -1.0f);
 				glTranslated(-longitude, -latitude, 0.0f);
 				if (standby) {
 					glCallList(unkTarDl);
-				} else {
+				}
+				else {
 					if (!heavy) {
 						glCallList(aircraftDl);
-					} else {
+					}
+					else {
 						glCallList(heavyDl);
 					}
 				}
@@ -261,15 +234,24 @@ void DrawGLScene() {
 
 				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
 
+				//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+				glTranslated(+longitude, +latitude, 0.0f);
+				glScaled(a_size, a_size, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
+
 				//keep the callsign drawing in correct aspect ratio
 				glTranslated(+longitude, +latitude, 0.0f);
 				glScaled(normMapScaleX, 1.0, 1.0);
 				glTranslated(-longitude, -latitude, 0.0f);
+
 				if (!standby) {
 					glCallList(aircraft->Ccallsign);
 				}
 				glPopMatrix();
 			}
+		}
+		if (renderAllCallsigns) {
+			renderAllCallsigns = false;
 		}
 	}
 }
@@ -398,13 +380,13 @@ void DrawInterfaces() {
 	glCallList(confDl);
 }
 
-void DrawMirrorScenes(Mirror& mirror) 
+void DrawMirrorScenes(Mirror& mirror)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (DAY) {
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
 	}
-	else 
+	else
 	{
 	}
 
@@ -426,9 +408,17 @@ void DrawMirrorScenes(Mirror& mirror)
 				bool standby = aircraft->getMode() == 0 ? true : false;
 				aircraft->unlock();
 
+
 				//move the aircraft first so we have proper movement along the map scale
 				glPushMatrix();
 				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
+
+				//set the size based on zoom
+				glTranslated(+longitude, +latitude, 0.0f);
+				double zo = mirror.getZoom();
+				double a_size = get_asize(heavy, standby, zo);
+				glScaled(a_size, a_size, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
 
 				//keep the aircraft drawing in correct aspect ratio
 				glTranslated(+longitude, +latitude, 0.0f);
@@ -440,14 +430,16 @@ void DrawMirrorScenes(Mirror& mirror)
 				glRotatef(((float)acf_heading), 0.0f, 0.0f, -1.0f);
 				glTranslated(-longitude, -latitude, 0.0f);
 				if (standby) {
-					glCallList(mirror.unkTarDl);
+					glCallList(unkTarDl);
 				}
-				else {
+				else 
+				{
 					if (!heavy) {
-						glCallList(mirror.aircraftDl);
+						glCallList(aircraftDl);
 					}
-					else {
-						glCallList(mirror.heavyDl);
+					else 
+					{
+						glCallList(heavyDl);
 					}
 				}
 				glPopMatrix();
@@ -455,11 +447,11 @@ void DrawMirrorScenes(Mirror& mirror)
 
 				glPushMatrix();
 
-				if (renderCallsign || renderAllCallsigns) {
-					RenderCallsign(*aircraft, heavy, latitude, longitude);
-				}
-
 				glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
+
+				glTranslated(+longitude, +latitude, 0.0f);
+				glScaled(a_size, a_size, 1.0);
+				glTranslated(-longitude, -latitude, 0.0f);
 
 				//keep the callsign drawing in correct aspect ratio
 				glTranslated(+longitude, +latitude, 0.0f);
@@ -482,7 +474,7 @@ void DrawMirrorScenes(Mirror& mirror)
 }
 
 void SetPixelFormat(HDC hDC) {
-	static	PIXELFORMATDESCRIPTOR pfd=				// pfd Tells Windows How We Want Things To Be
+	static	PIXELFORMATDESCRIPTOR pfd =				// pfd Tells Windows How We Want Things To Be
 	{
 		sizeof(PIXELFORMATDESCRIPTOR),				// Size Of This Pixel Format Descriptor
 		1,											// Version Number
@@ -509,24 +501,19 @@ void SetPixelFormat(HDC hDC) {
 
 
 
-int DrawSceneryData(Mirror *mirror) {
-	if (mirror) {
-		mirror->sectorDl = glGenLists(1);
-	}
-	else 
-	{
-		sectorDl = glGenLists(1);
-	}
-	GLUtesselator *tess = gluNewTess(); // create a tessellator
-	if(tess == NULL)
+int DrawSceneryData(Mirror* mirror) {
+	sectorDl = glGenLists(1);
+
+	GLUtesselator* tess = gluNewTess(); // create a tessellator
+	if (tess == NULL)
 		return 0;  // failed to create tessellation object, return 0
 
 	// register callback functions
-	gluTessCallback(tess, GLU_TESS_BEGIN, (void (__stdcall *)(void)) &beginCallback);
-	gluTessCallback(tess, GLU_TESS_END, (void (__stdcall *)(void)) &endCallback);
-	gluTessCallback(tess, GLU_TESS_ERROR, (void (__stdcall *)(void)) &errorCallback);
-	gluTessCallback(tess, GLU_TESS_VERTEX, (void (__stdcall *)(void)) &vertexCallback);
-	gluTessCallback(tess, GLU_TESS_COMBINE, (void (__stdcall *)(void)) &combineCallback);
+	gluTessCallback(tess, GLU_TESS_BEGIN, (void(__stdcall*)(void)) & beginCallback);
+	gluTessCallback(tess, GLU_TESS_END, (void(__stdcall*)(void)) & endCallback);
+	gluTessCallback(tess, GLU_TESS_ERROR, (void(__stdcall*)(void)) & errorCallback);
+	gluTessCallback(tess, GLU_TESS_VERTEX, (void(__stdcall*)(void)) & vertexCallback);
+	gluTessCallback(tess, GLU_TESS_COMBINE, (void(__stdcall*)(void)) & combineCallback);
 
 
 	std::vector<PointTess*> runways;
@@ -534,29 +521,32 @@ int DrawSceneryData(Mirror *mirror) {
 	std::vector<PointTess*> taxiways;
 	std::vector<PointTess*> aprons;
 
-	glNewList(mirror ? mirror->sectorDl : sectorDl, GL_COMPILE);
+	glNewList(sectorDl, GL_COMPILE);
 	for (size_t i = 0; i < ALL.size(); i++) {
-		PointTess *point2d = ALL[i];
+		PointTess* point2d = ALL[i];
 		int type = point2d->get_type();
 		if (type == RUNWAY) {
 			runways.push_back(point2d);
-		} else if (type == PARKING) {
+		}
+		else if (type == PARKING) {
 			parking.push_back(point2d);
-		} else if (type == TAXIWAY) {
+		}
+		else if (type == TAXIWAY) {
 			taxiways.push_back(point2d);
-		} else if (type == APRON) {
+		}
+		else if (type == APRON) {
 			aprons.push_back(point2d);
 		}
 	}
 	//order rendered counts for overlapping
-	for (PointTess *point2d1 : taxiways) {
+	for (PointTess* point2d1 : taxiways) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
 		glColor3f(taxiway_clr[0], taxiway_clr[1], taxiway_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
-		for (LinearSegment *aCoordinates11 : coordinates11) {
+		for (LinearSegment* aCoordinates11 : coordinates11) {
 			double* data = aCoordinates11->pt.as_array();
 			gluTessVertex(tess, data, data);
 		}
@@ -572,12 +562,13 @@ int DrawSceneryData(Mirror *mirror) {
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
-		} else {
+		}
+		else {
 			//handle NITE
 		}
 		//delete point2d;
 	}
-	for (PointTess *point2d1 : aprons) {
+	for (PointTess* point2d1 : aprons) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
@@ -600,12 +591,13 @@ int DrawSceneryData(Mirror *mirror) {
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
-		} else {
+		}
+		else {
 			//handle NITE
 		}
 		//delete point2d;
 	}
-	for (PointTess *point2d1 : runways) {
+	for (PointTess* point2d1 : runways) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
@@ -628,12 +620,13 @@ int DrawSceneryData(Mirror *mirror) {
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
-		} else {
+		}
+		else {
 			//handle NITE
 		}
 		//delete point2d;
 	}
-	for (PointTess *point2d1 : parking) {
+	for (PointTess* point2d1 : parking) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
@@ -656,7 +649,8 @@ int DrawSceneryData(Mirror *mirror) {
 			}
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
-		} else {
+		}
+		else {
 			//handle NITE
 		}
 	}
@@ -743,7 +737,7 @@ void RenderButtons() {
 	int last_end_x = 0;
 	int last_end_y = 0;
 	for (size_t i = 0; i < BUTTONS.size(); i++) {
-		TopButton &curButton = *BUTTONS[i];
+		TopButton& curButton = *BUTTONS[i];
 		int index = curButton.getIndex();
 		bool half = curButton.getIsHalf();
 		bool onTop = curButton.getIsTop();
@@ -757,7 +751,8 @@ void RenderButtons() {
 		int padding = 4; // Change this to "BUTTON_PADDING" for variable padding
 		if (index == last_index) {
 			x = last_x;
-		} else {
+		}
+		else {
 			x = last_end_x;
 			if (i > 0) {
 				x += (padding / 2);
@@ -769,13 +764,15 @@ void RenderButtons() {
 		if (half) {
 			if (!onTop) {
 				y = (height / 2);
-			} else {
+			}
+			else {
 				y = 0;
 			}
 			height /= 2;
 			if (!onTop) {
 				y += (padding / 4);
-			} else {
+			}
+			else {
 				y = 0;
 			}
 			height -= (padding / 4);
@@ -785,7 +782,8 @@ void RenderButtons() {
 		last_end_y = (y + height);
 		if (isDark) {
 			glColor3f(button_clr_d[0], button_clr_d[1], button_clr_d[2]);
-		} else {
+		}
+		else {
 			glColor3f(button_clr_l[0], button_clr_l[1], button_clr_l[2]);
 		}
 		glBegin(GL_POLYGON);
@@ -801,7 +799,8 @@ void RenderButtons() {
 		std::string divider = "/";
 		if (second.length() > 0) {
 			fullString = first + divider + second;
-		} else {
+		}
+		else {
 			fullString = first;
 		}
 		int centerXPos = (x + (width / 2));
@@ -829,7 +828,8 @@ void RenderButtons() {
 				int textXPos3 = (x + (width / 2)) - (extent3.cx / 2);
 				glRasterPos2f(textXPos3, textYPos3);
 				glPrint(text3.c_str(), &topButtonBase);
-			} else if (dualOption) {
+			}
+			else if (dualOption) {
 				int textYPos2 = textYPos - (padding + linePadding);
 				std::string first2 = curButton.getOption2();
 				std::string second2 = curButton.getChoice2();
@@ -837,7 +837,8 @@ void RenderButtons() {
 				std::string divider = "/";
 				if (second2.length() > 0) {
 					fullString2 = first2 + divider + second2;
-				} else {
+				}
+				else {
 					fullString2 = first2;
 				}
 				SIZE extent2 = getTextExtent(fullString2);
@@ -857,7 +858,8 @@ void RenderButtons() {
 					glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 					glRasterPos2f((textXPos2 + first_e.cx + center_e.cx), textYPos2);
 					glPrint(second2.c_str(), &topButtonBase);
-				} else {
+				}
+				else {
 					glRasterPos2f(textXPos2, textYPos2);
 					glPrint(fullString2.c_str(), &topButtonBase);
 				}
@@ -877,7 +879,8 @@ void RenderButtons() {
 				glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 				glRasterPos2f((textXPos + first_e.cx + center_e.cx), textYPos);
 				glPrint(second.c_str(), &topButtonBase);
-			} else {
+			}
+			else {
 				glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 				glRasterPos2f(textXPos, textYPos);
 				glPrint(fullString.c_str(), &topButtonBase);
@@ -923,10 +926,10 @@ void RenderInterfaces() {
 
 	glLineWidth((GLfloat)1.0f);
 
-	for (InterfaceFrame *frame : frames) {
+	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
 			int pos = 0;
-			for (ChatInterface *inter1 : frame->interfaces) {
+			for (ChatInterface* inter1 : frame->interfaces) {
 				RenderChatInterface(*inter1);
 				if (pos == 0) {
 					if (frame->title.size() > 0) {
@@ -956,7 +959,7 @@ void RenderInterfaces() {
 				}
 				pos++;
 			}
-			for (ChildFrame *children : frame->children) {
+			for (ChildFrame* children : frame->children) {
 				if (children) {
 					for (ChatInterface* inter2 : children->child_interfaces) {
 						if (inter2->isRender()) {
@@ -979,7 +982,7 @@ void RenderInterfaces() {
 	glEndList();
 }
 
-void RenderMirrorLines(Mirror &mirror) {
+void RenderMirrorLines(Mirror& mirror) {
 	int width = mirror.getWidth();
 	int height = mirror.getHeight();
 
@@ -1042,9 +1045,9 @@ void RenderDrawings() {
 	glPushMatrix();
 	glLoadIdentity();
 
-	for (InterfaceFrame *frame : frames) {
+	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
-			for (ChildFrame *children : frame->children) {
+			for (ChildFrame* children : frame->children) {
 				if (children) {
 					children->doDrawing();
 				}
@@ -1060,13 +1063,14 @@ void RenderDrawings() {
 	glEndList();
 }
 
-void RenderChatInterface(ChatInterface &interface1) {
+void RenderChatInterface(ChatInterface& interface1) {
 	float col[3];
 	interface1.getColor(col);
 	glColor4f(col[0], col[1], col[2], interface1.getTransparency());
 	if (interface1.isWireMode()) {
-		glBegin(GL_LINE_LOOP);		
-	} else {
+		glBegin(GL_LINE_LOOP);
+	}
+	else {
 		glBegin(GL_POLYGON);
 	}
 	glVertex2d(interface1.getStartX(), interface1.getStartY());
@@ -1082,7 +1086,7 @@ void RenderMirrorBorder(Mirror& mirror) {
 	glVertex2d(1, 1);
 	glVertex2d(1, mirror.getHeight() - 1);
 	glVertex2d(mirror.getWidth() - 1, mirror.getHeight() - 1);
-	glVertex2d(mirror.getWidth() - 1 , 1);
+	glVertex2d(mirror.getWidth() - 1, 1);
 	glEnd();
 }
 
@@ -1099,43 +1103,43 @@ void CALLBACK endCallback(void)
 
 void CALLBACK errorCallback(GLenum errorCode)
 {
-	const GLubyte *estring;
+	const GLubyte* estring;
 
 	estring = gluErrorString(errorCode);
-	fprintf (stderr, "Tessellation Error: %s\n", estring);
+	fprintf(stderr, "Tessellation Error: %s\n", estring);
 	//exit (0);
 }
 
-void CALLBACK vertexCallback(GLvoid *vertex)
+void CALLBACK vertexCallback(GLvoid* vertex)
 {
-	const GLdouble *pointer;
+	const GLdouble* pointer;
 
-	pointer = (GLdouble *) vertex;
+	pointer = (GLdouble*)vertex;
 	glVertex2dv(pointer);
 }
 
-void CALLBACK combineCallback(GLdouble coords[3], 
-							  GLdouble *vertex_data[4],
-							  GLfloat weight[4], GLdouble **dataOut )
+void CALLBACK combineCallback(GLdouble coords[3],
+	GLdouble* vertex_data[4],
+	GLfloat weight[4], GLdouble** dataOut)
 {
-	GLdouble *vertex;
+	GLdouble* vertex;
 	int i;
 
-	vertex = (GLdouble *) malloc(6 * sizeof(GLdouble));
+	vertex = (GLdouble*)malloc(6 * sizeof(GLdouble));
 	vertex[0] = coords[0];
-	vertex[1] = coords[1]; 
+	vertex[1] = coords[1];
 	vertex[2] = coords[2];
 	for (i = 2; i < 6; i++) {
-		vertex[i] = weight[0] * vertex_data[0][i] 
-		+ weight[1] * vertex_data[1][i];
-		+ weight[2] * vertex_data[2][i];
-		+ weight[3] * vertex_data[3][i];
+		vertex[i] = weight[0] * vertex_data[0][i]
+			+ weight[1] * vertex_data[1][i];
+		+weight[2] * vertex_data[2][i];
+		+weight[3] * vertex_data[3][i];
 	}
 	*dataOut = vertex;
 	tesses.push_back(vertex);
 }
 
-void GetOGLPos(int x, int y, double *output) {
+void GetOGLPos(int x, int y, double* output) {
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -1145,15 +1149,15 @@ void GetOGLPos(int x, int y, double *output) {
 	glGetDoublev(GL_PROJECTION_MATRIX, projection);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	winX = (float) x;
+	winX = (float)x;
 	winY = (float)viewport[3] - (float)y;
 
-	glReadPixels((int) x, (int) winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+	glReadPixels((int)x, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
 
 	gluUnProject(winX, winY, winZ, modelview, projection, viewport, &output[0], &output[1], &output[2]);
 }
 
-void BuildFont(LPCWSTR font_name, int font_height, bool bold, unsigned int *base, HFONT *oldfont1)								// Build Our Bitmap Font
+void BuildFont(LPCWSTR font_name, int font_height, bool bold, unsigned int* base, HFONT* oldfont1)								// Build Our Bitmap Font
 {
 	HFONT	font;										// Windows Font ID
 	HFONT	oldfont;
@@ -1181,12 +1185,12 @@ void BuildFont(LPCWSTR font_name, int font_height, bool bold, unsigned int *base
 	//DeleteObject(font);									// Delete The Font
 }
 
-GLvoid KillFont(GLuint *base)									// Delete The Font List
+GLvoid KillFont(GLuint* base)									// Delete The Font List
 {
 	glDeleteLists(*base, 96);							// Delete All 96 Characters
 }
 
-void glPrint(const char *fmt, unsigned int *base, ...)					// Custom GL "Print" Routine
+void glPrint(const char* fmt, unsigned int* base, ...)					// Custom GL "Print" Routine
 {
 	char		text[256];								// Holds Our String
 	va_list		ap;										// Pointer To List Of Arguments
@@ -1211,9 +1215,9 @@ void deleteTess() {
 	tesses.clear();
 }
 
-SIZE getTextExtent(std::string &s) {
+SIZE getTextExtent(std::string& s) {
 	std::wstring ws = s2ws(s);
-	LPCWSTR wText2 = ws.c_str(); 
+	LPCWSTR wText2 = ws.c_str();
 	SIZE extent;
 	GetTextExtentPoint32(hDC, wText2, lstrlenW(wText2), &extent);
 	return extent;
@@ -1224,7 +1228,7 @@ void LoadInterfaces() {
 	//set main pane
 	const int controller_list_width = 86;
 	const int arrow_offset = 15;//arrows that come with display box
-	InterfaceFrame *textBox = new InterfaceFrame(MAIN_CHAT_INTERFACE);
+	InterfaceFrame* textBox = new InterfaceFrame(MAIN_CHAT_INTERFACE);
 	int x = (CLIENT_WIDTH / 3);
 	double width = 0.66666666667;
 	textBox->Pane1(x, width, 0, 125);
@@ -1242,7 +1246,7 @@ void LoadInterfaces() {
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	DisplayBox *displayBox = new DisplayBox(textBox, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
+	DisplayBox* displayBox = new DisplayBox(textBox, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
 
 	//chatbox
 	textBox->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
@@ -1254,22 +1258,23 @@ void LoadInterfaces() {
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
 
-	main_chat = new DisplayBox(textBox, list2, 6, x + (controller_list_width + arrow_offset), 
+	main_chat = new DisplayBox(textBox, list2, 6, x + (controller_list_width + arrow_offset),
 		(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);
 	textBox->children[main_chat->index = MAIN_CHAT_MESSAGES] = main_chat;
-	textField = new InputField(textBox, x + (controller_list_width + arrow_offset), 
+	textField = new InputField(textBox, x + (controller_list_width + arrow_offset),
 		(CLIENT_WIDTH * width) - width_offset, 10.0, 5, 20, 5);
 	textBox->children[textField->index = MAIN_CHAT_INPUT] = textField;
 	frames[MAIN_CHAT_INTERFACE] = textBox;
 	textField->setFocus();
 }
 
-void RenderInputText(ChatInterface& border, int &inputTextDl, std::string &text, bool centered) {
+void RenderInputText(ChatInterface& border, int& inputTextDl, std::string& text, bool centered) {
 	int x, y = border.getStartY() + 6;
 	double aW = border.getActualWidth();
 	if (centered) {
 		x = (border.getStartX() + (aW / 2));
-	} else {
+	}
+	else {
 		x = border.getStartX() + 3;
 	}
 	int w_width = CLIENT_WIDTH;
@@ -1305,7 +1310,7 @@ void RenderInputText(ChatInterface& border, int &inputTextDl, std::string &text,
 	glRasterPos2f(x, y);
 	std::string finalTxt = text.c_str();
 	size_t pos = finalTxt.find("%");
-	while (pos!=std::string::npos) {
+	while (pos != std::string::npos) {
 		finalTxt.insert(pos, "%");
 		pos = finalTxt.find("%", pos + 2);
 	}
@@ -1325,9 +1330,11 @@ void RenderLabel(ChatInterface& border, int& labelDl, std::string& text, int cen
 	double aW = border.getActualWidth();
 	if (centered == 1) {
 		x = (border.getStartX() + (aW / 2));
-	} else if (centered == 2) {
+	}
+	else if (centered == 2) {
 		x = border.getStartX() + aW;
-	} else {
+	}
+	else {
 		x = border.getStartX() + 3;
 	}
 	int w_width = CLIENT_WIDTH;
@@ -1359,7 +1366,8 @@ void RenderLabel(ChatInterface& border, int& labelDl, std::string& text, int cen
 	SIZE size = getTextExtent(text);
 	if (centered == 1) {
 		x -= (size.cx / 2);
-	} else if (centered == 2) {
+	}
+	else if (centered == 2) {
 		x -= size.cx;
 	}
 	glRasterPos2f(x, y);
@@ -1411,7 +1419,7 @@ void RenderConf() {
 	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)));
 	glPrint(config.c_str(), &confBase);
 
-	const std::string *date1 = currentDateTime();
+	const std::string* date1 = currentDateTime();
 	glRasterPos2f(50, (CLIENT_HEIGHT / 6));
 	glPrint(date1[0].c_str(), &confBase);
 
@@ -1429,34 +1437,36 @@ void RenderConf() {
 	glEndList();
 }
 
-int RenderAircraft(bool heavy, int &acf_base, double aircraft_size) {
+int RenderAircraft(bool heavy, int& acf_base) {
+	double aircraft_size = get_default_asize(heavy, false);
 	acf_base = glGenLists(1);
-	GLUtesselator *tess = gluNewTess(); // create a tessellator
-	if(tess == NULL)
+	GLUtesselator* tess = gluNewTess(); // create a tessellator
+	if (tess == NULL)
 		return 0;  // failed to create tessellation object, return 0
 
 	// register callback functions
-	gluTessCallback(tess, GLU_TESS_BEGIN, (void (__stdcall *)(void)) &beginCallback);
-	gluTessCallback(tess, GLU_TESS_END, (void (__stdcall *)(void)) &endCallback);
-	gluTessCallback(tess, GLU_TESS_ERROR, (void (__stdcall *)(void)) &errorCallback);
-	gluTessCallback(tess, GLU_TESS_VERTEX, (void (__stdcall *)(void)) &vertexCallback);
-	gluTessCallback(tess, GLU_TESS_COMBINE, (void (__stdcall *)(void)) &combineCallback);
+	gluTessCallback(tess, GLU_TESS_BEGIN, (void(__stdcall*)(void)) & beginCallback);
+	gluTessCallback(tess, GLU_TESS_END, (void(__stdcall*)(void)) & endCallback);
+	gluTessCallback(tess, GLU_TESS_ERROR, (void(__stdcall*)(void)) & errorCallback);
+	gluTessCallback(tess, GLU_TESS_VERTEX, (void(__stdcall*)(void)) & vertexCallback);
+	gluTessCallback(tess, GLU_TESS_COMBINE, (void(__stdcall*)(void)) & combineCallback);
 
 	glNewList(acf_base, GL_COMPILE);
 	if (heavy) {
 		glColor4f(heavy_clr[0], heavy_clr[1], heavy_clr[2], 1.0f);
-	} else {
+	}
+	else {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	glTranslatef(+longitude, +latitude, 0.0f);
-	glRotatef(((float) heading), 0.0f, 0.0f, -1.0f);
+	glRotatef(((float)heading), 0.0f, 0.0f, -1.0f);
 	glTranslatef(-longitude, -latitude, 0.0f);
 	glScaled(aircraft_size, aircraft_size, 1);
 	gluTessBeginPolygon(tess, 0);
 	gluTessBeginContour(tess);
 	std::vector<double*> coords = aircraftBlip->getCoordinates();
-	for (double *coord : coords) {
+	for (double* coord : coords) {
 		gluTessVertex(tess, coord, coord);
 	}
 	gluTessEndContour(tess);
@@ -1468,34 +1478,36 @@ int RenderAircraft(bool heavy, int &acf_base, double aircraft_size) {
 	return acf_base;
 }
 
-int RenderUnknown(bool heavy, int &acf_base, double aircraft_size) {
+int RenderUnknown(bool heavy, int& acf_base) {
+	double aircraft_size = get_default_asize(heavy, false);
 	acf_base = glGenLists(1);
-	GLUtesselator *tess = gluNewTess(); // create a tessellator
-	if(tess == NULL)
+	GLUtesselator* tess = gluNewTess(); // create a tessellator
+	if (tess == NULL)
 		return 0;  // failed to create tessellation object, return 0
 
 	// register callback functions
-	gluTessCallback(tess, GLU_TESS_BEGIN, (void (__stdcall *)(void)) &beginCallback);
-	gluTessCallback(tess, GLU_TESS_END, (void (__stdcall *)(void)) &endCallback);
-	gluTessCallback(tess, GLU_TESS_ERROR, (void (__stdcall *)(void)) &errorCallback);
-	gluTessCallback(tess, GLU_TESS_VERTEX, (void (__stdcall *)(void)) &vertexCallback);
-	gluTessCallback(tess, GLU_TESS_COMBINE, (void (__stdcall *)(void)) &combineCallback);
+	gluTessCallback(tess, GLU_TESS_BEGIN, (void(__stdcall*)(void)) & beginCallback);
+	gluTessCallback(tess, GLU_TESS_END, (void(__stdcall*)(void)) & endCallback);
+	gluTessCallback(tess, GLU_TESS_ERROR, (void(__stdcall*)(void)) & errorCallback);
+	gluTessCallback(tess, GLU_TESS_VERTEX, (void(__stdcall*)(void)) & vertexCallback);
+	gluTessCallback(tess, GLU_TESS_COMBINE, (void(__stdcall*)(void)) & combineCallback);
 
 	glNewList(acf_base, GL_COMPILE);
 	if (!heavy) {
 		glColor4f(unknown_clr[0], unknown_clr[1], unknown_clr[2], 1.0f);
-	} else {
+	}
+	else {
 		glColor4f(unknown_clr[0], unknown_clr[1], unknown_clr[2], 1.0f);
 	}
 
 	glTranslatef(+longitude, +latitude, 0.0f);
-	glRotatef(((float) heading), 0.0f, 0.0f, -1.0f);
+	glRotatef(((float)heading), 0.0f, 0.0f, -1.0f);
 	glTranslatef(-longitude, -latitude, 0.0f);
 	glScaled(aircraft_size, aircraft_size, 1);
 	gluTessBeginPolygon(tess, 0);
 	gluTessBeginContour(tess);
 	std::vector<double*> coords = unknownBlip->getCoordinates();
-	for (double *coord : coords) {
+	for (double* coord : coords) {
 		gluTessVertex(tess, coord, coord);
 	}
 	gluTessEndContour(tess);
@@ -1507,14 +1519,9 @@ int RenderUnknown(bool heavy, int &acf_base, double aircraft_size) {
 	return acf_base;
 }
 
-int RenderCallsign(Aircraft &aircraft, bool heavy, float latitude, float longitude) {
+int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitude) {
 	aircraft.Ccallsign = glGenLists(1);
-	double aircraft_size;
-	if (heavy) {
-		aircraft_size = h_aircraft_size;
-	} else {
-		aircraft_size = r_aircraft_size;
-	}
+	double aircraft_size = get_default_asize(heavy, false);
 	double minX = aircraftBlip->getMinX();
 	double minY = aircraftBlip->getMinY();
 	double maxX = aircraftBlip->getMaxX();
@@ -1524,6 +1531,8 @@ int RenderCallsign(Aircraft &aircraft, bool heavy, float latitude, float longitu
 	double offsetY = maxY;
 	float vMaxX = (longitude + (offsetX * aircraft_size));
 	float vMaxY = (latitude + (offsetY * aircraft_size));
+
+	std::cout << aircraft_size << ", " << u_aircraft_size << std::endl;
 
 	//Draw Callsign
 	glNewList(aircraft.Ccallsign, GL_COMPILE);
@@ -1536,15 +1545,15 @@ int RenderCallsign(Aircraft &aircraft, bool heavy, float latitude, float longitu
 	return 1;
 }
 
-const std::string *currentDateTime() {
+const std::string* currentDateTime() {
 	time_t     now = time(0);
 	struct tm  tstruct;
 	char       buf[80];
 	char	   buf2[80];
-	_gmtime64_s(&tstruct,&now);
+	_gmtime64_s(&tstruct, &now);
 	strftime(buf, sizeof(buf), "%m/%d/%y", &tstruct);
 	strftime(buf2, sizeof(buf2), "%H%M/%S", &tstruct);
-	std::string *ret = new std::string[2];
+	std::string* ret = new std::string[2];
 	ret[0] = buf;
 	ret[1] = buf2;
 	return ret;
@@ -1592,9 +1601,9 @@ void RenderFocuses() {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	for (InterfaceFrame *frame : frames) {
+	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
-			for (ChildFrame *children : frame->children) {
+			for (ChildFrame* children : frame->children) {
 				if (children) {
 					children->focusDrawing();
 				}
@@ -1610,7 +1619,42 @@ void RenderFocuses() {
 	glEndList();
 }
 
-void deleteFrame(InterfaceFrame *frame) {
+void deleteFrame(InterfaceFrame* frame) {
 	std::vector<InterfaceFrame*>::iterator it = std::remove(frames.begin(), frames.end(), frame);
 	frames.erase(it, frames.end());
+}
+
+void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, bool top_bar) {
+
+	// Clamp the zoom.
+	if (zoom > MAX_ZOOM) {
+		zoom = MAX_ZOOM;
+	}
+	else if (zoom < MIN_ZOOM) {
+		zoom = MIN_ZOOM;
+	}
+
+	// Set the min/max lat/lon based on center point, zoom, and client aspect.
+	double coordSysMinLon = c_lon - ((clientWidth / 2.0) * (zoom / NM_PER_DEG));
+	double coordSysMaxLon = c_lon + ((clientWidth / 2.0) * (zoom / NM_PER_DEG));
+	double coordSysMinLat = c_lat - (((top_bar ? (clientHeight + BUTTON_HEIGHT) : clientHeight) / 2.0) * (zoom / NM_PER_DEG));
+	double coordSysMaxLat = c_lat + (((top_bar ? (clientHeight + BUTTON_HEIGHT) : clientHeight) / 2.0) * (zoom / NM_PER_DEG));
+
+	// Calculate coordinate system boundaries.
+	double coordSysWidth = coordSysMaxLon - coordSysMinLon;
+	double coordSysHeight = coordSysMaxLat - coordSysMinLat;
+	double minX = 0.0 - (coordSysWidth / 2.0);
+	double maxX = coordSysWidth / 2.0;
+	double minY = 0.0 - (coordSysHeight / 2.0);
+	double maxY = coordSysHeight / 2.0;
+
+	//System.out.println(coordSysMinLon + ", " + coordSysMaxLon);
+
+	// Set up the projection matrix based on these boundaries.
+	gluOrtho2D(minX, maxX, minY, maxY);
+
+	double nmPerLon = 54.0;
+	double mapScaleX = (nmPerLon / 60.0);
+	normMapScaleX = 1.0 / mapScaleX;
+	glScaled(mapScaleX, 1.0, 1.0);
 }

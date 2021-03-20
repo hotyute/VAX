@@ -336,7 +336,7 @@ void ClickButton::doAction() {
 		{
 		case CONN_OKAY_BUTTON:
 		{
-			Identity id = *USER->getIdentity();
+			Identity &id = *USER->getIdentity();
 			id.callsign = connect_callsign->input.c_str();
 			id.login_name = connect_fullname->input.c_str();
 			id.username = connect_username->input.c_str();

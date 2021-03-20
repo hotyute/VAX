@@ -26,10 +26,11 @@ extern int MOUSE_X, MOUSE_Y;
 extern bool fixed_set;
 
 extern double mZoom;
+extern double DEFAULT_ZOOM;
 
-extern double r_aircraft_size;
-extern double h_aircraft_size;
-extern double u_aircraft_size;
+extern double r_aircraft_size, default_r_size;
+extern double h_aircraft_size, default_h_size;
+extern double u_aircraft_size, default_u_size;
 
 extern bool DAY, CAPS, SHIFT_DOWN, MOUSE_MOVE;
 

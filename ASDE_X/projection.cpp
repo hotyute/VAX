@@ -18,10 +18,11 @@ int FIXED_CLIENT_WIDTH, FIXED_CLIENT_HEIGHT;
 bool fixed_set = false;
 
 double mZoom = 30.000;
+double DEFAULT_ZOOM = 30.0;
 
-double r_aircraft_size = 0.00022;
-double h_aircraft_size = 0.00028;
-double u_aircraft_size = 0.00028;
+double r_aircraft_size = 0.1, default_r_size = 0.003;
+double h_aircraft_size = 0.12, default_h_size = 0.0032;
+double u_aircraft_size = 0.1, default_u_size = 0.003;
 
 int MOUSE_X = 0, MOUSE_Y = 0;
 

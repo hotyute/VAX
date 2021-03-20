@@ -178,38 +178,40 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CreateThread(NULL, 0, EventThread1, hwnd, 0, NULL);
 		userStorage1.resize(MAX_AIRCRAFT_SIZE);
 
-		/*User *user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
-		Aircraft *cur = new Aircraft();
+		User* user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
+		Aircraft* cur = new Aircraft();
 		user1->setAircraft(cur);
 		if (cur != NULL) {
-		cur->lock();
-		cur->setHeavy(true);
-		cur->setCallsign("AAL2");
-		cur->setLatitude(25.800704);
-		cur->setLongitude(-80.300770);
-		cur->setSpeed(0.0);
-		cur->setHeading(87.0);
-		cur->setRenderCallsign(true);
-		AcfMap[cur->getCallsign()] = cur;
-		cur->unlock();
+			cur->lock();
+			cur->setHeavy(true);
+			cur->setCallsign("AAL2");
+			cur->setLatitude(25.800704);
+			cur->setLongitude(-80.300770);
+			cur->setSpeed(0.0);
+			cur->setHeading(87.0);
+			cur->setRenderCallsign(true);
+			cur->setMode(1);
+			AcfMap[cur->getCallsign()] = cur;
+			cur->unlock();
 		}
 		userStorage1[0] = user1;
 		user1 = new User("EGF4427", PILOT_CLIENT, 0, 0);
 		cur = new Aircraft();
 		user1->setAircraft(cur);
 		if (cur != NULL) {
-		cur->lock();
-		cur->setHeavy(false);
-		cur->setCallsign("EGF4427");
-		cur->setLatitude(25.798267);
-		cur->setLongitude(-80.282544);
-		cur->setSpeed(0.0);
-		cur->setHeading(180.0);
-		cur->setRenderCallsign(true);
-		AcfMap[cur->getCallsign()] = cur;
-		cur->unlock();
+			cur->lock();
+			cur->setHeavy(false);
+			cur->setCallsign("EGF4427");
+			cur->setLatitude(25.798267);
+			cur->setLongitude(-80.282544);
+			cur->setSpeed(0.0);
+			cur->setHeading(180.0);
+			cur->setRenderCallsign(true);
+			cur->setMode(1);
+			AcfMap[cur->getCallsign()] = cur;
+			cur->unlock();
 		}
-		userStorage1[2] = user1;*/
+		userStorage1[2] = user1;
 		break;
 	}
 	case WM_SIZE:
@@ -238,7 +240,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderInterfaces = true;
 		renderDrawings = true;
 		renderConf = true;
-		renderAircraft = true;
+		//renderAircraft = true;
 	}
 	break;
 	case WM_MOUSEMOVE:
@@ -284,7 +286,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					renderInterfaces = true;
 					renderDrawings = true;
 					renderConf = true;
-					renderAircraft = true;
 				}
 			}
 		}
@@ -798,6 +799,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	}
 
 	InitOpenGL();
+	renderAircraft = true;
 	std::cout.precision(10);
 	Event& position_updates = ConfigUpdates();
 	position_updates.eAction.setTicks(0);
@@ -861,51 +863,7 @@ void pass_chars(char* chars) {
 }
 
 void preFlags() {
-	if (renderSector) {
-		glDeleteLists(sectorDl, 1);
-	}
-	if (renderAircraft) {
-		glDeleteLists(aircraftDl, 1);
-		glDeleteLists(heavyDl, 1);
-		glDeleteLists(unkTarDl, 1);
-	}
-	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
-			// iterator->first = key
-			Aircraft* aircraft = iter->second;
-			if (aircraft != NULL) {
-				aircraft->lock();
-				bool renderCallsign = aircraft->getRenderCallsign();
-				aircraft->unlock();
-				if (renderCallsign || renderAllCallsigns) {
-					glDeleteLists(aircraft->Ccallsign, 1);
-				}
-			}
-		}
-	}
 }
 
 void resetFlags() {
-	if (renderSector)
-		renderSector = false;
-	if (renderAircraft)
-		renderAircraft = false;
-	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
-			// iterator->first = key
-			Aircraft* aircraft = iter->second;
-			if (aircraft != NULL) {
-				aircraft->lock();
-				bool renderCallsign = aircraft->getRenderCallsign();
-				aircraft->unlock();
-				if (renderCallsign || renderAllCallsigns) {
-					aircraft->setRenderCallsign(false);
-				}
-			}
-		}
-	}
-	if (renderAllCallsigns)
-		renderAllCallsigns = false;
 }
