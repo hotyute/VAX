@@ -13,10 +13,19 @@ int FileReader::LoadADX(std::string path) {
 	std::ifstream myfile(path);
 	std::string header;
 	PointTess* point2d = NULL;
-	for (size_t i = 0; i < ALL.size(); i++) {
-		delete ALL[i];
+	auto p_it = ALL.begin();
+	while (p_it != ALL.end()) {
+		PointTess* p = *p_it;
+		p_it = ALL.erase(p_it);
+		delete p;
 	}
-	ALL.clear();
+	auto m_it = mirrors_storage.begin();
+	while (m_it != mirrors_storage.end()) {
+		Mirror* m = (*m_it).second;
+		m_it = mirrors_storage.erase(m_it);
+		delete m;
+	}
+	mirrors.clear();
 	if (myfile.is_open())
 	{
 		std::string string1 = "<<";

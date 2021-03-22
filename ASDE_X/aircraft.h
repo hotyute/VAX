@@ -30,6 +30,7 @@ private:
 	HANDLE aMutex;
 	int index;
 	bool renderCallsign, renderCollision;
+	bool flags[2];
 	bool collision;
 	bool heavy;
 	int mode;
@@ -44,7 +45,7 @@ public:
 	Aircraft *collisionAcf;
 	Aircraft();
 	~Aircraft();
-	unsigned int Ccallsign, collisionDl;
+	unsigned int Ccallsign, collisionDl, collLineDL, collLine2DL;
 	int getIndex();
 	void setIndex(int);
 	bool getRenderCallsign();
@@ -74,6 +75,8 @@ public:
 	void setHeavy(bool);
 	int getMode();
 	void setMode(int);
+	bool getCollLine() { return flags[0]; }
+	void setCollLine(bool flag) { flags[0] = flag; }
 };
 #endif
 

@@ -347,4 +347,33 @@ void remove(std::vector<T>& vec, void* pos)
 	
 }
 
+double get_delta(double from, double to, double move_by) {
+	double going = to - from;
+	if (going < 0) {
+		from -= move_by;
+	}
+	else if (going > 0)
+	{
+		from += move_by;
+	}
+	return from;
+}
+
+/*getLocationXDistanceFromLocation: function(latitude, longitude, distance, bearing) {
+// distance in KM, bearing in degrees
+
+var R = 6378.1,                         // Radius of the Earth
+brng = Math.radians(bearing)       // Convert bearing to radian
+lat = Math.radians(latitude),       // Current coords to radians
+lon = Math.radians(longitude);
+
+// Do the math magic
+lat = Math.asin(Math.sin(lat) * Math.cos(distance / R) + Math.cos(lat) * Math.sin(distance / R) * Math.cos(brng));
+lon += Math.atan2(Math.sin(brng) * Math.sin(distance / R) * Math.cos(lat), Math.cos(distance / R) - Math.sin(lat) * Math.sin(lat));
+
+// Coords back to degrees and return
+return new Microsoft.Maps.Location(Math.degrees(lat), Math.degrees(lon));
+
+},*/
+
 #endif

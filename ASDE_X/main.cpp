@@ -199,7 +199,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		userStorage1[0] = user1;
 		User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
 		Aircraft *cur2 = new Aircraft();
-		user1->setAircraft(cur);
+		user2->setAircraft(cur2);
 		if (cur2 != NULL) {
 			cur2->lock();
 			cur2->setHeavy(false);
@@ -210,11 +210,33 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setHeading(180.0);
 			cur2->setRenderCallsign(true);
 			cur2->setRenderCollision(true);
+			cur2->setCollision(true);
 			cur2->setMode(1);
 			AcfMap[cur2->getCallsign()] = cur2;
 			cur2->unlock();
 		}
-		userStorage1[2] = user2;
+		userStorage1[1] = user2;
+		cur->collisionAcf = cur2;
+		cur->setCollLine(true);
+
+		User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
+		Aircraft* cur3 = new Aircraft();
+		user3->setAircraft(cur3);
+		if (cur3 != NULL) {
+			cur3->lock();
+			cur3->setHeavy(false);
+			cur3->setCallsign("DAL220");
+			cur3->setLatitude(25.798429);
+			cur3->setLongitude(-80.278852);
+			cur3->setSpeed(0.0);
+			cur3->setHeading(180.0);
+			cur3->setRenderCallsign(true);
+			cur3->setRenderCollision(true);
+			cur3->setMode(1);
+			AcfMap[cur3->getCallsign()] = cur3;
+			cur3->unlock();
+		}
+		userStorage1[2] = user3;
 		break;
 	}
 	case WM_SIZE:

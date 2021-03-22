@@ -35,6 +35,10 @@ void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
 	if (_openedframe && !_openedframe->multi_open) {
 		return;
 	}
+	std::vector<std::string> options1;
+	options1.push_back("IFR");
+	options1.push_back("VFR");
+	options1.push_back("SVFR");
 	std::string call = strings[0], name = strings[1], pilot_rating = strings[2], 
 		ac_type_txt = strings[3], fr_text = strings[4], depart = strings[5], 
 		arrive = strings[6], alternate = strings[7], cruise = strings[8], 
@@ -64,9 +68,8 @@ void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
 		Label* fr_label = new Label(fp_frame, "Flight Rules:", x + (width - (width * (start_x -= spacing))), 70.0, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fr_label->centered = 2;
 		fp_frame->children[fr_label->index = FP_FLIGHTRULES_LABEL] = fr_label;
-		InputField* fr_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing))), 70.0, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
-		fr_input->setUneditable(fr_text);
-		fp_frame->children[fr_input->index = FP_FLIGHTRULES_INPUT] = fr_input;
+		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing))) + 10, 25.0, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
+		fp_frame->children[comboBox1->index = FP_FLIGHTRULES_INPUT] = comboBox1;
 
 		//2nd Line
 		start_x = 1.0;

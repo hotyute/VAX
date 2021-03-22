@@ -51,7 +51,8 @@ const static float button_text_clr[] = {0.80588235294f, 0.80588235294f, 0.805882
 const static float callsign_clr[] = {0.83921568627f, 0.83921568627f, 0.31372549019f};
 const static float conf_clr[] = {0.00392156862f, 0.72549019607f, 0.00392156862f};
 const static float unknown_clr[] = {0.0f, 0.85490196078f, 0.81176470588f};
-const static float collision_clr[] = { 0.87843137254, 0.0f, 0.0f };
+const static float collision_clr[] = { 0.00392156862f, 0.72549019607f, 0.00392156862f };
+const static float col_brdr_clr[] = { 0.00392156862f, 0.92549019607f, 0.00392156862f };
 
 void InitOpenGL();
 void ResizeMirrorGLScene(Mirror& mirror);
