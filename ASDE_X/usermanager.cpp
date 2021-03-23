@@ -5,7 +5,7 @@
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
 
-User *USER = new User("ZLC_ATM", CONTROLLER_CLIENT, 11, 0);
+User *USER = new User("(NOT_LOGGED)", CONTROLLER_CLIENT, 11, 0);
 
 void decodePackets(int opCode, Stream &stream) {
 	if (opCode == 10) {
