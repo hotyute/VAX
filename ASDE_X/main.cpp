@@ -198,7 +198,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		userStorage1[0] = user1;
 		User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
-		Aircraft *cur2 = new Aircraft();
+		Aircraft* cur2 = new Aircraft();
 		user2->setAircraft(cur2);
 		if (cur2 != NULL) {
 			cur2->lock();
@@ -303,6 +303,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				std::wstring wide(szFileName);
 				std::string final1(wide.begin(), wide.end());
 				if (FileReader::LoadADX(final1)) {
+					preFileRender();
 					resize = true;
 					renderSector = true;
 					renderButtons = true;
@@ -311,6 +312,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					renderInterfaces = true;
 					renderDrawings = true;
 					renderConf = true;
+					renderAllCollisionLines = true;
+					zoom_phase = 2;
 				}
 			}
 		}
@@ -719,6 +722,7 @@ bool processCommands(std::string command)
 			if (!opened)
 			{
 				mir->renderBorder = true;
+				mir->renderAllCollisionLines = true;
 				mirrors.push_back(mir);
 			}
 		}
@@ -891,4 +895,15 @@ void preFlags() {
 }
 
 void resetFlags() {
+	if (AcfMap.size() > 0) {
+		std::map<std::string, Aircraft*>::iterator iter;
+		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+			// iterator->first = key
+			Aircraft* aircraft = iter->second;
+			if (aircraft != NULL) {
+				if (aircraft->getCollLine())
+					aircraft->setCollLine(false);
+			}
+		}
+	}
 }

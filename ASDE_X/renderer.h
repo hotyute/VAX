@@ -16,7 +16,7 @@ extern std::vector<Mirror*> mirrors;
 
 extern bool renderAircraft, renderSector, renderButtons, 
 	renderLegend, renderAllCallsigns, renderInterfaces,
-	renderInputText, renderConf, renderFocus, renderDrawings, what;
+	renderInputText, renderConf, renderFocus, renderDrawings, what, renderAllCollision, renderAllCollisionLines;
 
 extern bool loadInterfaces;
 
@@ -76,5 +76,6 @@ void glPrint(const char*, unsigned int*, ...);
 void deleteTess();
 SIZE getTextExtent(std::string &s);
 void DrawVarLine(float, float, float, float, float, float);
+void preFileRender();
 
 #endif

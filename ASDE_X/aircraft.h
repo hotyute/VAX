@@ -3,6 +3,9 @@
 #include <vector>
 #include <map>
 
+#ifndef AIRCRAFT_H
+#define AIRCRAFT_H
+
 #ifndef History_aircraft_h
 #define History_aircraft_h
 class History {
@@ -85,4 +88,5 @@ extern std::map<std::string, Aircraft*> AcfMap;
 
 extern Aircraft *getAircraftByIndex(int);
 
+#endif
 

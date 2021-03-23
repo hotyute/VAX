@@ -5,6 +5,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "aircraft.h"
+
 #ifndef MIRROR_CLS_h
 #define MIRROR_CLS_h
 class Mirror;
@@ -13,9 +15,11 @@ private:
 	int x_, y_, width, height;
 	double zoom_, lat_, lon_;
 public:
+	~Mirror();
 	std::string id_;
+	std::unordered_map<Aircraft*, std::vector<unsigned int>> g_flags;
 	int borderDl;
-	bool renderBorder;
+	bool renderBorder, renderAllCollisionLines;
 	int getX() { return x_; }
 	int getY() { return y_; }
 	void setX(int x) { x_ = x; }
@@ -35,6 +39,7 @@ public:
 
 extern std::vector<Mirror*>::iterator get_mir(std::vector<Mirror*>& vec, std::string search);
 extern std::unordered_map<std::string, Mirror*>::iterator get_mir(std::unordered_map<std::string, Mirror*>& vec, std::string search);
+extern std::unordered_map<Aircraft*, std::vector<unsigned int>>::iterator get_flags(std::unordered_map<Aircraft*, std::vector<unsigned int>>& vec, Aircraft* search);
 
 #endif
 

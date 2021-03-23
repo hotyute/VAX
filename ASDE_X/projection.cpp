@@ -18,6 +18,7 @@ int FIXED_CLIENT_WIDTH, FIXED_CLIENT_HEIGHT;
 bool fixed_set = false;
 
 double mZoom = 30.000;
+int zoom_phase = 1;
 double DEFAULT_ZOOM = 30.0;
 
 double r_aircraft_size = 0.1, default_r_size = 0.003;

@@ -26,6 +26,7 @@ extern int MOUSE_X, MOUSE_Y;
 extern bool fixed_set;
 
 extern double mZoom;
+extern int zoom_phase;
 extern double DEFAULT_ZOOM;
 
 extern double r_aircraft_size, default_r_size;

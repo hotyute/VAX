@@ -8,6 +8,7 @@ Aircraft::Aircraft() {
 	renderCallsign = false;
 	renderCollision = false;
 	collision = false;
+	collisionAcf = nullptr;
 	for (size_t i = 0; i < sizeof(flags) / sizeof(bool); i++) {
 		flags[i] = false;
 	}
