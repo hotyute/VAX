@@ -10,7 +10,7 @@
 
 std::vector<InterfaceFrame*> frames(256);
 ChildFrame* focusChild = NULL, * lastFocus = NULL;
-std::vector<InterfaceFrame*> deleteInterfaces;
+std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 bool updateLastFocus = false;
 InterfaceFrame* _openedframe = NULL;
 
@@ -26,10 +26,10 @@ InterfaceFrame::InterfaceFrame(int index, double width, double height) {
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::index = index;
-	ChatInterface* contentPane = new ChatInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, false, false);
+	BasicInterface* contentPane = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, false, false);
 	contentPane->updateCoordinates();
 	InterfaceFrame::interfaces.push_back(contentPane);
-	ChatInterface* bounds = new ChatInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, false, true);
+	BasicInterface* bounds = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, false, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
 	InterfaceFrame::interfaces.push_back(bounds);
@@ -40,10 +40,10 @@ InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, doub
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::index = index;
-	ChatInterface* contentPane = new ChatInterface(x, width, 0.0, y, height, 0.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
+	BasicInterface* contentPane = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
 	contentPane->updateCoordinates();
 	interfaces.push_back(contentPane);
-	ChatInterface* bounds = new ChatInterface(x, width, 0.0, y, height, 0.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
+	BasicInterface* bounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
 	interfaces.push_back(bounds);
@@ -51,10 +51,10 @@ InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, doub
 
 void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	InterfaceFrame::render = true;
-	ChatInterface* contentPane = new ChatInterface(x, width, -5.0, y, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
+	BasicInterface* contentPane = new BasicInterface(x, width, -5.0, y, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
 	contentPane->updateCoordinates();
 	InterfaceFrame::interfaces.push_back(contentPane);
-	ChatInterface* bounds = new ChatInterface(x, width, -5.0, y, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
+	BasicInterface* bounds = new BasicInterface(x, width, -5.0, y, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
 	InterfaceFrame::interfaces.push_back(bounds);
@@ -115,7 +115,7 @@ InputField::InputField(InterfaceFrame* frame, double width, double height) {
 	InputField::focus = false;
 	InputField::type = INPUT_FIELD;
 	InputField::inputTextDl = 0;
-	ChatInterface* fieldBounds = new ChatInterface(0.0, width, 10.0, 0.0, height, 10.0, 1.0f, 1.0f, 1.0f, 0.8, false, true);
+	BasicInterface* fieldBounds = new BasicInterface(0.0, width, 10.0, 0.0, height, 10.0, 1.0f, 1.0f, 1.0f, 0.8, false, true);
 	fieldBounds->setBounds(true);
 	fieldBounds->updateCoordinates();
 	InputField::border = fieldBounds;
@@ -130,7 +130,7 @@ InputField::InputField(InterfaceFrame* frame, double x, double width, double pad
 	InputField::focus = false;
 	InputField::type = INPUT_FIELD;
 	InputField::inputTextDl = 0;
-	ChatInterface* fieldBounds = new ChatInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* fieldBounds = new BasicInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	fieldBounds->setBounds(true);
 	fieldBounds->updateCoordinates();
 	InputField::border = fieldBounds;
@@ -227,10 +227,10 @@ CloseButton::CloseButton(InterfaceFrame* frame, double width, double height) {
 	CloseButton::frame = frame;
 	CloseButton::focus = false;
 	CloseButton::type = CLOSE_BUTTON;
-	ChatInterface* inter = frame->interfaces[0];
+	BasicInterface* inter = frame->interfaces[0];
 	double startX = (inter->getStartX() + inter->getWidth()) - width;
 	double startY = (inter->getStartY() + inter->getHeight()) - height;
-	ChatInterface* closeBorder = new ChatInterface(startX, width, 0.0, startY, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* closeBorder = new BasicInterface(startX, width, 0.0, startY, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	closeBorder->setBounds(true);
 	closeBorder->updateCoordinates();
 	CloseButton::border = closeBorder;
@@ -238,7 +238,7 @@ CloseButton::CloseButton(InterfaceFrame* frame, double width, double height) {
 }
 
 void CloseButton::doDrawing() {
-	ChatInterface* inter11 = CloseButton::border;
+	BasicInterface* inter11 = CloseButton::border;
 
 	int startX = inter11->getStartX(), startY = inter11->getStartY();
 	int endX = inter11->getEndX(), endY = inter11->getEndY();
@@ -284,7 +284,7 @@ ClickButton::ClickButton(InterfaceFrame* frame, std::string text, double x, doub
 	ClickButton::focus = false;
 	ClickButton::type = CLICK_BUTTON;
 	ClickButton::text = text;
-	ChatInterface* closeBounds = new ChatInterface(x, width, 0.0, y, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* closeBounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	closeBounds->setBounds(true);
 	closeBounds->updateCoordinates();
 	ClickButton::border = closeBounds;
@@ -292,7 +292,7 @@ ClickButton::ClickButton(InterfaceFrame* frame, std::string text, double x, doub
 }
 
 void ClickButton::doDrawing() {
-	ChatInterface& param = *ClickButton::border;
+	BasicInterface& param = *ClickButton::border;
 	double x = (param.getStartX() + (param.getWidth() / 2));
 	double y = (param.getStartY() + (param.getHeight() / 2));
 	SelectObject(hDC, topBtnFont);
@@ -381,7 +381,7 @@ ComboBox::ComboBox(InterfaceFrame* frame, std::vector<std::string> options, doub
 		}
 	}
 	int arrow_space = 10;
-	ChatInterface* comboBounds = new ChatInterface(x, ((ComboBox::largestExtent.cx + arrow_space) + width), x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* comboBounds = new BasicInterface(x, ((ComboBox::largestExtent.cx + arrow_space) + width), x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	comboBounds->setBounds(true);
 	comboBounds->updateCoordinates();
 	ComboBox::border = comboBounds;
@@ -389,7 +389,7 @@ ComboBox::ComboBox(InterfaceFrame* frame, std::vector<std::string> options, doub
 }
 
 void ComboBox::doDrawing() {
-	ChatInterface& param = *ComboBox::border;
+	BasicInterface& param = *ComboBox::border;
 	double x = (param.getStartX() + (param.getActualWidth() / 2));
 	double y = (param.getStartY() + (param.getActualHeight() / 2));
 	SelectObject(hDC, topBtnFont);
@@ -443,7 +443,7 @@ void ComboBox::doAction() {
 void ComboBox::focusDrawing() {
 	if (ComboBox::focus) {
 		int offsetX = 15, offsetY = 7;
-		ChatInterface& param = *ComboBox::border;
+		BasicInterface& param = *ComboBox::border;
 		double x1 = (param.getStartX() - offsetX), x2 = (param.getStartX() + param.getActualWidth()) + offsetX;
 		double y1 = (param.getStartY() - offsetY), y2 = (param.getStartY() + param.getActualHeight()) + offsetY;
 		glColor3f(0.32549019607f, 0.03137254901f, 0.91372549019f);
@@ -462,7 +462,7 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> list, int n
 	DisplayBox::numBlocks = numBlocks;
 	DisplayBox::focus = false;
 	DisplayBox::type = DISPLAY_BOX;
-	ChatInterface* comboBounds = new ChatInterface(x, width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* comboBounds = new BasicInterface(x, width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	comboBounds->setBounds(true);
 	comboBounds->updateCoordinates();
 	DisplayBox::border = comboBounds;
@@ -470,7 +470,7 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> list, int n
 }
 
 void DisplayBox::doDrawing() {
-	ChatInterface& param = *DisplayBox::border;
+	BasicInterface& param = *DisplayBox::border;
 	double x;
 	double aW = param.getActualWidth();
 	if (DisplayBox::centered) {
@@ -605,7 +605,7 @@ Label::Label(InterfaceFrame* interfaceFrame, std::string label, double x, double
 	Label::labelTextDl = 0;
 	Label::focus = false;
 	Label::type = LABEL_D;
-	ChatInterface* fieldBounds = new ChatInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* fieldBounds = new BasicInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	fieldBounds->setRender(false);
 	fieldBounds->setBounds(true);
 	fieldBounds->updateCoordinates();

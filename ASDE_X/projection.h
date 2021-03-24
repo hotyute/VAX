@@ -20,8 +20,6 @@ extern int CLIENT_HEIGHT;
 extern int FIXED_CLIENT_WIDTH;
 extern int FIXED_CLIENT_HEIGHT;
 
-extern int MOUSE_X, MOUSE_Y;
-
 
 extern bool fixed_set;
 
@@ -33,6 +31,6 @@ extern double r_aircraft_size, default_r_size;
 extern double h_aircraft_size, default_h_size;
 extern double u_aircraft_size, default_u_size;
 
-extern bool DAY, CAPS, SHIFT_DOWN, MOUSE_MOVE;
+extern bool DAY, CAPS, SHIFT_DOWN;
 
 extern char input_cursor;

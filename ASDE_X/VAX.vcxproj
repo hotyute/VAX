@@ -100,6 +100,7 @@
     <ClCompile Include="flightplan.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="guicon.cpp" />
+    <ClCompile Include="interfaces.cpp" />
     <ClCompile Include="later.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mirror.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="flightplan.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="guicon.h" />
+    <ClInclude Include="interfaces.h" />
     <ClInclude Include="later.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mirror.h" />

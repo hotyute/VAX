@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-class ChatInterface {
+class BasicInterface {
 private:
 	HANDLE mutex;
 	int x[2];
@@ -18,8 +18,8 @@ private:
 	int posX, posY;
 	bool render, bounds;
 public:
-	ChatInterface();
-	ChatInterface(double posX, double width, double width_padding, double posY, double height, double height_padding, float r, float g, float b, float transparency, bool absolute, bool wire_mode);
+	BasicInterface();
+	BasicInterface(double posX, double width, double width_padding, double posY, double height, double height_padding, float r, float g, float b, float transparency, bool absolute, bool wire_mode);
 	void createMutex();
 	void setActualWidth(double);
 	double getActualWidth();

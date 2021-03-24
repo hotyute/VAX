@@ -1,128 +1,129 @@
 #include "chatinterface.h"
 #include "projection.h"
 
-std::vector<ChatInterface*> interfaces;
+std::vector<BasicInterface*> interfaces;
 
-ChatInterface::ChatInterface() {
-	ChatInterface::render = false;
+BasicInterface::BasicInterface() {
+	BasicInterface::render = false;
 }
 
-ChatInterface::ChatInterface(double posX, double width, double width_padding, double posY, double height, double height_padding, float r, float g, float b, float transparency, bool absolute, bool wire_mode) {
-	ChatInterface::width = width;
-	ChatInterface::width_padding = width_padding;
-	ChatInterface::height = height;
-	ChatInterface::height_padding = height_padding;
-	ChatInterface::transparency = transparency;
+BasicInterface::BasicInterface(double posX, double width, double width_padding, double posY, double height, double height_padding, float r, float g, float b, float transparency, bool absolute, bool wire_mode) {
+	BasicInterface::width = width;
+	BasicInterface::width_padding = width_padding;
+	BasicInterface::height = height;
+	BasicInterface::height_padding = height_padding;
+	BasicInterface::transparency = transparency;
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
-	ChatInterface::absolute = absolute;
-	ChatInterface::wire_mode = wire_mode;
-	ChatInterface::posX = posX;
-	ChatInterface::posY = posY;
-	ChatInterface::render = true;
+	BasicInterface::absolute = absolute;
+	BasicInterface::wire_mode = wire_mode;
+	BasicInterface::posX = posX;
+	BasicInterface::posY = posY;
+	BasicInterface::render = true;
+	BasicInterface::bounds = false;
 }
 
-void ChatInterface::createMutex() {
-	ChatInterface::mutex = CreateMutex(NULL, FALSE, L"CI Mutex");
+void BasicInterface::createMutex() {
+	BasicInterface::mutex = CreateMutex(NULL, FALSE, L"CI Mutex");
 }
 
-double ChatInterface::getWidth() {
-	return ChatInterface::width;
+double BasicInterface::getWidth() {
+	return BasicInterface::width;
 }
 
-void ChatInterface::setActualWidth(double actual) {
-	ChatInterface::actual_width = actual;
+void BasicInterface::setActualWidth(double actual) {
+	BasicInterface::actual_width = actual;
 }
 
-double ChatInterface::getActualWidth() {
-	return ChatInterface::actual_width;
+double BasicInterface::getActualWidth() {
+	return BasicInterface::actual_width;
 }
 
-double ChatInterface::getWidthPad() {
-	return ChatInterface::width_padding;
+double BasicInterface::getWidthPad() {
+	return BasicInterface::width_padding;
 }
 
-void ChatInterface::setActualHeight(double actual) {
-	ChatInterface::actual_height = actual;
+void BasicInterface::setActualHeight(double actual) {
+	BasicInterface::actual_height = actual;
 }
 
-double ChatInterface::getActualHeight() {
-	return ChatInterface::actual_height;
+double BasicInterface::getActualHeight() {
+	return BasicInterface::actual_height;
 }
 
-double ChatInterface::getHeight() {
-	return ChatInterface::height;
+double BasicInterface::getHeight() {
+	return BasicInterface::height;
 }
 
-double ChatInterface::getHeightPad() {
-	return ChatInterface::height_padding;
+double BasicInterface::getHeightPad() {
+	return BasicInterface::height_padding;
 }
 
-float ChatInterface::getTransparency() {
-	return ChatInterface::transparency;
+float BasicInterface::getTransparency() {
+	return BasicInterface::transparency;
 }
 
-void ChatInterface::updateXs(int x, int y) {
-	ChatInterface::x[0] = x;
-	ChatInterface::x[1] = y;
+void BasicInterface::updateXs(int x, int y) {
+	BasicInterface::x[0] = x;
+	BasicInterface::x[1] = y;
 }
 
-void ChatInterface::updateYs(int x, int y) {
-	ChatInterface::y[0] = x;
-	ChatInterface::y[1] = y;
+void BasicInterface::updateYs(int x, int y) {
+	BasicInterface::y[0] = x;
+	BasicInterface::y[1] = y;
 }
 
-void ChatInterface::clearPoints() {
-	ChatInterface::x[0] = -1;
-	ChatInterface::x[1] = -1;
-	ChatInterface::y[0] = -1;
-	ChatInterface::y[1] = -1;
+void BasicInterface::clearPoints() {
+	BasicInterface::x[0] = -1;
+	BasicInterface::x[1] = -1;
+	BasicInterface::y[0] = -1;
+	BasicInterface::y[1] = -1;
 }
 
-int ChatInterface::getStartX() {
-	return ChatInterface::x[0];
+int BasicInterface::getStartX() {
+	return BasicInterface::x[0];
 }
 
-int ChatInterface::getStartY() {
-	return ChatInterface::y[0];
+int BasicInterface::getStartY() {
+	return BasicInterface::y[0];
 }
 
-int ChatInterface::getEndX() {
-	return ChatInterface::x[1];
+int BasicInterface::getEndX() {
+	return BasicInterface::x[1];
 }
 
-int ChatInterface::getEndY() {
-	return ChatInterface::y[1];
+int BasicInterface::getEndY() {
+	return BasicInterface::y[1];
 }
 
-void ChatInterface::getColor(float *dest) {
-	dest[0] = ChatInterface::color[0];
-	dest[1] = ChatInterface::color[1];
-	dest[2] = ChatInterface::color[2];
+void BasicInterface::getColor(float *dest) {
+	dest[0] = BasicInterface::color[0];
+	dest[1] = BasicInterface::color[1];
+	dest[2] = BasicInterface::color[2];
 }
 
-bool ChatInterface::isWireMode() {
-	return ChatInterface::wire_mode;
+bool BasicInterface::isWireMode() {
+	return BasicInterface::wire_mode;
 }
 
-bool ChatInterface::isAbsolute() {
-	return ChatInterface::absolute; 
+bool BasicInterface::isAbsolute() {
+	return BasicInterface::absolute; 
 }
 
-void ChatInterface::updateCoordinates() {
+void BasicInterface::updateCoordinates() {
 	double xs[3];
 	double ys[3];
-	ChatInterface::updateCoordinates(xs, ys);
+	BasicInterface::updateCoordinates(xs, ys);
 	double start_x = xs[0], end_x = xs[1];
 	double start_y = ys[0], end_y = ys[1];
-	ChatInterface::updateXs(start_x, end_x);
-	ChatInterface::updateYs(start_y, end_y);
-	ChatInterface::actual_width = xs[2];
-	ChatInterface::actual_height = ys[2];
+	BasicInterface::updateXs(start_x, end_x);
+	BasicInterface::updateYs(start_y, end_y);
+	BasicInterface::actual_width = xs[2];
+	BasicInterface::actual_height = ys[2];
 }
 
-void ChatInterface::updateCoordinates(double* xs, double* ys) {
+void BasicInterface::updateCoordinates(double* xs, double* ys) {
 	//x[0] x start, x[1] x end
 	//same with y
 	int w_width = CLIENT_WIDTH;
@@ -133,66 +134,66 @@ void ChatInterface::updateCoordinates(double* xs, double* ys) {
 	if (w_height < FIXED_CLIENT_HEIGHT) {
 		w_height = FIXED_CLIENT_HEIGHT;
 	}
-	double f_width = ChatInterface::width, f_height = ChatInterface::height;
+	double f_width = BasicInterface::width, f_height = BasicInterface::height;
 	if (!absolute) {		
-		if (ChatInterface::width <= 1.0) {// percentage
-			f_width = (ChatInterface::width * w_width);
+		if (BasicInterface::width <= 1.0) {// percentage
+			f_width = (BasicInterface::width * w_width);
 			xs[0] = ((w_width - f_width) + width_padding);
 			xs[1] = (w_width + width_padding);
 		} else {
-			f_width = ChatInterface::width;
+			f_width = BasicInterface::width;
 			xs[0] = ((w_width - f_width) + width_padding);
 			xs[1] = (w_width + width_padding);
 		}
-		if (ChatInterface::height <= 1.0) {//percentage
-			f_height = (ChatInterface::height * w_height);
+		if (BasicInterface::height <= 1.0) {//percentage
+			f_height = (BasicInterface::height * w_height);
 			ys[0] = ((w_height - f_height) + height_padding);
 			ys[1] = (w_height + height_padding);
 		} else {
-			f_height = ChatInterface::height;
+			f_height = BasicInterface::height;
 			ys[0] = ((w_height - f_height) + height_padding);
 			ys[1] = (w_height + height_padding);
 		}
 	} else {
-		xs[0] = (ChatInterface::posX + ChatInterface::width_padding);
-		if (ChatInterface::width <= 1.0) {
-			f_width = (ChatInterface::width * w_width);
-			xs[1] =  ((ChatInterface::posX + f_width) + ChatInterface::width_padding);
+		xs[0] = (BasicInterface::posX + BasicInterface::width_padding);
+		if (BasicInterface::width <= 1.0) {
+			f_width = (BasicInterface::width * w_width);
+			xs[1] =  ((BasicInterface::posX + f_width) + BasicInterface::width_padding);
 		} else {
-			xs[1] = ((ChatInterface::posX + ChatInterface::width) + ChatInterface::width_padding);
+			xs[1] = ((BasicInterface::posX + BasicInterface::width) + BasicInterface::width_padding);
 		}
-		ys[0] = (ChatInterface::posY + ChatInterface::height_padding);
-		if (ChatInterface::height <= 1.0) {
-			f_height = (ChatInterface::height * w_height);
-			ys[1] =  ((ChatInterface::posY + f_height) + ChatInterface::height_padding);
+		ys[0] = (BasicInterface::posY + BasicInterface::height_padding);
+		if (BasicInterface::height <= 1.0) {
+			f_height = (BasicInterface::height * w_height);
+			ys[1] =  ((BasicInterface::posY + f_height) + BasicInterface::height_padding);
 		} else {
-			ys[1] = ((ChatInterface::posY + ChatInterface::height) + ChatInterface::height_padding);
+			ys[1] = ((BasicInterface::posY + BasicInterface::height) + BasicInterface::height_padding);
 		}
 	}
 	xs[2] = f_width;
 	ys[2] = f_height;
 }
 
-int ChatInterface::getPosX() {
-	return ChatInterface::posX;
+int BasicInterface::getPosX() {
+	return BasicInterface::posX;
 }
 
-int ChatInterface::getPosY() {
-	return ChatInterface::posY;
+int BasicInterface::getPosY() {
+	return BasicInterface::posY;
 }
 
-void ChatInterface::setRender(bool draw) {
-	ChatInterface::render = draw;
+void BasicInterface::setRender(bool draw) {
+	BasicInterface::render = draw;
 }
 
-bool ChatInterface::isRender() {
-	return ChatInterface::render;
+bool BasicInterface::isRender() {
+	return BasicInterface::render;
 }
 
-void ChatInterface::setBounds(bool draw) {
-	ChatInterface::bounds = draw;
+void BasicInterface::setBounds(bool draw) {
+	BasicInterface::bounds = draw;
 }
 
-bool ChatInterface::isBounds() {
-	return ChatInterface::bounds;
+bool BasicInterface::isBounds() {
+	return BasicInterface::bounds;
 }

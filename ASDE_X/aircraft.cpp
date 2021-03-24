@@ -16,7 +16,7 @@ Aircraft::Aircraft() {
 	Aircraft::textTag1 = "";
 	Aircraft::textTag2 = "";
 	Aircraft::collText = "#CALLSIGN";
-	Aircraft::collTag1 = "No Alarm";
+	Aircraft::collTag1 = "No Alert";
 	Aircraft::collTag2 = "DISPLAY#0000";
 }
 

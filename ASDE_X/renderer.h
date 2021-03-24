@@ -22,7 +22,7 @@ extern bool loadInterfaces;
 
 extern bool resize;
 
-extern int sectorDl, legendDl, buttonsDl, interfacesDl, confDl, aircraftDl, heavyDl, unkTarDl, focusDl, drawingDl;
+extern int sectorDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
 
 extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont, errorFont;
@@ -54,7 +54,7 @@ const static float unknown_clr[] = {0.0f, 0.85490196078f, 0.81176470588f};
 const static float collision_clr[] = { 0.00392156862f, 0.72549019607f, 0.00392156862f };
 const static float col_brdr_clr[] = { 0.00392156862f, 0.92549019607f, 0.00392156862f };
 
-void InitOpenGL();
+void InitOpenGL(GLvoid);
 void ResizeMirrorGLScene(Mirror& mirror);
 void ResizeGLScene();
 void ResizeMirrorGLScene(Mirror*);
@@ -66,7 +66,7 @@ void SetPixelFormat(HDC);
 int DrawSceneryData(Mirror* mirror);
 void RenderLegend();
 void RenderButtons();
-void RenderInterfaces();
+void RenderInterface(InterfaceFrame* frame);
 void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
 void LoadInterfaces();
@@ -77,5 +77,15 @@ void deleteTess();
 SIZE getTextExtent(std::string &s);
 void DrawVarLine(float, float, float, float, float, float);
 void preFileRender();
+
+void CallInterfaces();
+
+void CallDrawings();
+
+void CallFocuses();
+
+void CallLabels(InterfaceFrame* frame, Label* label);
+
+void CallInputTexts(InterfaceFrame* frame, InputField* field);
 
 #endif

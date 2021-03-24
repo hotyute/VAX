@@ -25,17 +25,17 @@ renderAllCollision = false, renderAllCollisionLines = false;
 bool loadInterfaces = false;
 
 bool resize = false;
-int sectorDl, legendDl, buttonsDl, interfacesDl, confDl, aircraftDl, heavyDl, unkTarDl, focusDl, drawingDl;
+int sectorDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
 
-void RenderChatInterface(ChatInterface&);
+void RenderChatInterface(BasicInterface&);
 void RenderMirrorBorder(Mirror& mirror);
-void RenderInputText(ChatInterface&, int&, std::string&, bool);
-void RenderLabel(ChatInterface&, int&, std::string&, int);
-void RenderFocuses();
-void RenderDrawings();
+void RenderInputText(BasicInterface&, int&, std::string&, bool);
+void RenderLabel(BasicInterface&, int&, std::string&, int);
+void RenderFocuses(InterfaceFrame* frame);
+void RenderDrawings(InterfaceFrame* frame);
 int RenderAircraft(bool, int&);
 int RenderUnknown(bool, int&);
 int RenderCallsign(Aircraft&, bool, float, float);
@@ -215,35 +215,54 @@ void DrawInterfaces() {
 			LoadInterfaces();
 			loadInterfaces = false;
 		}
-		glDeleteLists(interfacesDl, 1);
-		RenderInterfaces();
+		for (InterfaceFrame* frame : frames) {
+			if (frame)
+			{
+				glDeleteLists(frame->interfaceDl, 1);
+				RenderInterface(frame);
+			}
+		}
 		renderInterfaces = false;
 	}
-	glCallList(interfacesDl);
+	CallInterfaces();
 	if (renderDrawings) {
 		//TODO add optimizations (refresh per object basis)
-		glDeleteLists(drawingDl, 1);
-		RenderDrawings();
+		for (InterfaceFrame* frame : frames) {
+			if (frame)
+			{
+				glDeleteLists(frame->drawingDl, 1);
+				RenderDrawings(frame);
+			}
+		}
 		renderDrawings = false;
 	}
-	glCallList(drawingDl);
+	CallDrawings();
 	if (renderFocus) {
 		//TODO add optimizations (refresh per object basis)
-		glDeleteLists(focusDl, 1);
-		RenderFocuses();
+		for (InterfaceFrame* frame : frames) {
+			if (frame)
+			{
+				glDeleteLists(frame->focusDl, 1);
+				RenderFocuses(frame);
+			}
+		}
 		renderFocus = false;
 	}
-	glCallList(focusDl);
+	CallFocuses();
+
+	//all input text from all frames
 	if (renderInputText) {
 		if (updateLastFocus && lastFocus != NULL && lastFocus->type == INPUT_FIELD) {
 			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
-			ChatInterface* last_border = lastFocus->child_interfaces[0];
+			BasicInterface* last_border = lastFocus->child_interfaces[0];
 			std::string l_input;
-			if (lastFocusField->p_protected) {
+			if (lastFocusField->p_protected)
+			{
 				l_input = lastFocusField->pp_input;
 			}
-			else {
+			else
+			{
 				l_input = lastFocusField->input;
 			}
 			RenderInputText(*last_border, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
@@ -252,7 +271,7 @@ void DrawInterfaces() {
 		if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
 			InputField* focusField = (InputField*)focusChild;
 			glDeleteLists(focusField->inputTextDl, 1);
-			ChatInterface* border = focusField->border;
+			BasicInterface* border = focusField->border;
 			std::string f_input;
 			if (focusField->p_protected) {
 				f_input = focusField->pp_input;
@@ -264,6 +283,8 @@ void DrawInterfaces() {
 		}
 		renderInputText = false;
 	}
+
+	//frame specific input text
 	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
 			if (frame->renderAllInputText) {
@@ -271,7 +292,7 @@ void DrawInterfaces() {
 					if (child != NULL && child->type == INPUT_FIELD) {
 						InputField* field = (InputField*)child;
 						glDeleteLists(field->inputTextDl, 1);
-						ChatInterface* border = field->border;
+						BasicInterface* border = field->border;
 						std::string f_input;
 						if (field->p_protected) {
 							f_input = field->pp_input;
@@ -287,7 +308,8 @@ void DrawInterfaces() {
 				if (child) {
 					if (child->type == INPUT_FIELD) {
 						InputField* field = (InputField*)child;
-						glCallList(field->inputTextDl);
+						CallInputTexts(frame, field);
+						//glCallList(field->inputTextDl);
 					}
 				}
 			}
@@ -299,7 +321,7 @@ void DrawInterfaces() {
 				if (child != NULL && child->type == LABEL_D) {
 					Label* label = (Label*)child;
 					glDeleteLists(label->labelTextDl, 1);
-					ChatInterface* border = label->border;
+					BasicInterface* border = label->border;
 					RenderLabel(*border, label->labelTextDl, label->input, label->centered);
 				}
 			}
@@ -307,7 +329,7 @@ void DrawInterfaces() {
 				if (child) {
 					if (child->type == LABEL_D) {
 						Label* label = (Label*)child;
-						glCallList(label->labelTextDl);
+						CallLabels(frame, label);
 					}
 				}
 			}
@@ -780,74 +802,51 @@ void RenderButtons() {
 	glEndList();
 }
 
-void RenderInterfaces() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
+void RenderInterface(InterfaceFrame* frame) {
 
-	interfacesDl = glGenLists(1);
+	frame->interfaceDl = glGenLists(1);
 
-	glNewList(interfacesDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+	glNewList(frame->interfaceDl, GL_COMPILE);
 
 	glLineWidth((GLfloat)1.0f);
 
-	for (InterfaceFrame* frame : frames) {
-		if (frame && frame->render) {
-			int pos = 0;
-			for (ChatInterface* inter1 : frame->interfaces) {
-				RenderChatInterface(*inter1);
-				if (pos == 0) {
-					if (frame->title.size() > 0) {
-						std::string title = frame->title;
-						int offsetY = 10;
-						int x = inter1->getStartX() + (inter1->getWidth() / 2);
-						int y = inter1->getStartY() + (inter1->getHeight() - offsetY);
-						SelectObject(hDC, titleFont);
-						SIZE extent = getTextExtent(title);
-						TEXTMETRIC tm;
-						GetTextMetrics(hDC, &tm);
-						int tH = tm.tmAscent - tm.tmInternalLeading;
-						int textXPos = x - (extent.cx / 2);
-						int textYPos = y - (tH / 2);
-						glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-						glRasterPos2f(textXPos, textYPos);
-						glPrint(title.c_str(), &titleBase);
+	if (frame && frame->render) {
+		int pos = 0;
+		for (BasicInterface* inter1 : frame->interfaces) {
+			RenderChatInterface(*inter1);
+			if (pos == 0) {
+				if (frame->title.size() > 0) {
+					std::string title = frame->title;
+					int offsetY = 10;
+					int x = inter1->getStartX() + (inter1->getWidth() / 2);
+					int y = inter1->getStartY() + (inter1->getHeight() - offsetY);
+					SelectObject(hDC, titleFont);
+					SIZE extent = getTextExtent(title);
+					TEXTMETRIC tm;
+					GetTextMetrics(hDC, &tm);
+					int tH = tm.tmAscent - tm.tmInternalLeading;
+					int textXPos = x - (extent.cx / 2);
+					int textYPos = y - (tH / 2);
+					glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+					glRasterPos2f(textXPos, textYPos);
+					glPrint(title.c_str(), &titleBase);
 
-						//border line
-						glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
-						int b_offset_Y = 25;
-						glBegin(GL_LINES);
-						glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-						glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-						glEnd();
-					}
+					//title border line
+					glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+					int b_offset_Y = 25;
+					glBegin(GL_LINES);
+					glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+					glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+					glEnd();
 				}
-				pos++;
 			}
-			for (ChildFrame* children : frame->children) {
-				if (children) {
-					for (ChatInterface* inter2 : children->child_interfaces) {
-						if (inter2->isRender()) {
-							RenderChatInterface(*inter2);
-						}
+			pos++;
+		}
+		for (ChildFrame* children : frame->children) {
+			if (children) {
+				for (BasicInterface* inter2 : children->child_interfaces) {
+					if (inter2->isRender()) {
+						RenderChatInterface(*inter2);
 					}
 				}
 			}
@@ -856,12 +855,6 @@ void RenderInterfaces() {
 
 	glLineWidth((GLfloat)1.0f);
 
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 	glEndList();
 }
 
@@ -901,52 +894,24 @@ void RenderMirrorLines(Mirror& mirror) {
 	glEndList();
 }
 
-void RenderDrawings() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
+void RenderDrawings(InterfaceFrame* frame) {
 
-	drawingDl = glGenLists(1);
+	frame->drawingDl = glGenLists(1);
 
-	glNewList(drawingDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+	glNewList(frame->drawingDl, GL_COMPILE);
 
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	for (InterfaceFrame* frame : frames) {
-		if (frame && frame->render) {
-			for (ChildFrame* children : frame->children) {
-				if (children) {
-					children->doDrawing();
-				}
+	if (frame && frame->render) {
+		for (ChildFrame* children : frame->children) {
+			if (children) {
+				children->doDrawing();
 			}
 		}
 	}
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
 
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 	glEndList();
 }
 
-void RenderChatInterface(ChatInterface& interface1) {
+void RenderChatInterface(BasicInterface& interface1) {
 	float col[3];
 	interface1.getColor(col);
 	glColor4f(col[0], col[1], col[2], interface1.getTransparency());
@@ -1151,7 +1116,7 @@ void LoadInterfaces() {
 	textField->setFocus();
 }
 
-void RenderInputText(ChatInterface& border, int& inputTextDl, std::string& text, bool centered) {
+void RenderInputText(BasicInterface& border, int& inputTextDl, std::string& text, bool centered) {
 	int x, y = border.getStartY() + 6;
 	double aW = border.getActualWidth();
 	if (centered) {
@@ -1160,29 +1125,10 @@ void RenderInputText(ChatInterface& border, int& inputTextDl, std::string& text,
 	else {
 		x = border.getStartX() + 3;
 	}
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
 
 	inputTextDl = glGenLists(1);
 
 	glNewList(inputTextDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	SelectObject(hDC, topBtnFont);
@@ -1199,16 +1145,10 @@ void RenderInputText(ChatInterface& border, int& inputTextDl, std::string& text,
 	}
 	glPrint(finalTxt.c_str(), &topButtonBase);
 
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 	glEndList();
 }
 
-void RenderLabel(ChatInterface& border, int& labelDl, std::string& text, int centered) {
+void RenderLabel(BasicInterface& border, int& labelDl, std::string& text, int centered) {
 	int x, y = border.getStartY() + 6;
 	double aW = border.getActualWidth();
 	if (centered == 1) {
@@ -1220,29 +1160,10 @@ void RenderLabel(ChatInterface& border, int& labelDl, std::string& text, int cen
 	else {
 		x = border.getStartX() + 3;
 	}
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
 
 	labelDl = glGenLists(1);
 
 	glNewList(labelDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	SelectObject(hDC, labelFont);
@@ -1263,12 +1184,6 @@ void RenderLabel(ChatInterface& border, int& labelDl, std::string& text, int cen
 	}
 	glPrint(finalTxt.c_str(), &labelBase);
 
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 	glEndList();
 }
 
@@ -1534,45 +1449,17 @@ void DrawVarLine(float x1, float y1, float x2, float y2, float t1, float t2)
 	glEnd();
 }
 
-void RenderFocuses() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
+void RenderFocuses(InterfaceFrame* frame) {
+	frame->focusDl = glGenLists(1);
 
-	focusDl = glGenLists(1);
-
-	glNewList(focusDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	for (InterfaceFrame* frame : frames) {
-		if (frame && frame->render) {
-			for (ChildFrame* children : frame->children) {
-				if (children) {
-					children->focusDrawing();
-				}
+	glNewList(frame->focusDl, GL_COMPILE);
+	if (frame && frame->render) {
+		for (ChildFrame* children : frame->children) {
+			if (children) {
+				children->focusDrawing();
 			}
 		}
 	}
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 	glEndList();
 }
 
@@ -1921,4 +1808,236 @@ void preFileRender() {
 			}
 		}
 	}
+}
+
+void CallInterfaces() {
+	int w_width = CLIENT_WIDTH;
+	if (w_width < FIXED_CLIENT_WIDTH) {
+		w_width = FIXED_CLIENT_WIDTH;
+	}
+	int w_height = CLIENT_HEIGHT;
+	if (w_height < FIXED_CLIENT_HEIGHT) {
+		w_height = FIXED_CLIENT_HEIGHT;
+	}
+
+	for (InterfaceFrame* frame : frames) {
+		if (frame)
+		{
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+
+			int viewport[4];
+			glGetIntegerv(GL_VIEWPORT, viewport);
+
+			//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+
+			if (frame->cur_pt && frame->s_pt)
+			{
+
+				glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+				glCallList(frame->interfaceDl);
+			}
+			else
+			{
+				glCallList(frame->interfaceDl);
+			}
+			//Restore old ortho
+			glPopMatrix();
+			glMatrixMode(GL_PROJECTION);
+
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+		}
+	}
+}
+
+void CallDrawings() {
+	int w_width = CLIENT_WIDTH;
+	if (w_width < FIXED_CLIENT_WIDTH) {
+		w_width = FIXED_CLIENT_WIDTH;
+	}
+	int w_height = CLIENT_HEIGHT;
+	if (w_height < FIXED_CLIENT_HEIGHT) {
+		w_height = FIXED_CLIENT_HEIGHT;
+	}
+
+	for (InterfaceFrame* frame : frames) {
+		if (frame)
+		{
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+
+			int viewport[4];
+			glGetIntegerv(GL_VIEWPORT, viewport);
+
+			//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+
+			if (frame->cur_pt && frame->s_pt)
+			{
+
+				glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+				glCallList(frame->drawingDl);
+			}
+			else
+			{
+				glCallList(frame->drawingDl);
+			}
+
+			//Restore old ortho
+			glPopMatrix();
+			glMatrixMode(GL_PROJECTION);
+
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+		}
+	}
+}
+
+void CallFocuses() {
+	int w_width = CLIENT_WIDTH;
+	if (w_width < FIXED_CLIENT_WIDTH) {
+		w_width = FIXED_CLIENT_WIDTH;
+	}
+	int w_height = CLIENT_HEIGHT;
+	if (w_height < FIXED_CLIENT_HEIGHT) {
+		w_height = FIXED_CLIENT_HEIGHT;
+	}
+
+	for (InterfaceFrame* frame : frames) {
+		if (frame)
+		{
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+
+			int viewport[4];
+			glGetIntegerv(GL_VIEWPORT, viewport);
+
+			//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+
+			if (frame->cur_pt && frame->s_pt)
+			{
+
+				glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+				glCallList(frame->focusDl);
+			}
+			else
+			{
+				glCallList(frame->focusDl);
+			}
+
+			//Restore old ortho
+			glPopMatrix();
+			glMatrixMode(GL_PROJECTION);
+
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+		}
+	}
+}
+
+void CallLabels(InterfaceFrame* frame, Label* label) {
+	int w_width = CLIENT_WIDTH;
+	if (w_width < FIXED_CLIENT_WIDTH) {
+		w_width = FIXED_CLIENT_WIDTH;
+	}
+	int w_height = CLIENT_HEIGHT;
+	if (w_height < FIXED_CLIENT_HEIGHT) {
+		w_height = FIXED_CLIENT_HEIGHT;
+	}
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+
+	int viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	if (frame->cur_pt && frame->s_pt)
+	{
+
+		glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+		glCallList(label->labelTextDl);
+	}
+	else
+	{
+		glCallList(label->labelTextDl);
+	}
+
+	//Restore old ortho
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void CallInputTexts(InterfaceFrame* frame, InputField* field) {
+	int w_width = CLIENT_WIDTH;
+	if (w_width < FIXED_CLIENT_WIDTH) {
+		w_width = FIXED_CLIENT_WIDTH;
+	}
+	int w_height = CLIENT_HEIGHT;
+	if (w_height < FIXED_CLIENT_HEIGHT) {
+		w_height = FIXED_CLIENT_HEIGHT;
+	}
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+
+	int viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	if (frame->cur_pt && frame->s_pt)
+	{
+
+		glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+		glCallList(field->inputTextDl);
+	}
+	else
+	{
+		glCallList(field->inputTextDl);
+	}
+
+	//Restore old ortho
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 }

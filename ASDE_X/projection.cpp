@@ -25,8 +25,6 @@ double r_aircraft_size = 0.1, default_r_size = 0.003;
 double h_aircraft_size = 0.12, default_h_size = 0.0032;
 double u_aircraft_size = 0.1, default_u_size = 0.003;
 
-int MOUSE_X = 0, MOUSE_Y = 0;
-
-bool DAY = true, CAPS = false, SHIFT_DOWN = false, MOUSE_MOVE = false;
+bool DAY = true, CAPS = false, SHIFT_DOWN = false;
 
 char input_cursor = '_';
