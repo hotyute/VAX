@@ -15,7 +15,7 @@ extern std::unordered_map<std::string, Mirror*> mirrors_storage;
 extern std::vector<Mirror*> mirrors;
 
 extern bool renderAircraft, renderSector, renderButtons, 
-	renderLegend, renderAllCallsigns, renderInterfaces,
+	renderLegend, renderAllCallsigns, renderAllCollTags, renderInterfaces,
 	renderInputText, renderConf, renderFocus, renderDrawings, what, renderAllCollision, renderAllCollisionLines;
 
 extern bool loadInterfaces;

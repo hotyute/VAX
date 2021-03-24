@@ -7,11 +7,17 @@ Aircraft::Aircraft() {
 	Aircraft::flight_plan = new FlightPlan();
 	renderCallsign = false;
 	renderCollision = false;
+	renderCollTag = true;
 	collision = false;
 	collisionAcf = nullptr;
 	for (size_t i = 0; i < sizeof(flags) / sizeof(bool); i++) {
 		flags[i] = false;
 	}
+	Aircraft::textTag1 = "";
+	Aircraft::textTag2 = "";
+	Aircraft::collText = "#CALLSIGN";
+	Aircraft::collTag1 = "No Alarm";
+	Aircraft::collTag2 = "DISPLAY#0000";
 }
 
 Aircraft::~Aircraft()
@@ -37,6 +43,14 @@ void Aircraft::setRenderCallsign(bool value) {
 	Aircraft::renderCallsign = value;
 }
 
+bool Aircraft::getRenderCollTag() {
+	return Aircraft::renderCollTag;
+}
+
+void Aircraft::setRenderCollTag(bool value) {
+	Aircraft::renderCollTag = value;
+}
+
 bool Aircraft::getRenderCollision() {
 	return Aircraft::renderCollision;
 }
@@ -56,6 +70,46 @@ std::string Aircraft::getCallsign() {
 
 void Aircraft::setCallsign(std::string value) {
 	Aircraft::callsign = value;
+}
+
+std::string Aircraft::getTextTag1() {
+	return Aircraft::textTag1;
+}
+
+void Aircraft::setTextTag1(std::string value) {
+	Aircraft::textTag1 = value;
+}
+
+std::string Aircraft::getTextTag2() {
+	return Aircraft::textTag2;
+}
+
+void Aircraft::setTextTag2(std::string value) {
+	Aircraft::textTag2 = value;
+}
+
+std::string Aircraft::getCollText() {
+	return Aircraft::collText;
+}
+
+void Aircraft::setCollText(std::string value) {
+	Aircraft::collText = value;
+}
+
+std::string Aircraft::getCollTag1() {
+	return Aircraft::collTag1;
+}
+
+void Aircraft::setCollTag1(std::string value) {
+	Aircraft::collTag1 = value;
+}
+
+std::string Aircraft::getCollTag2() {
+	return Aircraft::collTag2;
+}
+
+void Aircraft::setCollTag2(std::string value) {
+	Aircraft::collTag2 = value;
 }
 
 std::string Aircraft::getSquawkCode() {

@@ -244,7 +244,9 @@ void CloseButton::doDrawing() {
 	int endX = inter11->getEndX(), endY = inter11->getEndY();
 
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	int line_width = 1;
+	int line_width = 2;
+	startX += line_width, startY += line_width;
+	endX -= line_width, endY -= line_width;
 	DrawVarLine(startX, endY, endX, startY, line_width, line_width);
 	DrawVarLine(startX, startY, endX, endY, line_width, line_width);
 }

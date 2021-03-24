@@ -906,4 +906,17 @@ void resetFlags() {
 			}
 		}
 	}
+
+	if (renderAllCallsigns) {
+		renderAllCallsigns = false;
+	}
+	if (renderAllCollisionLines) {
+		renderAllCollisionLines = false;
+	}
+	if (renderAllCollision) {
+		renderAllCollision = false;
+	}
+	if (renderAllCollTags) {
+		renderAllCollTags = false;
+	}
 }
