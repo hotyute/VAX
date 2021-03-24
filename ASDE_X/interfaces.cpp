@@ -1,11 +1,11 @@
 #include "interfaces.h"
 
-void RenderConnect()
+void RenderConnect(double x_, double y_)
 {
 	connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
 	connectFrame->title = "CONNECT";
-	int width = 300, x = (CLIENT_WIDTH / 2) - (width / 2);
-	int height = 200, y = (CLIENT_HEIGHT / 2) - (height / 2);
+	int width = 300, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
+	int height = 200, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 	connectFrame->Pane1(x, width, y, height);
 	callsign_label = new Label(connectFrame, "Callsign:", x, 120.0, 10.0, y + (height - 30.0), 20, -10.0);
 	connectFrame->children[callsign_label->index = CONN_CALLSIGN_LABEL] = callsign_label;

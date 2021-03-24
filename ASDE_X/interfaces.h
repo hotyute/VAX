@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-void RenderConnect();
+void RenderConnect(double x, double y);
 
 #endif

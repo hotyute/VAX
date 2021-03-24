@@ -33,10 +33,10 @@ bool done = false, connected = false;
 
 const int proto_version = 32698;
 
-InterfaceFrame* connectFrame = NULL, *dragged = nullptr;
+InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * textField = NULL;
-Label*callsign_label = NULL, *name_label = NULL, * user_label = NULL, * pass_label = NULL;
+Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
 DisplayBox* main_chat = NULL;
 
@@ -286,7 +286,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			windowHeight = dragged_bounds->getStartY() - dragged_bounds->getEndY();
 			windowWidth = dragged_bounds->getStartX() - dragged_bounds->getEndX();
 
-			
+
 			dragged->move_bound = dragged_bounds;
 		}
 	}
@@ -410,7 +410,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							clicked1->doAction();
 						}
 					}
-				} else if (clicked2 != NULL) {
+				}
+				else if (clicked2 != NULL) {
 					std::cout << "dragging" << std::endl;
 					if (frame->s_pt)
 						delete frame->s_pt;
@@ -422,6 +423,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					//SetCapture(hwnd);
 				}
 			}
+		}
+	}
+	break;
+	case WM_LBUTTONUP:
+	{
+		if (dragged && dragged_bounds)
+		{
+			dragged->s_pt = nullptr;
+			dragged->cur_pt = nullptr;
+			dragged->end_pt = nullptr;
+			dragged = nullptr;
+			dragged_bounds = nullptr;
 		}
 	}
 	break;
@@ -650,7 +663,8 @@ void handleConnect() {
 		return;
 	}
 	if (connectFrame == NULL) {
-		RenderConnect();
+		//TODO save X and Y positions when moved
+		RenderConnect(-1, -1);
 	}
 	else {
 		if (!connectFrame->render) {
