@@ -272,7 +272,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	break;
 	case WM_MOUSEMOVE:
 	{
-		if (dragged && dragged_bounds)
+		if (dragged && dragged_bounds && dragged->pannable)
 		{
 			RECT mainWindowRect;
 			if (dragged->cur_pt)
@@ -370,7 +370,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (frame && frame->render) {
 				BasicInterface* clicked2 = NULL;
 				for (BasicInterface* inter1 : frame->interfaces) {
-					if (inter1->isBounds() && frame->index != MAIN_CHAT_INTERFACE) {
+					if (inter1->isBounds() && frame->pannable) {
 						int b_offset_Y = 25;
 						int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
 						int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
@@ -436,7 +436,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 				if (dx != 0 || dy != 0)
 				{
-					if (dragged->index != MAIN_CHAT_INTERFACE) {
+					if (dragged->pannable) {
 						for (BasicInterface* inter1 : dragged->interfaces) {
 							inter1->setPosX(inter1->getPosX() + dx);
 							inter1->setPosY(inter1->getPosY() + -dy);
@@ -451,13 +451,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								}
 							}
 						}
-					}
 
-					dragged->renderAllInputText = true;
-					dragged->renderAllLabels = true;
-					renderDrawings = true;
-					renderFocus = true;
-					renderInterfaces = true;
+						dragged->renderAllInputText = true;
+						dragged->renderAllLabels = true;
+						renderDrawings = true;
+						renderFocus = true;
+						renderInterfaces = true;
+					}
 				}
 			}
 
@@ -699,7 +699,7 @@ void handleConnect() {
 	}
 	else {
 		if (!connectFrame->render) {
-			connectFrame->doOpen(CONNECT_INTERFACE, false);
+			connectFrame->doOpen(CONNECT_INTERFACE, false, true);
 		}
 	}
 }
@@ -875,7 +875,9 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 			}
 		}
 		if (mirrors.size() > 0)
+		{
 			ResizeGLScene();
+		}
 		DrawInterfaces();
 		resetFlags();
 		GLenum err;

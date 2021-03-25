@@ -56,5 +56,5 @@ void RenderConnect(double x_, double y_)
 	connectFrame->children[okButton->index = CONN_OKAY_BUTTON] = okButton;
 	ClickButton* cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
-	connectFrame->doOpen(CONNECT_INTERFACE, false);
+	connectFrame->doOpen(CONNECT_INTERFACE, false, true);
 }

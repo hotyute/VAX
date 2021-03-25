@@ -221,7 +221,11 @@ void DrawInterfaces() {
 		for (InterfaceFrame* frame : frames) {
 			if (frame)
 			{
-				glDeleteLists(frame->interfaceDl, 1);
+				if (frame->interfaceDl != 0)
+				{
+					glDeleteLists(frame->interfaceDl, 1);
+					frame->interfaceDl = 0;
+				}
 				RenderInterface(frame);
 			}
 		}
@@ -233,7 +237,11 @@ void DrawInterfaces() {
 		for (InterfaceFrame* frame : frames) {
 			if (frame)
 			{
-				glDeleteLists(frame->drawingDl, 1);
+				if (frame->drawingDl != 0)
+				{
+					glDeleteLists(frame->drawingDl, 1);
+					frame->drawingDl = 0;
+				}
 				RenderDrawings(frame);
 			}
 		}
@@ -245,7 +253,11 @@ void DrawInterfaces() {
 		for (InterfaceFrame* frame : frames) {
 			if (frame)
 			{
-				glDeleteLists(frame->focusDl, 1);
+				if (frame->focusDl != 0)
+				{
+					glDeleteLists(frame->focusDl, 1);
+					frame->focusDl = 0;
+				}
 				RenderFocuses(frame);
 			}
 		}
@@ -294,7 +306,10 @@ void DrawInterfaces() {
 				for (ChildFrame* child : frame->children) {
 					if (child != NULL && child->type == INPUT_FIELD) {
 						InputField* field = (InputField*)child;
-						glDeleteLists(field->inputTextDl, 1);
+						if (field->inputTextDl != 0) {
+							glDeleteLists(field->inputTextDl, 1);
+							field->inputTextDl = 0;
+						}
 						BasicInterface* border = field->border;
 						std::string f_input;
 						if (field->p_protected) {
@@ -324,7 +339,10 @@ void DrawInterfaces() {
 				for (ChildFrame* child : frame->children) {
 					if (child != NULL && child->type == LABEL_D) {
 						Label* label = (Label*)child;
-						glDeleteLists(label->labelTextDl, 1);
+						if (label->labelTextDl != 0) {
+							glDeleteLists(label->labelTextDl, 1);
+							label->labelTextDl = 0;
+						}
 						BasicInterface* border = label->border;
 						RenderLabel(*border, label->labelTextDl, label->input, label->centered);
 					}

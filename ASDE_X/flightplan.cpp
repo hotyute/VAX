@@ -145,10 +145,10 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		fp_frame->children[fp_closeb->index = FP_CLOSE_BUTTON] = fp_closeb;
 
 
-		fp_frame->doOpen(FP_INTERFACE, false);
+		fp_frame->doOpen(FP_INTERFACE, false, true);
 	} else {
 		if (!fp_frame->render) {
-			fp_frame->doOpen(FP_INTERFACE, false);
+			fp_frame->doOpen(FP_INTERFACE, false, true);
 		}
 	}
 }

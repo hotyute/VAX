@@ -63,7 +63,7 @@ void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	InterfaceFrame::interfaces.push_back(bounds);
 }
 
-void InterfaceFrame::doOpen(int index, bool multi_open)
+void InterfaceFrame::doOpen(int index, bool multi_open, bool pannable)
 {
 	if (frames[index] != this) {
 		InterfaceFrame *frame = frames[index];
@@ -76,6 +76,7 @@ void InterfaceFrame::doOpen(int index, bool multi_open)
 	InterfaceFrame::renderAllInputText = true;
 	InterfaceFrame::render = true;
 	InterfaceFrame::multi_open = multi_open;
+	InterfaceFrame::pannable = pannable;
 	renderInputTextFocus = true;
 	renderInterfaces = true;
 	renderDrawings = true;
