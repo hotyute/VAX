@@ -13,12 +13,12 @@
 
 extern User* opened_fp;
 
-void Load_Unknown_FlightPlan_Interface(char*, bool);
+void Load_Unknown_FlightPlan_Interface(double x, double y, char*, bool);
 
-void Load_Known_No_FlightPlan_Interface(User& user, bool refresh);
+void Load_Known_No_FlightPlan_Interface(double x, double y, User& user, bool refresh);
 
-void Load_FlightPlan_Interface(User&, bool);
+void Load_FlightPlan_Interface(double x, double y, User&, bool);
 
-void Load_FlightPlan_Interface(std::string*, bool);
+void Load_FlightPlan_Interface(double x, double y, std::string*, bool);
 
 #endif

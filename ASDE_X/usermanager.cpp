@@ -150,7 +150,7 @@ void decodePackets(int opCode, Stream &stream) {
 
 				//TODO open Flight Plan
 				if (opened_fp == user1 && cur_cycle) {
-					Load_FlightPlan_Interface(user_to_update, true);
+					Load_FlightPlan_Interface(-1, -1, user_to_update, true);
 				}
 			}
 		}

@@ -2,24 +2,24 @@
 
 User* opened_fp = NULL;
 
-void Load_Unknown_FlightPlan_Interface(char* call_sign, bool refresh)
+void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {
 	std::string values[11] = { call_sign, "Unknown", "R1", "A321/L" , "IFR", "KMIA", "MMUN", "MYNN", "22000", "08r", "3306" };
-	Load_FlightPlan_Interface(values, refresh);
+	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = NULL;
 }
 
-void Load_Known_No_FlightPlan_Interface(User& user, bool refresh)
+void Load_Known_No_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 {
 	Identity& id = *user.getIdentity();
 	Aircraft& acf = *user.getAircraft();
 	std::string values[11] = { id.callsign, id.login_name, "", "" , "IFR",
 		"", "", "", "", "", "" };
-	Load_FlightPlan_Interface(values, refresh);
+	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
 }
 
-void Load_FlightPlan_Interface(User& user, bool refresh)
+void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 {
 	Identity &id = *user.getIdentity();
 	Aircraft &acf = *user.getAircraft();
@@ -27,11 +27,11 @@ void Load_FlightPlan_Interface(User& user, bool refresh)
 	std::cout << id.login_name << std::endl;
 	std::string values[11] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR", 
 		fp.departure, fp.arrival, fp.alternate, fp.cruise, fp.scratchPad, fp.squawkCode };
-	Load_FlightPlan_Interface(values, refresh);
+	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
 }
 
-void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
+void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool refresh) {
 	if (_openedframe && !_openedframe->multi_open) {
 		return;
 	}
@@ -47,8 +47,8 @@ void Load_FlightPlan_Interface(std::string* strings, bool refresh) {
 	if (!fp_frame || refresh) {
 		fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
-		int width = 500, x = (CLIENT_WIDTH / 2) - (width / 2);
-		int height = 250, y = (CLIENT_HEIGHT / 2) - (height / 2);
+		int width = 500, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
+		int height = 250, y = y_ == -1 ?(CLIENT_HEIGHT / 2) - (height / 2) : y_;
 		fp_frame->Pane1(x, width, y, height);
 		const double spacing = 0.15, spacing_y = 0.13;
 		double start_x = 1.0, start_y = 0.2;

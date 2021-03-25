@@ -174,8 +174,18 @@ void BasicInterface::updateCoordinates(double* xs, double* ys) {
 	ys[2] = f_height;
 }
 
+void BasicInterface::setPosX(int x)
+{
+	BasicInterface::posX = x;
+}
+
 int BasicInterface::getPosX() {
 	return BasicInterface::posX;
+}
+
+void BasicInterface::setPosY(int y)
+{
+	BasicInterface::posY = y;
 }
 
 int BasicInterface::getPosY() {

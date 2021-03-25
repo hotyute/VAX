@@ -42,7 +42,9 @@ public:
 	bool isAbsolute();
 	void updateCoordinates();
 	void updateCoordinates(double*, double*);
+	void setPosX(int x);
 	int getPosX();
+	void setPosY(int y);
 	int getPosY();
 	bool isRender();
 	void setRender(bool);

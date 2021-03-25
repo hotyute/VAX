@@ -26,7 +26,7 @@ public:
 	unsigned int interfaceDl, drawingDl, focusDl;
 	POINT *s_pt = nullptr, *cur_pt = nullptr, *end_pt = nullptr;
 	BasicInterface* move_bound = nullptr;
-	bool render, renderAllInputText, multi_open = true;
+	bool render, renderAllInputText, renderAllLabels, multi_open = true;
 	int index;
 	std::string title;
 	std::vector<BasicInterface*> interfaces;
@@ -37,6 +37,7 @@ public:
 	void Pane1(double, double, double, double);
 	void doOpen(int, bool multi_open);
 	void doClose();
+	void doRelease();
 };
 
 class ChildFrame {

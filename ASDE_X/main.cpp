@@ -412,7 +412,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 				}
 				else if (clicked2 != NULL) {
-					std::cout << "dragging" << std::endl;
 					if (frame->s_pt)
 						delete frame->s_pt;
 					frame->s_pt = new POINT();
@@ -420,7 +419,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					frame->s_pt->y = (int)(short)HIWORD(lParam);
 					dragged = frame;
 					dragged_bounds = clicked2;
-					//SetCapture(hwnd);
 				}
 			}
 		}
@@ -430,6 +428,31 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		if (dragged && dragged_bounds)
 		{
+			int dx = (dragged->cur_pt->x - dragged->s_pt->x);
+			int dy = (dragged->cur_pt->y - dragged->s_pt->y);
+			if (dragged->index != MAIN_CHAT_INTERFACE) {
+				for (BasicInterface* inter1 : dragged->interfaces) {
+					inter1->setPosX(inter1->getPosX() + dx);
+					inter1->setPosY(inter1->getPosY() + -dy);
+					inter1->updateCoordinates();
+				}
+				for (ChildFrame* children : dragged->children) {
+					if (children) {
+						for (BasicInterface* inter2 : children->child_interfaces) {
+							inter2->setPosX(inter2->getPosX() + dx);
+							inter2->setPosY(inter2->getPosY() + -dy);
+							inter2->updateCoordinates();
+						}
+					}
+				}
+			}
+
+			dragged->renderAllInputText = true;
+			dragged->renderAllLabels = true;
+			renderDrawings = true;
+			renderFocus = true;
+			renderInterfaces = true;
+
 			dragged->s_pt = nullptr;
 			dragged->cur_pt = nullptr;
 			dragged->end_pt = nullptr;
@@ -499,7 +522,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
 								focusField->pushInput(true, input_cursor);
-								renderInputText = true;
+								renderInputTextFocus = true;
 							}
 							else {
 								for (size_t i = 0; i < userStorage1.size(); i++) {
@@ -512,7 +535,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								renderDrawings = true;
 								focusField->clearInput();
 								focusField->pushInput(true, input_cursor);
-								renderInputText = true;
+								renderInputTextFocus = true;
 							}
 						}
 					}
@@ -559,7 +582,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						focusField->popInput();
 						focusField->popInput();
 						focusField->pushInput(true, input_cursor);
-						renderInputText = true;
+						renderInputTextFocus = true;
 					}
 				}
 			}
@@ -624,7 +647,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					focusField.pushInput(false, c2);
 					focusField.pushInput(true, input_cursor);
-					renderInputText = true;
+					renderInputTextFocus = true;
 				}
 			}
 		}
@@ -686,16 +709,16 @@ bool processCommands(std::string command)
 					FlightPlan& fp = *user.getAircraft()->getFlightPlan();
 					sendFlightPlanRequest(user);
 					if (fp.cycle) {
-						Load_FlightPlan_Interface(user, true);
+						Load_FlightPlan_Interface(-1, -1, user, true);
 					}
 					else {
 						//TODO Change to No flight plan filed, rather than Unknown User
-						Load_Known_No_FlightPlan_Interface(user, true);
+						Load_Known_No_FlightPlan_Interface(-1, -1, user, true);
 					}
 				}
 			}
 			else {
-				Load_Unknown_FlightPlan_Interface((char*)call_sign.c_str(), true);
+				Load_Unknown_FlightPlan_Interface(-1, -1, (char*)call_sign.c_str(), true);
 			}
 		}
 		return true;
@@ -873,7 +896,7 @@ void pass_command(char* cmd) {
 
 			input_box.setInput(cmd);
 			input_box.pushInput(true, input_cursor);
-			renderInputText = true;
+			renderInputTextFocus = true;
 		}
 	}
 }

@@ -19,12 +19,14 @@ InterfaceFrame::InterfaceFrame(int index) {
 	InterfaceFrame::index = index;
 	InterfaceFrame::render = false;
 	InterfaceFrame::renderAllInputText = false;
+	InterfaceFrame::renderAllLabels = false;
 }
 
 InterfaceFrame::InterfaceFrame(int index, double width, double height) {
 	InterfaceFrame::children.resize(256);
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
+	InterfaceFrame::renderAllLabels = false;
 	InterfaceFrame::index = index;
 	BasicInterface* contentPane = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, false, false);
 	contentPane->updateCoordinates();
@@ -39,6 +41,7 @@ InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, doub
 	InterfaceFrame::children.resize(256);
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
+	InterfaceFrame::renderAllLabels = false;
 	InterfaceFrame::index = index;
 	BasicInterface* contentPane = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
 	contentPane->updateCoordinates();
@@ -73,9 +76,10 @@ void InterfaceFrame::doOpen(int index, bool multi_open)
 	InterfaceFrame::renderAllInputText = true;
 	InterfaceFrame::render = true;
 	InterfaceFrame::multi_open = multi_open;
-	renderInputText = true;
+	renderInputTextFocus = true;
 	renderInterfaces = true;
 	renderDrawings = true;
+	renderAllLabels = true;
 	_openedframe = this;
 	if (index == CONNECT_INTERFACE)
 		InterfaceFrame::children[CONN_CALLSIGN_LABEL]->setFocus();
@@ -93,7 +97,7 @@ void InterfaceFrame::doClose()
 	}
 	InterfaceFrame::render = false;
 	renderInterfaces = true;
-	renderInputText = true;
+	renderInputTextFocus = true;
 	renderDrawings = true;
 	renderFocus = true;
 	_openedframe = NULL;
@@ -149,7 +153,7 @@ void InputField::setFocus() {
 		InputField::pushInput(true, input_cursor);
 		InputField::focus = true;
 		focusChild = this;
-		renderInputText = true;
+		renderInputTextFocus = true;
 	}
 }
 
@@ -161,7 +165,7 @@ void InputField::removeFocus() {
 		InputField::focus = false;
 		lastFocus = this;
 		focusChild = NULL;
-		renderInputText = true;
+		renderInputTextFocus = true;
 	}
 }
 
@@ -218,7 +222,7 @@ void InputField::pass_characters(char* chars) {
 			++chars;
 		}
 		InputField::pushInput(true, input_cursor);
-		renderInputText = true;
+		renderInputTextFocus = true;
 	}
 }
 

@@ -19,7 +19,7 @@ std::vector<Mirror*> mirrors;
 
 bool renderAircraft = false, renderSector = false, renderButtons = false,
 renderLegend = false, renderAllCallsigns = false, renderAllCollTags = false, renderInterfaces = false,
-renderInputText = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false,
+renderInputTextFocus = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false,
 renderAllCollision = false, renderAllCollisionLines = false;
 
 bool loadInterfaces = false;
@@ -251,7 +251,7 @@ void DrawInterfaces() {
 	CallFocuses();
 
 	//all input text from all frames
-	if (renderInputText) {
+	if (renderInputTextFocus) {
 		if (updateLastFocus && lastFocus != NULL && lastFocus->type == INPUT_FIELD) {
 			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
@@ -281,7 +281,7 @@ void DrawInterfaces() {
 			}
 			RenderInputText(*border, focusField->inputTextDl, f_input, focusField->centered);
 		}
-		renderInputText = false;
+		renderInputTextFocus = false;
 	}
 
 	//frame specific input text
@@ -303,13 +303,13 @@ void DrawInterfaces() {
 						RenderInputText(*border, field->inputTextDl, f_input, field->centered);
 					}
 				}
+				frame->renderAllInputText = false;
 			}
 			for (ChildFrame* child : frame->children) {
 				if (child) {
 					if (child->type == INPUT_FIELD) {
 						InputField* field = (InputField*)child;
 						CallInputTexts(frame, field);
-						//glCallList(field->inputTextDl);
 					}
 				}
 			}
@@ -317,13 +317,16 @@ void DrawInterfaces() {
 	}
 	for (InterfaceFrame* frame : frames) {
 		if (frame && frame->render) {
-			for (ChildFrame* child : frame->children) {
-				if (child != NULL && child->type == LABEL_D) {
-					Label* label = (Label*)child;
-					glDeleteLists(label->labelTextDl, 1);
-					BasicInterface* border = label->border;
-					RenderLabel(*border, label->labelTextDl, label->input, label->centered);
+			if (frame->renderAllLabels) {
+				for (ChildFrame* child : frame->children) {
+					if (child != NULL && child->type == LABEL_D) {
+						Label* label = (Label*)child;
+						glDeleteLists(label->labelTextDl, 1);
+						BasicInterface* border = label->border;
+						RenderLabel(*border, label->labelTextDl, label->input, label->centered);
+					}
 				}
+				frame->renderAllLabels = false;
 			}
 			for (ChildFrame* child : frame->children) {
 				if (child) {
