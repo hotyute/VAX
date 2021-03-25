@@ -428,30 +428,38 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		if (dragged && dragged_bounds)
 		{
-			int dx = (dragged->cur_pt->x - dragged->s_pt->x);
-			int dy = (dragged->cur_pt->y - dragged->s_pt->y);
-			if (dragged->index != MAIN_CHAT_INTERFACE) {
-				for (BasicInterface* inter1 : dragged->interfaces) {
-					inter1->setPosX(inter1->getPosX() + dx);
-					inter1->setPosY(inter1->getPosY() + -dy);
-					inter1->updateCoordinates();
-				}
-				for (ChildFrame* children : dragged->children) {
-					if (children) {
-						for (BasicInterface* inter2 : children->child_interfaces) {
-							inter2->setPosX(inter2->getPosX() + dx);
-							inter2->setPosY(inter2->getPosY() + -dy);
-							inter2->updateCoordinates();
+			if (dragged->cur_pt && dragged->s_pt)
+			{
+
+				int dx = (dragged->cur_pt->x - dragged->s_pt->x);
+				int dy = (dragged->cur_pt->y - dragged->s_pt->y);
+
+				if (dx != 0 || dy != 0)
+				{
+					if (dragged->index != MAIN_CHAT_INTERFACE) {
+						for (BasicInterface* inter1 : dragged->interfaces) {
+							inter1->setPosX(inter1->getPosX() + dx);
+							inter1->setPosY(inter1->getPosY() + -dy);
+							inter1->updateCoordinates();
+						}
+						for (ChildFrame* children : dragged->children) {
+							if (children) {
+								for (BasicInterface* inter2 : children->child_interfaces) {
+									inter2->setPosX(inter2->getPosX() + dx);
+									inter2->setPosY(inter2->getPosY() + -dy);
+									inter2->updateCoordinates();
+								}
+							}
 						}
 					}
+
+					dragged->renderAllInputText = true;
+					dragged->renderAllLabels = true;
+					renderDrawings = true;
+					renderFocus = true;
+					renderInterfaces = true;
 				}
 			}
-
-			dragged->renderAllInputText = true;
-			dragged->renderAllLabels = true;
-			renderDrawings = true;
-			renderFocus = true;
-			renderInterfaces = true;
 
 			dragged->s_pt = nullptr;
 			dragged->cur_pt = nullptr;

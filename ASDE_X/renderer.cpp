@@ -30,6 +30,9 @@ unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, label
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
 
+std::string heavy_text = "Heavy Aircraft";
+std::string regular_text = "Regular Aircraft";
+
 void RenderChatInterface(BasicInterface&);
 void RenderMirrorBorder(Mirror& mirror);
 void RenderInputText(BasicInterface&, int&, std::string&, bool);
@@ -572,7 +575,6 @@ int DrawSceneryData(Mirror* mirror) {
 void RenderLegend() {
 	legendDl = glGenLists(1);
 	glNewList(legendDl, GL_COMPILE);
-	std::string text1 = "Heavy Aircraft";
 
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -583,16 +585,15 @@ void RenderLegend() {
 	glPushMatrix();
 	glLoadIdentity();
 
+	
+
 	glColor3f(heavy_clr[0], heavy_clr[1], heavy_clr[2]);
 	glRasterPos2f(18, 35);
-	glPrint(text1.c_str(), &legendBase);	// Print GL Text To The Screen
-
-	std::string text2 = "Regular Aircraft";
+	glPrint(heavy_text.c_str(), &legendBase);	// Print GL Text To The Screen
 
 	glColor3f(regular_clr[0], regular_clr[1], regular_clr[2]);
 	glRasterPos2f(18, 20);
-	glPrint(text2.c_str(), &legendBase);	// Print GL Text To The Screen
-
+	glPrint(regular_text.c_str(), &legendBase);	// Print GL Text To The Screen
 
 	//Restore old ortho
 	glPopMatrix();
@@ -600,6 +601,7 @@ void RenderLegend() {
 
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+
 	glEndList();
 }
 
