@@ -42,6 +42,8 @@ DisplayBox* main_chat = NULL;
 
 void handleConnect();
 bool processCommands(std::string);
+bool click_arrow_bottom(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset);
+bool click_arrow_top(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset);
 
 /* Components */
 
@@ -385,6 +387,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				for (ChildFrame* children : frame->children) {
 					if (children) {
 						for (BasicInterface* inter2 : children->child_interfaces) {
+							if (children->type == DISPLAY_BOX) {
+								int arrow_bounds = 15, arrow_offset = 3;
+								if (click_arrow_bottom(*inter2, x, y, arrow_bounds, arrow_offset)) {
+									((DisplayBox*)children)->doActionDown();
+									break;
+								}
+
+								if (click_arrow_top(*inter2, x, y, arrow_bounds, arrow_offset)) {
+									((DisplayBox*)children)->doActionUp();
+									break;
+								}
+								
+							}
 							if (inter2->isBounds()) {
 								int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
 								int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
@@ -411,7 +426,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						}
 					}
 				}
-				else if (clicked2 != NULL) {
+				else if (clicked2 != NULL) 
+				{
 					if (frame->s_pt)
 						delete frame->s_pt;
 					frame->s_pt = new POINT();
@@ -539,6 +555,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 										sendUserMessage(*curUsr, focusField->input);
 									}
 								}
+								main_chat->resetReaderIdx();
 								main_chat->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
 								renderDrawings = true;
 								focusField->clearInput();
@@ -950,4 +967,46 @@ void resetFlags() {
 	if (renderAllCollTags) {
 		renderAllCollTags = false;
 	}
+}
+
+bool click_arrow_bottom(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset) {
+	bool clicked = false;
+	int vertxt[4] = {
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds) + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds) + arrow_offset
+	};
+	int vertyt[4] = {
+		inter2.getStartY(),
+		inter2.getStartY() + arrow_bounds,
+		inter2.getStartY() + arrow_bounds,
+		inter2.getStartY()
+	};
+	bool clicked_bottom = pnpoly(4, vertxt, vertyt, x, y);
+	if (clicked_bottom) {
+		clicked = true;
+	}
+	return clicked;
+}
+
+bool click_arrow_top(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset) {
+	bool clicked = false;
+	int vertx[4] = {
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
+	};
+	int verty[4] = {
+		inter2.getStartY() + inter2.getActualHeight(),
+		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
+		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
+		inter2.getStartY() + inter2.getActualHeight()
+	};
+	bool clicked_top = pnpoly(4, vertx, verty, x, y);
+	if (clicked_top) {
+		clicked = true;
+	}
+	return clicked;
 }

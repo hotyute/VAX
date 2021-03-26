@@ -1645,7 +1645,10 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	if (!is_mirror) {
 		if (renderCollision || renderAllCollision) {
-			glDeleteLists(aircraft.collisionDl, 1);
+			if (aircraft.collisionDl != 0) {
+				glDeleteLists(aircraft.collisionDl, 1);
+				aircraft.collisionDl = 0;
+			}
 			DrawCircle(aircraft, heavy, longitude, latitude, 100);
 			aircraft.setRenderCollision(false);
 		}
@@ -1732,7 +1735,10 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	if (!is_mirror) {
 		if (renderCallsign || renderAllCallsigns) {
-			glDeleteLists(aircraft.Ccallsign, 1);
+			if (aircraft.Ccallsign != 0) {
+				glDeleteLists(aircraft.Ccallsign, 1);
+				aircraft.Ccallsign = 0;
+			}
 			RenderCallsign(aircraft, heavy, latitude, longitude);
 			aircraft.setRenderCallsign(false);
 		}
@@ -1761,7 +1767,11 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	if (!is_mirror) {
 		if (renderCollTag || renderAllCollTags) {
-			glDeleteLists(aircraft.Ccolltext, 1);
+			if (aircraft.Ccolltext != 0) 
+			{
+				glDeleteLists(aircraft.Ccolltext, 1);
+				aircraft.Ccolltext = 0;
+			}
 			RenderCollisionTag(aircraft, heavy, latitude, longitude);
 			aircraft.setRenderCollTag(false);
 		}
@@ -1791,7 +1801,10 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 }
 
 void updateCollisionLine(Aircraft& aircraft, unsigned int& base, bool heavy, double zo) {
-	glDeleteLists(base, 1);
+	if (base != 0) {
+		glDeleteLists(base, 1);
+		base = 0;
+	}
 	if (aircraft.collisionAcf) {
 		DrawLine(aircraft, base, *aircraft.collisionAcf, heavy, false, zo);
 	}
@@ -1825,7 +1838,7 @@ void preFileRender() {
 
 					if (mir)
 					{
-						mir->g_flags.emplace(acf, std::vector<unsigned int>(3));
+						mir->g_flags.emplace(acf, std::vector<unsigned int>(3)); // initialized to 0 by default
 					}
 				}
 			}

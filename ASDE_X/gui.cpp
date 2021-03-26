@@ -460,9 +460,9 @@ void ComboBox::focusDrawing() {
 	}
 }
 
-DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> list, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
+DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
 	DisplayBox::frame = frame;
-	DisplayBox::list = list;
+	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::centered = centerText;
 	DisplayBox::numBlocks = numBlocks;
 	DisplayBox::focus = false;
@@ -472,6 +472,7 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> list, int n
 	comboBounds->updateCoordinates();
 	DisplayBox::border = comboBounds;
 	DisplayBox::child_interfaces.push_back(comboBounds);
+	DisplayBox::chat_line_history.insert(DisplayBox::chat_line_history.end(), chat_lines.begin(), chat_lines.end());
 }
 
 void DisplayBox::doDrawing() {
@@ -492,8 +493,8 @@ void DisplayBox::doDrawing() {
 	long ave = tm.tmAveCharWidth;
 	int maxChars = aW / ave;
 	int noncp = 2;
-	for (size_t i = 0; i < DisplayBox::list.size(); i++) {
-		std::string text = DisplayBox::list[i]->getText();
+	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
+		std::string text = DisplayBox::chat_lines[i]->getText();
 		SIZE size = getTextExtent(text);
 		if (size.cx > param.getActualWidth()) {
 			std::vector<std::string> store;
@@ -502,21 +503,21 @@ void DisplayBox::doDrawing() {
 			int s_size = store.size();
 			int timesShifted = 0;
 			while (timesShifted < (s_size - 1)) {
-				std::string temp = DisplayBox::list[0]->getText();
+				std::string temp = DisplayBox::chat_lines[0]->getText();
 				for (i3 = 0; i3 < i; i3++) {
-					DisplayBox::list[i3] = DisplayBox::list[i3 + 1];
+					DisplayBox::chat_lines[i3] = DisplayBox::chat_lines[i3 + 1];
 				}
-				DisplayBox::list[i]->setText(temp);
+				DisplayBox::chat_lines[i]->setText(temp);
 				timesShifted++;
 			}
 			for (size_t i2 = 0; i2 < s_size; i2++) {
 				std::string s_text = store[i2];
-				DisplayBox::list[i - ((s_size - 1) - i2)]->setText(ltrim(s_text));
+				DisplayBox::chat_lines[i - ((s_size - 1) - i2)]->setText(ltrim(s_text));
 			}
 		}
 	}
-	for (size_t i = 0; i < DisplayBox::list.size(); i++) {
-		std::string text = DisplayBox::list[i]->getText();
+	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
+		std::string text = DisplayBox::chat_lines[i]->getText();
 		double y, endY;
 		if (last_end_y != -1) {
 			y = (last_end_y - (y_height / 2));
@@ -588,13 +589,59 @@ void DisplayBox::focusDrawing() {
 	}
 }
 
+void DisplayBox::display_pos()
+{
+	auto it = chat_line_history.begin() + read_index;
+	int i = 0;
+	while (it != chat_line_history.end()) {
+		if (i >= numBlocks)
+			break;
+		DisplayBox::chat_lines[i++] = *it;
+		it++;
+	}
+}
+
 
 
 void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
-	ChatLine *line = DisplayBox::list.front();
-	DisplayBox::list.erase(DisplayBox::list.begin());
-	delete line;
-	DisplayBox::list.push_back(new ChatLine(text, type));
+	DisplayBox::chat_lines.erase(DisplayBox::chat_lines.begin());
+	ChatLine* c = new ChatLine(text, type);
+	DisplayBox::chat_lines.push_back(c);
+	if (chat_line_history.size() >= max_history)
+	{
+		ChatLine* first_line = chat_line_history.front();
+		DisplayBox::chat_line_history.erase(DisplayBox::chat_line_history.begin());
+		delete first_line;
+	}
+	read_index++;
+	DisplayBox::chat_line_history.push_back(c);
+}
+
+void DisplayBox::doActionUp()
+{
+	--read_index;
+	renderDrawings = true;
+	display_pos();
+}
+
+void DisplayBox::doActionDown()
+{
+	++read_index;
+	renderDrawings = true;
+	display_pos();
+}
+
+void DisplayBox::resetReaderIdx()
+{
+	if (read_index != (chat_line_history.end() - numBlocks) - chat_line_history.begin()) {
+		auto it = chat_line_history.end() - numBlocks;
+		int i = 0;
+		read_index = (it - chat_line_history.begin());
+		while (it != chat_line_history.end()) {
+			DisplayBox::chat_lines[i++] = *it;
+			it++;
+		}
+	}
 }
 
 Label::Label(InterfaceFrame* interfaceFrame, std::string label, double width, double height)

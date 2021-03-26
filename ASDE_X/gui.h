@@ -142,14 +142,22 @@ public:
 	DisplayBox(InterfaceFrame*, std::vector<ChatLine*>, int, double, double, double, double, double, double, bool);
 public:
 	int numBlocks;
+	int read_index = 0, max_history = 100;
 	bool centered;
-	std::vector<ChatLine*> list;
+	std::vector<ChatLine*> chat_lines;
+	std::vector<ChatLine*> chat_line_history;
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	void display_pos();
+	void resetReaderIdx();
+	void doActionUp();
+	void doActionDown();
 	void addLine(std::string, CHAT_TYPE type);
+
+
 };
 
 class Label : public ChildFrame {
