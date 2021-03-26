@@ -233,7 +233,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur3->setLatitude(25.798429);
 			cur3->setLongitude(-80.278852);
 			cur3->setSpeed(0.0);
-			cur3->setHeading(180.0);
+			cur3->setHeading(090.0);
 			cur3->setRenderCallsign(true);
 			cur3->setRenderCollision(true);
 			cur3->setMode(1);

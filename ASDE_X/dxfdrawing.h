@@ -26,6 +26,5 @@ public:
 extern DxfDrawing *aircraftBlip;
 extern DxfDrawing *unknownBlip;
 
-extern void loadAircraftBlip();
 extern void loadUnknownBlip();
 extern void loadAircraftBlip2();

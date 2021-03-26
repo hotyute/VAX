@@ -62,7 +62,7 @@ std::vector<GLdouble*> tesses;
 float latitude = 0, longitude = 0;
 double heading = 0;
 double normMapScaleX;
-double collision_size = 0.5, tag_line_sep = 0.4;
+double collision_size = 0.5, tag_line_sep = 0.4, config_line_sep = 0.1;
 
 void CALLBACK beginCallback(GLenum);
 void CALLBACK endCallback(void);
@@ -1240,9 +1240,27 @@ void RenderConf() {
 	glLoadIdentity();
 
 	glColor4f(conf_clr[0], conf_clr[1], conf_clr[2], 1.0f);
-	std::string config = "RWY CONFIG: 26L27-00";
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)));
+	SelectObject(hDC, confFont);
+
+	double linesX = 0, linesY = 0;
+
+	std::string config = "RWY CONFIG: 08R09-00";
+	SIZE size = getTextExtent(config);
+	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
 	glPrint(config.c_str(), &confBase);
+	linesY += (size.cy + (size.cy * config_line_sep));
+
+	std::string config2 = "OVERLOAD END";
+	size = getTextExtent(config2);
+	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glPrint(config2.c_str(), &confBase);
+	linesY += (size.cy + (size.cy * config_line_sep));
+
+	std::string config3 = "ACID";
+	size = getTextExtent(config3);
+	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glPrint(config3.c_str(), &confBase);
+	linesY += (size.cy + (size.cy * config_line_sep));
 
 	const std::string* date1 = currentDateTime();
 	glRasterPos2f(50, (CLIENT_HEIGHT / 6));
@@ -1598,8 +1616,7 @@ int DrawLine(Aircraft& from, unsigned int& line_dl, Aircraft& to, bool heavy_fro
 	double bearing_from = getBearing(lat_f, lon_f, lat_t, lon_t);
 	double bearing_to = getBearing(lat_t, lon_t, lat_f, lon_f);
 
-	//std::cout << maxX << ", " << default_size << ", " <<  _aircraft_size  << std::endl;
-	std::cout << (offset + (offset * collision_size)) << std::endl;
+	//std::cout << (offset + (offset * collision_size)) << std::endl;
 
 	double z_factor = default_size;
 	if (zoom_phase == 2)
@@ -1716,8 +1733,9 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	//keep the aircraft drawing in correct aspect ratio
+	//std::cout << normMapScaleX << std::endl;
 	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(normMapScaleX, 1.0, 1.0);
+	glScaled(normMapScaleX, 1.0f, 1.0f);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	//set the aircraft heading - this needs to come after scaling aspect for proper rotation

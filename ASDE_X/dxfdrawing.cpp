@@ -1,48 +1,7 @@
 #include "dxfdrawing.h"
 
-DxfDrawing *aircraftBlip = new DxfDrawing();
-DxfDrawing *unknownBlip = new DxfDrawing();
-
-void loadAircraftBlip() {
-	aircraftBlip->setMinX(151.750000);
-	aircraftBlip->setMaxX(187.000000);
-	aircraftBlip->setMinY(135.450000);
-	aircraftBlip->setMaxY(170.370370);
-	aircraftBlip->addCoordinates(166.363636, 136.000000);
-	aircraftBlip->addCoordinates(167.515152, 136.030303);
-	aircraftBlip->addCoordinates(168.484848, 137.636364);
-	aircraftBlip->addCoordinates(169.303030, 138.787879);
-	aircraftBlip->addCoordinates(171.333333, 136.030303);
-	aircraftBlip->addCoordinates(179.650000, 135.450000);
-	aircraftBlip->addCoordinates(179.550000, 137.550000);
-	aircraftBlip->addCoordinates(173.107143, 140.464286);
-	aircraftBlip->addCoordinates(173.321429, 147.035714);
-	aircraftBlip->addCoordinates(173.392857, 150.107143);
-	aircraftBlip->addCoordinates(187.000000, 149.111111);
-	aircraftBlip->addCoordinates(186.964286, 151.750000);
-	aircraftBlip->addCoordinates(183.750000, 152.892857);
-	aircraftBlip->addCoordinates(178.666667, 154.666667);
-	aircraftBlip->addCoordinates(173.541667, 156.375000);
-	aircraftBlip->addCoordinates(173.370370, 164.777778);
-	aircraftBlip->addCoordinates(173.296296, 167.148148);
-	aircraftBlip->addCoordinates(172.222222, 169.444444);
-	aircraftBlip->addCoordinates(170.888889, 170.370370);
-	aircraftBlip->addCoordinates(167.925926, 170.370370);
-	aircraftBlip->addCoordinates(166.592593, 169.333333);
-	aircraftBlip->addCoordinates(165.629630, 166.925926);
-	aircraftBlip->addCoordinates(165.481481, 165.148148);
-	aircraftBlip->addCoordinates(165.291667, 156.375000);
-	aircraftBlip->addCoordinates(160.250000, 154.821429);
-	aircraftBlip->addCoordinates(155.964286, 153.392857);
-	aircraftBlip->addCoordinates(151.750000, 151.964286);
-	aircraftBlip->addCoordinates(151.750000, 149.464286);
-	aircraftBlip->addCoordinates(164.964286, 150.107143);
-	aircraftBlip->addCoordinates(165.000000, 146.600000);
-	aircraftBlip->addCoordinates(165.200000, 140.466667);
-	aircraftBlip->addCoordinates(159.250000, 137.535714);
-	aircraftBlip->addCoordinates(159.176471, 135.705882);
-	aircraftBlip->addCoordinates(165.909091, 135.969697);
-}
+DxfDrawing* aircraftBlip = new DxfDrawing();
+DxfDrawing* unknownBlip = new DxfDrawing();
 
 void loadUnknownBlip() {
 	unknownBlip->setMinX(-9.46875);
@@ -86,45 +45,113 @@ void loadUnknownBlip() {
 }
 
 void loadAircraftBlip2() {
-	aircraftBlip->setMinX(-17.625);
-	aircraftBlip->setMaxX(17.625);
+	aircraftBlip->setMinX(-17.70422160212365);
+	aircraftBlip->setMaxX(17.69419252735628);
 	aircraftBlip->setMinY(-17.460185);
 	aircraftBlip->setMaxY(17.460185);
-	aircraftBlip->addCoordinates(-3.011364,-16.910185);
-	aircraftBlip->addCoordinates(-1.859848,-16.879882);
-	aircraftBlip->addCoordinates(-0.890152,-15.273821);
-	aircraftBlip->addCoordinates(-0.07197,-14.122306);
-	aircraftBlip->addCoordinates(1.958333,-16.879882);
-	aircraftBlip->addCoordinates(10.275,-17.460185);
-	aircraftBlip->addCoordinates(10.175,-15.360185);
-	aircraftBlip->addCoordinates(3.732143,-12.445899);
-	aircraftBlip->addCoordinates(3.946429,-5.874471);
-	aircraftBlip->addCoordinates(4.017857,-2.803042);
-	aircraftBlip->addCoordinates(17.625,-3.799074);
-	aircraftBlip->addCoordinates(17.589286,-1.160185);
-	aircraftBlip->addCoordinates(14.375,-0.017328);
-	aircraftBlip->addCoordinates(9.291667,1.756482);
-	aircraftBlip->addCoordinates(4.166667,3.464815);
-	aircraftBlip->addCoordinates(3.99537,11.867593);
-	aircraftBlip->addCoordinates(3.921296,14.237963);
-	aircraftBlip->addCoordinates(2.847222,16.534259);
-	aircraftBlip->addCoordinates(1.513889,17.460185);
-	aircraftBlip->addCoordinates(-1.449074,17.460185);
-	aircraftBlip->addCoordinates(-2.782407,16.423148);
-	aircraftBlip->addCoordinates(-3.74537,14.015741);
-	aircraftBlip->addCoordinates(-3.893519,12.237963);
-	aircraftBlip->addCoordinates(-4.083333,3.464815);
-	aircraftBlip->addCoordinates(-9.125,1.911244);
-	aircraftBlip->addCoordinates(-13.410714,0.482672);
-	aircraftBlip->addCoordinates(-17.625,-0.945899);
-	aircraftBlip->addCoordinates(-17.625,-3.445899);
-	aircraftBlip->addCoordinates(-4.410714,-2.803042);
-	aircraftBlip->addCoordinates(-4.375,-6.310185);
-	aircraftBlip->addCoordinates(-4.175,-12.443518);
-	aircraftBlip->addCoordinates(-10.125,-15.374471);
-	aircraftBlip->addCoordinates(-10.198529,-17.204303);
-	aircraftBlip->addCoordinates(-3.465909,-16.940488);
+	aircraftBlip->addCoordinates(-3.011363999999999, -16.910185);
+	aircraftBlip->addCoordinates(-1.859847999999999, -16.879882);
+	aircraftBlip->addCoordinates(-1.859847999999999, -16.879882);
+	aircraftBlip->addCoordinates(-0.890152, -15.273821);
+	aircraftBlip->addCoordinates(-0.890152, -15.273821);
+	aircraftBlip->addCoordinates(-0.07197, -14.122306);
+	aircraftBlip->addCoordinates(-0.07197, -14.122306);
+	aircraftBlip->addCoordinates(1.958333, -16.879882);
+	aircraftBlip->addCoordinates(1.958333, -16.879882);
+	aircraftBlip->addCoordinates(10.275, -17.460185);
+	aircraftBlip->addCoordinates(10.275, -17.460185);
+	aircraftBlip->addCoordinates(10.175, -15.360185);
+	aircraftBlip->addCoordinates(10.175, -15.360185);
+	aircraftBlip->addCoordinates(3.732143, -12.445899);
+	aircraftBlip->addCoordinates(3.732143, -12.445899);
+	aircraftBlip->addCoordinates(3.946429, -5.874470999999999);
+	aircraftBlip->addCoordinates(3.946429, -5.874470999999999);
+	aircraftBlip->addCoordinates(4.017857, -2.803041999999999);
+	aircraftBlip->addCoordinates(4.017857, -2.803041999999999);
+	aircraftBlip->addCoordinates(17.625, -3.799073999999999);
+	aircraftBlip->addCoordinates(17.625, -3.799073999999999);
+	aircraftBlip->addCoordinates(17.69926448113389, 1.024461725636683);
+	aircraftBlip->addCoordinates(17.69926448113389, 1.024461725636683);
+	aircraftBlip->addCoordinates(14.49707702674095, 1.572253896205438);
+	aircraftBlip->addCoordinates(14.49707702674095, 1.572253896205438);
+	aircraftBlip->addCoordinates(9.291667, 2.45687168879067);
+	aircraftBlip->addCoordinates(9.291667, 2.45687168879067);
+	aircraftBlip->addCoordinates(4.16524236722042, 3.507118342647117);
+	aircraftBlip->addCoordinates(4.16524236722042, 3.507118342647117);
+	aircraftBlip->addCoordinates(3.995369999999999, 11.867593);
+	aircraftBlip->addCoordinates(3.995369999999999, 11.867593);
+	aircraftBlip->addCoordinates(3.921295999999999, 14.237963);
+	aircraftBlip->addCoordinates(3.921295999999999, 14.237963);
+	aircraftBlip->addCoordinates(2.847222, 16.534259);
+	aircraftBlip->addCoordinates(2.847222, 16.534259);
+	aircraftBlip->addCoordinates(1.513888999999999, 17.460185);
+	aircraftBlip->addCoordinates(1.513888999999999, 17.460185);
+	aircraftBlip->addCoordinates(-1.449073999999999, 17.460185);
+	aircraftBlip->addCoordinates(-1.449073999999999, 17.460185);
+	aircraftBlip->addCoordinates(-2.782407, 16.423148);
+	aircraftBlip->addCoordinates(-2.782407, 16.423148);
+	aircraftBlip->addCoordinates(-3.745369999999999, 14.015741);
+	aircraftBlip->addCoordinates(-3.745369999999999, 14.015741);
+	aircraftBlip->addCoordinates(-3.893519, 12.237963);
+	aircraftBlip->addCoordinates(-3.893519, 12.237963);
+	aircraftBlip->addCoordinates(-4.083333, 3.464815);
+	aircraftBlip->addCoordinates(-4.083333, 3.464815);
+	aircraftBlip->addCoordinates(-9.125, 2.517866671123556);
+	aircraftBlip->addCoordinates(-9.125, 2.517866671123556);
+	aircraftBlip->addCoordinates(-13.410714, 1.832614559962166);
+	aircraftBlip->addCoordinates(-13.410714, 1.832614559962166);
+	aircraftBlip->addCoordinates(-17.625, 1.141542637397833);
+	aircraftBlip->addCoordinates(-17.625, 1.141542637397833);
+	aircraftBlip->addCoordinates(-17.625, -3.445898999999999);
+	aircraftBlip->addCoordinates(-17.625, -3.445898999999999);
+	aircraftBlip->addCoordinates(-4.410713999999999, -2.803041999999999);
+	aircraftBlip->addCoordinates(-4.410713999999999, -2.803041999999999);
+	aircraftBlip->addCoordinates(-4.375, -6.310184999999999);
+	aircraftBlip->addCoordinates(-4.375, -6.310184999999999);
+	aircraftBlip->addCoordinates(-4.174999999999999, -12.443518);
+	aircraftBlip->addCoordinates(-4.174999999999999, -12.443518);
+	aircraftBlip->addCoordinates(-10.125, -15.374471);
+	aircraftBlip->addCoordinates(-10.125, -15.374471);
+	aircraftBlip->addCoordinates(-10.198529, -17.204303);
+	aircraftBlip->addCoordinates(-10.198529, -17.204303);
+	aircraftBlip->addCoordinates(-3.465908999999999, -16.940488);
+
 }
+
+//-3.011364, -16.910185
+//-1.859848, -16.879882
+//-0.890152, -15.273821
+//-0.07197, -14.122306
+//1.958333, -16.879882
+//10.275, -17.460185
+//10.175, -15.360185
+//3.732143, -12.445899
+//3.946429, -5.874471
+//4.017857, -2.803042
+//17.625, -3.799074
+//17.589286, -1.160185
+//14.375, -0.017328
+//9.291667, 1.756482
+//4.166667, 3.464815
+//3.99537, 11.867593
+//3.921296, 14.237963
+//2.847222, 16.534259
+//1.513889, 17.460185
+//-1.449074, 17.460185
+//-2.782407, 16.423148
+//-3.74537, 14.015741
+//-3.893519, 12.237963
+//-4.083333, 3.464815
+//-9.125, 1.911244
+//-13.410714, 0.482672
+//-17.625, -0.945899
+//-17.625, -3.445899
+//-4.410714, -2.803042
+//-4.375, -6.310185
+//-4.175, -12.443518
+//-10.125, -15.374471
+//-10.198529, -17.204303
+//-3.465909, -16.940488
 
 double DxfDrawing::getMinX() {
 	return DxfDrawing::minX;
