@@ -461,6 +461,10 @@ void ComboBox::focusDrawing() {
 }
 
 DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
+	while (chat_lines.size() < numBlocks)
+		chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN));
+	while (chat_lines.size() > numBlocks)
+		chat_lines.pop_back();
 	DisplayBox::frame = frame;
 	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::centered = centerText;
@@ -619,16 +623,20 @@ void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
 
 void DisplayBox::doActionUp()
 {
-	--read_index;
-	renderDrawings = true;
-	display_pos();
+	if ((read_index - 1) >= 0) {
+		--read_index;
+		renderDrawings = true;
+		display_pos();
+	}
 }
 
 void DisplayBox::doActionDown()
 {
-	++read_index;
-	renderDrawings = true;
-	display_pos();
+	if ((read_index + 1) <= ((chat_line_history.end() - numBlocks) - chat_line_history.begin())) {
+		++read_index;
+		renderDrawings = true;
+		display_pos();
+	}
 }
 
 void DisplayBox::resetReaderIdx()

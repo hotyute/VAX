@@ -1117,6 +1117,10 @@ void LoadInterfaces() {
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	DisplayBox* displayBox = new DisplayBox(textBox, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
 
 	//chatbox
