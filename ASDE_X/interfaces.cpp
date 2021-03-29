@@ -56,5 +56,44 @@ void RenderConnect(double x_, double y_)
 	connectFrame->children[okButton->index = CONN_OKAY_BUTTON] = okButton;
 	ClickButton* cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
-	connectFrame->doOpen(CONNECT_INTERFACE, false, true);
+	connectFrame->doOpen(false, true);
+}
+
+void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh) {
+	InterfaceFrame* pm_frame = frames[PRIVATE_MESSAGE_INTERFACE];
+	if (!pm_frame || refresh) {
+		pm_frame = new InterfaceFrame(PRIVATE_MESSAGE_INTERFACE);
+		pm_frame->title = "PRIVATE CHAT " + callsign;
+		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
+		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
+		pm_frame->Pane1(x, width, y, height);
+		const double spacing = 0.15, spacing_y = 0.13;
+		double start_x = 1.15, start_y = 0.15;
+
+		std::vector<ChatLine*> list;
+		list.push_back(new ChatLine("Hello there!", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("1", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("2", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("3", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("4", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("5", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("6", CHAT_TYPE::MAIN));
+		double route_box_size = 90.0;
+		DisplayBox* displayBox = new DisplayBox(pm_frame, list, 7, x + (width - (width * (start_x - spacing))), width * 0.93, 5, y + (height - (height * (start_y += spacing_y)))
+			- (route_box_size - 10), route_box_size, 5, false);
+		pm_frame->children[displayBox->index = PRIVATE_MESSAGE_BOX] = displayBox;
+
+		InputField* pm_input = new InputField(pm_frame, x + (width - (width * (start_x - spacing))), width * 0.93, 5, (y - (route_box_size - 10)) + (height - (height * (start_y += spacing_y))), 20.0, 0.0);
+		pm_frame->children[pm_input->index = PRIVATE_MESSAGE_INPUT] = pm_input;
+
+		CloseButton* pm_closeb = new CloseButton(pm_frame, 15, 15);
+		pm_frame->children[pm_closeb->index = PM_CLOSE_BOX] = pm_closeb;
+
+
+		pm_frame->doOpen(true, true);
+	} else {
+		if (!pm_frame->render) {
+			pm_frame->doOpen(false, true);
+		}
+	}
 }

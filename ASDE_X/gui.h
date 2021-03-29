@@ -37,7 +37,7 @@ public:
 	InterfaceFrame(int, double, double);
 	InterfaceFrame(int, double, double, double, double);
 	void Pane1(double, double, double, double);
-	void doOpen(int, bool multi_open, bool pannable);
+	void doOpen(bool multi_open, bool pannable);
 	void doClose();
 };
 

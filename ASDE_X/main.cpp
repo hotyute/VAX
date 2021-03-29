@@ -756,14 +756,14 @@ void handleConnect() {
 	}
 	else {
 		if (!connectFrame->render) {
-			connectFrame->doOpen(CONNECT_INTERFACE, false, true);
+			connectFrame->doOpen(false, true);
 		}
 	}
 }
 
 bool processCommands(std::string command)
 {
-	if (boost::starts_with(command, ".SS")) {
+	if (boost::istarts_with(command, ".SS")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string call_sign = array3[1];
@@ -788,17 +788,18 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::starts_with(command, ".AN")) {
+	else if (boost::istarts_with(command, ".AN")) {
 		return true;
 	}
-	else if (boost::starts_with(command, ".CHAT")) {
+	else if (boost::istarts_with(command, ".CHAT")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string call_sign = array3[1];
+			LoadPrivateChat(-1, -1, call_sign, true);
 		}
 		return true;
 	}
-	else if (boost::starts_with(command, ".omir")) {
+	else if (boost::istarts_with(command, ".omir")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
@@ -821,7 +822,7 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::starts_with(command, ".cmir")) {
+	else if (boost::istarts_with(command, ".cmir")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];

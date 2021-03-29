@@ -66,15 +66,15 @@ void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
-void InterfaceFrame::doOpen(int index, bool multi_open, bool pannable)
+void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 {
-	if (frames[index] != this) {
-		InterfaceFrame* frame = frames[index];
+	if (frames[InterfaceFrame::index] != this) {
+		InterfaceFrame* frame = frames[InterfaceFrame::index];
 		if (frame) {
 			delete frame;
-			frames[index] = NULL;
+			frames[InterfaceFrame::index] = NULL;
 		}
-		frames[index] = this;
+		frames[InterfaceFrame::index] = this;
 	}
 	InterfaceFrame::renderAllInputText = true;
 	InterfaceFrame::render = true;
@@ -85,7 +85,7 @@ void InterfaceFrame::doOpen(int index, bool multi_open, bool pannable)
 	renderDrawings = true;
 	renderAllLabels = true;
 	_openedframe = this;
-	if (index == CONNECT_INTERFACE)
+	if (InterfaceFrame::index == CONNECT_INTERFACE)
 		InterfaceFrame::children[CONN_CALLSIGN_LABEL]->setFocus();
 }
 
@@ -241,12 +241,12 @@ bool InputField::can_type()
 	int maxChars = aW / ave;
 	if (InputField::p_protected) 
 	{
-		if (InputField::pp_input.size() < maxChars)
+		if (InputField::pp_input.size() < (maxChars - 1))
 			return true;
 	}
 	else 
 	{
-		if (InputField::input.size() < maxChars)
+		if (InputField::input.size() < (maxChars - 1))
 			return true;
 	}
 	return false;
