@@ -1,10 +1,15 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+//Children Interfaces
+#define CONTENT_PANE 0
+#define FRAME_BOUNDS 1
+
 //frames
 #define CONNECT_INTERFACE 0
 #define MAIN_CHAT_INTERFACE 1
 #define FP_INTERFACE 2
+#define PRIVATE_MESSAGE_INTERFACE 3
 
 //children frames
 
@@ -61,6 +66,9 @@
 
 #define FP_CLOSE_BUTTON 22
 
+//PRIVATE_MESSAGE_INTERFACE CHILDREN
+#define PRIVATE_MESSAGE_INPUT 0
+#define PRIVATE_MESSAGE_BOX 1
 
 #endif
 

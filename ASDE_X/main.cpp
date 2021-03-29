@@ -192,7 +192,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setLatitude(25.800704);
 			cur->setLongitude(-80.300770);
 			cur->setSpeed(0.0);
-			cur->setHeading(87.0);
+			cur->setHeading(85.0);
 			cur->setRenderCallsign(true);
 			cur->setRenderCollision(true);
 			cur->setCollision(true);
@@ -211,7 +211,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setLatitude(25.798267);
 			cur2->setLongitude(-80.282544);
 			cur2->setSpeed(0.0);
-			cur2->setHeading(180.0);
+			cur2->setHeading(182.0);
 			cur2->setRenderCallsign(true);
 			cur2->setRenderCollision(true);
 			cur2->setCollision(true);
@@ -233,7 +233,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur3->setLatitude(25.798429);
 			cur3->setLongitude(-80.278852);
 			cur3->setSpeed(0.0);
-			cur3->setHeading(090.0);
+			cur3->setHeading(120.0);
 			cur3->setRenderCallsign(true);
 			cur3->setRenderCollision(true);
 			cur3->setMode(1);
@@ -372,7 +372,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (frame && frame->render) {
 				BasicInterface* clicked2 = NULL;
 				for (BasicInterface* inter1 : frame->interfaces) {
-					if (inter1->isBounds() && frame->pannable) {
+					if (inter1 && inter1->isBounds() && frame->pannable) {
 						int b_offset_Y = 25;
 						int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
 						int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
@@ -398,7 +398,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									((DisplayBox*)children)->doActionUp();
 									break;
 								}
-								
+
 							}
 							if (inter2->isBounds()) {
 								int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
@@ -426,7 +426,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						}
 					}
 				}
-				else if (clicked2 != NULL) 
+				else if (clicked2 != NULL)
 				{
 					if (frame->s_pt)
 						delete frame->s_pt;
@@ -454,9 +454,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				{
 					if (dragged->pannable) {
 						for (BasicInterface* inter1 : dragged->interfaces) {
-							inter1->setPosX(inter1->getPosX() + dx);
-							inter1->setPosY(inter1->getPosY() + -dy);
-							inter1->updateCoordinates();
+							if (inter1)
+							{
+								inter1->setPosX(inter1->getPosX() + dx);
+								inter1->setPosY(inter1->getPosY() + -dy);
+								inter1->updateCoordinates();
+							}
 						}
 						for (ChildFrame* children : dragged->children) {
 							if (children) {
@@ -540,7 +543,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				int type = focusChild->type;
 				if (type == INPUT_FIELD) {
 					InputField* focusField = (InputField*)focusChild;
-					if (focusField == textField) {// main chat
+					InterfaceFrame& frame = *focusField->getFrame();
+					int frame_index = frame.index;
+					if (frame_index == MAIN_CHAT_INTERFACE && focusField == textField) {// main chat
 						if (focusField->input.size() > 1) {
 							focusField->popInput();
 							if (processCommands(focusField->input)) {
@@ -548,7 +553,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								focusField->pushInput(true, input_cursor);
 								renderInputTextFocus = true;
 							}
-							else {
+							else
+							{
 								for (size_t i = 0; i < userStorage1.size(); i++) {
 									User* curUsr = userStorage1[i];
 									if (curUsr != NULL && curUsr != USER) {
@@ -561,6 +567,35 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								focusField->clearInput();
 								focusField->pushInput(true, input_cursor);
 								renderInputTextFocus = true;
+							}
+						}
+					}
+					else if (frame_index == PRIVATE_MESSAGE_INTERFACE) {
+						if (focusField->index == PRIVATE_MESSAGE_INPUT) {
+							if (focusField->input.size() > 1) {
+								focusField->popInput();
+								if (processCommands(focusField->input))
+								{
+									focusField->clearInput();
+									focusField->pushInput(true, input_cursor);
+									renderInputTextFocus = true;
+								}
+								else
+								{
+									for (size_t i = 0; i < userStorage1.size(); i++) {
+										User* curUsr = userStorage1[i];
+										if (curUsr != NULL && curUsr != USER) {
+											sendUserMessage(*curUsr, focusField->input);
+										}
+									}
+									DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
+									box.resetReaderIdx();
+									box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
+									renderDrawings = true;
+									focusField->clearInput();
+									focusField->pushInput(true, input_cursor);
+									renderInputTextFocus = true;
+								}
 							}
 						}
 					}
@@ -666,13 +701,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 			if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
 				InputField& focusField = *(InputField*)focusChild;
+				InterfaceFrame& frame = *focusField.getFrame();
 				if (focusField.editable) {
-					if (focusField.input.size() > 0) {
-						focusField.popInput();
+					if (frame.interfaces[FRAME_BOUNDS]) {
+						if (focusField.can_type()) {
+							if (focusField.input.size() > 0) {
+								focusField.popInput();
+							}
+							focusField.pushInput(false, c2);
+							focusField.pushInput(true, input_cursor);
+							renderInputTextFocus = true;
+						}
 					}
-					focusField.pushInput(false, c2);
-					focusField.pushInput(true, input_cursor);
-					renderInputTextFocus = true;
 				}
 			}
 		}
@@ -749,6 +789,13 @@ bool processCommands(std::string command)
 		return true;
 	}
 	else if (boost::starts_with(command, ".AN")) {
+		return true;
+	}
+	else if (boost::starts_with(command, ".CHAT")) {
+		std::vector<std::string> array3 = split(command, " ");
+		if (array3.size() == 2) {
+			std::string call_sign = array3[1];
+		}
 		return true;
 	}
 	else if (boost::starts_with(command, ".omir")) {
@@ -974,8 +1021,8 @@ bool click_arrow_bottom(BasicInterface& inter2, int x, int y, int arrow_bounds, 
 	int vertxt[4] = {
 		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds) + arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds) + arrow_offset
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
 	};
 	int vertyt[4] = {
 		inter2.getStartY(),

@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <vector>
 #include <sstream>
+#include <iostream>
 #include <boost/math/special_functions/round.hpp>
 
 #define _USE_MATH_DEFINES
@@ -18,6 +19,8 @@
 extern std::wstring s2ws(const std::string& s);
 
 extern char *s2ca1(const std::string &s);
+
+void WordWrap(std::vector<std::string>& outputString, const std::string& inputString, unsigned int lineLength);
 
 extern SIZE getBitTextLength(HDC, HFONT, std::string);
 

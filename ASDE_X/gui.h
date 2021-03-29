@@ -14,6 +14,8 @@
 #define COMBO_BOX 62446
 #define DISPLAY_BOX 62447
 
+#define NUM_SUB_INTERFACES 2
+
 enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM };
 
 class InterfaceFrame;
@@ -89,6 +91,8 @@ public:
 	void setInput(std::string);
 	void setUneditable(std::string);
 	void pass_characters(char* chars);
+	bool can_type();
+	InterfaceFrame* getFrame() { return this->frame; }
 };
 
 class CloseButton : public ChildFrame {

@@ -831,39 +831,37 @@ void RenderInterface(InterfaceFrame* frame) {
 
 	glNewList(frame->interfaceDl, GL_COMPILE);
 
-	glLineWidth((GLfloat)1.0f);
-
 	if (frame && frame->render) {
-		int pos = 0;
 		for (BasicInterface* inter1 : frame->interfaces) {
-			RenderChatInterface(*inter1);
-			if (pos == 0) {
-				if (frame->title.size() > 0) {
-					std::string title = frame->title;
-					int offsetY = 10;
-					int x = inter1->getStartX() + (inter1->getWidth() / 2);
-					int y = inter1->getStartY() + (inter1->getHeight() - offsetY);
-					SelectObject(hDC, titleFont);
-					SIZE extent = getTextExtent(title);
-					TEXTMETRIC tm;
-					GetTextMetrics(hDC, &tm);
-					int tH = tm.tmAscent - tm.tmInternalLeading;
-					int textXPos = x - (extent.cx / 2);
-					int textYPos = y - (tH / 2);
-					glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-					glRasterPos2f(textXPos, textYPos);
-					glPrint(title.c_str(), &titleBase);
+			if (inter1) {
+				RenderChatInterface(*inter1);
+				if (inter1->index == CONTENT_PANE) {
+					if (frame->title.size() > 0) {
+						std::string title = frame->title;
+						int offsetY = 10;
+						int x = inter1->getStartX() + (inter1->getWidth() / 2);
+						int y = inter1->getStartY() + (inter1->getHeight() - offsetY);
+						SelectObject(hDC, titleFont);
+						SIZE extent = getTextExtent(title);
+						TEXTMETRIC tm;
+						GetTextMetrics(hDC, &tm);
+						int tH = tm.tmAscent - tm.tmInternalLeading;
+						int textXPos = x - (extent.cx / 2);
+						int textYPos = y - (tH / 2);
+						glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], 1.0f);
+						glRasterPos2f(textXPos, textYPos);
+						glPrint(title.c_str(), &titleBase);
 
-					//title border line
-					glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
-					int b_offset_Y = 25;
-					glBegin(GL_LINES);
-					glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-					glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-					glEnd();
+						//title border line
+						glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+						int b_offset_Y = 25;
+						glBegin(GL_LINES);
+						glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+						glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+						glEnd();
+					}
 				}
 			}
-			pos++;
 		}
 		for (ChildFrame* children : frame->children) {
 			if (children) {
@@ -875,8 +873,6 @@ void RenderInterface(InterfaceFrame* frame) {
 			}
 		}
 	}
-
-	glLineWidth((GLfloat)1.0f);
 
 	glEndList();
 }

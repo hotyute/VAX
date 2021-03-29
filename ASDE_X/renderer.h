@@ -55,6 +55,7 @@ const static float conf_clr[] = {0.00392156862f, 0.72549019607f, 0.00392156862f}
 const static float unknown_clr[] = {0.0f, 0.85490196078f, 0.81176470588f};
 const static float collision_clr[] = { 0.00392156862f, 0.72549019607f, 0.00392156862f };
 const static float col_brdr_clr[] = { 0.00392156862f, 0.92549019607f, 0.00392156862f };
+const static float title_clr[] = { 0.78431372549f, 0.78431372549f, 0.78431372549f };
 
 void InitOpenGL(GLvoid);
 void ResizeMirrorGLScene(Mirror& mirror);
@@ -89,5 +90,9 @@ void CallFocuses();
 void CallLabels(InterfaceFrame* frame, Label* label);
 
 void CallInputTexts(InterfaceFrame* frame, InputField* field);
+
+void OrthoHeader();
+
+void OrthoFooter();
 
 #endif

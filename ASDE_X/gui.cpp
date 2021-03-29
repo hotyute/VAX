@@ -16,6 +16,7 @@ InterfaceFrame* _openedframe = NULL;
 
 InterfaceFrame::InterfaceFrame(int index) {
 	InterfaceFrame::children.resize(256);
+	InterfaceFrame::interfaces.resize(NUM_SUB_INTERFACES);
 	InterfaceFrame::index = index;
 	InterfaceFrame::render = false;
 	InterfaceFrame::renderAllInputText = false;
@@ -24,49 +25,51 @@ InterfaceFrame::InterfaceFrame(int index) {
 
 InterfaceFrame::InterfaceFrame(int index, double width, double height) {
 	InterfaceFrame::children.resize(256);
+	InterfaceFrame::interfaces.resize(NUM_SUB_INTERFACES);
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::renderAllLabels = false;
 	InterfaceFrame::index = index;
 	BasicInterface* contentPane = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, false, false);
 	contentPane->updateCoordinates();
-	InterfaceFrame::interfaces.push_back(contentPane);
+	InterfaceFrame::interfaces[contentPane->index = CONTENT_PANE] = contentPane;
 	BasicInterface* bounds = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, false, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
-	InterfaceFrame::interfaces.push_back(bounds);
+	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
 InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, double height) {
 	InterfaceFrame::children.resize(256);
+	InterfaceFrame::interfaces.resize(NUM_SUB_INTERFACES);
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::renderAllLabels = false;
 	InterfaceFrame::index = index;
 	BasicInterface* contentPane = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
 	contentPane->updateCoordinates();
-	interfaces.push_back(contentPane);
+	InterfaceFrame::interfaces[contentPane->index = CONTENT_PANE] = contentPane;
 	BasicInterface* bounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
-	interfaces.push_back(bounds);
+	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
 void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	InterfaceFrame::render = true;
 	BasicInterface* contentPane = new BasicInterface(x, width, -5.0, y, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
 	contentPane->updateCoordinates();
-	InterfaceFrame::interfaces.push_back(contentPane);
+	InterfaceFrame::interfaces[contentPane->index = CONTENT_PANE] = contentPane;
 	BasicInterface* bounds = new BasicInterface(x, width, -5.0, y, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
-	InterfaceFrame::interfaces.push_back(bounds);
+	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
 void InterfaceFrame::doOpen(int index, bool multi_open, bool pannable)
 {
 	if (frames[index] != this) {
-		InterfaceFrame *frame = frames[index];
+		InterfaceFrame* frame = frames[index];
 		if (frame) {
 			delete frame;
 			frames[index] = NULL;
@@ -227,12 +230,34 @@ void InputField::pass_characters(char* chars) {
 	}
 }
 
+bool InputField::can_type()
+{
+	BasicInterface& param = *InputField::border;
+	double aW = param.getActualWidth();
+	SelectObject(hDC, topBtnFont);
+	TEXTMETRIC tm;
+	GetTextMetrics(hDC, &tm);
+	long ave = tm.tmAveCharWidth;
+	int maxChars = aW / ave;
+	if (InputField::p_protected) 
+	{
+		if (InputField::pp_input.size() < maxChars)
+			return true;
+	}
+	else 
+	{
+		if (InputField::input.size() < maxChars)
+			return true;
+	}
+	return false;
+}
+
 
 CloseButton::CloseButton(InterfaceFrame* frame, double width, double height) {
 	CloseButton::frame = frame;
 	CloseButton::focus = false;
 	CloseButton::type = CLOSE_BUTTON;
-	BasicInterface* inter = frame->interfaces[0];
+	BasicInterface* inter = frame->interfaces[CONTENT_PANE];
 	double startX = (inter->getStartX() + inter->getWidth()) - width;
 	double startY = (inter->getStartY() + inter->getHeight()) - height;
 	BasicInterface* closeBorder = new BasicInterface(startX, width, 0.0, startY, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
@@ -343,7 +368,7 @@ void ClickButton::doAction() {
 		{
 		case CONN_OKAY_BUTTON:
 		{
-			Identity &id = *USER->getIdentity();
+			Identity& id = *USER->getIdentity();
 			id.callsign = connect_callsign->input.c_str();
 			id.login_name = connect_fullname->input.c_str();
 			id.username = connect_username->input.c_str();
@@ -499,29 +524,22 @@ void DisplayBox::doDrawing() {
 	int noncp = 2;
 	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
 		std::string text = DisplayBox::chat_lines[i]->getText();
+		CHAT_TYPE type = DisplayBox::chat_lines[i]->getType();
 		SIZE size = getTextExtent(text);
 		if (size.cx > param.getActualWidth()) {
 			std::vector<std::string> store;
 			wordWrap(store, text.c_str(), maxChars, 0);
-			int i3;
 			int s_size = store.size();
-			int timesShifted = 0;
-			while (timesShifted < (s_size - 1)) {
-				std::string temp = DisplayBox::chat_lines[0]->getText();
-				for (i3 = 0; i3 < i; i3++) {
-					DisplayBox::chat_lines[i3] = DisplayBox::chat_lines[i3 + 1];
-				}
-				DisplayBox::chat_lines[i]->setText(temp);
-				timesShifted++;
-			}
-			for (size_t i2 = 0; i2 < s_size; i2++) {
-				std::string s_text = store[i2];
-				DisplayBox::chat_lines[i - ((s_size - 1) - i2)]->setText(ltrim(s_text));
+			int timesShifted = 1;
+			DisplayBox::chat_lines[i]->setText(store[0]);
+			while (timesShifted < s_size) {
+				addLine(store[timesShifted++], type);
 			}
 		}
 	}
 	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
 		std::string text = DisplayBox::chat_lines[i]->getText();
+		//std::cout << text << ", " << i << std::endl;
 		double y, endY;
 		if (last_end_y != -1) {
 			y = (last_end_y - (y_height / 2));

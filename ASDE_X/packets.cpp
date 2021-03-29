@@ -33,6 +33,17 @@ void sendUserMessage(User &to, std::string message) {
 	intter->sendMessage(&out);
 }
 
+void sendPrivateMessage(User& to, std::string message) {
+	Stream& out = Stream(512);
+	out.createFrameVarSizeWord(_PRIVATE_MESSAGE);
+	out.writeWord(USER->getUserIndex());
+	out.writeWord(to.getUserIndex());
+	char* msg = s2ca1(message);
+	out.writeString(msg);
+	out.endFrameVarSizeWord();
+	intter->sendMessage(&out);
+}
+
 void sendFlightPlanRequest(User& user_for) {
 	Stream& out = Stream(5);
 	out.createFrame(_FLIGHT_PLAN_REQ);

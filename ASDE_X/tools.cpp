@@ -173,6 +173,32 @@ char* s2ca1(const std::string& s) {
 	return res;
 }
 
+void WordWrap(std::vector<std::string>& outputString, const std::string& inputString, unsigned int lineLength)
+{
+	std::istringstream iss(inputString);
+
+	std::string line;
+
+	do
+	{
+		std::string word;
+		iss >> word;
+
+		if (line.length() + word.length() > lineLength)
+		{
+			outputString.push_back(line);
+			line.clear();
+		}
+		line += word + " ";
+
+	} while (iss);
+
+	if (!line.empty())
+	{
+		outputString.push_back(line);
+	}
+}
+
 void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent) {
 	size_t count, buflen;
 	const char* ptr, * endptr;

@@ -13,4 +13,5 @@ User::User(std::string callSign, int type, int controllerRating, int pilotRating
 User::~User() {
 	delete User::aircraft;
 	delete User::identity;
+	delete User::private_messages;
 }

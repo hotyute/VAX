@@ -1,9 +1,23 @@
+#ifndef USER_H
+#define USER_H
+
+
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 #include "aircraft.h"
+#include "gui.h"
 
 class User;
+
+#ifndef Pmessages_h
+#define Pmessages_h
+struct PrivateMessages
+{
+	std::unordered_map<User*, ChatLine*> message_history;
+};
+#endif
 
 #ifndef Identity_user_h
 #define Identity_user_h
@@ -32,15 +46,15 @@ public:
 		return this->latitude;
 	}
 	void setLongitude(double value) {
-		this->longitude = value; 
+		this->longitude = value;
 	}
 	double getLongitude() {
 		return this->longitude;
 	}
-	Identity *getIdentity() {
+	Identity* getIdentity() {
 		return this->identity;
 	}
-	void setIdentity(Identity *userIdentity) {
+	void setIdentity(Identity* userIdentity) {
 		this->identity = userIdentity;
 	}
 	int getUserIndex() {
@@ -61,13 +75,19 @@ public:
 	void setAircraft(Aircraft* value) {
 		aircraft = value;
 	}
+	PrivateMessages* getPrivateMsgs() {
+		return private_messages;
+	}
 private:
 	int userIndex;
 	double latitude;
 	double longitude;
-	Identity *identity;
-	Aircraft *aircraft;
+	Identity* identity;
+	Aircraft* aircraft;
+	PrivateMessages* private_messages;
 	long long update_time;
 };
+#endif
+
 #endif
 
