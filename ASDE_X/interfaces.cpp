@@ -2,6 +2,9 @@
 
 void RenderConnect(double x_, double y_)
 {
+	if (connectFrame) {
+		delete connectFrame;
+	}
 	connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
 	connectFrame->title = "CONNECT";
 	int width = 300, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
@@ -59,10 +62,13 @@ void RenderConnect(double x_, double y_)
 	connectFrame->doOpen(false, true);
 }
 
-void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh) {
-	InterfaceFrame* pm_frame = frames[PRIVATE_MESSAGE_INTERFACE];
+void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, int index) {
+	InterfaceFrame* pm_frame = frames[index];
 	if (!pm_frame || refresh) {
-		pm_frame = new InterfaceFrame(PRIVATE_MESSAGE_INTERFACE);
+		if (pm_frame) {
+			delete pm_frame;
+		}
+		pm_frame = new InterfaceFrame(index);
 		pm_frame->title = "PRIVATE CHAT " + callsign;
 		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
@@ -91,7 +97,8 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh) {
 
 
 		pm_frame->doOpen(true, true);
-	} else {
+	}
+	else {
 		if (!pm_frame->render) {
 			pm_frame->doOpen(false, true);
 		}

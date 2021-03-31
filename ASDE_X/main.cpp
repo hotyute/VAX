@@ -368,7 +368,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_LBUTTONDOWN:
 	{
 		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
-		for (InterfaceFrame* frame : frames) {
+		for (auto it = frames.begin(); it != frames.end(); ++it) {
+			InterfaceFrame* frame = *(it);
 			if (frame && frame->render) {
 				BasicInterface* clicked2 = NULL;
 				for (BasicInterface* inter1 : frame->interfaces) {
@@ -430,6 +431,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				{
 					if (frame->s_pt)
 						delete frame->s_pt;
+					if (frames.back() != *it)
+						std::swap(frames[it - frames.begin()], frames.back()); //bring interface to the front
 					frame->s_pt = new POINT();
 					frame->s_pt->x = (int)(short)LOWORD(lParam);
 					frame->s_pt->y = (int)(short)HIWORD(lParam);
@@ -795,7 +798,17 @@ bool processCommands(std::string command)
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string call_sign = array3[1];
-			LoadPrivateChat(-1, -1, call_sign, true);
+
+			//TODO, make Private Chat User* (Pointer) oriented specific.
+			InterfaceFrame* pm_frame = frames[PRIVATE_MESSAGE_INTERFACE];
+			int index = PRIVATE_MESSAGE_INTERFACE;
+			int max = 10;
+			while (max > 0 && pm_frame && pm_frame->render) {
+				pm_frame = frames[index];
+				++index;
+				--max;
+			}
+			LoadPrivateChat(-1, -1, call_sign, true, index);
 		}
 		return true;
 	}
