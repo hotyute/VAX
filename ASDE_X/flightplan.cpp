@@ -48,7 +48,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		if (fp_frame) {
 			delete fp_frame;
 		}
-		fp_frame = new InterfaceFrame(FP_INTERFACE);
+		frames[FP_INTERFACE] = fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
 		int width = 500, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 250, y = y_ == -1 ?(CLIENT_HEIGHT / 2) - (height / 2) : y_;

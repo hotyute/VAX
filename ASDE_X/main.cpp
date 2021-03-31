@@ -756,8 +756,7 @@ void handleConnect() {
 	if (connectFrame == NULL) {
 		//TODO save X and Y positions when moved
 		RenderConnect(-1, -1);
-	}
-	else {
+	} else {
 		if (!connectFrame->render) {
 			connectFrame->doOpen(false, true);
 		}
