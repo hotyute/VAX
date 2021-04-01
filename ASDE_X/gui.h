@@ -16,7 +16,7 @@
 
 #define NUM_SUB_INTERFACES 2
 
-enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM };
+enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM, ATC };
 
 class InterfaceFrame;
 class ChildFrame;
@@ -66,6 +66,7 @@ public:
 	CHAT_TYPE getType();
 	void setText(std::string text);
 	std::string getText();
+	void playChatSound();
 };
 
 class InputField : public ChildFrame {
@@ -112,7 +113,7 @@ class ClickButton : public ChildFrame {
 private:
 	InterfaceFrame *frame;
 public:
-	ClickButton(InterfaceFrame*, std::string, double, double, double, double);
+	ClickButton(InterfaceFrame*, std::string, double x, double width, double y, double height);
 public:
 	std::string text;
 	void doDrawing();
@@ -160,6 +161,7 @@ public:
 	void doActionUp();
 	void doActionDown();
 	void addLine(std::string, CHAT_TYPE type);
+	void addLine(ChatLine* c);
 
 
 };
@@ -188,5 +190,7 @@ extern ChildFrame *focusChild, *lastFocus;
 extern std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 extern bool updateLastFocus;
 extern InterfaceFrame* _openedframe;
+
+
 
 #endif

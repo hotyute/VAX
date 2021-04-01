@@ -69,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 	loadUnknownBlip();
 
 	//PlaySound(L"Sounds/atcmessage.wav",NULL,SND_FILENAME|SND_ASYNC);
-	PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
+	//PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
 
 	/* The Window structure */
 	wincl.hInstance = hThisInstance;
@@ -848,6 +848,21 @@ bool processCommands(std::string command)
 				return true;
 			mirrors.erase(it2);
 		}
+		return true;
+	}
+	else if (boost::istarts_with(command, "/")) {
+		command.erase(0, 1);
+		for (size_t i = 0; i < userStorage1.size(); i++) {
+			User* curUsr = userStorage1[i];
+			if (curUsr != NULL && curUsr != USER) {
+				//sendUserMessage(*curUsr, command);
+			}
+		}
+		main_chat->resetReaderIdx();
+		ChatLine* c = new ChatLine(USER->getIdentity()->callsign + std::string(": ") + command, CHAT_TYPE::ATC);
+		main_chat->addLine(c);
+		c->playChatSound();
+		renderDrawings = true;
 		return true;
 	}
 	return false;

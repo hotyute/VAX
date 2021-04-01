@@ -24,7 +24,8 @@
  
 //If these are invoked as resources load them
 #ifdef RC_INVOKED
-IDW_SOUND1 WAVE "Sounds/atcmessage.wav"
+IDW_SOUND1 WAVE "../Sounds/atcmessage.wav"
+IDW_SOUND2 WAVE "../Sounds/error.wav"
 #endif
 
 static const int CLIENT_PORT = 6809;

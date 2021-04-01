@@ -1126,8 +1126,10 @@ void LoadInterfaces() {
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
+	ChatLine* c = new ChatLine("[ERROR! Unable to retrieve version]", CHAT_TYPE::ERRORS);
+	list2.push_back(c);
+	c->playChatSound();
 
 	main_chat = new DisplayBox(textBox, list2, 6, x + (controller_list_width + arrow_offset),
 		(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);

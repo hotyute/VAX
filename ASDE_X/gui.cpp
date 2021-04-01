@@ -239,12 +239,12 @@ bool InputField::can_type()
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
 	int maxChars = aW / ave;
-	if (InputField::p_protected) 
+	if (InputField::p_protected)
 	{
 		if (InputField::pp_input.size() < (maxChars - 1))
 			return true;
 	}
-	else 
+	else
 	{
 		if (InputField::input.size() < (maxChars - 1))
 			return true;
@@ -539,6 +539,7 @@ void DisplayBox::doDrawing() {
 	}
 	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
 		std::string text = DisplayBox::chat_lines[i]->getText();
+		CHAT_TYPE type = DisplayBox::chat_lines[i]->getType();
 		//std::cout << text << ", " << i << std::endl;
 		double y, endY;
 		if (last_end_y != -1) {
@@ -559,11 +560,39 @@ void DisplayBox::doDrawing() {
 			textXPos = x + noncp;
 		}
 		double textYPos = y - (tH / 2);
-		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+		switch (type) {
+		case CHAT_TYPE::MAIN:
+		{
+			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::ERRORS:
+		{
+			glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::SYSTEM:
+		{
+			glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::ATC:
+		{
+			glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
+		}
+		break;
+		default:
+		{
+			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+		}
+		break;
+		}
 		glRasterPos2f(textXPos, textYPos);
 		glPrint(text.c_str(), &topButtonBase);
 		last_end_y = endY;
 	}
+
+	glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 	int offsetX = 3, offsetY = 0;
 	int xLength = 8, yLength = 8;
 	int line_size = 2;
@@ -623,11 +652,8 @@ void DisplayBox::display_pos()
 	}
 }
 
-
-
-void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
+void DisplayBox::addLine(ChatLine* c) {
 	DisplayBox::chat_lines.erase(DisplayBox::chat_lines.begin());
-	ChatLine* c = new ChatLine(text, type);
 	DisplayBox::chat_lines.push_back(c);
 	if (chat_line_history.size() >= max_history)
 	{
@@ -637,6 +663,12 @@ void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
 	}
 	read_index++;
 	DisplayBox::chat_line_history.push_back(c);
+}
+
+
+void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
+	ChatLine* c = new ChatLine(text, type);
+	addLine(c);
 }
 
 void DisplayBox::doActionUp()
@@ -739,4 +771,33 @@ void ChatLine::setText(std::string text)
 std::string ChatLine::getText()
 {
 	return ChatLine::line;
+}
+
+void ChatLine::playChatSound()
+{
+	switch (ChatLine::type) {
+	case CHAT_TYPE::MAIN:
+	{
+	}
+	break;
+	case CHAT_TYPE::ERRORS:
+	{
+		PlaySound(MAKEINTRESOURCE(IDW_SOUND2), NULL, SND_RESOURCE | SND_ASYNC);
+	}
+	break;
+	case CHAT_TYPE::SYSTEM:
+	{
+
+	}
+	break;
+	case CHAT_TYPE::ATC:
+	{
+		PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
+	}
+	break;
+	default:
+	{
+	}
+	break;
+	}
 }

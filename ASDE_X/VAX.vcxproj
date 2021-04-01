@@ -137,6 +137,7 @@
     <ClInclude Include="point2d.h" />
     <ClInclude Include="projection.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="spline.h" />
     <ClInclude Include="spline2.h" />
     <ClInclude Include="Stream.h" />
@@ -147,6 +148,16 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="main.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wave1.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\Sounds\atcmessage.wav" />
+    <Media Include="..\Sounds\error.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
