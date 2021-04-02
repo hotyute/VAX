@@ -11,7 +11,7 @@ Aircraft::Aircraft() {
 		update_flags[i] = false;
 		render_flags[i] = false;
 	}
-	update_flags[COLLISION_TAG] = true;
+	update_flags[ACF_COLLISION_TAG] = true;
 	Aircraft::textTag1 = "";
 	Aircraft::textTag2 = "";
 	Aircraft::collText = "#CALLSIGN";

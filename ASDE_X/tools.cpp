@@ -470,6 +470,18 @@ double getBearing(double lat1, double lng1, double lat2, double lng2) {
 	return fmod((degrees(atan2(dLng, dPhi)) + 360.0), 360.0);
 }
 
+void addAircraftToMirrors(Aircraft* acf)
+{
+	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
+	{
+		Mirror* mir = (*it).second;
+
+		if (mir) {
+			mir->g_flags.emplace(acf, std::vector<unsigned int>(3)); // initialized to 0 by default
+		}
+	}
+}
+
 /*double computeHeading(double latitude1, double longitude1, double latitude2, double longitude2)
 {
 	double degToRad = PI / 180.0;

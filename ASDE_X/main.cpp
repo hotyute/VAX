@@ -193,8 +193,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setLongitude(-80.300770);
 			cur->setSpeed(0.0);
 			cur->setHeading(85.0);
-			cur->setUpdateFlag(CALLSIGN, true);
-			cur->setUpdateFlag(COLLISION, true);
+			cur->setUpdateFlag(ACF_CALLSIGN, true);
+			cur->setUpdateFlag(ACF_COLLISION, true);
 			cur->setCollision(true);
 			cur->setMode(1);
 			AcfMap[cur->getCallsign()] = cur;
@@ -212,8 +212,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setLongitude(-80.282544);
 			cur2->setSpeed(0.0);
 			cur2->setHeading(182.0);
-			cur2->setUpdateFlag(CALLSIGN, true);
-			cur2->setUpdateFlag(COLLISION, true);
+			cur2->setUpdateFlag(ACF_CALLSIGN, true);
+			cur2->setUpdateFlag(ACF_COLLISION, true);
 			cur2->setCollision(true);
 			cur2->setMode(1);
 			AcfMap[cur2->getCallsign()] = cur2;
@@ -221,7 +221,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		userStorage1[1] = user2;
 		cur->collisionAcf = cur2;
-		cur->setUpdateFlag(COLLISION_LINE, true);
+		cur->setUpdateFlag(ACF_COLLISION_LINE, true);
 
 		User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
 		Aircraft* cur3 = new Aircraft();
@@ -234,8 +234,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur3->setLongitude(-80.278852);
 			cur3->setSpeed(0.0);
 			cur3->setHeading(120.0);
-			cur3->setUpdateFlag(CALLSIGN, true);
-			cur3->setUpdateFlag(COLLISION, true);
+			cur3->setUpdateFlag(ACF_CALLSIGN, true);
+			cur3->setUpdateFlag(ACF_COLLISION, true);
 			cur3->setMode(1);
 			AcfMap[cur3->getCallsign()] = cur3;
 			cur3->unlock();
@@ -325,12 +325,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					resize = true;
 					renderSector = true;
 					renderButtons = true;
-					updateAllCallsigns = true;
+					updateFlags[GBL_CALLSIGN] = true;
 					renderLegend = true;
 					renderInterfaces = true;
 					renderDrawings = true;
 					renderConf = true;
-					updateAllCollisionLines = true;
+					updateFlags[GBL_COLLISION_LINE] = true;
 					zoom_phase = 2;
 				}
 			}
@@ -756,7 +756,8 @@ void handleConnect() {
 	if (connectFrame == NULL) {
 		//TODO save X and Y positions when moved
 		RenderConnect(-1, -1);
-	} else {
+	}
+	else {
 		if (!connectFrame->render) {
 			connectFrame->doOpen(false, true);
 		}
@@ -828,7 +829,7 @@ bool processCommands(std::string command)
 			if (!opened)
 			{
 				mir->renderBorder = true;
-				mir->renderAllCollisionLines = true;
+				mir->update_flags[MIR_COLLISION_LINE] = true;
 				mirrors.push_back(mir);
 			}
 		}
@@ -1015,22 +1016,27 @@ void pass_chars(char* chars) {
 }
 
 void preFlags() {
-	bool renderAllCollisionLines = false, renderAllCallsigns = false, renderAllCollision = false, renderAllCollTags = false;
-	if (updateAllCollisionLines) {
-		renderAllCollisionLines = true;
-		updateAllCollisionLines = false;
+	for (int i = 0; i < NUM_FLAGS; i++)
+	{
+		if (updateFlags[i]) {
+			renderFlags[i] = true;
+			updateFlags[i] = false;
+		}
 	}
-	if (updateAllCallsigns) {
-		renderAllCallsigns = true;
-		updateAllCallsigns = false;
-	}
-	if (updateAllCollision) {
-		renderAllCollision = true;
-		updateAllCollision = false;
-	}
-	if (updateAllCollTags) {
-		renderAllCollTags = true;
-		updateAllCollTags = false;
+
+	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
+	{
+		Mirror* mir = (*it).second;
+
+		if (mir)
+		{
+			for (size_t i = 0; i < MIR_FLAG_COUNT; i++) {
+				if (mir->update_flags[i]) {
+					mir->render_flags[i] = true;
+					mir->update_flags[i] = false;
+				}
+			}
+		}
 	}
 	if (AcfMap.size() > 0) {
 		std::map<std::string, Aircraft*>::iterator iter;
@@ -1038,29 +1044,15 @@ void preFlags() {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
-				if (aircraft->getUpdateFlag(COLLISION_LINE) || renderAllCollisionLines) {
-					aircraft->setRenderFlag(COLLISION_LINE, true);
-					aircraft->setUpdateFlag(COLLISION_LINE, false);
-				}
-				if (aircraft->getUpdateFlag(CALLSIGN) || renderAllCallsigns) {
-					aircraft->setRenderFlag(CALLSIGN, true);
-					aircraft->setUpdateFlag(CALLSIGN, false);
-				}
-				if (aircraft->getUpdateFlag(COLLISION) || renderAllCollision) {
-					aircraft->setRenderFlag(COLLISION, true);
-					aircraft->setUpdateFlag(COLLISION, false);
-				}
-				if (aircraft->getUpdateFlag(COLLISION_TAG) || renderAllCollTags) {
-					aircraft->setRenderFlag(COLLISION_TAG, true);
-					aircraft->setUpdateFlag(COLLISION_TAG, false);
+				for (size_t i = 0; i < ACF_FLAG_COUNT; i++) {
+					if (aircraft->getUpdateFlag(i)) {
+						aircraft->setRenderFlag(i, true);
+						aircraft->setUpdateFlag(i, false);
+					}
 				}
 			}
 		}
 	}
-	renderAllCollisionLines = false;
-	renderAllCallsigns = false;
-	renderAllCollision = false;
-	renderAllCollTags = false;
 }
 
 void resetFlags() {
@@ -1075,6 +1067,25 @@ void resetFlags() {
 					aircraft->setRenderFlag(i, false);
 				}
 			}
+		}
+	}
+	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
+	{
+		Mirror* mir = (*it).second;
+
+		if (mir)
+		{
+			for (size_t i = 0; i < MIR_FLAG_COUNT; i++) {
+				if (mir->render_flags[i]) {
+					mir->render_flags[i] = false;
+				}
+			}
+		}
+	}
+	for (int i = 0; i < NUM_FLAGS; i++)
+	{
+		if (renderFlags[i]) {
+			renderFlags[i] = false;
 		}
 	}
 }

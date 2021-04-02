@@ -2,6 +2,14 @@
 
 #include <boost/algorithm/string.hpp>
 
+Mirror::Mirror()
+{
+	for (size_t i = 0; i < MIR_FLAG_COUNT; i++) {
+		update_flags[i] = false;
+		render_flags[i] = false;
+	}
+}
+
 Mirror::~Mirror()
 {
 	g_flags.clear();

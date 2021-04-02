@@ -16,9 +16,11 @@ extern std::vector<Mirror*> mirrors;
 
 extern std::string heavy_text, regular_text;
 
-extern bool renderAircraft, renderSector, renderButtons,
-	renderLegend, updateAllCallsigns, updateAllCollTags, renderInterfaces,
-	renderInputTextFocus, renderConf, renderFocus, renderDrawings, what, updateAllCollision, updateAllCollisionLines;
+extern bool renderAircraft, renderSector, renderButtons, renderLegend, renderInterfaces,
+renderInputTextFocus, renderConf, renderFocus, renderDrawings, what;
+
+extern bool updateFlags[NUM_FLAGS];
+extern bool renderFlags[NUM_FLAGS];
 
 extern bool loadInterfaces;
 

@@ -17,10 +17,11 @@
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
-bool renderAircraft = false, renderSector = false, renderButtons = false,
-renderLegend = false, updateAllCallsigns = false, updateAllCollTags = false, renderInterfaces = false,
-renderInputTextFocus = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false,
-updateAllCollision = false, updateAllCollisionLines = false;
+bool renderAircraft = false, renderSector = false, renderButtons = false, renderLegend = false, renderInterfaces = false, 
+renderInputTextFocus = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false;
+
+bool updateFlags[NUM_FLAGS];
+bool renderFlags[NUM_FLAGS];
 
 bool loadInterfaces = false;
 
@@ -388,9 +389,6 @@ void DrawMirrorScenes(Mirror& mirror)
 			if (aircraft != NULL) {
 				aircraft_graphics(*aircraft, &mirror);
 			}
-		}
-		if (mirror.renderAllCollisionLines) {
-			mirror.renderAllCollisionLines = false;
 		}
 	}
 
@@ -1652,9 +1650,9 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	double acf_lat = aircraft.getLatitude();
 	double acf_lon = aircraft.getLongitude();
 	double acf_heading = aircraft.getHeading();
-	bool renderCallsign = aircraft.getRenderFlag(CALLSIGN);
-	bool renderCollTag = aircraft.getRenderFlag(COLLISION_TAG);
-	bool renderCollision = aircraft.getRenderFlag(COLLISION);
+	bool renderCallsign = aircraft.getRenderFlag(ACF_CALLSIGN);
+	bool renderCollTag = aircraft.getRenderFlag(ACF_COLLISION_TAG);
+	bool renderCollision = aircraft.getRenderFlag(ACF_COLLISION);
 	bool heavy = aircraft.isHeavy();
 	bool standby = aircraft.getMode() == 0 ? true : false;
 	aircraft.unlock();
@@ -1663,7 +1661,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	double a_size = get_asize(heavy, standby, zo);
 
 	if (!is_mirror) {
-		if (renderCollision) {
+		if (renderCollision || renderFlags[GBL_COLLISION]) {
 			if (aircraft.collisionDl != 0) {
 				glDeleteLists(aircraft.collisionDl, 1);
 				aircraft.collisionDl = 0;
@@ -1696,7 +1694,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	if (is_mirror)
 	{
 		//TODO make this more efficient, we shouldn't be searching an ordermap every single frame
-		if (aircraft.getRenderFlag(COLLISION_LINE)) {
+		if (aircraft.getRenderFlag(ACF_COLLISION_LINE) || mirror->render_flags[MIR_COLLISION_LINE]) {
 			updateCollisionLine(aircraft, mirror->g_flags[&aircraft][0], heavy, zo);
 		}
 
@@ -1706,7 +1704,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	}
 	else
 	{
-		if (aircraft.getRenderFlag(COLLISION_LINE)) {
+		if (aircraft.getRenderFlag(ACF_COLLISION_LINE) || renderFlags[GBL_COLLISION_LINE]) {
 			updateCollisionLine(aircraft, aircraft.collLineDL, heavy, zo);
 		}
 
@@ -1748,7 +1746,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	glPopMatrix();
 
 	if (!is_mirror) {
-		if (renderCallsign) {
+		if (renderCallsign || renderFlags[GBL_CALLSIGN]) {
 			if (aircraft.Ccallsign != 0) {
 				glDeleteLists(aircraft.Ccallsign, 1);
 				aircraft.Ccallsign = 0;
@@ -1779,7 +1777,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 
 	if (!is_mirror) {
-		if (renderCollTag) {
+		if (renderCollTag || renderFlags[GBL_COLLISION_TAG]) {
 			if (aircraft.Ccolltext != 0)
 			{
 				glDeleteLists(aircraft.Ccolltext, 1);
@@ -1833,8 +1831,8 @@ void preFileRender() {
 				double acf_lat = aircraft.getLatitude();
 				double acf_lon = aircraft.getLongitude();
 				double acf_heading = aircraft.getHeading();
-				bool renderCallsign = aircraft.getRenderFlag(CALLSIGN);
-				bool renderCollision = aircraft.getRenderFlag(COLLISION);
+				bool renderCallsign = aircraft.getRenderFlag(ACF_CALLSIGN);
+				bool renderCollision = aircraft.getRenderFlag(ACF_COLLISION);
 				bool heavy = aircraft.isHeavy();
 				bool standby = aircraft.getMode() == 0 ? true : false;
 
@@ -1844,15 +1842,7 @@ void preFileRender() {
 
 				glDeleteLists(aircraft.collLineDL, 1);
 
-				for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
-				{
-					Mirror* mir = (*it).second;
-
-					if (mir)
-					{
-						mir->g_flags.emplace(acf, std::vector<unsigned int>(3)); // initialized to 0 by default
-					}
-				}
+				addAircraftToMirrors(acf);
 			}
 		}
 	}

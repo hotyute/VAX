@@ -15,11 +15,14 @@ private:
 	int x_, y_, width, height;
 	double zoom_, lat_, lon_;
 public:
+	Mirror();
 	~Mirror();
 	std::string id_;
 	std::unordered_map<Aircraft*, std::vector<unsigned int>> g_flags;
 	int borderDl;
-	bool renderBorder, renderAllCollisionLines;
+	bool renderBorder;
+	bool update_flags[MIR_FLAG_COUNT];
+	bool render_flags[MIR_FLAG_COUNT];
 	int getX() { return x_; }
 	int getY() { return y_; }
 	void setX(int x) { x_ = x; }

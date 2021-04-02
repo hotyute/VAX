@@ -1,6 +1,7 @@
 #include "usermanager.h"
 #include "main.h"
 #include "renderer.h"
+#include "tools.h"
 
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
@@ -37,11 +38,12 @@ void decodePackets(int opCode, Stream &stream) {
 			Aircraft *aircraft1 = new Aircraft();
 			aircraft1->lock();
 			aircraft1->setCallsign(callSign1);
-			aircraft1->setUpdateFlag(CALLSIGN, true);
-			aircraft1->setUpdateFlag(COLLISION, true);
+			aircraft1->setUpdateFlag(ACF_CALLSIGN, true);
+			aircraft1->setUpdateFlag(ACF_COLLISION, true);
 			aircraft1->setMode(squawkMode);
 			aircraft1->unlock();
 			user1->setAircraft(aircraft1);
+			addAircraftToMirrors(aircraft1);
 			users_map.emplace(user1->getAircraft()->getCallsign(), user1);
 		}
 		user1->setUserIndex(index);
