@@ -1854,7 +1854,7 @@ void preFileRender() {
 			// iterator->first = key
 			Aircraft* acf = iter->second;
 			if (acf != NULL) {
-				Aircraft aircraft = *acf;
+				Aircraft &aircraft = *acf;
 				double acf_lat = aircraft.getLatitude();
 				double acf_lon = aircraft.getLongitude();
 				double acf_heading = aircraft.getHeading();

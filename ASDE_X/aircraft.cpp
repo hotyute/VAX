@@ -21,6 +21,7 @@ Aircraft::Aircraft() {
 
 Aircraft::~Aircraft()
 {
+	std::cout << "hello" << std::endl;
 	delete Aircraft::flight_plan;
 }
 

@@ -33,6 +33,7 @@ public:
 	std::string title;
 	std::vector<BasicInterface*> interfaces;
 	std::vector<ChildFrame*> children;
+	~InterfaceFrame();
 	InterfaceFrame(int);
 	InterfaceFrame(int, double, double);
 	InterfaceFrame(int, double, double, double, double);
@@ -43,6 +44,7 @@ public:
 
 class ChildFrame {
 public:
+	virtual ~ChildFrame();
 	std::vector<BasicInterface*> child_interfaces;
 	BasicInterface *border;
 	int type;
@@ -73,6 +75,7 @@ class InputField : public ChildFrame {
 private:
 	InterfaceFrame *frame;
 public:
+	virtual ~InputField();
 	InputField(InterfaceFrame*, double, double);
 	InputField(InterfaceFrame*, double, double, double, double, double, double);
 public:

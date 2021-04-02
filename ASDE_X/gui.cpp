@@ -55,6 +55,23 @@ InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, doub
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
+InterfaceFrame::~InterfaceFrame()
+{
+	auto it = interfaces.begin();
+	while (it != interfaces.end()) {
+		BasicInterface* bi = (*it);
+		it = interfaces.erase(it);
+		delete bi;
+	}
+
+	auto it2 = children.begin();
+	while (it2 != children.end()) {
+		ChildFrame* cf = (*it2);
+		it2 = children.erase(it2);
+		delete cf;
+	}
+}
+
 void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	InterfaceFrame::render = true;
 	BasicInterface* contentPane = new BasicInterface(x, width, -5.0, y, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
@@ -143,6 +160,10 @@ InputField::InputField(InterfaceFrame* frame, double x, double width, double pad
 	fieldBounds->updateCoordinates();
 	InputField::border = fieldBounds;
 	InputField::child_interfaces.push_back(fieldBounds);
+}
+
+InputField::~InputField()
+{
 }
 
 void InputField::doDrawing() {
@@ -801,3 +822,16 @@ void ChatLine::playChatSound()
 	break;
 	}
 }
+
+ChildFrame::~ChildFrame()
+{
+	auto it = child_interfaces.begin();
+	while (it != child_interfaces.end()) {
+		BasicInterface* bi = (*it);
+		it = child_interfaces.erase(it);
+		delete bi;
+	}
+
+	//no need to delete "border" as it's stored in child_interfaces
+}
+
