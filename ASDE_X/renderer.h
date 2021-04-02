@@ -32,7 +32,7 @@ extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase
 extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont, errorFont;
 
 static const int scale[] = {4, 60};
-static const int LOCKED_FPS = 30;
+static const int LOCKED_FPS = 60;
 static const double NM_PER_DEG = 60.0;
 static const double MIN_ZOOM = 0.00002;
 static const double MAX_ZOOM = 30.0;

@@ -19,6 +19,8 @@ public:
 	~Mirror();
 	std::string id_;
 	std::unordered_map<Aircraft*, std::vector<unsigned int>> g_flags;
+	POINT* s_pt = nullptr, * cur_pt = nullptr, * end_pt = nullptr;
+	int startX = -1, startY = -1;
 	int borderDl;
 	bool renderBorder;
 	bool update_flags[MIR_FLAG_COUNT];

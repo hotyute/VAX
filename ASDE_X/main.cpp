@@ -34,6 +34,7 @@ bool done = false, connected = false;
 const int proto_version = 32698;
 
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
+Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * textField = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
@@ -165,6 +166,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_CONNECT, L"&Connect to Sever...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
+		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
 		AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
 
 		SetMenu(hwnd, hMenuBar);
@@ -276,20 +278,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		if (dragged && dragged_bounds && dragged->pannable)
 		{
-			RECT mainWindowRect;
-			if (dragged->cur_pt)
-				delete dragged->cur_pt;
-			dragged->cur_pt = new POINT();
-			int windowWidth, windowHeight;
+			if (!dragged->cur_pt) {
+				dragged->cur_pt = new POINT();
+			}
 
 			dragged->cur_pt->x = (int)(short)LOWORD(lParam);
 			dragged->cur_pt->y = (int)(short)HIWORD(lParam);
 
-			windowHeight = dragged_bounds->getStartY() - dragged_bounds->getEndY();
-			windowWidth = dragged_bounds->getStartX() - dragged_bounds->getEndX();
-
 
 			dragged->move_bound = dragged_bounds;
+		}
+		else if (dragged_mir)
+		{
+			if (!dragged_mir->cur_pt) {
+				dragged_mir->cur_pt = new POINT();
+			}
+
+			dragged_mir->cur_pt->x = (int)(short)LOWORD(lParam);
+			dragged_mir->cur_pt->y = (int)(short)HIWORD(lParam);
+
+			double dx = dragged_mir->cur_pt->x - dragged_mir->s_pt->x;
+			double dy = dragged_mir->cur_pt->y - dragged_mir->s_pt->y;
+
+			dragged_mir->setX(dragged_mir->startX + dx);
+			dragged_mir->setY(dragged_mir->startY + -dy);
 		}
 	}
 	break;
@@ -368,6 +380,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_LBUTTONDOWN:
 	{
 		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
+		bool clicked_interface = false;
 		for (auto it = frames.begin(); it != frames.end(); ++it) {
 			InterfaceFrame* frame = *(it);
 			if (frame && frame->render) {
@@ -426,18 +439,45 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							clicked1->doAction();
 						}
 					}
+					clicked_interface = true;
 				}
 				else if (clicked2 != NULL)
 				{
-					if (frame->s_pt)
-						delete frame->s_pt;
+					if (!frame->s_pt)
+						frame->s_pt = new POINT();
 					if (frames.back() != *it)
 						std::swap(frames[it - frames.begin()], frames.back()); //bring interface to the front
-					frame->s_pt = new POINT();
 					frame->s_pt->x = (int)(short)LOWORD(lParam);
 					frame->s_pt->y = (int)(short)HIWORD(lParam);
 					dragged = frame;
 					dragged_bounds = clicked2;
+					clicked_interface = true;
+				}
+			}
+		}
+		if (!clicked_interface)
+		{
+			//check for mirrors
+			for (Mirror* mir : mirrors) {
+				if (mir)
+				{
+					Mirror& mirror = *mir;
+					int b_offset_Y = mirror.getHeight() * 0.25;
+					double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
+					int vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
+					int vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
+					bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+					if (clicked) {
+						if (!mir->s_pt) {
+							mir->s_pt = new POINT();
+						}
+						mir->s_pt->x = (int)(short)LOWORD(lParam);
+						mir->s_pt->y = (int)(short)HIWORD(lParam);
+						mir->startX = mir->getX();
+						mir->startY = mir->getY();
+						dragged_mir = mir;
+						break;
+					}
 				}
 			}
 		}
@@ -483,17 +523,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				}
 			}
 
+			delete dragged->s_pt;
 			dragged->s_pt = nullptr;
+			delete dragged->cur_pt;
 			dragged->cur_pt = nullptr;
+			delete dragged->end_pt;
 			dragged->end_pt = nullptr;
 			dragged = nullptr;
 			dragged_bounds = nullptr;
+		}
+		else if (dragged_mir)
+		{
+			delete dragged_mir->s_pt;
+			dragged_mir->s_pt = nullptr;
+			delete dragged_mir->cur_pt;
+			dragged_mir->cur_pt = nullptr;
+			delete dragged_mir->end_pt;
+			dragged_mir->end_pt = nullptr;
+			dragged_mir = nullptr;
 		}
 	}
 	break;
 	case WM_KEYDOWN:
 	{
-		//std::cout << wParam << std::endl;
+		std::cout << wParam << std::endl;
 		if (wParam == VK_F1) {
 		}
 		else if (wParam == VK_F2) {
@@ -540,6 +593,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_TAB) {
+
+		}
+		else if (wParam == 0x11) {//control (any)
+
+		}
+		else if (wParam == VK_LCONTROL) {
+			
+		}
+		else if (wParam == VK_RCONTROL) {
+		}
+		else if (wParam == 0xFF) {//FN Key
+
 		}
 		else if (wParam == VK_RETURN) {
 			if (focusChild != NULL) {
@@ -707,13 +772,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				InterfaceFrame& frame = *focusField.getFrame();
 				if (focusField.editable) {
 					if (frame.interfaces[FRAME_BOUNDS]) {
-						if (focusField.can_type()) {
-							if (focusField.input.size() > 0) {
-								focusField.popInput();
+						BYTE keyboardState[256];
+						::GetKeyboardState(keyboardState);
+						WORD ascii;
+						int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
+						if (len == 1) {
+							if (focusField.can_type()) {
+								if (focusField.input.size() > 0) {
+									focusField.popInput();
+								}
+								focusField.pushInput(false, c2);
+								focusField.pushInput(true, input_cursor);
+								renderInputTextFocus = true;
 							}
-							focusField.pushInput(false, c2);
-							focusField.pushInput(true, input_cursor);
-							renderInputTextFocus = true;
 						}
 					}
 				}

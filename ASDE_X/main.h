@@ -1,21 +1,23 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <windows.h>
+#include "gui.h"
+#include "constants.h"
+#include "flightplan.h"
+
 #define IDC_STATIC -1
 #define IDR_MYMENU 101
 #define IDD_ABOUT 102
 #define MyIcon 110
 #define ID_FILE_EXIT 40001
 #define ID_FILE_CONNECT 40002
-#include <windows.h>
-#include "gui.h"
-#include "constants.h"
-#include "flightplan.h"
 
 #define ID_HELP_ABOUT 40003
 #define ID_BUTTON 40004
 #define ID_TEXT 40005
 #define ID_FILE_OPEN 40006
+#define ID_SETTINGS_DEPARTS 40007
 
 #define IDW_SOUND1 1000
 #define IDW_SOUND2 1001
