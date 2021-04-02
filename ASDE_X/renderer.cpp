@@ -145,6 +145,33 @@ void ResizeGLScene() {
 	SetView(CENTER_LAT, CENTER_LON);
 }
 
+void ResizeInterfaceGLScene() {
+	int w_width = CLIENT_WIDTH;
+	if (w_width < FIXED_CLIENT_WIDTH) {
+		w_width = FIXED_CLIENT_WIDTH;
+	}
+	int w_height = CLIENT_HEIGHT;
+	if (w_height < FIXED_CLIENT_HEIGHT) {
+		w_height = FIXED_CLIENT_HEIGHT;
+	}
+
+	glViewport(0, 0, w_width, w_height);
+	glScissor(0, 0, w_width, w_height);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
+
+	int viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
 void SetView(double latitude, double longitude) {
 	gluLookAt(longitude, latitude, 0, longitude, latitude, -1, 0, 1, 0);
 }
@@ -1849,31 +1876,10 @@ void preFileRender() {
 }
 
 void CallInterfaces() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-
 	for (InterfaceFrame* frame : frames) {
 		if (frame)
 		{
-			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
-			glLoadIdentity();
-			gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-			int viewport[4];
-			glGetIntegerv(GL_VIEWPORT, viewport);
-
-			//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
 
 			if (frame->cur_pt && frame->s_pt)
 			{
@@ -1886,42 +1892,18 @@ void CallInterfaces() {
 			{
 				glCallList(frame->interfaceDl);
 			}
-			//Restore old ortho
-			glPopMatrix();
-			glMatrixMode(GL_PROJECTION);
 
 			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
 		}
 	}
 }
 
 void CallDrawings() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
 
 	for (InterfaceFrame* frame : frames) {
 		if (frame)
 		{
-			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
-			glLoadIdentity();
-			gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-			int viewport[4];
-			glGetIntegerv(GL_VIEWPORT, viewport);
-
-			//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
 
 			if (frame->cur_pt && frame->s_pt)
 			{
@@ -1935,42 +1917,16 @@ void CallDrawings() {
 				glCallList(frame->drawingDl);
 			}
 
-			//Restore old ortho
 			glPopMatrix();
-			glMatrixMode(GL_PROJECTION);
-
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
 		}
 	}
 }
 
 void CallFocuses() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-
 	for (InterfaceFrame* frame : frames) {
 		if (frame)
 		{
-			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
-			glLoadIdentity();
-			gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-			int viewport[4];
-			glGetIntegerv(GL_VIEWPORT, viewport);
-
-			//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
 
 			if (frame->cur_pt && frame->s_pt)
 			{
@@ -1984,38 +1940,13 @@ void CallFocuses() {
 				glCallList(frame->focusDl);
 			}
 
-			//Restore old ortho
 			glPopMatrix();
-			glMatrixMode(GL_PROJECTION);
-
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
 		}
 	}
 }
 
 void CallLabels(InterfaceFrame* frame, Label* label) {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
 
 	if (frame->cur_pt && frame->s_pt)
 	{
@@ -2029,36 +1960,11 @@ void CallLabels(InterfaceFrame* frame, Label* label) {
 		glCallList(label->labelTextDl);
 	}
 
-	//Restore old ortho
 	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 }
 
 void CallInputTexts(InterfaceFrame* frame, InputField* field) {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
 
 	if (frame->cur_pt && frame->s_pt)
 	{
@@ -2072,10 +1978,5 @@ void CallInputTexts(InterfaceFrame* frame, InputField* field) {
 		glCallList(field->inputTextDl);
 	}
 
-	//Restore old ortho
 	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 }

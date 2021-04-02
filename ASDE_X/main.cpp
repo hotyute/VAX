@@ -958,8 +958,12 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	while (!done) {
 		start = boost::posix_time::microsec_clock::local_time();
 		preFlags();
+
+		//Draw Main Scene
 		ResizeGLScene();
 		DrawGLScene();
+
+		//Draw Sub Scenes
 		for (Mirror* mirror : mirrors) {
 			if (mirror)
 			{
@@ -967,11 +971,11 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 				DrawMirrorScenes(*mirror);
 			}
 		}
-		if (mirrors.size() > 0)
-		{
-			ResizeGLScene();
-		}
+
+		//Draw Interface Scene
+		ResizeInterfaceGLScene();
 		DrawInterfaces();
+
 		resetFlags();
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR) {

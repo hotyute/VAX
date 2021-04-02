@@ -65,6 +65,7 @@ const static float title_clr[] = { 0.78431372549f, 0.78431372549f, 0.78431372549
 void InitOpenGL(GLvoid);
 void ResizeMirrorGLScene(Mirror& mirror);
 void ResizeGLScene();
+void ResizeInterfaceGLScene();
 void ResizeMirrorGLScene(Mirror*);
 void SetView(double, double);
 void DrawGLScene();
