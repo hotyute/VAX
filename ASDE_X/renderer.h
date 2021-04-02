@@ -17,8 +17,8 @@ extern std::vector<Mirror*> mirrors;
 extern std::string heavy_text, regular_text;
 
 extern bool renderAircraft, renderSector, renderButtons,
-	renderLegend, renderAllCallsigns, renderAllCollTags, renderInterfaces,
-	renderInputTextFocus, renderConf, renderFocus, renderDrawings, what, renderAllCollision, renderAllCollisionLines;
+	renderLegend, updateAllCallsigns, updateAllCollTags, renderInterfaces,
+	renderInputTextFocus, renderConf, renderFocus, renderDrawings, what, updateAllCollision, updateAllCollisionLines;
 
 extern bool loadInterfaces;
 

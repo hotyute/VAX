@@ -193,8 +193,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setLongitude(-80.300770);
 			cur->setSpeed(0.0);
 			cur->setHeading(85.0);
-			cur->setRenderCallsign(true);
-			cur->setRenderCollision(true);
+			cur->setUpdateFlag(CALLSIGN, true);
+			cur->setUpdateFlag(COLLISION, true);
 			cur->setCollision(true);
 			cur->setMode(1);
 			AcfMap[cur->getCallsign()] = cur;
@@ -212,8 +212,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setLongitude(-80.282544);
 			cur2->setSpeed(0.0);
 			cur2->setHeading(182.0);
-			cur2->setRenderCallsign(true);
-			cur2->setRenderCollision(true);
+			cur2->setUpdateFlag(CALLSIGN, true);
+			cur2->setUpdateFlag(COLLISION, true);
 			cur2->setCollision(true);
 			cur2->setMode(1);
 			AcfMap[cur2->getCallsign()] = cur2;
@@ -221,7 +221,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		userStorage1[1] = user2;
 		cur->collisionAcf = cur2;
-		cur->setCollLine(true);
+		cur->setUpdateFlag(COLLISION_LINE, true);
 
 		User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
 		Aircraft* cur3 = new Aircraft();
@@ -234,8 +234,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur3->setLongitude(-80.278852);
 			cur3->setSpeed(0.0);
 			cur3->setHeading(120.0);
-			cur3->setRenderCallsign(true);
-			cur3->setRenderCollision(true);
+			cur3->setUpdateFlag(CALLSIGN, true);
+			cur3->setUpdateFlag(COLLISION, true);
 			cur3->setMode(1);
 			AcfMap[cur3->getCallsign()] = cur3;
 			cur3->unlock();
@@ -325,12 +325,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					resize = true;
 					renderSector = true;
 					renderButtons = true;
-					renderAllCallsigns = true;
+					updateAllCallsigns = true;
 					renderLegend = true;
 					renderInterfaces = true;
 					renderDrawings = true;
 					renderConf = true;
-					renderAllCollisionLines = true;
+					updateAllCollisionLines = true;
 					zoom_phase = 2;
 				}
 			}
@@ -1015,6 +1015,52 @@ void pass_chars(char* chars) {
 }
 
 void preFlags() {
+	bool renderAllCollisionLines = false, renderAllCallsigns = false, renderAllCollision = false, renderAllCollTags = false;
+	if (updateAllCollisionLines) {
+		renderAllCollisionLines = true;
+		updateAllCollisionLines = false;
+	}
+	if (updateAllCallsigns) {
+		renderAllCallsigns = true;
+		updateAllCallsigns = false;
+	}
+	if (updateAllCollision) {
+		renderAllCollision = true;
+		updateAllCollision = false;
+	}
+	if (updateAllCollTags) {
+		renderAllCollTags = true;
+		updateAllCollTags = false;
+	}
+	if (AcfMap.size() > 0) {
+		std::map<std::string, Aircraft*>::iterator iter;
+		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+			// iterator->first = key
+			Aircraft* aircraft = iter->second;
+			if (aircraft != NULL) {
+				if (aircraft->getUpdateFlag(COLLISION_LINE) || renderAllCollisionLines) {
+					aircraft->setRenderFlag(COLLISION_LINE, true);
+					aircraft->setUpdateFlag(COLLISION_LINE, false);
+				}
+				if (aircraft->getUpdateFlag(CALLSIGN) || renderAllCallsigns) {
+					aircraft->setRenderFlag(CALLSIGN, true);
+					aircraft->setUpdateFlag(CALLSIGN, false);
+				}
+				if (aircraft->getUpdateFlag(COLLISION) || renderAllCollision) {
+					aircraft->setRenderFlag(COLLISION, true);
+					aircraft->setUpdateFlag(COLLISION, false);
+				}
+				if (aircraft->getUpdateFlag(COLLISION_TAG) || renderAllCollTags) {
+					aircraft->setRenderFlag(COLLISION_TAG, true);
+					aircraft->setUpdateFlag(COLLISION_TAG, false);
+				}
+			}
+		}
+	}
+	renderAllCollisionLines = false;
+	renderAllCallsigns = false;
+	renderAllCollision = false;
+	renderAllCollTags = false;
 }
 
 void resetFlags() {
@@ -1024,23 +1070,12 @@ void resetFlags() {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
-				if (aircraft->getCollLine())
-					aircraft->setCollLine(false);
+				for (int i = 0; i < ACF_FLAG_COUNT; i++)
+				{
+					aircraft->setRenderFlag(i, false);
+				}
 			}
 		}
-	}
-
-	if (renderAllCallsigns) {
-		renderAllCallsigns = false;
-	}
-	if (renderAllCollisionLines) {
-		renderAllCollisionLines = false;
-	}
-	if (renderAllCollision) {
-		renderAllCollision = false;
-	}
-	if (renderAllCollTags) {
-		renderAllCollTags = false;
 	}
 }
 

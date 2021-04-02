@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 
+#include "constants.h"
+
 #ifndef AIRCRAFT_H
 #define AIRCRAFT_H
 
@@ -32,8 +34,8 @@ class Aircraft {
 private:
 	HANDLE aMutex;
 	int index;
-	bool renderCallsign, renderCollision, renderCollTag;
-	bool flags[2];
+	bool render_flags[ACF_FLAG_COUNT];
+	bool update_flags[ACF_FLAG_COUNT];
 	bool collision;
 	bool heavy;
 	int mode;
@@ -52,12 +54,8 @@ public:
 	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0, collLineDL = 0, collLine2DL = 0;
 	int getIndex();
 	void setIndex(int);
-	bool getRenderCallsign();
-	void setRenderCallsign(bool);
-	bool getRenderCollTag();
-	void setRenderCollTag(bool value);
-	bool getRenderCollision();
-	void setRenderCollision(bool value);
+	bool getRenderFlag(int flag);
+	void setRenderFlag(int flag, bool val);
 	FlightPlan* getFlightPlan();
 	std::string getCallsign();
 	void setCallsign(std::string);
@@ -91,8 +89,8 @@ public:
 	void setHeavy(bool);
 	int getMode();
 	void setMode(int);
-	bool getCollLine() { return flags[0]; }
-	void setCollLine(bool flag) { flags[0] = flag; }
+	bool getUpdateFlag(int flag) { return update_flags[flag]; }
+	void setUpdateFlag(int flag, bool val) { update_flags[flag] = val; }
 };
 #endif
 

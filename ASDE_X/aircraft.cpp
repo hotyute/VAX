@@ -5,14 +5,13 @@ Aircraft::Aircraft() {
 	Aircraft::mode = 0;
 	Aircraft::squawkCode = "0000";
 	Aircraft::flight_plan = new FlightPlan();
-	renderCallsign = false;
-	renderCollision = false;
-	renderCollTag = true;
 	collision = false;
 	collisionAcf = nullptr;
-	for (size_t i = 0; i < sizeof(flags) / sizeof(bool); i++) {
-		flags[i] = false;
+	for (size_t i = 0; i < ACF_FLAG_COUNT; i++) {
+		update_flags[i] = false;
+		render_flags[i] = false;
 	}
+	update_flags[COLLISION_TAG] = true;
 	Aircraft::textTag1 = "";
 	Aircraft::textTag2 = "";
 	Aircraft::collText = "#CALLSIGN";
@@ -35,28 +34,14 @@ void Aircraft::setIndex(int value) {
 	Aircraft::index = value;
 }
 
-bool Aircraft::getRenderCallsign() {
-	return Aircraft::renderCallsign;
+bool Aircraft::getRenderFlag(int flag)
+{
+	return Aircraft::render_flags[flag];
 }
 
-void Aircraft::setRenderCallsign(bool value) {
-	Aircraft::renderCallsign = value;
-}
-
-bool Aircraft::getRenderCollTag() {
-	return Aircraft::renderCollTag;
-}
-
-void Aircraft::setRenderCollTag(bool value) {
-	Aircraft::renderCollTag = value;
-}
-
-bool Aircraft::getRenderCollision() {
-	return Aircraft::renderCollision;
-}
-
-void Aircraft::setRenderCollision(bool value) {
-	Aircraft::renderCollision = value;
+void Aircraft::setRenderFlag(int flag, bool val)
+{
+	Aircraft::render_flags[flag] = val;
 }
 
 FlightPlan* Aircraft::getFlightPlan()

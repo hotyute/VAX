@@ -18,9 +18,9 @@ std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
 bool renderAircraft = false, renderSector = false, renderButtons = false,
-renderLegend = false, renderAllCallsigns = false, renderAllCollTags = false, renderInterfaces = false,
+renderLegend = false, updateAllCallsigns = false, updateAllCollTags = false, renderInterfaces = false,
 renderInputTextFocus = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false,
-renderAllCollision = false, renderAllCollisionLines = false;
+updateAllCollision = false, updateAllCollisionLines = false;
 
 bool loadInterfaces = false;
 
@@ -603,7 +603,7 @@ void RenderLegend() {
 	glPushMatrix();
 	glLoadIdentity();
 
-	
+
 
 	glColor3f(heavy_clr[0], heavy_clr[1], heavy_clr[2]);
 	glRasterPos2f(18, 35);
@@ -1652,9 +1652,9 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	double acf_lat = aircraft.getLatitude();
 	double acf_lon = aircraft.getLongitude();
 	double acf_heading = aircraft.getHeading();
-	bool renderCallsign = aircraft.getRenderCallsign();
-	bool renderCollTag = aircraft.getRenderCollTag();
-	bool renderCollision = aircraft.getRenderCollision();
+	bool renderCallsign = aircraft.getRenderFlag(CALLSIGN);
+	bool renderCollTag = aircraft.getRenderFlag(COLLISION_TAG);
+	bool renderCollision = aircraft.getRenderFlag(COLLISION);
 	bool heavy = aircraft.isHeavy();
 	bool standby = aircraft.getMode() == 0 ? true : false;
 	aircraft.unlock();
@@ -1663,13 +1663,12 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	double a_size = get_asize(heavy, standby, zo);
 
 	if (!is_mirror) {
-		if (renderCollision || renderAllCollision) {
+		if (renderCollision) {
 			if (aircraft.collisionDl != 0) {
 				glDeleteLists(aircraft.collisionDl, 1);
 				aircraft.collisionDl = 0;
 			}
 			DrawCircle(aircraft, heavy, longitude, latitude, 100);
-			aircraft.setRenderCollision(false);
 		}
 	}
 
@@ -1697,22 +1696,17 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	if (is_mirror)
 	{
 		//TODO make this more efficient, we shouldn't be searching an ordermap every single frame
-		auto it = get_flags(mirror->g_flags, &aircraft);
-		bool found_store = it != mirror->g_flags.end();
-		if (found_store)
-		{
-			if (aircraft.getCollLine() || mirror->renderAllCollisionLines) {
-				updateCollisionLine(aircraft, (*it).second[0], heavy, zo);
-			}
+		if (aircraft.getRenderFlag(COLLISION_LINE)) {
+			updateCollisionLine(aircraft, mirror->g_flags[&aircraft][0], heavy, zo);
+		}
 
-			if (aircraft.isCollision()) {
-				glCallList((*it).second[0]);
-			}
+		if (aircraft.isCollision()) {
+			glCallList(mirror->g_flags[&aircraft][0]);
 		}
 	}
 	else
 	{
-		if (aircraft.getCollLine() || renderAllCollisionLines) {
+		if (aircraft.getRenderFlag(COLLISION_LINE)) {
 			updateCollisionLine(aircraft, aircraft.collLineDL, heavy, zo);
 		}
 
@@ -1754,13 +1748,12 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	glPopMatrix();
 
 	if (!is_mirror) {
-		if (renderCallsign || renderAllCallsigns) {
+		if (renderCallsign) {
 			if (aircraft.Ccallsign != 0) {
 				glDeleteLists(aircraft.Ccallsign, 1);
 				aircraft.Ccallsign = 0;
 			}
 			RenderCallsign(aircraft, heavy, latitude, longitude);
-			aircraft.setRenderCallsign(false);
 		}
 	}
 
@@ -1786,14 +1779,13 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 
 	if (!is_mirror) {
-		if (renderCollTag || renderAllCollTags) {
-			if (aircraft.Ccolltext != 0) 
+		if (renderCollTag) {
+			if (aircraft.Ccolltext != 0)
 			{
 				glDeleteLists(aircraft.Ccolltext, 1);
 				aircraft.Ccolltext = 0;
 			}
 			RenderCollisionTag(aircraft, heavy, latitude, longitude);
-			aircraft.setRenderCollTag(false);
 		}
 	}
 
@@ -1841,8 +1833,8 @@ void preFileRender() {
 				double acf_lat = aircraft.getLatitude();
 				double acf_lon = aircraft.getLongitude();
 				double acf_heading = aircraft.getHeading();
-				bool renderCallsign = aircraft.getRenderCallsign();
-				bool renderCollision = aircraft.getRenderCollision();
+				bool renderCallsign = aircraft.getRenderFlag(CALLSIGN);
+				bool renderCollision = aircraft.getRenderFlag(COLLISION);
 				bool heavy = aircraft.isHeavy();
 				bool standby = aircraft.getMode() == 0 ? true : false;
 

@@ -94,7 +94,7 @@ DWORD tcpinterface1::run() {
 												cur->setLongitude(atof(array3[5].c_str()));
 												cur->setSpeed(atof(array3[7].c_str()));
 												cur->setHeading(heading);
-												cur->setRenderCallsign(true);
+												cur->setUpdateFlag(CALLSIGN, true);
 												AcfMap[callsign] = cur;
 												cur->unlock();
 											} else {
