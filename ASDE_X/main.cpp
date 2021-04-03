@@ -213,7 +213,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setLatitude(25.798267);
 			cur2->setLongitude(-80.282544);
 			cur2->setSpeed(0.0);
-			cur2->setHeading(182.0);
+			cur2->setHeading(190.0);
 			cur2->setUpdateFlag(ACF_CALLSIGN, true);
 			cur2->setUpdateFlag(ACF_COLLISION, true);
 			cur2->setCollision(true);
@@ -243,6 +243,25 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur3->unlock();
 		}
 		userStorage1[2] = user3;
+
+		User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
+		Aircraft* cur4 = new Aircraft();
+		user4->setAircraft(cur4);
+		if (cur4 != NULL) {
+			cur4->lock();
+			cur4->setHeavy(false);
+			cur4->setCallsign("N108MS");
+			cur4->setLatitude(25.792179);
+			cur4->setLongitude(-80.305309);
+			cur4->setSpeed(0.0);
+			cur4->setHeading(220.0);
+			cur4->setUpdateFlag(ACF_CALLSIGN, true);
+			cur4->setUpdateFlag(ACF_COLLISION, true);
+			cur4->setMode(0);
+			AcfMap[cur4->getCallsign()] = cur4;
+			cur4->unlock();
+		}
+		userStorage1[3] = user4;
 		break;
 	}
 	case WM_SIZE:
@@ -271,6 +290,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderInterfaces = true;
 		renderDrawings = true;
 		renderConf = true;
+		renderDate = true;
+		renderDepartures = true;
 		//renderAircraft = true;
 	}
 	break;
@@ -342,6 +363,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					renderInterfaces = true;
 					renderDrawings = true;
 					renderConf = true;
+					renderDate = true;
+					renderDepartures = true;
 					updateFlags[GBL_COLLISION_LINE] = true;
 					zoom_phase = 2;
 				}
@@ -544,9 +567,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 	}
 	break;
+	case WM_MOUSEWHEEL:
+	{
+		const int val = GET_WHEEL_DELTA_WPARAM(wParam);
+		ChildFrame* focus = focusChild;
+		if (focus) {
+			if (focus->type == DISPLAY_BOX) {
+				BasicInterface& bdr = *((DisplayBox*)focus)->border;
+				if (bdr.isBounds()) {
+					if (val < 0) {
+						((DisplayBox*)focus)->doActionDown();
+					}
+
+					if (val > 0) {
+						((DisplayBox*)focus)->doActionUp();
+					}
+				}
+			}
+
+		}
+	}
+	break;
 	case WM_KEYDOWN:
 	{
-		std::cout << wParam << std::endl;
+		//std::cout << wParam << std::endl;
 		if (wParam == VK_F1) {
 		}
 		else if (wParam == VK_F2) {
@@ -599,7 +643,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		}
 		else if (wParam == VK_LCONTROL) {
-			
+
 		}
 		else if (wParam == VK_RCONTROL) {
 		}
@@ -623,22 +667,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							}
 							else
 							{
-								for (size_t i = 0; i < userStorage1.size(); i++) {
-									User* curUsr = userStorage1[i];
-									if (curUsr != NULL && curUsr != USER) {
-										sendUserMessage(*curUsr, focusField->input);
-									}
-								}
-								main_chat->resetReaderIdx();
-								main_chat->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
-								renderDrawings = true;
-								focusField->clearInput();
-								focusField->pushInput(true, input_cursor);
-								renderInputTextFocus = true;
+								sendMainChatMessage(focusField);
 							}
 						}
 					}
-					else if (frame_index == PRIVATE_MESSAGE_INTERFACE) {
+					else if (is_privateinterface(frame_index))
+					{
 						if (focusField->index == PRIVATE_MESSAGE_INPUT) {
 							if (focusField->input.size() > 1) {
 								focusField->popInput();
@@ -773,7 +807,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				if (focusField.editable) {
 					if (frame.interfaces[FRAME_BOUNDS]) {
 						BYTE keyboardState[256];
-						::GetKeyboardState(keyboardState);
+						BOOL ks = GetKeyboardState(keyboardState);
 						WORD ascii;
 						int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
 						if (len == 1) {
@@ -924,17 +958,7 @@ bool processCommands(std::string command)
 	}
 	else if (boost::istarts_with(command, "/")) {
 		command.erase(0, 1);
-		for (size_t i = 0; i < userStorage1.size(); i++) {
-			User* curUsr = userStorage1[i];
-			if (curUsr != NULL && curUsr != USER) {
-				//sendUserMessage(*curUsr, command);
-			}
-		}
-		main_chat->resetReaderIdx();
-		ChatLine* c = new ChatLine(USER->getIdentity()->callsign + std::string(": ") + command, CHAT_TYPE::ATC);
-		main_chat->addLine(c);
-		c->playChatSound();
-		renderDrawings = true;
+		sendATCMessage(command);
 		return true;
 	}
 	return false;

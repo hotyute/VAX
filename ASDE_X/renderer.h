@@ -16,8 +16,8 @@ extern std::vector<Mirror*> mirrors;
 
 extern std::string heavy_text, regular_text;
 
-extern bool renderAircraft, renderSector, renderButtons, renderLegend, renderInterfaces,
-renderInputTextFocus, renderConf, renderFocus, renderDrawings, what;
+extern bool renderAircraft, renderSector, renderButtons, renderLegend, renderInterfaces, renderInputTextFocus, 
+renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures;
 
 extern bool updateFlags[NUM_FLAGS];
 extern bool renderFlags[NUM_FLAGS];
@@ -78,6 +78,8 @@ void RenderButtons();
 void RenderInterface(InterfaceFrame* frame);
 void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
+void RenderDate();
+void RenderDepartures();
 void LoadInterfaces();
 void GetOGLPos(int, int, double*);
 void BuildFont(LPCWSTR, int, bool, unsigned int*, HFONT*);
@@ -96,9 +98,5 @@ void CallFocuses();
 void CallLabels(InterfaceFrame* frame, Label* label);
 
 void CallInputTexts(InterfaceFrame* frame, InputField* field);
-
-void OrthoHeader();
-
-void OrthoFooter();
 
 #endif

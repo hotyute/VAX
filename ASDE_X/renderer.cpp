@@ -18,7 +18,8 @@ std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
 bool renderAircraft = false, renderSector = false, renderButtons = false, renderLegend = false, renderInterfaces = false, 
-renderInputTextFocus = false, renderConf = false, renderFocus = false, renderDrawings = false, what = false;
+renderInputTextFocus = false, renderConf = false, renderDate = false, renderFocus = false, renderDrawings = false, 
+queueDeleteInterface = false, renderDepartures = false;
 
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
@@ -26,7 +27,7 @@ bool renderFlags[NUM_FLAGS];
 bool loadInterfaces = false;
 
 bool resize = false;
-int sectorDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
+int sectorDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -63,7 +64,7 @@ std::vector<GLdouble*> tesses;
 float latitude = 0, longitude = 0;
 double heading = 0;
 double normMapScaleX;
-double collision_size = 0.5, tag_line_sep = 0.4, config_line_sep = 0.1;
+double collision_size = 0.5, tag_line_sep = 0.4, config_line_sep = 0.1, dep_line_sep = 0.3;
 
 void CALLBACK beginCallback(GLenum);
 void CALLBACK endCallback(void);
@@ -189,13 +190,13 @@ void DrawGLScene() {
 	std::cout << std::fixed << lol[0] << ", " << lol[1] << std::endl;
 	MOUSE_MOVE = false;
 	}*/
-	if (what && frames.size() >= 1) {
+	if (queueDeleteInterface && frames.size() >= 1) {
 		std::vector<InterfaceFrame*>::iterator it = deleteInterfaces.begin();
 		while (it != deleteInterfaces.end()) {
 			deleteFrame((*it));
 			it = deleteInterfaces.erase(it);
 		}
-		what = false;
+		queueDeleteInterface = false;
 	}
 	if (renderSector) {
 		glDeleteLists(sectorDl, 1);
@@ -234,13 +235,17 @@ void DrawInterfaces() {
 		RenderLegend();
 		renderLegend = false;
 	}
+	glPushMatrix();
 	glCallList(legendDl);
+	glPopMatrix();
 	if (renderButtons) {
 		glDeleteLists(buttonsDl, 1);
 		RenderButtons();
 		renderButtons = false;
 	}
+	glPushMatrix();
 	glCallList(buttonsDl);
+	glPopMatrix();
 	if (renderInterfaces) {
 		if (loadInterfaces) {
 			LoadInterfaces();
@@ -392,7 +397,25 @@ void DrawInterfaces() {
 		RenderConf();
 		renderConf = false;
 	}
+	glPushMatrix();
 	glCallList(confDl);
+	glPopMatrix();
+	if (renderDate) {
+		glDeleteLists(dateDl, 1);
+		RenderDate();
+		renderDate = false;
+	}
+	glPushMatrix();
+	glCallList(dateDl);
+	glPopMatrix();
+	if (renderDepartures) {
+		glDeleteLists(departuresDl, 1);
+		RenderDepartures();
+		renderDepartures = false;
+	}
+	glPushMatrix();
+	glCallList(departuresDl);
+	glPopMatrix();
 }
 
 void DrawMirrorScenes(Mirror& mirror)
@@ -619,16 +642,6 @@ void RenderLegend() {
 	legendDl = glGenLists(1);
 	glNewList(legendDl, GL_COMPILE);
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-
 
 	glColor3f(heavy_clr[0], heavy_clr[1], heavy_clr[2]);
 	glRasterPos2f(18, 35);
@@ -637,13 +650,6 @@ void RenderLegend() {
 	glColor3f(regular_clr[0], regular_clr[1], regular_clr[2]);
 	glRasterPos2f(18, 20);
 	glPrint(regular_text.c_str(), &legendBase);	// Print GL Text To The Screen
-
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 
 	glEndList();
 }
@@ -662,7 +668,7 @@ void RenderButtons() {
 	buttonsDl = glGenLists(1);
 
 	glNewList(buttonsDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
+	/*glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
 	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
@@ -674,7 +680,7 @@ void RenderButtons() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glLoadIdentity();
+	glLoadIdentity();*/
 
 	glColor3f(button_bg[0], button_bg[1], button_bg[2]);
 	glBegin(GL_POLYGON);
@@ -842,11 +848,11 @@ void RenderButtons() {
 		last_index = index;
 	}
 	//Restore old ortho
-	glPopMatrix();
+	/*glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 
 	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_MODELVIEW);*/
 	glEndList();
 }
 
@@ -1238,29 +1244,9 @@ void RenderLabel(BasicInterface& border, int& labelDl, std::string& text, int ce
 }
 
 void RenderConf() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-
 	confDl = glGenLists(1);
 
 	glNewList(confDl, GL_COMPILE);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
 
 	glColor4f(conf_clr[0], conf_clr[1], conf_clr[2], 1.0f);
 	SelectObject(hDC, confFont);
@@ -1271,19 +1257,31 @@ void RenderConf() {
 	SIZE size = getTextExtent(config);
 	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
 	glPrint(config.c_str(), &confBase);
-	linesY += (size.cy + (size.cy * config_line_sep));
+	linesY += (size.cy - (size.cy * config_line_sep));
 
 	std::string config2 = "OVERLOAD END";
 	size = getTextExtent(config2);
 	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
 	glPrint(config2.c_str(), &confBase);
-	linesY += (size.cy + (size.cy * config_line_sep));
+	linesY += (size.cy - (size.cy * config_line_sep));
 
 	std::string config3 = "ACID";
 	size = getTextExtent(config3);
 	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
 	glPrint(config3.c_str(), &confBase);
-	linesY += (size.cy + (size.cy * config_line_sep));
+	linesY += (size.cy - (size.cy * config_line_sep));
+
+	glEndList();
+}
+
+void RenderDate() {
+	dateDl = glGenLists(1);
+
+	glNewList(dateDl, GL_COMPILE);
+
+
+	glColor4f(conf_clr[0], conf_clr[1], conf_clr[2], 1.0f);
+	SelectObject(hDC, confFont);
 
 	const std::string* date1 = currentDateTime();
 	glRasterPos2f(50, (CLIENT_HEIGHT / 6));
@@ -1292,14 +1290,41 @@ void RenderConf() {
 	//std::string date2 = "1645/22";
 	glRasterPos2f(53, (CLIENT_HEIGHT / 6) - 12);
 	glPrint(date1[1].c_str(), &confBase);
+	glEndList();
+}
 
+void RenderDepartures() {
+	int start_x = CLIENT_WIDTH - 30;
 
-	//Restore old ortho
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
+	departuresDl = glGenLists(1);
 
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+	glNewList(departuresDl, GL_COMPILE);
+
+	double linesX = 0, linesY = 0;
+
+	glColor4f(conf_clr[0], conf_clr[1], conf_clr[2], 1.0f);
+	SelectObject(hDC, confFont);
+
+	std::string config = "DEPARTURES";
+	SIZE size1 = getTextExtent(config);
+	std::string config2 = "---------------------";
+	SIZE size2 = getTextExtent(config2);
+
+	glRasterPos2f((start_x - (size1.cx * 0.5)) - (size2.cx * 0.5), (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glPrint(config.c_str(), &confBase);
+	linesY += (size1.cy - (size1.cy * dep_line_sep));
+
+	
+	glRasterPos2f(start_x - size2.cx, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glPrint(config2.c_str(), &confBase);
+	linesY += (size2.cy - (size2.cy * dep_line_sep));
+
+	std::string config3 = "AAL2";
+	SIZE size3 = getTextExtent(config3);
+	glRasterPos2f(start_x - size2.cx, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glPrint(config3.c_str(), &confBase);
+	linesY += (size3.cy - (size3.cy * dep_line_sep));
+
 	glEndList();
 }
 
@@ -1702,14 +1727,14 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
 
-	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(a_size, a_size, 1.0);
-	glTranslated(-longitude, -latitude, 0.0f);
-
 	//keep the drawing in correct aspect ratio
 	glTranslated(+longitude, +latitude, 0.0f);
 	glScaled(normMapScaleX, 1.0, 1.0);
+	glTranslated(-longitude, -latitude, 0.0f);
+
+	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+	glTranslated(+longitude, +latitude, 0.0f);
+	glScaled(a_size, a_size, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	if (!standby && aircraft.isCollision()) {
@@ -1744,15 +1769,15 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	glPushMatrix();
 	glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
 
-	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(a_size, a_size, 1.0);
-	glTranslated(-longitude, -latitude, 0.0f);
-
 	//keep the aircraft drawing in correct aspect ratio
 	//std::cout << normMapScaleX << std::endl;
 	glTranslated(+longitude, +latitude, 0.0f);
 	glScaled(normMapScaleX, 1.0f, 1.0f);
+	glTranslated(-longitude, -latitude, 0.0f);
+
+	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+	glTranslated(+longitude, +latitude, 0.0f);
+	glScaled(a_size, a_size, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	//set the aircraft heading - this needs to come after scaling aspect for proper rotation
@@ -1787,14 +1812,14 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
 
-	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(a_size, a_size, 1.0);
-	glTranslated(-longitude, -latitude, 0.0f);
-
 	//keep the callsign drawing in correct aspect ratio
 	glTranslated(+longitude, +latitude, 0.0f);
 	glScaled(normMapScaleX, 1.0, 1.0);
+	glTranslated(-longitude, -latitude, 0.0f);
+
+	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+	glTranslated(+longitude, +latitude, 0.0f);
+	glScaled(a_size, a_size, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	if (!standby) {
@@ -1821,15 +1846,15 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 		glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
 
-		//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
-		glTranslated(+longitude, +latitude, 0.0f);
-		glScaled(a_size, a_size, 1.0);
-		glTranslated(-longitude, -latitude, 0.0f);
-
 		//keep the callsign drawing in correct aspect ratio
 		glTranslated(+longitude, +latitude, 0.0f);
 		glScaled(normMapScaleX, 1.0, 1.0);
 		glTranslated(-longitude, -latitude, 0.0f);
+
+		//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+		glTranslated(+longitude, +latitude, 0.0f);
+		glScaled(a_size, a_size, 1.0);
+		glTranslated(-longitude, -latitude, 0.0f);		
 
 		glCallList(aircraft.Ccolltext);
 

@@ -482,20 +482,11 @@ void addAircraftToMirrors(Aircraft* acf)
 	}
 }
 
-/*double computeHeading(double latitude1, double longitude1, double latitude2, double longitude2)
-{
-	double degToRad = PI / 180.0;
-	double phi1 = latitude1*degToRad;
-	double phi2 = latitude2*degToRad;
-	double lam1 = longitude1*degToRad;
-	double lam2 = longitude2*degToRad;
-
-	double x,y;
-	x = cos(phi2) * sin(lam2-lam1);
-	printf("X is %lf\n", x);
-	y = cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lam2-lam1);
-	printf("Y is %lf\n", y);
-	return atan2(x,y)*180/PI;
-}*/
+bool is_privateinterface(int frame_index) {
+	return frame_index == PRIVATE_MESSAGE_INTERFACE || frame_index == PRIVATE_MESSAGE_INTERFACE2 || frame_index == PRIVATE_MESSAGE_INTERFACE3 ||
+		frame_index == PRIVATE_MESSAGE_INTERFACE4 || frame_index == PRIVATE_MESSAGE_INTERFACE5 || frame_index == PRIVATE_MESSAGE_INTERFACE6
+		|| frame_index == PRIVATE_MESSAGE_INTERFACE7 || frame_index == PRIVATE_MESSAGE_INTERFACE8 || frame_index == PRIVATE_MESSAGE_INTERFACE9
+		|| frame_index == PRIVATE_MESSAGE_INTERFACE10;
+}
 
 #endif

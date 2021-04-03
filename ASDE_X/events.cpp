@@ -24,7 +24,14 @@ void ConfigUpdates::execute() {
 		|| USER->getUpdateTime() != ConfigUpdates::eAction.getTicks()) {
 		ConfigUpdates::eAction.setTicks(1000);
 	}
-	renderConf = true;
+	/*Aircraft* acf = AcfMap["EGF4427"];
+	
+	if ((acf->getHeading() + 3) > 360)
+		acf->setHeading((acf->getHeading() + 3) - 360);
+	else
+	acf->setHeading(acf->getHeading() + 3);*/
+
+	renderDate = true;
 }
 
 void ConfigUpdates::stop() {

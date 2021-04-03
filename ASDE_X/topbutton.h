@@ -1,3 +1,6 @@
+#ifndef TOPBUTTON_H
+#define TOPBUTTON_H
+
 #include <vector>
 #include <string>
 
@@ -46,3 +49,5 @@ public:
 extern std::vector<TopButton*> BUTTONS;
 
 extern void loadButtons();
+
+#endif;

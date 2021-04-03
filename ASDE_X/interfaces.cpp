@@ -77,13 +77,13 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		double start_x = 1.15, start_y = 0.15;
 
 		std::vector<ChatLine*> list;
-		list.push_back(new ChatLine("Hello there!", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("1", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("2", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("3", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("4", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("5", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("6", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine(callsign + ": Hello There!", CHAT_TYPE::MAIN));
 		double route_box_size = 90.0;
 		DisplayBox* displayBox = new DisplayBox(pm_frame, list, 7, x + (width - (width * (start_x - spacing))), width * 0.93, 5, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
@@ -103,4 +103,34 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 			pm_frame->doOpen(false, true);
 		}
 	}
+}
+
+void sendMainChatMessage(InputField* focusField)
+{
+	for (size_t i = 0; i < userStorage1.size(); i++) {
+		User* curUsr = userStorage1[i];
+		if (curUsr != NULL && curUsr != USER) {
+			sendUserMessage(*curUsr, focusField->input);
+		}
+	}
+	main_chat->resetReaderIdx();
+	main_chat->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
+	renderDrawings = true;
+	focusField->clearInput();
+	focusField->pushInput(true, input_cursor);
+	renderInputTextFocus = true;
+}
+
+void sendATCMessage(std::string message) {
+	for (size_t i = 0; i < userStorage1.size(); i++) {
+		User* curUsr = userStorage1[i];
+		if (curUsr != NULL && curUsr != USER) {
+			//sendUserMessage(*curUsr, message);
+		}
+	}
+	main_chat->resetReaderIdx();
+	ChatLine* c = new ChatLine(USER->getIdentity()->callsign + std::string(": ") + message, CHAT_TYPE::ATC);
+	main_chat->addLine(c);
+	c->playChatSound();
+	renderDrawings = true;
 }
