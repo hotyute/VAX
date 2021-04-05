@@ -167,14 +167,8 @@ long long doubleToRawBits(double x) {
 	return bits;
 }
 
-char* s2ca1(const std::string& s) {
-	char* res = new char[s.size() + 1];
-	strncpy_s(res, s.size() + 1, s.c_str(), s.size() + 1);
-	return res;
-}
-
-void wordWrap(std::vector<std::string>& dest, const char* buffer, unsigned int maxlength, int indent) {
-
+int wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent)
+{
 	bool has_space = false;
 
 	for (int i = 0; i < maxlength; i++) {
@@ -183,9 +177,11 @@ void wordWrap(std::vector<std::string>& dest, const char* buffer, unsigned int m
 			break;
 		}
 	}
+	
+	std::cout << has_space << ", " << (strlen(buffer)) << ", "<<  maxlength << std::endl;
 
-	if (!has_space) {
-		return;
+	if (!has_space && (strlen(buffer) > maxlength)) {
+		return 0;
 	}
 
 	//std::cout << p << std::endl;
@@ -219,6 +215,14 @@ void wordWrap(std::vector<std::string>& dest, const char* buffer, unsigned int m
 		count += size;
 		//TODO Fix bug where word is longer than max length (word as in no spaces)
 	} while (*endptr);
+
+	return 1;
+}
+
+char* s2ca1(const std::string& s) {
+	char* res = new char[s.size() + 1];
+	strncpy_s(res, s.size() + 1, s.c_str(), s.size() + 1);
+	return res;
 }
 
 double radians(double degrees) {

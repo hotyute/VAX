@@ -609,7 +609,10 @@ void DisplayBox::doDrawing() {
 		SIZE size = getTextExtent(text);
 		if (size.cx > param.getActualWidth()) {
 			std::vector<std::string> store;
-			wordWrap(store, text.c_str(), maxChars, 0);
+			if (!wordWrap(store, text.c_str(), maxChars, 0)) {
+				std::cout << "hello" << std::endl;
+				continue;
+			}
 
 			std::string new_text;
 			int remaining = 0;
@@ -622,8 +625,8 @@ void DisplayBox::doDrawing() {
 
 
 			if (remaining > 0) {
-				m->setText(store[s_size - 1]);
-				ChatLine* c = new ChatLine(new_text, type);
+				m->setText(rtrim(ltrim(store[s_size - 1])));
+				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type);
 				it = DisplayBox::chat_lines.insert(it, c) + 1;
 
 
@@ -642,7 +645,7 @@ void DisplayBox::doDrawing() {
 			ChatLine* n = *(i + 1);
 			SIZE size = getTextExtent(c->getText() + n->getText());
 			if (size.cx <= param.getActualWidth()) {
-				c->setText(c->getText() + n->getText());
+				c->setText(c->getText() + " " + n->getText());
 				DisplayBox::chat_lines.erase(i + 1);
 				c->split = n->split;
 				delete n;

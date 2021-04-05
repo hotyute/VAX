@@ -641,8 +641,10 @@ void RenderLegend() {
 
 void RenderButtons() {
 
+	int min_client_width = 1000;
 
-	int w_width = CLIENT_WIDTH, w_height = CLIENT_HEIGHT;
+
+	int w_width = min_client_width > CLIENT_WIDTH ? min_client_width : CLIENT_WIDTH, w_height = CLIENT_HEIGHT;
 
 	//BUTTON_HEIGHT = (BUTTON_LAYOUT_HEIGHT * w_height);// TODO apply to native scaling (native resolution y)
 
@@ -667,8 +669,8 @@ void RenderButtons() {
 	glBegin(GL_POLYGON);
 	glVertex2d(0, CLIENT_HEIGHT);
 	glVertex2d(0, (CLIENT_HEIGHT - BUTTON_HEIGHT));
-	glVertex2d(CLIENT_WIDTH, (CLIENT_HEIGHT - BUTTON_HEIGHT));
-	glVertex2d(CLIENT_WIDTH, CLIENT_HEIGHT);
+	glVertex2d(w_width, (CLIENT_HEIGHT - BUTTON_HEIGHT));
+	glVertex2d(w_width, CLIENT_HEIGHT);
 	//std::cout << BUTTON_HEIGHT << std::endl;
 	glEnd();
 
@@ -699,7 +701,7 @@ void RenderButtons() {
 			}
 		}
 		if (i == (BUTTONS.size() - 2) && half || i == (BUTTONS.size() - 1)) {
-			width = (CLIENT_WIDTH - x);
+			width = (w_width - x);
 		}
 		if (half) {
 			if (!onTop) {
