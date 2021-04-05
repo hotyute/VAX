@@ -32,7 +32,7 @@ void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 }
 
 void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool refresh) {
-	if (_openedframe && !_openedframe->multi_open) {
+	if (single_opened_frames) {
 		return;
 	}
 	std::vector<std::string> options1;
@@ -72,7 +72,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		Label* fr_label = new Label(fp_frame, "Flight Rules:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fr_label->centered = 2;
 		fp_frame->children[fr_label->index = FP_FLIGHTRULES_LABEL] = fr_label;		
-		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing_x))) + 10, 20.0, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
+		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing_x))) + 10, (input_width - 20.0), 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fp_frame->children[comboBox1->index = FP_FLIGHTRULES_INPUT] = comboBox1;
 		
 		ClickButton* amendButton = new ClickButton(fp_frame, "AMEND PLAN", x + ((width - (width * 0.05)) - button_width), button_width, y + (height - (height * start_y)), 20.0);// set button from the left

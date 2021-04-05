@@ -5,7 +5,7 @@ void RenderConnect(double x_, double y_)
 	if (connectFrame) {
 		delete connectFrame;
 	}
-	frames[CONNECT_INTERFACE] = connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
+	connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
 	connectFrame->title = "CONNECT";
 	int width = 300, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 	int height = 200, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
@@ -39,7 +39,7 @@ void RenderConnect(double x_, double y_)
 	options1.push_back("Instructor 3");
 	options1.push_back("Supervisor");
 	options1.push_back("Administrator");
-	ComboBox* comboBox1 = new ComboBox(connectFrame, options1, (x + 15.0), 0.0, 10.0, y + (height - 130), 22.0, -10.0);
+	ComboBox* comboBox1 = new ComboBox(connectFrame, options1, (x + 15.0), -1, 10.0, y + (height - 130), 22.0, -10.0);
 	connectFrame->children[comboBox1->index = RATING_COMBO] = comboBox1;
 	std::vector<std::string> options2;
 	options2.push_back("Observer");
@@ -51,7 +51,7 @@ void RenderConnect(double x_, double y_)
 	options2.push_back("Center");
 	options2.push_back("Oceanic");
 	options2.push_back("FSS");
-	ComboBox* comboBox2 = new ComboBox(connectFrame, options2, (x + 15) + 163, 0.0, 10.0, y + (height - 130), 22.0, -10.0);
+	ComboBox* comboBox2 = new ComboBox(connectFrame, options2, (x + 15) + 163, -1, 10.0, y + (height - 130), 22.0, -10.0);
 	connectFrame->children[comboBox2->index = CONN_POSITION_COMBO] = comboBox2;
 	connect_closeb = new CloseButton(connectFrame, 15, 15);
 	connectFrame->children[connect_closeb->index = CONN_CLOSE_BUTTON] = connect_closeb;
@@ -59,6 +59,9 @@ void RenderConnect(double x_, double y_)
 	connectFrame->children[okButton->index = CONN_OKAY_BUTTON] = okButton;
 	ClickButton* cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
+
+	frames[CONNECT_INTERFACE] = connectFrame;
+
 	connectFrame->doOpen(false, true);
 }
 
@@ -68,7 +71,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		if (pm_frame) {
 			delete pm_frame;
 		}
-		frames[index] = pm_frame = new InterfaceFrame(index);
+		pm_frame = new InterfaceFrame(index);
 		pm_frame->title = "PRIVATE CHAT " + callsign;
 		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
@@ -95,6 +98,8 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		CloseButton* pm_closeb = new CloseButton(pm_frame, 15, 15);
 		pm_frame->children[pm_closeb->index = PM_CLOSE_BOX] = pm_closeb;
 
+		frames[index] = pm_frame;
+
 
 		pm_frame->doOpen(true, true);
 	}
@@ -102,6 +107,93 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		if (!pm_frame->render) {
 			pm_frame->doOpen(false, true);
 		}
+	}
+}
+
+void LoadMainChatInterface(bool refresh) {
+	InterfaceFrame* main_chat_frame = frames[MAIN_CHAT_INTERFACE];
+
+	//set main pane
+	const int controller_list_width = 86;
+	const int arrow_offset = 15;//arrows that come with display box
+
+	int x = (CLIENT_WIDTH / 3);
+	double width = 0.66666666667;
+	const int c_padding = 10, m_padding = 10;
+
+	// 2 arrow offset's for both display boxes
+	// if you want to make input box longer, remove an arrow offset
+	const int width_offset = (controller_list_width + (arrow_offset + arrow_offset) + c_padding + m_padding);
+
+	if (refresh) {
+		if (main_chat_frame) {
+			main_chat_frame->UpdatePane1(x, width, 0, 125);
+			for (ChildFrame* child : main_chat_frame->children) {
+				if (child) {
+					switch (child->index) {
+					case MAIN_CONTROLLERS_BOX:
+					{
+						((DisplayBox*)child)->updatePos(x, controller_list_width, 5, 114);
+					}
+					break;
+					case MAIN_CHAT_MESSAGES:
+					{
+						((DisplayBox*)child)->updatePos(x + (controller_list_width + arrow_offset),
+							(CLIENT_WIDTH * width) - width_offset, 27, 87);
+					}
+					break;
+					case MAIN_CHAT_INPUT:
+					{
+						((InputField*)child)->updatePos(x + (controller_list_width + arrow_offset),
+							(CLIENT_WIDTH * width) - width_offset, 5, 20);
+					}
+					break;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		InterfaceFrame* textBox = new InterfaceFrame(MAIN_CHAT_INTERFACE);
+
+		textBox->Pane1(x, width, 0, 125);
+
+		//controller list
+		std::vector<ChatLine*> list;
+		list.push_back(new ChatLine("--Delivery--", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("1A - MIA_DEL", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		DisplayBox* displayBox = new DisplayBox(textBox, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
+
+		//chatbox
+		textBox->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
+		std::vector<ChatLine*> list2;
+		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
+		ChatLine* c = new ChatLine("[ERROR! Unable to retrieve version]", CHAT_TYPE::ERRORS);
+		list2.push_back(c);
+		c->playChatSound();
+
+		main_chat = new DisplayBox(textBox, list2, 6, x + (controller_list_width + arrow_offset),
+			(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);
+		textBox->children[main_chat->index = MAIN_CHAT_MESSAGES] = main_chat;
+
+		textField = new InputField(textBox, x + (controller_list_width + arrow_offset),
+			(CLIENT_WIDTH * width) - width_offset, 10.0, 5, 20, 5);
+		textBox->children[textField->index = MAIN_CHAT_INPUT] = textField;
+
+		frames[MAIN_CHAT_INTERFACE] = textBox;
 	}
 }
 

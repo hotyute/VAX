@@ -1,3 +1,6 @@
+#ifndef CLINC2_H
+#define CLINC2_H
+
 #include <windows.h>
 #include <winsock.h>
 #include <iostream>
@@ -28,3 +31,5 @@ public:
 };
 
 extern tcpinterface* intter;
+
+#endif

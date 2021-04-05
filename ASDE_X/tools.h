@@ -20,8 +20,6 @@ extern std::wstring s2ws(const std::string& s);
 
 extern char *s2ca1(const std::string &s);
 
-void WordWrap(std::vector<std::string>& outputString, const std::string& inputString, unsigned int lineLength);
-
 extern SIZE getBitTextLength(HDC, HFONT, std::string);
 
 extern std::string ltrim(std::string s);

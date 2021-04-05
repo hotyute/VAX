@@ -1,12 +1,13 @@
+#ifndef AIRCRAFT_H
+#define AIRCRAFT_H
+
 #include <Windows.h>
 #include <iostream>
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 #include "constants.h"
-
-#ifndef AIRCRAFT_H
-#define AIRCRAFT_H
 
 #ifndef History_aircraft_h
 #define History_aircraft_h
@@ -95,7 +96,7 @@ public:
 #endif
 
 
-extern std::map<std::string, Aircraft*> AcfMap;
+extern std::unordered_map<std::string, Aircraft*> AcfMap;
 
 extern Aircraft *getAircraftByIndex(int);
 

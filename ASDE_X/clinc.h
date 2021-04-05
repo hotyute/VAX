@@ -1,3 +1,6 @@
+#ifndef CLINC_H
+#define CLINC_H
+
 #include <sdkddkver.h>
 
 #include <WinSock2.h>
@@ -16,3 +19,5 @@ public:
 	void startT(HWND);
 	int connectNew(HWND, std::string, unsigned short);
 };
+
+#endif

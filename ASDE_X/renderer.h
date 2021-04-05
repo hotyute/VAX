@@ -22,8 +22,6 @@ renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, rende
 extern bool updateFlags[NUM_FLAGS];
 extern bool renderFlags[NUM_FLAGS];
 
-extern bool loadInterfaces;
-
 extern bool resize;
 
 extern int sectorDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
@@ -38,7 +36,8 @@ static const double MIN_ZOOM = 0.00002;
 static const double MAX_ZOOM = 30.0;
 
 const static double BUTTON_PADDING = 0.05;
-static double BUTTON_HEIGHT = 0;
+static double BUTTON_HEIGHT = 70;
+static double BUTTON_WIDTH = 70;
 const static double BUTTON_LAYOUT_HEIGHT = 0.1;
 
 const static float day_background[] = {0.0f, 0.35686274509f, 0.49019607843f};

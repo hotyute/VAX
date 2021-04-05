@@ -24,7 +24,7 @@ Aircraft::~Aircraft()
 	delete Aircraft::flight_plan;
 }
 
-std::map<std::string, Aircraft*>AcfMap;
+std::unordered_map<std::string, Aircraft*>AcfMap;
 
 int Aircraft::getIndex() {
 	return Aircraft::index;

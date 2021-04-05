@@ -64,14 +64,14 @@ float BasicInterface::getTransparency() {
 	return BasicInterface::transparency;
 }
 
-void BasicInterface::updateXs(int x, int y) {
+void BasicInterface::updateXs(int x, int x2) {
 	BasicInterface::x[0] = x;
-	BasicInterface::x[1] = y;
+	BasicInterface::x[1] = x2;
 }
 
-void BasicInterface::updateYs(int x, int y) {
-	BasicInterface::y[0] = x;
-	BasicInterface::y[1] = y;
+void BasicInterface::updateYs(int y, int y2) {
+	BasicInterface::y[0] = y;
+	BasicInterface::y[1] = y2;
 }
 
 void BasicInterface::clearPoints() {
@@ -126,14 +126,8 @@ void BasicInterface::updateCoordinates() {
 void BasicInterface::updateCoordinates(double* xs, double* ys) {
 	//x[0] x start, x[1] x end
 	//same with y
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
+	int w_width = CLIENT_WIDTH, w_height = CLIENT_HEIGHT;
+
 	double f_width = BasicInterface::width, f_height = BasicInterface::height;
 	if (!absolute) {		
 		if (BasicInterface::width <= 1.0) {// percentage

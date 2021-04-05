@@ -11,17 +11,8 @@ extern double CENTER_LON;
 extern int WIDTH;
 extern int HEIGHT;
 
-extern int FIXED_WIDTH;
-extern int FIXED_HEIGHT;
-
 extern int CLIENT_WIDTH;
 extern int CLIENT_HEIGHT;
-
-extern int FIXED_CLIENT_WIDTH;
-extern int FIXED_CLIENT_HEIGHT;
-
-
-extern bool fixed_set;
 
 extern double mZoom;
 extern int zoom_phase;

@@ -16,6 +16,7 @@
 #include "usermanager.h"
 #include "packets.h"
 #include "interfaces.h"
+#include "calc_cycles.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -29,7 +30,8 @@ PAINTSTRUCT ps;
 TCHAR szClassName[] = TEXT("WindowsApp");
 HWND text123, text124, lblNone, strUsers, lblNumUsrs;
 
-bool done = false, connected = false;
+bool done = false, connected = false, show_departures = false;
+int single_opened_frames = 0;
 
 const int proto_version = 32698;
 
@@ -65,7 +67,6 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 #endif
 
 	loadButtons();
-	loadInterfaces = true;
 	loadAircraftBlip2();
 	loadUnknownBlip();
 
@@ -98,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 		0,                   /* Extended possibilites for variation */
 		szClassName,         /* Classname */
 		L"VAX",       /* Title Text */
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, /* default window */
+		WS_CAPTION | WS_SYSMENU | WS_OVERLAPPEDWINDOW, /* default window */
 		CW_USEDEFAULT,       /* Windows decides the position */
 		CW_USEDEFAULT,       /* where the window ends up on the screen */
 		WIDTH,                 /* The programs width */
@@ -182,6 +183,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		CreateThread(NULL, 0, OpenGLThread, hwnd, 0, 0);
 		CreateThread(NULL, 0, EventThread1, hwnd, 0, NULL);
+		CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
 		userStorage1.resize(MAX_AIRCRAFT_SIZE);
 
 		User* user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
@@ -268,12 +270,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		int width = LOWORD(lParam);
 		int height = HIWORD(lParam);
+
 		RECT rect;
-		if (!fixed_set) {
-			FIXED_CLIENT_WIDTH = width;
-			FIXED_CLIENT_HEIGHT = height;
-			fixed_set = true;
-		}
 		if (GetWindowRect(hwnd, &rect))
 		{
 			int width2 = rect.right - rect.left;
@@ -283,6 +281,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		CLIENT_WIDTH = width;
 		CLIENT_HEIGHT = height;
+		LoadMainChatInterface(true);
 
 		resize = true;
 		renderButtons = true;
@@ -292,6 +291,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderConf = true;
 		renderDate = true;
 		renderDepartures = true;
+		renderInputTextFocus = true;
 		//renderAircraft = true;
 	}
 	break;
@@ -332,6 +332,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		case ID_FILE_CONNECT:
 		{
 			handleConnect();
+		}
+		break;
+		case ID_SETTINGS_DEPARTS:
+		{
+			show_departures = !show_departures;
 		}
 		break;
 		case ID_FILE_OPEN:
@@ -1045,6 +1050,8 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	}
 
 	InitOpenGL();
+	LoadMainChatInterface(false);
+	((InputField*)frames[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	renderAircraft = true;
 	std::cout.precision(10);
 	Event& position_updates = ConfigUpdates();
@@ -1138,8 +1145,7 @@ void preFlags() {
 		}
 	}
 	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
@@ -1156,8 +1162,7 @@ void preFlags() {
 
 void resetFlags() {
 	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {

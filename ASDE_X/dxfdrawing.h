@@ -1,3 +1,6 @@
+#ifndef DXDRAWING_H
+#define DXDRAWING_H
+
 #include <vector>
 #include <iostream>
 
@@ -28,3 +31,5 @@ extern DxfDrawing *unknownBlip;
 
 extern void loadUnknownBlip();
 extern void loadAircraftBlip2();
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef CHATINTERFACE_H
+#define CHATINTERFACE_H
+
 #include <Windows.h>
 #include <iostream>
 #include <vector>
@@ -51,4 +54,8 @@ public:
 	void setRender(bool);
 	bool isBounds();
 	void setBounds(bool);
+	void setWidth(double w) { this->width = w; }
+	void setHeight(double h) { this->height = h; }
 };
+
+#endif

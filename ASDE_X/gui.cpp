@@ -83,6 +83,19 @@ void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
+void InterfaceFrame::UpdatePane1(double x, double width, double y, double height)
+{
+	BasicInterface& contentPane = *InterfaceFrame::interfaces[CONTENT_PANE];
+	contentPane.setPosX(x), contentPane.setPosY(y);
+	contentPane.setWidth(width), contentPane.setHeight(height);
+	contentPane.updateCoordinates();
+
+	BasicInterface& bounds = *InterfaceFrame::interfaces[FRAME_BOUNDS];
+	bounds.setPosX(x), bounds.setPosY(y);
+	bounds.setWidth(width), bounds.setHeight(height);
+	bounds.updateCoordinates();
+}
+
 void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 {
 	if (frames[InterfaceFrame::index] != this) {
@@ -104,6 +117,8 @@ void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 	_openedframe = this;
 	if (InterfaceFrame::index == CONNECT_INTERFACE)
 		InterfaceFrame::children[CONN_CALLSIGN_LABEL]->setFocus();
+	if (!multi_open)
+		single_opened_frames++;
 }
 
 void InterfaceFrame::doClose()
@@ -122,6 +137,8 @@ void InterfaceFrame::doClose()
 	renderDrawings = true;
 	renderFocus = true;
 	_openedframe = NULL;
+	if (!multi_open)
+		single_opened_frames--;
 }
 
 /*void InterfaceFrame::addInputField(InputField* field) {
@@ -164,6 +181,13 @@ InputField::InputField(InterfaceFrame* frame, double x, double width, double pad
 
 InputField::~InputField()
 {
+}
+
+void InputField::updatePos(double x, double width, double y, double height)
+{
+	InputField::border->setPosX(x), InputField::border->setPosY(y);
+	InputField::border->setWidth(width), InputField::border->setHeight(height);
+	InputField::border->updateCoordinates();
 }
 
 void InputField::doDrawing() {
@@ -286,6 +310,17 @@ CloseButton::CloseButton(InterfaceFrame* frame, double width, double height) {
 	closeBorder->updateCoordinates();
 	CloseButton::border = closeBorder;
 	CloseButton::child_interfaces.push_back(closeBorder);
+}
+
+void CloseButton::updatePos(double x, double width, double y, double height)
+{
+	BasicInterface* inter = CloseButton::frame->interfaces[CONTENT_PANE];
+	double startX = (inter->getStartX() + inter->getWidth()) - width;
+	double startY = (inter->getStartY() + inter->getHeight()) - height;
+
+	CloseButton::border->setPosX(startX), CloseButton::border->setPosY(startY);
+	CloseButton::border->setWidth(width), CloseButton::border->setHeight(height);
+	CloseButton::border->updateCoordinates();
 }
 
 void CloseButton::doDrawing() {
@@ -417,6 +452,13 @@ void ClickButton::doAction() {
 void ClickButton::focusDrawing() {
 }
 
+void ClickButton::updatePos(double x, double width, double y, double height)
+{
+	ClickButton::border->setPosX(x), ClickButton::border->setPosY(y);
+	ClickButton::border->setWidth(width), ClickButton::border->setHeight(height);
+	ClickButton::border->updateCoordinates();
+}
+
 ComboBox::ComboBox(InterfaceFrame* frame, std::vector<std::string> options, double x, double width, double x_padding, double y, double height, double y_padding) {
 	ComboBox::frame = frame;
 	ComboBox::options = options;
@@ -432,11 +474,27 @@ ComboBox::ComboBox(InterfaceFrame* frame, std::vector<std::string> options, doub
 		}
 	}
 	int arrow_space = 10;
-	BasicInterface* comboBounds = new BasicInterface(x, ((ComboBox::largestExtent.cx + arrow_space) + width), x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* comboBounds = new BasicInterface(x, width == -1 ? ((ComboBox::largestExtent.cx + arrow_space) + width) : width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	comboBounds->setBounds(true);
 	comboBounds->updateCoordinates();
 	ComboBox::border = comboBounds;
 	ComboBox::child_interfaces.push_back(comboBounds);
+}
+
+void ComboBox::updatePos(double x, double width, double y, double height) {
+	SelectObject(hDC, topBtnFont);
+	ComboBox::largestExtent = getTextExtent(ComboBox::options[ComboBox::pos]);
+	for (size_t i = 0; i < options.size(); i++) {
+		ComboBox::extents.push_back(getTextExtent(ComboBox::options[i]));
+		if (ComboBox::extents[i].cx > ComboBox::largestExtent.cx) {
+			ComboBox::largestExtent = ComboBox::extents[i];
+		}
+	}
+	int arrow_space = 10;
+	ComboBox::border->setPosX(x), ComboBox::border->setPosY(y);
+	ComboBox::border->setWidth(width == -1 ? ((ComboBox::largestExtent.cx + arrow_space) + width) : width),
+		ComboBox::border->setHeight(height);
+	ComboBox::border->updateCoordinates();
 }
 
 void ComboBox::doDrawing() {
@@ -507,10 +565,6 @@ void ComboBox::focusDrawing() {
 }
 
 DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
-	while (chat_lines.size() < numBlocks)
-		chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN));
-	while (chat_lines.size() > numBlocks)
-		chat_lines.pop_back();
 	DisplayBox::frame = frame;
 	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::centered = centerText;
@@ -522,7 +576,6 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines,
 	comboBounds->updateCoordinates();
 	DisplayBox::border = comboBounds;
 	DisplayBox::child_interfaces.push_back(comboBounds);
-	DisplayBox::chat_line_history.insert(DisplayBox::chat_line_history.end(), chat_lines.begin(), chat_lines.end());
 }
 
 void DisplayBox::doDrawing() {
@@ -543,22 +596,76 @@ void DisplayBox::doDrawing() {
 	long ave = tm.tmAveCharWidth;
 	int maxChars = aW / ave;
 	int noncp = 2;
-	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
-		std::string text = DisplayBox::chat_lines[i]->getText();
-		CHAT_TYPE type = DisplayBox::chat_lines[i]->getType();
+
+	bool reset_idx = false;
+
+	//split line
+	auto it = DisplayBox::chat_lines.end();
+	while (it != DisplayBox::chat_lines.begin()) {
+		--it;
+		ChatLine* m = *it;
+		std::string text = m->getText();
+		CHAT_TYPE type = m->getType();
 		SIZE size = getTextExtent(text);
 		if (size.cx > param.getActualWidth()) {
 			std::vector<std::string> store;
 			wordWrap(store, text.c_str(), maxChars, 0);
+
+			std::string new_text;
+			int remaining = 0;
 			int s_size = store.size();
-			int timesShifted = 1;
-			DisplayBox::chat_lines[i]->setText(store[0]);
-			while (timesShifted < s_size) {
-				addLine(store[timesShifted++], type);
+
+			for (int iy = 0; iy < s_size - 1; iy++) {
+				new_text += store[iy];
+				remaining++;
+			}
+
+
+			if (remaining > 0) {
+				m->setText(store[s_size - 1]);
+				ChatLine* c = new ChatLine(new_text, type);
+				it = DisplayBox::chat_lines.insert(it, c) + 1;
+
+
+				c->split = m;
 			}
 		}
 	}
-	for (size_t i = 0; i < DisplayBox::chat_lines.size(); i++) {
+
+	//unsplit lines
+	auto i = DisplayBox::chat_lines.begin();
+	while (i != DisplayBox::chat_lines.end()) {
+		ChatLine* c = *i;
+
+		bool set_pos = false;
+		if (c->split) {
+			ChatLine* n = *(i + 1);
+			SIZE size = getTextExtent(c->getText() + n->getText());
+			if (size.cx <= param.getActualWidth()) {
+				c->setText(c->getText() + n->getText());
+				DisplayBox::chat_lines.erase(i + 1);
+				c->split = n->split;
+				delete n;
+				reset_idx = true;
+			}
+			else
+			{
+				++i;
+			}
+		}
+		else
+		{
+			++i;
+		}
+	}
+
+	if (reset_idx) {
+		resetReaderIdx();
+		reset_idx = false;
+	}
+
+	//draw Text to screen
+	for (size_t i = read_index; i < read_index + numBlocks; i++) {
 		std::string text = DisplayBox::chat_lines[i]->getText();
 		CHAT_TYPE type = DisplayBox::chat_lines[i]->getType();
 		//std::cout << text << ", " << i << std::endl;
@@ -581,33 +688,7 @@ void DisplayBox::doDrawing() {
 			textXPos = x + noncp;
 		}
 		double textYPos = y - (tH / 2);
-		switch (type) {
-		case CHAT_TYPE::MAIN:
-		{
-			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::ERRORS:
-		{
-			glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::SYSTEM:
-		{
-			glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::ATC:
-		{
-			glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
-		}
-		break;
-		default:
-		{
-			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-		}
-		break;
-		}
+		DisplayBox::SetChatTextColour(type);
 		glRasterPos2f(textXPos, textYPos);
 		glPrint(text.c_str(), &topButtonBase);
 		last_end_y = endY;
@@ -661,30 +742,32 @@ void DisplayBox::focusDrawing() {
 	}
 }
 
-void DisplayBox::display_pos()
-{
-	auto it = chat_line_history.begin() + read_index;
-	int i = 0;
-	while (it != chat_line_history.end()) {
-		if (i >= numBlocks)
-			break;
-		DisplayBox::chat_lines[i++] = *it;
-		it++;
-	}
+void DisplayBox::addLine(ChatLine* c) {
+	if (DisplayBox::chat_lines.size() > max_history)
+		DisplayBox::chat_lines.erase(DisplayBox::chat_lines.begin());
+	DisplayBox::chat_lines.push_back(c);
+	read_index++;
 }
 
-void DisplayBox::addLine(ChatLine* c) {
-	DisplayBox::chat_lines.erase(DisplayBox::chat_lines.begin());
-	DisplayBox::chat_lines.push_back(c);
-	if (chat_line_history.size() >= max_history)
-	{
-		ChatLine* first_line = chat_line_history.front();
-		DisplayBox::chat_line_history.erase(DisplayBox::chat_line_history.begin());
-		delete first_line;
+void DisplayBox::removeLine(ChatLine* c)
+{
+	auto it = std::find(std::begin(DisplayBox::chat_lines), std::end(DisplayBox::chat_lines), c);
+
+	if (it != std::end(DisplayBox::chat_lines)) {
+		DisplayBox::chat_lines.erase(it);
 	}
-	read_index++;
-	DisplayBox::chat_line_history.push_back(c);
+
+	delete c;
 }
+
+void DisplayBox::updatePos(double x, double width, double y, double height)
+{
+	DisplayBox::border->setPosX(x), DisplayBox::border->setPosY(y);
+	DisplayBox::border->setWidth(width), DisplayBox::border->setHeight(height);
+	DisplayBox::border->updateCoordinates();
+}
+
+
 
 
 void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
@@ -697,29 +780,49 @@ void DisplayBox::doActionUp()
 	if ((read_index - 1) >= 0) {
 		--read_index;
 		renderDrawings = true;
-		display_pos();
 	}
 }
 
 void DisplayBox::doActionDown()
 {
-	if ((read_index + 1) <= ((chat_line_history.end() - numBlocks) - chat_line_history.begin())) {
+	if ((read_index + 1) <= ((chat_lines.end() - numBlocks) - chat_lines.begin())) {
 		++read_index;
 		renderDrawings = true;
-		display_pos();
 	}
 }
 
 void DisplayBox::resetReaderIdx()
 {
-	if (read_index != (chat_line_history.end() - numBlocks) - chat_line_history.begin()) {
-		auto it = chat_line_history.end() - numBlocks;
-		int i = 0;
-		read_index = (it - chat_line_history.begin());
-		while (it != chat_line_history.end()) {
-			DisplayBox::chat_lines[i++] = *it;
-			it++;
-		}
+	read_index = ((chat_lines.end() - numBlocks) - chat_lines.begin());
+}
+
+void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
+	switch (t) {
+	case CHAT_TYPE::MAIN:
+	{
+		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::ERRORS:
+	{
+		glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::SYSTEM:
+	{
+		glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::ATC:
+	{
+		glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
+	}
+	break;
+	default:
+	{
+		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+	}
+	break;
 	}
 }
 
@@ -742,6 +845,13 @@ Label::Label(InterfaceFrame* interfaceFrame, std::string label, double x, double
 	fieldBounds->updateCoordinates();
 	Label::border = fieldBounds;
 	Label::child_interfaces.push_back(fieldBounds);
+}
+
+void Label::updatePos(double x, double width, double y, double height)
+{
+	Label::border->setPosX(x), Label::border->setPosY(y);
+	Label::border->setWidth(width), Label::border->setHeight(height);
+	Label::border->updateCoordinates();
 }
 
 void Label::doDrawing()

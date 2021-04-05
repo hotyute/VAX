@@ -1,3 +1,6 @@
+#ifndef SPLINE2_H
+#define SPLINE2_H
+
 #include <iostream>
 #include <vector>
 #include <stdio.h>
@@ -16,3 +19,5 @@ public:
 	Spline2D(double (&s)[mLength][mLength]);
 	void getPoint(double&, double*);
 };
+
+#endif

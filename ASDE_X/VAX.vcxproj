@@ -89,9 +89,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aircraft.cpp" />
+    <ClCompile Include="calc_cycles.cpp" />
     <ClCompile Include="chatinterface.cpp" />
     <ClCompile Include="clinc.cpp" />
     <ClCompile Include="clinc2.cpp" />
+    <ClCompile Include="collision.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="constants.cpp" />
     <ClCompile Include="dxfdrawing.cpp" />
@@ -118,9 +120,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aircraft.h" />
+    <ClInclude Include="calc_cycles.h" />
     <ClInclude Include="chatinterface.h" />
     <ClInclude Include="clinc.h" />
     <ClInclude Include="clinc2.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="dxfdrawing.h" />

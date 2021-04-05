@@ -10,12 +10,7 @@ double CENTER_LON = 0.000000;
 
 int WIDTH = 1366, HEIGHT = 820;
 
-int FIXED_WIDTH = WIDTH, FIXED_HEIGHT = HEIGHT;
-
 int CLIENT_WIDTH, CLIENT_HEIGHT;
-int FIXED_CLIENT_WIDTH, FIXED_CLIENT_HEIGHT;
-
-bool fixed_set = false;
 
 double mZoom = 30.000;
 int zoom_phase = 1;

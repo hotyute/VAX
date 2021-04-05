@@ -1,3 +1,6 @@
+#ifndef SPLINE_H
+#define SPLINE_H
+
 #include <math.h>
 #include "tools.h"
 
@@ -16,3 +19,5 @@ public:
 	double getValue(double&);
 	void setValues(double (&)[2], double (&)[2]);
 };
+
+#endif

@@ -173,33 +173,23 @@ char* s2ca1(const std::string& s) {
 	return res;
 }
 
-void WordWrap(std::vector<std::string>& outputString, const std::string& inputString, unsigned int lineLength)
-{
-	std::istringstream iss(inputString);
+void wordWrap(std::vector<std::string>& dest, const char* buffer, unsigned int maxlength, int indent) {
 
-	std::string line;
+	bool has_space = false;
 
-	do
-	{
-		std::string word;
-		iss >> word;
-
-		if (line.length() + word.length() > lineLength)
-		{
-			outputString.push_back(line);
-			line.clear();
+	for (int i = 0; i < maxlength; i++) {
+		if (isspace(buffer[i])) {
+			has_space = true;
+			break;
 		}
-		line += word + " ";
-
-	} while (iss);
-
-	if (!line.empty())
-	{
-		outputString.push_back(line);
 	}
-}
 
-void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent) {
+	if (!has_space) {
+		return;
+	}
+
+	//std::cout << p << std::endl;
+
 	size_t count, buflen;
 	const char* ptr, * endptr;
 	count = 0;
@@ -217,15 +207,17 @@ void wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxleng
 
 		while (*(endptr) && !isspace(*(endptr)))
 			endptr--;
+
 		const int size = (endptr - ptr);
-		char* out;
-		out = (char*)malloc(size);
+		char* out = (char*)malloc(size);
+
 		strncpy(out, ptr, size);
 		out[size] = '\0';
 		rtrim(out);
 		dest.push_back(out);
+
 		count += size;
-		//TODO FIx bug where word is longer than max length (word as in no spaces)
+		//TODO Fix bug where word is longer than max length (word as in no spaces)
 	} while (*endptr);
 }
 

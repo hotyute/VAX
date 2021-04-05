@@ -1,3 +1,6 @@
+#ifndef LATER_H
+#define LATER_H
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #ifndef EventAction_h
@@ -61,3 +64,5 @@ public:
 #endif
 
 extern EventManager *event_manager1;
+
+#endif

@@ -24,8 +24,6 @@ queueDeleteInterface = false, renderDepartures = false;
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
 
-bool loadInterfaces = false;
-
 bool resize = false;
 int sectorDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
@@ -121,10 +119,8 @@ void ResizeMirrorGLScene(Mirror& mirror) {
 void ResizeGLScene() {
 	// Set up the viewport.
 	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-	BUTTON_HEIGHT = (BUTTON_LAYOUT_HEIGHT * w_height);
+
+	//BUTTON_HEIGHT = (BUTTON_LAYOUT_HEIGHT * w_height);
 
 	int clientWidth = CLIENT_WIDTH;
 	int clientHeight = CLIENT_HEIGHT;
@@ -147,14 +143,7 @@ void ResizeGLScene() {
 }
 
 void ResizeInterfaceGLScene() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
+	int w_width = CLIENT_WIDTH, w_height = CLIENT_HEIGHT;
 
 	glViewport(0, 0, w_width, w_height);
 	glScissor(0, 0, w_width, w_height);
@@ -217,8 +206,7 @@ void DrawGLScene() {
 		renderAircraft = false;
 	}
 	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
@@ -247,10 +235,6 @@ void DrawInterfaces() {
 	glCallList(buttonsDl);
 	glPopMatrix();
 	if (renderInterfaces) {
-		if (loadInterfaces) {
-			LoadInterfaces();
-			loadInterfaces = false;
-		}
 		for (InterfaceFrame* frame : frames) {
 			if (frame)
 			{
@@ -413,9 +397,11 @@ void DrawInterfaces() {
 		RenderDepartures();
 		renderDepartures = false;
 	}
-	glPushMatrix();
-	glCallList(departuresDl);
-	glPopMatrix();
+	if (show_departures) {
+		glPushMatrix();
+		glCallList(departuresDl);
+		glPopMatrix();
+	}
 }
 
 void DrawMirrorScenes(Mirror& mirror)
@@ -432,8 +418,7 @@ void DrawMirrorScenes(Mirror& mirror)
 	glCallList(sectorDl);
 
 	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
@@ -655,15 +640,11 @@ void RenderLegend() {
 }
 
 void RenderButtons() {
-	int w_width = CLIENT_WIDTH;
-	if (w_width < FIXED_CLIENT_WIDTH) {
-		w_width = FIXED_CLIENT_WIDTH;
-	}
-	int w_height = CLIENT_HEIGHT;
-	if (w_height < FIXED_CLIENT_HEIGHT) {
-		w_height = FIXED_CLIENT_HEIGHT;
-	}
-	BUTTON_HEIGHT = (BUTTON_LAYOUT_HEIGHT * w_height);
+
+
+	int w_width = CLIENT_WIDTH, w_height = CLIENT_HEIGHT;
+
+	//BUTTON_HEIGHT = (BUTTON_LAYOUT_HEIGHT * w_height);// TODO apply to native scaling (native resolution y)
 
 	buttonsDl = glGenLists(1);
 
@@ -705,7 +686,7 @@ void RenderButtons() {
 		bool tripleOption = curButton.isTripleOption();
 		int x;
 		int y = 0;
-		int width = (curButton.getWidth() * w_width);
+		int width = BUTTON_WIDTH > (curButton.getWidth() * w_width) ? BUTTON_WIDTH : (curButton.getWidth() * w_width);
 		int height = BUTTON_HEIGHT;
 		int padding = 4; // Change this to "BUTTON_PADDING" for variable padding
 		if (index == last_index) {
@@ -1121,57 +1102,6 @@ SIZE getTextExtent(std::string& s) {
 	return extent;
 }
 
-void LoadInterfaces() {
-
-	//set main pane
-	const int controller_list_width = 86;
-	const int arrow_offset = 15;//arrows that come with display box
-	InterfaceFrame* textBox = new InterfaceFrame(MAIN_CHAT_INTERFACE);
-	int x = (CLIENT_WIDTH / 3);
-	double width = 0.66666666667;
-	textBox->Pane1(x, width, 0, 125);
-
-	const int c_padding = 10, m_padding = 10;
-	// 2 arrow offset's for both display boxes
-	// if you want to make input box longer, remove an arrow offset
-	const int width_offset = (controller_list_width + (arrow_offset + arrow_offset) + c_padding + m_padding);
-
-	//controller list
-	std::vector<ChatLine*> list;
-	list.push_back(new ChatLine("--Delivery--", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("1A - MIA_DEL", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	DisplayBox* displayBox = new DisplayBox(textBox, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
-
-	//chatbox
-	textBox->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
-	std::vector<ChatLine*> list2;
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-	list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
-	ChatLine* c = new ChatLine("[ERROR! Unable to retrieve version]", CHAT_TYPE::ERRORS);
-	list2.push_back(c);
-	c->playChatSound();
-
-	main_chat = new DisplayBox(textBox, list2, 6, x + (controller_list_width + arrow_offset),
-		(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);
-	textBox->children[main_chat->index = MAIN_CHAT_MESSAGES] = main_chat;
-	textField = new InputField(textBox, x + (controller_list_width + arrow_offset),
-		(CLIENT_WIDTH * width) - width_offset, 10.0, 5, 20, 5);
-	textBox->children[textField->index = MAIN_CHAT_INPUT] = textField;
-	frames[MAIN_CHAT_INTERFACE] = textBox;
-	textField->setFocus();
-}
-
 void RenderInputText(BasicInterface& border, int& inputTextDl, std::string& text, bool centered) {
 	int x, y = border.getStartY() + 6;
 	double aW = border.getActualWidth();
@@ -1319,11 +1249,32 @@ void RenderDepartures() {
 	glPrint(config2.c_str(), &confBase);
 	linesY += (size2.cy - (size2.cy * dep_line_sep));
 
-	std::string config3 = "AAL2";
-	SIZE size3 = getTextExtent(config3);
-	glRasterPos2f(start_x - size2.cx, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
-	glPrint(config3.c_str(), &confBase);
-	linesY += (size3.cy - (size3.cy * dep_line_sep));
+	std::string config3, config4, config5;
+	SIZE size3, size4, size5;
+
+	for (int i = 0; i < 2; i++) {
+		if (i == 0) {
+			config3 = "AAL2", config4 = "HEDLY1", config5 = "HEDLY";
+			size3 = getTextExtent(config3), size4 = getTextExtent(config4), size5 = getTextExtent(config5);
+		}
+		else 
+		{
+			config3 = "N108MS", config4 = "SKIPS1", config5 = "SKIPS";
+			size3 = getTextExtent(config3), size4 = getTextExtent(config4), size5 = getTextExtent(config5);
+		}
+
+		float callsign_x = start_x - size2.cx, fix1_x = (start_x - (size4.cx * 0.5)) - (size2.cx * 0.5), fix2_x = start_x - size5.cx;
+
+		glRasterPos2f(callsign_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+		glPrint(config3.c_str(), &confBase);
+
+		glRasterPos2f(fix1_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+		glPrint(config4.c_str(), &confBase);
+
+		glRasterPos2f(fix2_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+		glPrint(config5.c_str(), &confBase);
+		linesY += (size5.cy - (size5.cy * dep_line_sep));
+	}
 
 	glEndList();
 }
@@ -1874,8 +1825,7 @@ void updateCollisionLine(Aircraft& aircraft, unsigned int& base, bool heavy, dou
 
 void preFileRender() {
 	if (AcfMap.size() > 0) {
-		std::map<std::string, Aircraft*>::iterator iter;
-		for (iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
 			// iterator->first = key
 			Aircraft* acf = iter->second;
 			if (acf != NULL) {

@@ -38,6 +38,7 @@ public:
 	InterfaceFrame(int, double, double);
 	InterfaceFrame(int, double, double, double, double);
 	void Pane1(double, double, double, double);
+	void UpdatePane1(double, double, double, double);
 	void doOpen(bool multi_open, bool pannable);
 	void doClose();
 };
@@ -50,6 +51,7 @@ public:
 	int type;
 	int index;
 	bool focus;
+	virtual void updatePos(double x, double width, double y, double height) = 0;
 	virtual void doDrawing() = 0;
 	virtual void setFocus() = 0;
 	virtual void removeFocus() = 0;
@@ -62,6 +64,7 @@ private:
 	CHAT_TYPE type;
 	std::string line;
 public:
+	ChatLine* split = nullptr;
 	ChatLine(std::string, CHAT_TYPE);
 	~ChatLine();
 	void setType(CHAT_TYPE type);
@@ -84,11 +87,14 @@ public:
 	bool p_protected; // password protection
 	std::string input;
 	int inputTextDl = 0;
+
+	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+
 	void pushInput(bool, char);
 	void popInput();
 	void clearInput();
@@ -105,6 +111,7 @@ private:
 public:
 	CloseButton(InterfaceFrame*, double, double);
 public:
+	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
@@ -119,6 +126,8 @@ public:
 	ClickButton(InterfaceFrame*, std::string, double x, double width, double y, double height);
 public:
 	std::string text;
+
+	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
@@ -136,6 +145,8 @@ public:
 	std::vector<std::string> options;
 	std::vector<SIZE> extents;
 	SIZE largestExtent;
+
+	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
@@ -153,18 +164,21 @@ public:
 	int read_index = 0, max_history = 100;
 	bool centered;
 	std::vector<ChatLine*> chat_lines;
-	std::vector<ChatLine*> chat_line_history;
+
+	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
-	void display_pos();
+
 	void resetReaderIdx();
 	void doActionUp();
 	void doActionDown();
 	void addLine(std::string, CHAT_TYPE type);
 	void addLine(ChatLine* c);
+	void removeLine(ChatLine* c);
+	void SetChatTextColour(CHAT_TYPE t);
 
 
 };
@@ -179,6 +193,8 @@ public:
 	int centered;
 	std::string input;
 	int labelTextDl = 0;
+
+	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
