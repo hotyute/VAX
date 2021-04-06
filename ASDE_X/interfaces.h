@@ -10,6 +10,8 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 
 void LoadMainChatInterface(bool refresh);
 
+void sendErrorMessage(std::string message);
+
 void sendMainChatMessage(InputField* focusField);
 
 void sendATCMessage(std::string message);

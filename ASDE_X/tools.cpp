@@ -485,4 +485,10 @@ bool is_privateinterface(int frame_index) {
 		|| frame_index == PRIVATE_MESSAGE_INTERFACE10;
 }
 
+void capitalize(std::string& str)
+{
+	for (auto& x : str)
+		x = toupper(x);
+}
+
 #endif

@@ -33,6 +33,7 @@ void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 
 void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool refresh) {
 	if (single_opened_frames) {
+		sendErrorMessage("This is not allowed (Designated Interface)");
 		return;
 	}
 	std::vector<std::string> options1;
@@ -50,12 +51,12 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		}
 		frames[FP_INTERFACE] = fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
-		int width = 500, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
+		int width = 450, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 220, y = y_ == -1 ?(CLIENT_HEIGHT / 2) - (height / 2) : y_;
 		fp_frame->Pane1(x, width, y, height);
-		const double spacing_x = 0.12, spacing_y = 0.13;
+		const double spacing_x = 0.125, spacing_y = 0.13;
 		double start_x = 1.0, start_y = 0.2;
-		double input_width = 55.0, label_width = 55.0, button_width = 85.0;
+		double input_width = 50.0, label_width = 55.0, button_width = 85.0, buttons_offset = (width * 0.035);
 		//1st Line
 		Label* callsign_label = new Label(fp_frame, "Callsign:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * start_y)), 20.0, 0.0);
 		callsign_label->centered = 2;
@@ -75,7 +76,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing_x))) + 10, (input_width - 20.0), 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fp_frame->children[comboBox1->index = FP_FLIGHTRULES_INPUT] = comboBox1;
 		
-		ClickButton* amendButton = new ClickButton(fp_frame, "AMEND PLAN", x + ((width - (width * 0.05)) - button_width), button_width, y + (height - (height * start_y)), 20.0);// set button from the left
+		ClickButton* amendButton = new ClickButton(fp_frame, "AMEND PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * start_y)), 20.0);// set button from the left
 		fp_frame->children[amendButton->index = FP_AMMEND_PLAN] = amendButton;
 
 		
@@ -100,7 +101,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		altern_input->setUneditable(alternate);
 		fp_frame->children[altern_input->index = FP_ALTERNATE_INPUT] = altern_input;
 
-		ClickButton* refreshButton = new ClickButton(fp_frame, "REFRESH PLAN", x + ((width - (width * 0.05)) - button_width), button_width, y + (height - (height * (start_y += spacing_y))), 20.0);// set button from the left
+		ClickButton* refreshButton = new ClickButton(fp_frame, "REFRESH PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))), 20.0);// set button from the left
 		fp_frame->children[refreshButton->index = FP_REFRESH_PLAN] = refreshButton;
 
 		//3rd Line
@@ -124,7 +125,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		squawk_input->setUneditable(a_squawk);
 		fp_frame->children[squawk_input->index = FP_SQUAWK_INPUT] = squawk_input;
 
-		ClickButton* assignButton = new ClickButton(fp_frame, "ASSIGN SQUAWK", x + ((width - (width * 0.05)) - button_width), button_width, y + (height - (height * (start_y += spacing_y))), 20.0);// set button from the left
+		ClickButton* assignButton = new ClickButton(fp_frame, "ASSIGN SQUAWK", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))), 20.0);// set button from the left
 		fp_frame->children[assignButton->index = FP_ASSIGN_SQUAWK] = assignButton;
 
 		//4th Line
@@ -137,7 +138,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		double route_box_size = 50.0;
-		DisplayBox* displayBox = new DisplayBox(fp_frame, list, 3, x + (width - (width * (start_x -= spacing_x))), width * 0.80, 5, y + (height - (height * (start_y += spacing_y)))
+		DisplayBox* displayBox = new DisplayBox(fp_frame, list, 3, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
 		fp_frame->children[displayBox->index = FP_ROUTE_BOX] = displayBox;
 
@@ -151,7 +152,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		remarks_list.push_back(new ChatLine("/v/", CHAT_TYPE::MAIN));
 		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		route_box_size = 30.0;
-		DisplayBox* remarks_box = new DisplayBox(fp_frame, remarks_list, 2, x + (width - (width * (start_x -= spacing_x))), width * 0.80, 5, y + (height - (height * (start_y += spacing_y)))
+		DisplayBox* remarks_box = new DisplayBox(fp_frame, remarks_list, 2, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
 		fp_frame->children[remarks_box->index = FP_REMARKS_BOX] = remarks_box;
 

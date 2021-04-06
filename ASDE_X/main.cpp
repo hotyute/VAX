@@ -857,7 +857,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 }
 
 void handleConnect() {
-	if (_openedframe && !_openedframe->multi_open) {
+	if (single_opened_frames) {
+		sendErrorMessage("This is not allowed (Designated Interface)");
 		return;
 	}
 	if (connected) {
@@ -879,6 +880,7 @@ bool processCommands(std::string command)
 	if (boost::istarts_with(command, ".SS")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
+			capitalize(array3[1]);
 			std::string call_sign = array3[1];
 			std::unordered_map<std::string, User*>::const_iterator got = users_map.find(call_sign);
 			if (got != users_map.end()) {
@@ -907,6 +909,7 @@ bool processCommands(std::string command)
 	else if (boost::istarts_with(command, ".CHAT")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
+			capitalize(array3[1]);
 			std::string call_sign = array3[1];
 
 			//TODO, make Private Chat User* (Pointer) oriented specific.

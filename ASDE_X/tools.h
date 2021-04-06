@@ -80,4 +80,6 @@ void addAircraftToMirrors(Aircraft*);
 
 bool is_privateinterface(int frame_index);
 
+void capitalize(std::string& str);
+
 #endif

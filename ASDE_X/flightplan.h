@@ -10,6 +10,7 @@
 #include "renderer.h"
 #include "usermanager.h"
 #include "main.h"
+#include "interfaces.h"
 
 extern User* opened_fp;
 

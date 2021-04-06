@@ -181,7 +181,7 @@ void LoadMainChatInterface(bool refresh) {
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
-		ChatLine* c = new ChatLine("[ERROR! Unable to retrieve version]", CHAT_TYPE::ERRORS);
+		ChatLine* c = new ChatLine("[ERROR: Unable to retrieve version]", CHAT_TYPE::ERRORS);
 		list2.push_back(c);
 		c->playChatSound();
 
@@ -195,6 +195,14 @@ void LoadMainChatInterface(bool refresh) {
 
 		frames[MAIN_CHAT_INTERFACE] = textBox;
 	}
+}
+
+void sendErrorMessage(std::string message) {
+	main_chat->resetReaderIdx();
+	ChatLine* c = new ChatLine(std::string("[ERROR: ") + message + std::string("]"), CHAT_TYPE::ERRORS);
+	main_chat->addLine(c);
+	c->playChatSound();
+	renderDrawings = true;
 }
 
 void sendMainChatMessage(InputField* focusField)
