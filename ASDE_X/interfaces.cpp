@@ -72,7 +72,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 			delete pm_frame;
 		}
 		pm_frame = new InterfaceFrame(index);
-		pm_frame->title = "PRIVATE CHAT " + callsign;
+		pm_frame->title = "PRIVATE CHAT: " + callsign;
 		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 		pm_frame->Pane1(x, width, y, height);

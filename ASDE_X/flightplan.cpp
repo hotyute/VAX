@@ -4,7 +4,7 @@ User* opened_fp = NULL;
 
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {
-	std::string values[11] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", "MYNN", "FL220", "08R", "3306" };
+	std::string values[11] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", "MYNN", "10000", "08R", "3306" };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = NULL;
 }

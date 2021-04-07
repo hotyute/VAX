@@ -991,7 +991,7 @@ void connect() {
 		stream.writeString(pass);
 		stream.writeByte(USER->getIdentity()->controller_rating);
 		stream.writeByte(USER->getIdentity()->pilot_rating);
-		stream.writeQWord(1000);
+		stream.writeQWord(1000);//request time
 		stream.writeQWord(doubleToRawBits(USER->getLatitude()));
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
 		stream.writeWord(600);
