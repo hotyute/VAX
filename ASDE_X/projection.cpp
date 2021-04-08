@@ -19,6 +19,7 @@ double DEFAULT_ZOOM = 30.0;
 double r_aircraft_size = 0.1, default_r_size = 0.003;
 double h_aircraft_size = 0.12, default_h_size = 0.0031;
 double u_aircraft_size = 0.1, default_u_size = 0.003;
+std::string icao;
 
 bool DAY = true, CAPS = false, SHIFT_DOWN = false;
 

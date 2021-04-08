@@ -19,7 +19,10 @@ private:
 	std::string option2;
 	std::string choice2;
 	std::string option3;
+	int params[4];
 public:
+	bool off;
+	TopButton();
 	int getIndex();
 	void setIndex(int);
 	double getWidth();
@@ -44,6 +47,8 @@ public:
 	void setChoice2(std::string);
 	std::string getOption3();
 	void setOption3(std::string);
+	int* getParams() { return params; }
+	void updateParams(int x, int y, int x2, int y2) { params[0] = x, params[1] = y, params[2] = x2, params[3] = y2; }
 };
 
 extern std::vector<TopButton*> BUTTONS;

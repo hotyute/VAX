@@ -282,6 +282,11 @@ void loadButtons() {
 	BUTTONS.push_back(oper);
 }
 
+TopButton::TopButton() : params{0, 0, 0, 0}
+{
+
+}
+
 int TopButton::getIndex() {
 	return TopButton::index;
 }

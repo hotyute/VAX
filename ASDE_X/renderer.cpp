@@ -734,6 +734,7 @@ void RenderButtons() {
 		glVertex2d(last_end_x, (CLIENT_HEIGHT - last_end_y));
 		glVertex2d(last_end_x, (CLIENT_HEIGHT - y));
 		glEnd();
+		curButton.updateParams(x, (CLIENT_HEIGHT - y), last_end_x, (CLIENT_HEIGHT - last_end_y));
 		int linePadding = 1;
 		std::string first = curButton.getOption1();
 		std::string second = curButton.getChoice1();
@@ -789,7 +790,7 @@ void RenderButtons() {
 				if (second2.length() > 0) {
 					SIZE center_e = getTextExtent(divider);
 					SIZE first_e = getTextExtent(first2);
-					glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
+					curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
 					glRasterPos2f(textXPos2, textYPos2);
 					glPrint(first2.c_str(), &topButtonBase);
 
@@ -797,7 +798,7 @@ void RenderButtons() {
 					glRasterPos2f((textXPos2 + first_e.cx), textYPos2);
 					glPrint(divider.c_str(), &topButtonBase);
 
-					glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+					!curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
 					glRasterPos2f((textXPos2 + first_e.cx + center_e.cx), textYPos2);
 					glPrint(second2.c_str(), &topButtonBase);
 				}
@@ -810,7 +811,7 @@ void RenderButtons() {
 			if (second.length() > 0) {
 				SIZE center_e = getTextExtent(divider);
 				SIZE first_e = getTextExtent(first);
-				glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
+				curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
 				glRasterPos2f(textXPos, textYPos);
 				glPrint(first.c_str(), &topButtonBase);
 
@@ -818,7 +819,7 @@ void RenderButtons() {
 				glRasterPos2f((textXPos + first_e.cx), textYPos);
 				glPrint(divider.c_str(), &topButtonBase);
 
-				glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+				!curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
 				glRasterPos2f((textXPos + first_e.cx + center_e.cx), textYPos);
 				glPrint(second.c_str(), &topButtonBase);
 			}

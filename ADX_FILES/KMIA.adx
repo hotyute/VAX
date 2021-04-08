@@ -2,6 +2,7 @@ zoom=0.002
 raircraftsize=0.1
 haircraftsize=0.105
 uaircraftsize=0.1
+ICAO=KMIA
 
 <<CENTER>>
 25.795361 -80.290115

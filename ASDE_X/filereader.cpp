@@ -33,6 +33,7 @@ int FileReader::LoadADX(std::string path) {
 		std::string string3 = "raircraftsize=";
 		std::string string4 = "haircraftsize=";
 		std::string string5 = "uaircraftsize=";
+		std::string string6 = "ICAO=";
 		std::string commentStart = ";";
 		while (myfile.good()) {
 			getline(myfile, line);
@@ -46,6 +47,7 @@ int FileReader::LoadADX(std::string path) {
 			size_t found3 = line.find(string3);
 			size_t found4 = line.find(string4);
 			size_t found5 = line.find(string5);
+			size_t found6 = line.find(string6);
 			if (found2 != std::string::npos)
 			{
 				int start = (found2 + string2.length());
@@ -88,6 +90,17 @@ int FileReader::LoadADX(std::string path) {
 				}
 				else {
 					u_aircraft_size = atof(aSize.c_str());
+				}
+			}
+			else if (found6 != std::string::npos)
+			{
+				int start = (found6 + string6.length());
+				std::string apt_icao = line.substr(start);
+				if (apt_icao.length() == 0) {
+					//error handling
+				}
+				else {
+					icao = apt_icao.c_str();
 				}
 			}
 			else if (found1 != std::string::npos)
