@@ -396,6 +396,11 @@ void TopButton::handle()
 		DB_BLOCK = !DB_BLOCK;
 		break;
 	}
+	case TOP_TYPE::DAY_NITE_BTN:
+	{
+		DAY = !DAY;
+		break;
+	}
 	default:
 		break;
 	}
