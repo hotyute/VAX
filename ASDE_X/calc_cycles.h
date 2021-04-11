@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "aircraft.h"
+#include "collision.h"
 
 DWORD WINAPI CalcThread1(LPVOID);
 

@@ -39,4 +39,11 @@ void CalculateCollisions() {
 			Aircraft* acf = iter->second;
 		}
 	}
+
+	if (Collision_Map.size() > 0) {
+		for (auto iter = Collision_Map.begin(); iter != Collision_Map.end(); iter++) {
+			// iterator->first = key
+			Collision* col = iter->second;
+		}
+	}
 }
