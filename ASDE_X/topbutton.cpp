@@ -16,9 +16,10 @@ void loadButtons() {
 	range->setDualOption(true);
 	range->setTripleOption(false);
 	range->setOption1("RANGE");
-	range->setOption2("170");
+	range->value = 170;
+	range->setOption2(std::to_string(range->value));
 	BUTTONS.push_back(range);
-	TopButton* mode = new TopButton(TOP_TYPE::MODE_BTN);
+	TopButton* mode = new TopButton(TOP_TYPE::ROTATE_BTN);
 	mode->setIndex(1);
 	mode->setWidth(0.069259012016);
 	mode->setHalf(true);
@@ -27,6 +28,7 @@ void loadButtons() {
 	mode->setDualOption(false);
 	mode->setTripleOption(false);
 	mode->setOption1("ROTATE");
+	range->value = 0;
 	BUTTONS.push_back(mode);
 	TopButton* map = new TopButton(TOP_TYPE::MAP_BTN);
 	map->setIndex(1);
@@ -413,6 +415,33 @@ void TopButton::handleScroll(bool hi_scroll)
 	case TOP_TYPE::RANGE_BTN:
 	{
 		hi_scroll ? mZoom += 0.0002 : mZoom -= 0.0002;
+		updateFlags[GBL_COLLISION_LINE] = true;
+		hi_scroll ? this->value += 1 : this->value -= 1;
+		this->setOption2(std::to_string(this->value));
+
+		if (zoom_phase == 2) {
+			//hi_scroll ? r_aircraft_size -= (r_aircraft_size * 0.1) : r_aircraft_size += (r_aircraft_size * 0.1);
+			//hi_scroll ? h_aircraft_size -= (h_aircraft_size * 0.1) : h_aircraft_size += (h_aircraft_size * 0.1);
+		}
+		break;
+	}
+	case TOP_TYPE::ROTATE_BTN:
+	{
+		if (hi_scroll)
+		{
+			if ((this->value) + 1 >= 360)
+				this->value = 0;
+			else
+				this->value += 1;
+		}
+		else
+		{
+			if ((this->value - 1) < 0)
+				this->value = 359;
+			else
+				this->value -= 1;
+		}
+		rotation = this->value;
 		break;
 	}
 	default:

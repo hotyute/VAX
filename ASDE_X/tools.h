@@ -78,6 +78,8 @@ double getBearing(double lat1, double lng1, double lat2, double lng2);
 
 void addAircraftToMirrors(Aircraft*);
 
+void addCollisionToMirrors(Collision* collision);
+
 bool is_privateinterface(int frame_index);
 
 void capitalize(std::string& str);

@@ -38,7 +38,7 @@ const int proto_version = 32698;
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
-InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * textField = NULL;
+InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
 DisplayBox* main_chat = NULL;
@@ -225,7 +225,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		userStorage1[1] = user2;
 		cur->collisionAcf = cur2;
-		cur->setUpdateFlag(ACF_COLLISION_LINE, true);
+
+		Collision* collision = new Collision(cur, cur2);
+		Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
 
 		User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
 		Aircraft* cur3 = new Aircraft();
@@ -502,7 +504,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (!clicked_interface)
 			{
 				//check for mirrors
-				for (Mirror* mir : mirrors) {
+				for (auto it3 = mirrors.begin(); it3 != mirrors.end();  ++it3) {
+					Mirror* mir = *it3;
 					if (mir)
 					{
 						Mirror& mirror = *mir;
@@ -520,6 +523,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							mir->startX = mir->getX();
 							mir->startY = mir->getY();
 							dragged_mir = mir;
+
+							if (mirrors.back() != *it3)
+								std::swap(mirrors[it3 - mirrors.begin()], mirrors.back());
 							break;
 						}
 					}
@@ -707,7 +713,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					InputField* focusField = (InputField*)focusChild;
 					InterfaceFrame& frame = *focusField->getFrame();
 					int frame_index = frame.index;
-					if (frame_index == MAIN_CHAT_INTERFACE && focusField == textField) {// main chat
+					if (frame_index == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
 						if (focusField->input.size() > 0) {
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
@@ -1204,6 +1210,20 @@ void preFlags() {
 			}
 		}
 	}
+	if (Collision_Map.size() > 0) {
+		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
+			Collision* collision = it->second;
+			if (collision != NULL) {
+				for (int i = 0; i < COL_FLAG_COUNT; i++)
+				{
+					if (collision->getUpdateFlag(i)) {
+						collision->setRenderFlag(i, true);
+						collision->setUpdateFlag(i, false);
+					}
+				}
+			}
+		}
+	}
 }
 
 void resetFlags() {
@@ -1219,6 +1239,19 @@ void resetFlags() {
 			}
 		}
 	}
+	if (Collision_Map.size() > 0) {
+		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
+			Collision* collision = it->second;
+			if (collision != NULL) {
+				for (int i = 0; i < COL_FLAG_COUNT; i++)
+				{
+					collision->setRenderFlag(i, false);
+				}
+			}
+		}
+	}
+	//TODO create parent class implementation for the above
+	
 	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
 	{
 		Mirror* mir = (*it).second;

@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "aircraft.h"
+#include "collision.h"
 
 #ifndef MIRROR_CLS_h
 #define MIRROR_CLS_h
@@ -19,6 +20,7 @@ public:
 	~Mirror();
 	std::string id_;
 	std::unordered_map<Aircraft*, std::vector<unsigned int>> g_flags;
+	std::unordered_map<Collision*, std::vector<unsigned int>> c_flags;
 	POINT* s_pt = nullptr, * cur_pt = nullptr, * end_pt = nullptr;
 	int startX = -1, startY = -1;
 	int borderDl;

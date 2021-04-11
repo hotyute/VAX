@@ -4,8 +4,10 @@
 #include <vector>
 #include <string>
 
+#include "main.h"
+
 enum class TOP_TYPE { 
-	RANGE_BTN, MODE_BTN, MAP_BTN, UNDO_BTN, DEFAULT1_BTN, PREF_BTN,
+	RANGE_BTN, MAP_BTN, UNDO_BTN, DEFAULT1_BTN, PREF_BTN,
 	ROTATE_BTN, DAY_NITE_BTN, BRITE_BTN, CHAR_SIZE_BTN, SAFETY_BTN,
 	TOOLS_BTN, VECTOR_BTN, VECTOR2_BTN, TEMP_BTN, LDR_BTN, DB_AREA_BTN,
 	DB_BTN, DCB_BTN, TERM_BTN, LOCAL_BTN, LOCAL2_BTN, OPER_BTN, DB_EDIT,
@@ -31,6 +33,7 @@ private:
 	TOP_TYPE type;
 public:
 	bool off;
+	int value;
 	TopButton(TOP_TYPE type);
 	int getIndex();
 	void setIndex(int);

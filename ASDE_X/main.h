@@ -53,7 +53,7 @@ void resetFlags();
 
 extern InterfaceFrame *connectFrame;
 extern BasicInterface* dragged_bounds;
-extern InputField *connect_callsign, *connect_fullname, *connect_username, *connect_password, *textField;
+extern InputField *connect_callsign, *connect_fullname, *connect_username, *connect_password, * main_chat_input;
 extern Label* callsign_label, *name_label, *user_label, * pass_label;
 extern CloseButton *connect_closeb;
 extern DisplayBox *main_chat;

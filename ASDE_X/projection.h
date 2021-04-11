@@ -15,12 +15,14 @@ extern int CLIENT_WIDTH;
 extern int CLIENT_HEIGHT;
 
 extern double mZoom;
+extern double rotation;
 extern int zoom_phase;
 extern double DEFAULT_ZOOM;
 
 extern double r_aircraft_size, default_r_size;
 extern double h_aircraft_size, default_h_size;
 extern double u_aircraft_size, default_u_size;
+extern double elevation;
 extern std::string icao;
 
 extern bool DAY, DB_BLOCK, CAPS, SHIFT_DOWN;

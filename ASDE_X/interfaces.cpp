@@ -189,9 +189,9 @@ void LoadMainChatInterface(bool refresh) {
 			(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);
 		textBox->children[main_chat->index = MAIN_CHAT_MESSAGES] = main_chat;
 
-		textField = new InputField(textBox, x + (controller_list_width + arrow_offset),
+		main_chat_input = new InputField(textBox, x + (controller_list_width + arrow_offset),
 			(CLIENT_WIDTH * width) - width_offset, 10.0, 5, 20, 5);
-		textBox->children[textField->index = MAIN_CHAT_INPUT] = textField;
+		textBox->children[main_chat_input->index = MAIN_CHAT_INPUT] = main_chat_input;
 
 		frames[MAIN_CHAT_INTERFACE] = textBox;
 	}

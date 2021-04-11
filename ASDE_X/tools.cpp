@@ -473,7 +473,19 @@ void addAircraftToMirrors(Aircraft* acf)
 		Mirror* mir = (*it).second;
 
 		if (mir) {
-			mir->g_flags.emplace(acf, std::vector<unsigned int>(3)); // initialized to 0 by default
+			mir->g_flags.emplace(acf, std::vector<unsigned int>(ACF_FLAG_COUNT)); // initialized to 0 by default
+		}
+	}
+}
+
+void addCollisionToMirrors(Collision* collision)
+{
+	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
+	{
+		Mirror* mir = (*it).second;
+
+		if (mir) {
+			mir->c_flags.emplace(collision, std::vector<unsigned int>(COL_FLAG_COUNT)); // initialized to 0 by default
 		}
 	}
 }

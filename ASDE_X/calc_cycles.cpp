@@ -17,7 +17,7 @@ DWORD __stdcall CalcThread1(LPVOID)
 		end = boost::posix_time::microsec_clock::local_time();
 
 		time = (end - start);
-		long long time1 = 30L;
+		long long time1 = 100L;
 		long long time2 = time1 - time.total_milliseconds();
 		if (time2 < 1) {
 			time2 = 1;
@@ -35,8 +35,18 @@ void update()
 void CalculateCollisions() {
 	if (AcfMap.size() > 0) {
 		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
-			// iterator->first = key
-			Aircraft* acf = iter->second;
+			Aircraft* acf1 = iter->second;
+			if (acf1) {
+				Aircraft& aircraft1 = *acf1;
+				for (auto iter2 = AcfMap.begin(); iter2 != AcfMap.end(); iter2++) {
+					Aircraft* acf2 = iter2->second;
+					if (acf2 && acf2 != acf1) {
+						Aircraft& aircraft2 = *acf2;
+
+						//Check What Runway Aircraft1
+					}
+				}
+			}
 		}
 	}
 

@@ -11,6 +11,7 @@
 
 #include "projection.h"
 #include "mirror.h"
+#include "collision.h"
 
 extern std::unordered_map<std::string, Mirror*> mirrors_storage;
 extern std::vector<Mirror*> mirrors;

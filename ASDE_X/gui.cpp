@@ -128,8 +128,14 @@ void InterfaceFrame::doClose()
 	case FP_INTERFACE:
 	{
 		opened_fp = NULL;
+		main_chat_input->setFocus();
+		break;
 	}
-	break;
+	case CONNECT_INTERFACE:
+	{
+		main_chat_input->setFocus();
+		break;
+	}
 	}
 	InterfaceFrame::render = false;
 	renderInterfaces = true;
@@ -229,7 +235,7 @@ void InputField::pushInput(bool uni, char c) {
 			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, c) : InputField::pp_input.push_back(c);
 		}
 		else {
-			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, '*') :InputField::pp_input.push_back('*');
+			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, '*') : InputField::pp_input.push_back('*');
 		}
 	}
 	ins ? InputField::input.insert(InputField::input.begin() + cursor_pos, c) : InputField::input.push_back(c);

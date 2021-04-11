@@ -34,6 +34,7 @@ int FileReader::LoadADX(std::string path) {
 		std::string string4 = "haircraftsize=";
 		std::string string5 = "uaircraftsize=";
 		std::string string6 = "ICAO=";
+		std::string string7 = "elevation=";
 		std::string commentStart = ";";
 		while (myfile.good()) {
 			getline(myfile, line);
@@ -48,6 +49,7 @@ int FileReader::LoadADX(std::string path) {
 			size_t found4 = line.find(string4);
 			size_t found5 = line.find(string5);
 			size_t found6 = line.find(string6);
+			size_t found7 = line.find(string7);
 			if (found2 != std::string::npos)
 			{
 				int start = (found2 + string2.length());
@@ -101,6 +103,17 @@ int FileReader::LoadADX(std::string path) {
 				}
 				else {
 					icao = apt_icao.c_str();
+				}
+			}
+			else if (found7 != std::string::npos)
+			{
+				int start = (found7 + string7.length());
+				std::string elevation = line.substr(start);
+				if (elevation.length() == 0) {
+					//error handling
+				}
+				else {
+					elevation = atof(elevation.c_str());
 				}
 			}
 			else if (found1 != std::string::npos)
@@ -161,13 +174,14 @@ int FileReader::LoadADX(std::string path) {
 					if (header == "RUNWAY LINE") {
 						//std::cout << whole_line << std::endl;
 						std::vector<std::string> args = split(line, " ");
-						double p1[2] = { atof(args[0].c_str()),  atof(args[1].c_str()) };
-						double p2[2] = { atof(args[2].c_str()),  atof(args[3].c_str()) };
-						double shoulder = atof(args[5].c_str());
+						std::string rw1 = args[0], rw2 = args[3];
+						double p1[2] = { atof(args[1].c_str()),  atof(args[2].c_str()) };
+						double p2[2] = { atof(args[4].c_str()),  atof(args[5].c_str()) };
+						double shoulder = atof(args[7].c_str());
 						double* bounds[5];
 						for (int i = 0; i < 5; ++i)
 							bounds[i] = new double[2];
-						getRunwayBounds(p1, p2, atof(args[4].c_str()) + shoulder, bounds);
+						getRunwayBounds(p1, p2, atof(args[6].c_str()) + shoulder, bounds);
 						for (int i = 0; i < 5; i++) {
 							point2d->add_coordinates(bounds[i][1], bounds[i][0], 0);
 						}

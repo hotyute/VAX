@@ -13,3 +13,13 @@ Collision::~Collision()
 	Collision::aircraft1 = nullptr;
 	Collision::aircraft2 = nullptr;
 }
+
+bool Collision::getRenderFlag(int flag)
+{
+	return Collision::render_flags[flag];
+}
+
+void Collision::setRenderFlag(int flag, bool val)
+{
+	Collision::render_flags[flag] = val;
+}
