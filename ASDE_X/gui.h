@@ -86,7 +86,10 @@ public:
 	std::string pp_input;
 	bool p_protected; // password protection
 	std::string input;
+	std::string cursor_input;
+	int cursor_pos = 0, last_cursor_pos = 0;
 	int inputTextDl = 0;
+	int inputCursorDl = 0;
 
 	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
@@ -96,6 +99,11 @@ public:
 	void focusDrawing();
 
 	void pushInput(bool, char);
+	void setCursorAtEnd();
+	void setCursor();
+	void cursorLeft();
+	void cursorRight();
+	void removeCursor();
 	void popInput();
 	void clearInput();
 	void setInput(std::string);

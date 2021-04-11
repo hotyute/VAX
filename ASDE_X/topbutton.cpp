@@ -7,7 +7,7 @@ std::string text;
 
 
 void loadButtons() {
-	TopButton *range = new TopButton();
+	TopButton* range = new TopButton(TOP_TYPE::RANGE_BTN);
 	range->setIndex(0);
 	range->setWidth(0.069259012016);
 	range->setHalf(false);
@@ -18,7 +18,7 @@ void loadButtons() {
 	range->setOption1("RANGE");
 	range->setOption2("170");
 	BUTTONS.push_back(range);
-	TopButton *mode = new TopButton();
+	TopButton* mode = new TopButton(TOP_TYPE::MODE_BTN);
 	mode->setIndex(1);
 	mode->setWidth(0.069259012016);
 	mode->setHalf(true);
@@ -28,7 +28,7 @@ void loadButtons() {
 	mode->setTripleOption(false);
 	mode->setOption1("ROTATE");
 	BUTTONS.push_back(mode);
-	TopButton *map = new TopButton();
+	TopButton* map = new TopButton(TOP_TYPE::MAP_BTN);
 	map->setIndex(1);
 	map->setWidth(0.069259012016);
 	map->setHalf(true);
@@ -39,7 +39,7 @@ void loadButtons() {
 	map->setOption1("MAP");
 	map->setOption2("RPOS");
 	BUTTONS.push_back(map);
-	TopButton *undo = new TopButton();
+	TopButton* undo = new TopButton(TOP_TYPE::UNDO_BTN);
 	undo->setIndex(2);
 	undo->setWidth(0.069259012016);
 	undo->setHalf(true);
@@ -49,7 +49,7 @@ void loadButtons() {
 	undo->setTripleOption(false);
 	undo->setOption1("UNDO");
 	BUTTONS.push_back(undo);
-	TopButton *default1 = new TopButton();
+	TopButton* default1 = new TopButton(TOP_TYPE::DEFAULT1_BTN);
 	default1->setIndex(2);
 	default1->setWidth(0.069259012016);
 	default1->setHalf(true);
@@ -59,7 +59,7 @@ void loadButtons() {
 	default1->setTripleOption(false);
 	default1->setOption1("DEFAULT");
 	BUTTONS.push_back(default1);
-	TopButton *pref = new TopButton();
+	TopButton* pref = new TopButton(TOP_TYPE::PREF_BTN);
 	pref->setIndex(3);
 	pref->setWidth(0.069259012016);
 	pref->setHalf(true);
@@ -70,7 +70,7 @@ void loadButtons() {
 	pref->setOption1("PREF");
 	pref->setOption2("");
 	BUTTONS.push_back(pref);
-	TopButton *daytnite = new TopButton();
+	TopButton* daytnite = new TopButton(TOP_TYPE::DAY_NITE_BTN);
 	daytnite->setIndex(3);
 	daytnite->setWidth(0.069259012016);
 	daytnite->setHalf(true);
@@ -80,8 +80,9 @@ void loadButtons() {
 	daytnite->setTripleOption(false);
 	daytnite->setOption1("DAY");
 	daytnite->setChoice1("NITE");
+	daytnite->off = false;
 	BUTTONS.push_back(daytnite);
-	TopButton *brite = new TopButton();
+	TopButton* brite = new TopButton(TOP_TYPE::BRITE_BTN);
 	brite->setIndex(4);
 	brite->setWidth(0.069259012016);
 	brite->setHalf(true);
@@ -91,7 +92,7 @@ void loadButtons() {
 	brite->setTripleOption(false);
 	brite->setOption1("BRITE");
 	BUTTONS.push_back(brite);
-	TopButton *charsize = new TopButton();
+	TopButton* charsize = new TopButton(TOP_TYPE::CHAR_SIZE_BTN);
 	charsize->setIndex(4);
 	charsize->setWidth(0.069259012016);
 	charsize->setHalf(true);
@@ -102,7 +103,7 @@ void loadButtons() {
 	charsize->setOption1("CHAR");
 	charsize->setOption2("SIZE");
 	BUTTONS.push_back(charsize);
-	TopButton *safety = new TopButton();
+	TopButton* safety = new TopButton(TOP_TYPE::SAFETY_BTN);
 	safety->setIndex(5);
 	safety->setWidth(0.069259012016);
 	safety->setHalf(false);
@@ -114,7 +115,7 @@ void loadButtons() {
 	safety->setOption2("SAFETY");
 	safety->setOption3("26L27-00");
 	BUTTONS.push_back(safety);
-	TopButton *tools = new TopButton();
+	TopButton* tools = new TopButton(TOP_TYPE::TOOLS_BTN);
 	tools->setIndex(6);
 	tools->setWidth(0.069259012016);
 	tools->setHalf(false);
@@ -124,7 +125,7 @@ void loadButtons() {
 	tools->setTripleOption(false);
 	tools->setOption1("TOOLS");
 	BUTTONS.push_back(tools);
-	TopButton *vector = new TopButton();
+	TopButton* vector = new TopButton(TOP_TYPE::VECTOR_BTN);
 	vector->setIndex(7);
 	vector->setWidth(0.069259012016);
 	vector->setHalf(true);
@@ -136,7 +137,7 @@ void loadButtons() {
 	vector->setOption2("ON");
 	vector->setChoice2("OFF");
 	BUTTONS.push_back(vector);
-	TopButton *vector2 = new TopButton();
+	TopButton* vector2 = new TopButton(TOP_TYPE::VECTOR2_BTN);
 	vector2->setIndex(7);
 	vector2->setWidth(0.069259012016);
 	vector2->setHalf(true);
@@ -147,7 +148,7 @@ void loadButtons() {
 	vector2->setOption1("VECTOR");
 	vector2->setOption2("1");
 	BUTTONS.push_back(vector2);
-	TopButton *tmpdata = new TopButton();
+	TopButton* tmpdata = new TopButton(TOP_TYPE::TEMP_BTN);
 	tmpdata->setIndex(8);
 	tmpdata->setWidth(0.069259012016);
 	tmpdata->setHalf(true);
@@ -158,7 +159,7 @@ void loadButtons() {
 	tmpdata->setOption1("TEMP");
 	tmpdata->setOption2("DATA");
 	BUTTONS.push_back(tmpdata);
-	TopButton *ldr = new TopButton();
+	TopButton* ldr = new TopButton(TOP_TYPE::LDR_BTN);
 	ldr->setIndex(8);
 	ldr->setWidth(0.069259012016);
 	ldr->setHalf(true);
@@ -169,7 +170,7 @@ void loadButtons() {
 	ldr->setOption1("LDR LNG");
 	ldr->setOption2("1");
 	BUTTONS.push_back(ldr);
-	TopButton *local = new TopButton();
+	TopButton* local = new TopButton(TOP_TYPE::LOCAL_BTN);
 	local->setIndex(9);
 	local->setWidth(0.069259012016);
 	local->setHalf(true);
@@ -180,7 +181,7 @@ void loadButtons() {
 	local->setOption1("LOCAL");
 	local->setOption2("101-188");
 	BUTTONS.push_back(local);
-	TopButton *local2 = new TopButton();
+	TopButton* local2 = new TopButton(TOP_TYPE::LOCAL2_BTN);
 	local2->setIndex(9);
 	local2->setWidth(0.069259012016);
 	local2->setHalf(true);
@@ -191,7 +192,7 @@ void loadButtons() {
 	local2->setOption1("LOCAL");
 	local2->setOption2("189-276");
 	BUTTONS.push_back(local2);
-	TopButton *dbarea = new TopButton();
+	TopButton* dbarea = new TopButton(TOP_TYPE::DB_AREA_BTN);
 	dbarea->setIndex(10);
 	dbarea->setWidth(0.069259012016);
 	dbarea->setHalf(true);
@@ -202,7 +203,7 @@ void loadButtons() {
 	dbarea->setOption1("DB");
 	dbarea->setOption2("AREA");
 	BUTTONS.push_back(dbarea);
-	TopButton *dbedit = new TopButton();
+	TopButton* dbedit = new TopButton(TOP_TYPE::DB_EDIT);
 	dbedit->setIndex(10);
 	dbedit->setWidth(0.069259012016);
 	dbedit->setHalf(true);
@@ -212,7 +213,7 @@ void loadButtons() {
 	dbedit->setTripleOption(false);
 	dbedit->setOption1("DB EDIT");
 	BUTTONS.push_back(dbedit);
-	TopButton *db = new TopButton();
+	TopButton* db = new TopButton(TOP_TYPE::DB_BTN);
 	db->setIndex(11);
 	db->setWidth(0.069259012016);
 	db->setHalf(true);
@@ -223,8 +224,9 @@ void loadButtons() {
 	db->setOption1("DB");
 	db->setOption2("ON");
 	db->setChoice2("OFF");
+	db->off = false;
 	BUTTONS.push_back(db);
-	TopButton *initcntl = new TopButton();
+	TopButton* initcntl = new TopButton(TOP_TYPE::INITCNTL);
 	initcntl->setIndex(11);
 	initcntl->setWidth(0.069259012016);
 	initcntl->setHalf(true);
@@ -235,7 +237,7 @@ void loadButtons() {
 	initcntl->setOption1("INIT");
 	initcntl->setOption2("CNTL");
 	BUTTONS.push_back(initcntl);
-	TopButton *trksusp = new TopButton();
+	TopButton* trksusp = new TopButton(TOP_TYPE::TRKSUP);
 	trksusp->setIndex(12);
 	trksusp->setWidth(0.069259012016);
 	trksusp->setHalf(true);
@@ -246,7 +248,7 @@ void loadButtons() {
 	trksusp->setOption1("TRK");
 	trksusp->setOption2("SUSP");
 	BUTTONS.push_back(trksusp);
-	TopButton *term = new TopButton();
+	TopButton* term = new TopButton(TOP_TYPE::TERM_BTN);
 	term->setIndex(12);
 	term->setWidth(0.069259012016);
 	term->setHalf(true);
@@ -257,7 +259,7 @@ void loadButtons() {
 	term->setOption1("TERM");
 	term->setOption2("CNTL");
 	BUTTONS.push_back(term);
-	TopButton *dcb = new TopButton();
+	TopButton* dcb = new TopButton(TOP_TYPE::DCB_BTN);
 	dcb->setIndex(13);
 	dcb->setWidth(0.069259012016);
 	dcb->setHalf(true);
@@ -268,8 +270,9 @@ void loadButtons() {
 	dcb->setOption1("DCB");
 	dcb->setOption2("ON");
 	dcb->setChoice2("OFF");
+	dcb->off = false;
 	BUTTONS.push_back(dcb);
-	TopButton *oper = new TopButton();
+	TopButton* oper = new TopButton(TOP_TYPE::OPER_BTN);
 	oper->setIndex(13);
 	oper->setWidth(0.069259012016);
 	oper->setHalf(true);
@@ -282,9 +285,9 @@ void loadButtons() {
 	BUTTONS.push_back(oper);
 }
 
-TopButton::TopButton() : params{0, 0, 0, 0}
+TopButton::TopButton(TOP_TYPE type) : params{ 0, 0, 0, 0 }
 {
-
+	this->type = type;
 }
 
 int TopButton::getIndex() {
@@ -382,4 +385,18 @@ std::string TopButton::getOption3() {
 
 void TopButton::setOption3(std::string value) {
 	TopButton::option3 = value;
+}
+
+void TopButton::handle()
+{
+	switch (this->type)
+	{
+	case TOP_TYPE::DB_BTN:
+	{
+		DB_BLOCK = !DB_BLOCK;
+		break;
+	}
+	default:
+		break;
+	}
 }

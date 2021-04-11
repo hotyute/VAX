@@ -217,7 +217,7 @@ void sendMainChatMessage(InputField* focusField)
 	main_chat->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
 	renderDrawings = true;
 	focusField->clearInput();
-	focusField->pushInput(true, input_cursor);
+	focusField->setCursor();
 	renderInputTextFocus = true;
 }
 

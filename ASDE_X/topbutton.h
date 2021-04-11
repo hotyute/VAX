@@ -4,6 +4,14 @@
 #include <vector>
 #include <string>
 
+enum class TOP_TYPE { 
+	RANGE_BTN, MODE_BTN, MAP_BTN, UNDO_BTN, DEFAULT1_BTN, PREF_BTN,
+	ROTATE_BTN, DAY_NITE_BTN, BRITE_BTN, CHAR_SIZE_BTN, SAFETY_BTN,
+	TOOLS_BTN, VECTOR_BTN, VECTOR2_BTN, TEMP_BTN, LDR_BTN, DB_AREA_BTN,
+	DB_BTN, DCB_BTN, TERM_BTN, LOCAL_BTN, LOCAL2_BTN, OPER_BTN, DB_EDIT,
+	TRKSUP, INITCNTL
+};
+
 class TopButton {
 private:
 	int index;
@@ -20,9 +28,10 @@ private:
 	std::string choice2;
 	std::string option3;
 	int params[4];
+	TOP_TYPE type;
 public:
 	bool off;
-	TopButton();
+	TopButton(TOP_TYPE type);
 	int getIndex();
 	void setIndex(int);
 	double getWidth();
@@ -49,6 +58,8 @@ public:
 	void setOption3(std::string);
 	int* getParams() { return params; }
 	void updateParams(int x, int y, int x2, int y2) { params[0] = x, params[1] = y, params[2] = x2, params[3] = y2; }
+	TOP_TYPE getType() { return type; }
+	void handle();
 };
 
 extern std::vector<TopButton*> BUTTONS;

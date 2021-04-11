@@ -21,6 +21,6 @@ double h_aircraft_size = 0.12, default_h_size = 0.0031;
 double u_aircraft_size = 0.1, default_u_size = 0.003;
 std::string icao;
 
-bool DAY = true, CAPS = false, SHIFT_DOWN = false;
+bool DAY = true, DB_BLOCK = true, CAPS = false, SHIFT_DOWN = false;
 
 char input_cursor = '_';

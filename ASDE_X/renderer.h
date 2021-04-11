@@ -3,12 +3,13 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 #include "main.h"
 #include <gl/GL.h>
 #include <gl/GLU.h>
-#include <unordered_map>
 
+#include "projection.h"
 #include "mirror.h"
 
 extern std::unordered_map<std::string, Mirror*> mirrors_storage;
@@ -41,6 +42,7 @@ static double BUTTON_WIDTH = 70;
 const static double BUTTON_LAYOUT_HEIGHT = 0.1;
 
 const static float day_background[] = {0.0f, 0.35686274509f, 0.49019607843f};
+const static float nite_background[] = { 0.11111111111f, 0.11111111111f, 0.11111111111f };
 const static float runway_clr[] = {0.06274509803f, 0.06274509803f, 0.06274509803f};
 const static float taxiway_clr[] = {0.16078431372f, 0.16078431372f, 0.16078431372f};
 const static float apron_clr[] = {0.31764705882f, 0.31764705882f, 0.31764705882f};
@@ -97,5 +99,7 @@ void CallFocuses();
 void CallLabels(InterfaceFrame* frame, Label* label);
 
 void CallInputTexts(InterfaceFrame* frame, InputField* field);
+
+void CallInputCursor(InterfaceFrame* frame, InputField* field);
 
 #endif

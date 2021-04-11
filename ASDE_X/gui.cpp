@@ -199,7 +199,7 @@ void InputField::setFocus() {
 			focusChild->removeFocus();
 			updateLastFocus = true;
 		}
-		InputField::pushInput(true, input_cursor);
+		InputField::setCursorAtEnd();
 		InputField::focus = true;
 		focusChild = this;
 		renderInputTextFocus = true;
@@ -208,9 +208,7 @@ void InputField::setFocus() {
 
 void InputField::removeFocus() {
 	if (InputField::focus) {
-		if (InputField::input.size() > 0) {
-			InputField::popInput();
-		}
+		removeCursor();
 		InputField::focus = false;
 		lastFocus = this;
 		focusChild = NULL;
@@ -225,22 +223,70 @@ void InputField::focusDrawing() {
 }
 
 void InputField::pushInput(bool uni, char c) {
+	bool ins = cursor_pos < input.size() ? true : false;
 	if (InputField::p_protected) {
 		if (uni) {
-			InputField::pp_input.push_back(c);
+			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, c) : InputField::pp_input.push_back(c);
 		}
 		else {
-			InputField::pp_input.push_back('*');
+			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, '*') :InputField::pp_input.push_back('*');
 		}
 	}
-	InputField::input.push_back(c);
+	ins ? InputField::input.insert(InputField::input.begin() + cursor_pos, c) : InputField::input.push_back(c);
+	InputField::cursor_input.push_back(' ');
+	last_cursor_pos = cursor_pos;
+	cursor_pos++;
+}
+
+void InputField::setCursorAtEnd() {
+	last_cursor_pos = cursor_pos = input.size();
+	setCursor();
+}
+
+void InputField::setCursor() {
+	if (cursor_input.size() != (input.size() + 1))
+		cursor_input.resize(input.size() + 1, ' ');
+	cursor_input[last_cursor_pos] = ' ';
+	cursor_input[cursor_pos] = input_cursor;
+}
+
+void InputField::removeCursor() {
+	cursor_pos = 0;
+	last_cursor_pos = 0;
+	cursor_input.clear();
+}
+
+void InputField::cursorLeft()
+{
+	if (cursor_pos > 0) {
+		last_cursor_pos = cursor_pos;
+		cursor_pos--;
+		setCursor();
+		renderInputTextFocus = true;
+	}
+}
+
+void InputField::cursorRight()
+{
+	if (cursor_pos < input.size()) {
+		last_cursor_pos = cursor_pos;
+		cursor_pos++;
+		setCursor();
+		renderInputTextFocus = true;
+	}
 }
 
 void InputField::popInput() {
+	bool ins = cursor_pos < input.size() ? true : false;
+	if (ins && (cursor_pos - 1) < 0)
+		return;
 	if (InputField::p_protected) {
-		InputField::pp_input.pop_back();
+		ins ? InputField::pp_input.erase(InputField::pp_input.begin() + (cursor_pos - 1)) : InputField::pp_input.pop_back();
 	}
-	InputField::input.pop_back();
+	ins ? InputField::input.erase(InputField::input.begin() + (cursor_pos - 1)) : InputField::input.pop_back();
+	InputField::cursor_input.pop_back();
+	last_cursor_pos = cursor_pos;
+	cursor_pos--;
 }
 
 void InputField::clearInput() {
@@ -248,11 +294,20 @@ void InputField::clearInput() {
 		InputField::pp_input.clear();
 	}
 	InputField::input.clear();
+	InputField::cursor_input.clear();
+	last_cursor_pos = 0;
+	cursor_pos = 0;
 }
 
 void InputField::setInput(std::string text) {
 	InputField::clearInput();
 	InputField::input = text;
+
+	last_cursor_pos = cursor_pos;
+	for (int i = 0; i < text.size(); i++) {
+		InputField::cursor_input += ' ';
+		cursor_pos++;
+	}
 }
 
 void InputField::setUneditable(std::string line)
@@ -270,7 +325,7 @@ void InputField::pass_characters(char* chars) {
 			InputField::pushInput(false, *chars);
 			++chars;
 		}
-		InputField::pushInput(true, input_cursor);
+		InputField::setCursor();
 		renderInputTextFocus = true;
 	}
 }

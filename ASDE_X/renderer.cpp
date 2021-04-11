@@ -36,6 +36,7 @@ std::string regular_text = "Regular Aircraft";
 void RenderChatInterface(BasicInterface&);
 void RenderMirrorBorder(Mirror& mirror);
 void RenderInputText(BasicInterface&, int&, std::string&, bool);
+void RenderInputCursor(BasicInterface& border, int& inputCursorDl, std::string& text, bool centered);
 void RenderLabel(BasicInterface&, int&, std::string&, int);
 void RenderFocuses(InterfaceFrame* frame);
 void RenderDrawings(InterfaceFrame* frame);
@@ -171,7 +172,9 @@ void DrawGLScene() {
 	if (DAY) {
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
 	}
-	else {
+	else 
+	{
+		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
 	}
 	/*if (MOUSE_MOVE) {
 	double lol[3];
@@ -287,7 +290,8 @@ void DrawInterfaces() {
 		if (updateLastFocus && lastFocus != NULL && lastFocus->type == INPUT_FIELD) {
 			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
-			BasicInterface* last_border = lastFocus->child_interfaces[0];
+			glDeleteLists(lastFocusField->inputCursorDl, 1);
+			BasicInterface& last_border = *lastFocus->child_interfaces[0];
 			std::string l_input;
 			if (lastFocusField->p_protected)
 			{
@@ -297,13 +301,15 @@ void DrawInterfaces() {
 			{
 				l_input = lastFocusField->input;
 			}
-			RenderInputText(*last_border, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
+			RenderInputText(last_border, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
+			RenderInputCursor(last_border, lastFocusField->inputCursorDl, lastFocusField->cursor_input, lastFocusField->centered);
 			updateLastFocus = false;
 		}
 		if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
 			InputField* focusField = (InputField*)focusChild;
 			glDeleteLists(focusField->inputTextDl, 1);
-			BasicInterface* border = focusField->border;
+			glDeleteLists(focusField->inputCursorDl, 1);
+			BasicInterface& border = *focusField->border;
 			std::string f_input;
 			if (focusField->p_protected) {
 				f_input = focusField->pp_input;
@@ -311,7 +317,8 @@ void DrawInterfaces() {
 			else {
 				f_input = focusField->input;
 			}
-			RenderInputText(*border, focusField->inputTextDl, f_input, focusField->centered);
+			RenderInputText(border, focusField->inputTextDl, f_input, focusField->centered);
+			RenderInputCursor(border, focusField->inputCursorDl, focusField->cursor_input, focusField->centered);
 		}
 		renderInputTextFocus = false;
 	}
@@ -327,6 +334,10 @@ void DrawInterfaces() {
 							glDeleteLists(field->inputTextDl, 1);
 							field->inputTextDl = 0;
 						}
+						if (field->inputCursorDl != 0) {
+							glDeleteLists(field->inputCursorDl, 1);
+							field->inputCursorDl = 0;
+						}
 						BasicInterface* border = field->border;
 						std::string f_input;
 						if (field->p_protected) {
@@ -335,7 +346,9 @@ void DrawInterfaces() {
 						else {
 							f_input = field->input;
 						}
-						RenderInputText(*border, field->inputTextDl, f_input, field->centered);
+						BasicInterface& bord = *border;
+						RenderInputText(bord, field->inputTextDl, f_input, field->centered);
+						RenderInputCursor(bord, field->inputCursorDl, field->cursor_input, field->centered);
 					}
 				}
 				frame->renderAllInputText = false;
@@ -345,6 +358,7 @@ void DrawInterfaces() {
 					if (child->type == INPUT_FIELD) {
 						InputField* field = (InputField*)child;
 						CallInputTexts(frame, field);
+						CallInputCursor(frame, field);
 					}
 				}
 			}
@@ -412,6 +426,7 @@ void DrawMirrorScenes(Mirror& mirror)
 	}
 	else
 	{
+		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
 	}
 
 
@@ -1137,6 +1152,38 @@ void RenderInputText(BasicInterface& border, int& inputTextDl, std::string& text
 	glEndList();
 }
 
+void RenderInputCursor(BasicInterface& border, int& inputCursorDl, std::string& text, bool centered) {
+	int x, y = border.getStartY() + 6;
+	double aW = border.getActualWidth();
+	if (centered) {
+		x = (border.getStartX() + (aW / 2));
+	}
+	else {
+		x = border.getStartX() + 3;
+	}
+
+	inputCursorDl = glGenLists(1);
+
+	glNewList(inputCursorDl, GL_COMPILE);
+
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	SelectObject(hDC, topBtnFont);
+	SIZE size = getTextExtent(text);
+	if (centered) {
+		x -= (size.cx / 2);
+	}
+	glRasterPos2f(x, y);
+	std::string finalTxt = text.c_str();
+	size_t pos = finalTxt.find("%");
+	while (pos != std::string::npos) {
+		finalTxt.insert(pos, "%");
+		pos = finalTxt.find("%", pos + 2);
+	}
+	glPrint(finalTxt.c_str(), &topButtonBase);
+
+	glEndList();
+}
+
 void RenderLabel(BasicInterface& border, int& labelDl, std::string& text, int centered) {
 	int x, y = border.getStartY() + 6;
 	double aW = border.getActualWidth();
@@ -1776,7 +1823,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	glScaled(a_size, a_size, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
-	if (!standby) {
+	if (!standby && DB_BLOCK) {
 		glCallList(aircraft.Ccallsign);
 	}
 	glPopMatrix();
@@ -1954,6 +2001,24 @@ void CallInputTexts(InterfaceFrame* frame, InputField* field) {
 	else
 	{
 		glCallList(field->inputTextDl);
+	}
+
+	glPopMatrix();
+}
+
+void CallInputCursor(InterfaceFrame* frame, InputField* field) {
+	glPushMatrix();
+
+	if (frame->cur_pt && frame->s_pt)
+	{
+
+		glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+		glCallList(field->inputCursorDl);
+	}
+	else
+	{
+		glCallList(field->inputCursorDl);
 	}
 
 	glPopMatrix();

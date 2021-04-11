@@ -420,6 +420,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				curButton->off = !curButton->off;
 				renderButtons = true;
 				clicked_tbutton = curButton;
+				curButton->handle();
 				break;
 			}
 		}
@@ -679,11 +680,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					InterfaceFrame& frame = *focusField->getFrame();
 					int frame_index = frame.index;
 					if (frame_index == MAIN_CHAT_INTERFACE && focusField == textField) {// main chat
-						if (focusField->input.size() > 1) {
-							focusField->popInput();
+						if (focusField->input.size() > 0) {
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
-								focusField->pushInput(true, input_cursor);
+								focusField->setCursor();
 								renderInputTextFocus = true;
 							}
 							else
@@ -695,12 +695,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					else if (is_privateinterface(frame_index))
 					{
 						if (focusField->index == PRIVATE_MESSAGE_INPUT) {
-							if (focusField->input.size() > 1) {
-								focusField->popInput();
+							if (focusField->input.size() > 0) {
 								if (processCommands(focusField->input))
 								{
 									focusField->clearInput();
-									focusField->pushInput(true, input_cursor);
+									focusField->setCursor();
 									renderInputTextFocus = true;
 								}
 								else
@@ -716,7 +715,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
 									renderDrawings = true;
 									focusField->clearInput();
-									focusField->pushInput(true, input_cursor);
+									focusField->setCursor();
 									renderInputTextFocus = true;
 								}
 							}
@@ -736,6 +735,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 				}
 				else if (type == INPUT_FIELD) {
+					InputField* input = (InputField*)focusChild;
+					input->cursorLeft();
 				}
 			}
 		}
@@ -750,6 +751,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 				}
 				else if (type == INPUT_FIELD) {
+					InputField* input = (InputField*)focusChild;
+					input->cursorRight();
 				}
 			}
 		}
@@ -761,10 +764,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
 				InputField* focusField = (InputField*)focusChild;
 				if (focusField->editable) {
-					if (focusField->input.size() > 1) {
+					if (focusField->input.size() > 0) {
 						focusField->popInput();
-						focusField->popInput();
-						focusField->pushInput(true, input_cursor);
+						focusField->setCursor();
 						renderInputTextFocus = true;
 					}
 				}
@@ -833,11 +835,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
 						if (len == 1) {
 							if (focusField.can_type()) {
-								if (focusField.input.size() > 0) {
-									focusField.popInput();
-								}
 								focusField.pushInput(false, c2);
-								focusField.pushInput(true, input_cursor);
+								focusField.setCursor();
 								renderInputTextFocus = true;
 							}
 						}
@@ -1123,7 +1122,7 @@ void pass_command(char* cmd) {
 			InputField& input_box = *(InputField*)child;
 
 			input_box.setInput(cmd);
-			input_box.pushInput(true, input_cursor);
+			input_box.setCursor();
 			renderInputTextFocus = true;
 		}
 	}

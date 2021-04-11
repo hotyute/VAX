@@ -23,6 +23,6 @@ extern double h_aircraft_size, default_h_size;
 extern double u_aircraft_size, default_u_size;
 extern std::string icao;
 
-extern bool DAY, CAPS, SHIFT_DOWN;
+extern bool DAY, DB_BLOCK, CAPS, SHIFT_DOWN;
 
 extern char input_cursor;
