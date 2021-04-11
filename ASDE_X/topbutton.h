@@ -60,6 +60,7 @@ public:
 	void updateParams(int x, int y, int x2, int y2) { params[0] = x, params[1] = y, params[2] = x2, params[3] = y2; }
 	TOP_TYPE getType() { return type; }
 	void handle();
+	void handleScroll(bool hi_scroll);// boolean high scroll for if scrolling "up"
 };
 
 extern std::vector<TopButton*> BUTTONS;

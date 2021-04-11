@@ -405,3 +405,17 @@ void TopButton::handle()
 		break;
 	}
 }
+
+void TopButton::handleScroll(bool hi_scroll)
+{
+	switch (this->type)
+	{
+	case TOP_TYPE::RANGE_BTN:
+	{
+		hi_scroll ? mZoom += 0.0002 : mZoom -= 0.0002;
+		break;
+	}
+	default:
+		break;
+	}
+}

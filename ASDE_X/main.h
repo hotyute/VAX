@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <windows.h>
+#include <windowsx.h>
 #include "gui.h"
 #include "constants.h"
 #include "flightplan.h"

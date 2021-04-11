@@ -591,22 +591,50 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	break;
 	case WM_MOUSEWHEEL:
 	{
-		const int val = GET_WHEEL_DELTA_WPARAM(wParam);
-		ChildFrame* focus = focusChild;
-		if (focus) {
-			if (focus->type == DISPLAY_BOX) {
-				BasicInterface& bdr = *((DisplayBox*)focus)->border;
-				if (bdr.isBounds()) {
-					if (val < 0) {
-						((DisplayBox*)focus)->doActionDown();
-					}
+		POINT pt;
+		pt.x = GET_X_LPARAM(lParam);
+		pt.y = GET_Y_LPARAM(lParam);
+		ScreenToClient(hWnd, &pt);
 
-					if (val > 0) {
-						((DisplayBox*)focus)->doActionUp();
+		pt.y = (CLIENT_HEIGHT - pt.y);
+
+		const int val = GET_WHEEL_DELTA_WPARAM(wParam);
+
+		TopButton* clicked_tbutton = nullptr;
+		for (size_t i = 0; i < BUTTONS.size(); i++) {
+			TopButton* curButton = BUTTONS[i];
+			int* params = curButton->getParams();
+			int vertx[4] = { params[0], params[0], params[2], params[2] };
+			int verty[4] = { params[1], params[3], params[3], params[1] };
+			bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
+			if (clicked) {
+				renderButtons = true;
+				clicked_tbutton = curButton;
+				curButton->handleScroll(val > 0);
+				break;
+			}
+		}
+		if (!clicked_tbutton) {
+			ChildFrame* focus = focusChild;
+			if (focus) {
+				if (focus->type == DISPLAY_BOX) {
+					BasicInterface& bdr = *((DisplayBox*)focus)->border;
+					if (bdr.isBounds()) {
+						if (val < 0) {
+							((DisplayBox*)focus)->doActionDown();
+						}
+
+						if (val > 0) {
+							((DisplayBox*)focus)->doActionUp();
+						}
 					}
 				}
-			}
 
+			}
+			else
+			{
+				//search unfocused display boxes
+			}
 		}
 	}
 	break;
