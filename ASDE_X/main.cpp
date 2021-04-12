@@ -412,8 +412,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
 		bool clicked_interface = false;
 		TopButton* clicked_tbutton = nullptr;
-		for (size_t i = 0; i < BUTTONS.size(); i++) {
-			TopButton* curButton = BUTTONS[i];
+		for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) {
+			TopButton* curButton = *btn;
 			int* params = curButton->getParams();
 			int vertx[4] = { params[0], params[0], params[2], params[2] };
 			int verty[4] = { params[1], params[3], params[3], params[1] };
@@ -427,11 +427,63 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		if (!clicked_tbutton) {
-			for (auto it = frames.begin(); it != frames.end(); ++it) {
-				InterfaceFrame* frame = *(it);
+			for (auto it = frames.rbegin(); it != frames.rend(); ++it) {
+				InterfaceFrame* frame = *it;
 				if (frame && frame->render) {
-					BasicInterface* clicked2 = NULL;
-					for (BasicInterface* inter1 : frame->interfaces) {
+					ChildFrame* clicked1 = nullptr;
+					for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
+						ChildFrame* children = *child;
+						if (children) {
+							for (auto iter2 = children->child_interfaces.rbegin(); iter2 != children->child_interfaces.rend(); ++iter2) {
+								BasicInterface* inter2 = *iter2;
+								if (inter2) {
+									if (children->type == DISPLAY_BOX) {
+										int arrow_bounds = 15, arrow_offset = 3;
+										if (click_arrow_bottom(*inter2, x, y, arrow_bounds, arrow_offset)) {
+											((DisplayBox*)children)->doActionDown();
+											break;
+										}
+
+										if (click_arrow_top(*inter2, x, y, arrow_bounds, arrow_offset)) {
+											((DisplayBox*)children)->doActionUp();
+											break;
+										}
+
+									}
+									if (inter2->isBounds()) {
+										int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
+										int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
+										bool clicked = pnpoly(4, vertx, verty, x, y);
+										if (clicked) {
+											clicked1 = children;
+											break;
+										}
+									}
+								}
+							}
+						}
+						if (clicked1)
+							break;
+					}
+					if (clicked1) {
+						if (clicked1->type == INPUT_FIELD && !((InputField*)clicked1)->editable) {
+							//dont do anything with non editable field
+						}
+						else
+						{
+							if (focusChild != clicked1) {
+								clicked1->setFocus();
+							}
+							if (focusChild == clicked1) {
+								clicked1->doAction();
+							}
+						}
+						clicked_interface = true;
+						break;
+					}
+					BasicInterface* clicked2 = nullptr;
+					for (auto iter = frame->interfaces.rbegin(); iter != frame->interfaces.rend(); ++iter) {
+						BasicInterface* inter1 = *iter;
 						if (inter1 && inter1->isBounds() && frame->pannable) {
 							int b_offset_Y = 25;
 							int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
@@ -443,73 +495,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							}
 						}
 					}
-					ChildFrame* clicked1 = NULL;
-					for (ChildFrame* children : frame->children) {
-						if (children) {
-							for (BasicInterface* inter2 : children->child_interfaces) {
-								if (children->type == DISPLAY_BOX) {
-									int arrow_bounds = 15, arrow_offset = 3;
-									if (click_arrow_bottom(*inter2, x, y, arrow_bounds, arrow_offset)) {
-										((DisplayBox*)children)->doActionDown();
-										break;
-									}
-
-									if (click_arrow_top(*inter2, x, y, arrow_bounds, arrow_offset)) {
-										((DisplayBox*)children)->doActionUp();
-										break;
-									}
-
-								}
-								if (inter2->isBounds()) {
-									int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
-									int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
-									bool clicked = pnpoly(4, vertx, verty, x, y);
-									if (clicked) {
-										clicked1 = children;
-										break;
-									}
-								}
-							}
-						}
-					}
-					if (clicked1 != NULL) {
-						if (clicked1->type == INPUT_FIELD && !((InputField*)clicked1)->editable) {
-							//dont do anything with non editable field
-							printf("What");
-						}
-						else {
-							if (focusChild != clicked1) {
-								clicked1->setFocus();
-							}
-							if (focusChild == clicked1) {
-								clicked1->doAction();
-							}
-						}
-						clicked_interface = true;
-					}
-					else if (clicked2 != NULL)
+					if (clicked2)
 					{
 						if (!frame->s_pt)
 							frame->s_pt = new POINT();
 						if (frames.back() != *it)
-							std::swap(frames[it - frames.begin()], frames.back()); //bring interface to the front
+							std::swap(*it, frames.back()); //bring interface to the front
 						frame->s_pt->x = (int)(short)LOWORD(lParam);
 						frame->s_pt->y = (int)(short)HIWORD(lParam);
 						dragged = frame;
 						dragged_bounds = clicked2;
 						clicked_interface = true;
+						break;
 					}
 				}
 			}
 			if (!clicked_interface)
 			{
 				//check for mirrors
-				for (auto it3 = mirrors.begin(); it3 != mirrors.end();  ++it3) {
+				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3) {
 					Mirror* mir = *it3;
 					if (mir)
 					{
 						Mirror& mirror = *mir;
-						int b_offset_Y = mirror.getHeight() * 0.25;
+						int b_offset_Y = 25;
 						double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
 						int vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
 						int vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
@@ -525,7 +534,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							dragged_mir = mir;
 
 							if (mirrors.back() != *it3)
-								std::swap(mirrors[it3 - mirrors.begin()], mirrors.back());
+								std::swap(*it3, mirrors.back());
 							break;
 						}
 					}
@@ -1251,7 +1260,7 @@ void resetFlags() {
 		}
 	}
 	//TODO create parent class implementation for the above
-	
+
 	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
 	{
 		Mirror* mir = (*it).second;
