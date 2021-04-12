@@ -28,7 +28,7 @@ void loadButtons() {
 	mode->setDualOption(false);
 	mode->setTripleOption(false);
 	mode->setOption1("ROTATE");
-	range->value = 0;
+	mode->value = 0;
 	BUTTONS.push_back(mode);
 	TopButton* map = new TopButton(TOP_TYPE::MAP_BTN);
 	map->setIndex(1);
