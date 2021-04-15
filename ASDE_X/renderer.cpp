@@ -298,7 +298,7 @@ void DrawInterfaces() {
 
 	//all input text from all frames
 	if (renderInputTextFocus) {
-		if (updateLastFocus && lastFocus != NULL && lastFocus->type == INPUT_FIELD) {
+		if (updateLastFocus && lastFocus != NULL && lastFocus->type == CHILD_TYPE::INPUT_FIELD) {
 			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
 			glDeleteLists(lastFocusField->inputCursorDl, 1);
@@ -316,7 +316,7 @@ void DrawInterfaces() {
 			RenderInputCursor(last_border, lastFocusField->inputCursorDl, lastFocusField->cursor_input, lastFocusField->centered);
 			updateLastFocus = false;
 		}
-		if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
+		if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 			InputField* focusField = (InputField*)focusChild;
 			glDeleteLists(focusField->inputTextDl, 1);
 			glDeleteLists(focusField->inputCursorDl, 1);
@@ -339,7 +339,7 @@ void DrawInterfaces() {
 		if (frame && frame->render) {
 			if (frame->renderAllInputText) {
 				for (ChildFrame* child : frame->children) {
-					if (child != NULL && child->type == INPUT_FIELD) {
+					if (child != NULL && child->type == CHILD_TYPE::INPUT_FIELD) {
 						InputField* field = (InputField*)child;
 						if (field->inputTextDl != 0) {
 							glDeleteLists(field->inputTextDl, 1);
@@ -366,7 +366,7 @@ void DrawInterfaces() {
 			}
 			for (ChildFrame* child : frame->children) {
 				if (child) {
-					if (child->type == INPUT_FIELD) {
+					if (child->type == CHILD_TYPE::INPUT_FIELD) {
 						InputField* field = (InputField*)child;
 						CallInputTexts(frame, field);
 						CallInputCursor(frame, field);
@@ -379,7 +379,7 @@ void DrawInterfaces() {
 		if (frame && frame->render) {
 			if (frame->renderAllLabels) {
 				for (ChildFrame* child : frame->children) {
-					if (child != NULL && child->type == LABEL_D) {
+					if (child != NULL && child->type == CHILD_TYPE::LABEL_D) {
 						Label* label = (Label*)child;
 						if (label->labelTextDl != 0) {
 							glDeleteLists(label->labelTextDl, 1);
@@ -393,7 +393,7 @@ void DrawInterfaces() {
 			}
 			for (ChildFrame* child : frame->children) {
 				if (child) {
-					if (child->type == LABEL_D) {
+					if (child->type == CHILD_TYPE::LABEL_D) {
 						Label* label = (Label*)child;
 						CallLabels(frame, label);
 					}
@@ -1455,12 +1455,21 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 
 	glColor4f(callsign_clr[0], callsign_clr[1], callsign_clr[2], 1.0f);
 
+	if (show_squawks)
+	{
+		aircraft.setTextTag1(aircraft.getSquawkCode());
+	}
+	else 
+	{
+		aircraft.setTextTag1("");
+	}
+
 	std::string textTag1 = aircraft.getTextTag1();
 	std::string textTag2 = aircraft.getTextTag2();
 
 	double linesX = 0, linesY = 0;
 
-	if (textTag1.size() >= 1) {
+	if (!empty(textTag1)) {
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(textTag1);
 		glRasterPos2f(vMaxX, vMaxY); // set position
@@ -1468,7 +1477,7 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 		linesY += (size.cy * aircraft_size) + ((size.cy * aircraft_size) * tag_line_sep);
 	}
 
-	if (textTag2.size() >= 1) {
+	if (!empty(textTag2)) {
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(textTag2);
 		glRasterPos2f(vMaxX + linesX, vMaxY + linesY); // set position

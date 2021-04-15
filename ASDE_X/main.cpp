@@ -30,7 +30,7 @@ PAINTSTRUCT ps;
 TCHAR szClassName[] = TEXT("WindowsApp");
 HWND text123, text124, lblNone, strUsers, lblNumUsrs;
 
-bool done = false, connected = false, show_departures = false;
+bool done = false, connected = false, show_departures = false, show_squawks = false;
 int single_opened_frames = 0;
 
 const int proto_version = 32698;
@@ -168,6 +168,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
+		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide Squawk Codes...");
 		AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
 
 		SetMenu(hwnd, hMenuBar);
@@ -204,6 +205,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			AcfMap[cur->getCallsign()] = cur;
 			cur->unlock();
 
+			cur->setSquawkCode(std::to_string(random(1000, 9999)));
+
 			FlightPlan& fp = *cur->getFlightPlan();
 			fp.departure = "KMIA";
 			fp.route = "HEDLY1.HEDLY LAL";
@@ -228,6 +231,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setMode(1);
 			AcfMap[cur2->getCallsign()] = cur2;
 			cur2->unlock();
+
+			cur2->setSquawkCode(std::to_string(random(1000, 9999)));
 		}
 		userStorage1[1] = user2;
 		cur->collisionAcf = cur2;
@@ -251,6 +256,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur3->setMode(1);
 			AcfMap[cur3->getCallsign()] = cur3;
 			cur3->unlock();
+
+			cur3->setSquawkCode(std::to_string(random(1000, 9999)));
 		}
 		userStorage1[2] = user3;
 
@@ -353,6 +360,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			show_departures = !show_departures;
 		}
 		break;
+		case ID_SETTINGS_SQUAWKS:
+		{
+			show_squawks = !show_squawks;
+			updateFlags[GBL_CALLSIGN] = true;
+
+		}
+		break;
 		case ID_FILE_OPEN:
 		{
 			OPENFILENAME ofn;
@@ -449,7 +463,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							for (auto iter2 = children->child_interfaces.rbegin(); iter2 != children->child_interfaces.rend(); ++iter2) {
 								BasicInterface* inter2 = *iter2;
 								if (inter2) {
-									if (children->type == DISPLAY_BOX) {
+									if (children->type == CHILD_TYPE::DISPLAY_BOX) {
 										int arrow_bounds = 15, arrow_offset = 3;
 										if (click_arrow_bottom(*inter2, x, y, arrow_bounds, arrow_offset)) {
 											((DisplayBox*)children)->doActionDown();
@@ -478,7 +492,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							break;
 					}
 					if (clicked1) {
-						if (clicked1->type == INPUT_FIELD && !((InputField*)clicked1)->editable) {
+						if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
 							//dont do anything with non editable field
 						}
 						else
@@ -642,9 +656,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		if (!clicked_tbutton) {
+			bool used_focused = false;
 			ChildFrame* focus = focusChild;
 			if (focus) {
-				if (focus->type == DISPLAY_BOX) {
+				if (focus->type == CHILD_TYPE::DISPLAY_BOX) {
 					BasicInterface& bdr = *((DisplayBox*)focus)->border;
 					if (bdr.isBounds()) {
 						if (val < 0) {
@@ -654,13 +669,48 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						if (val > 0) {
 							((DisplayBox*)focus)->doActionUp();
 						}
+						used_focused = true;
 					}
 				}
 
 			}
-			else
+			if (!used_focused)
 			{
 				//search unfocused display boxes
+				for (auto it = frames.rbegin(); it != frames.rend(); ++it) {
+					InterfaceFrame* frame = *it;
+					if (frame && frame->render) {
+						ChildFrame* clicked1 = nullptr;
+						for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
+							ChildFrame* children = *child;
+							if (children) {
+
+								BasicInterface& border = *children->border;
+								if (border.isBounds()) {
+									int vertx[4] = { border.getStartX(), border.getStartX(), border.getEndX(), border.getEndX() };
+									int verty[4] = { border.getStartY(), border.getEndY(), border.getEndY(), border.getStartY() };
+									bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
+									if (clicked) {
+										if (val < 0) {
+											((DisplayBox*)children)->doActionDown();
+											break;
+										}
+
+										if (val > 0) {
+											((DisplayBox*)children)->doActionUp();
+											break;
+										}
+										clicked1 = children;
+										break;
+									}
+								}
+							}
+						}
+						if (clicked1) {
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -714,7 +764,28 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_TAB) {
-
+			if (focusChild != NULL) {
+				CHILD_TYPE type = focusChild->type;
+				if (type == CHILD_TYPE::INPUT_FIELD) {
+					InputField* focusField = (InputField*)focusChild;
+					InterfaceFrame& frame = *focusField->getFrame();
+					int frame_index = frame.index;
+					if (frame_index != MAIN_CHAT_INTERFACE) {
+						for (int i = focusField->index; i < frame.children.size(); i++) {
+							ChildFrame* child_ptr = frame.children[i];
+							if (child_ptr) {
+								if (child_ptr->type == CHILD_TYPE::INPUT_FIELD && child_ptr != focusField) {
+									InputField* newField = (InputField*)child_ptr;
+									if (newField->editable) {
+										newField->setFocus();
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 		else if (wParam == 0x11) {//control (any)
 
@@ -729,8 +800,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == VK_RETURN) {
 			if (focusChild != NULL) {
-				int type = focusChild->type;
-				if (type == INPUT_FIELD) {
+				CHILD_TYPE type = focusChild->type;
+				if (type == CHILD_TYPE::INPUT_FIELD) {
 					InputField* focusField = (InputField*)focusChild;
 					InterfaceFrame& frame = *focusField->getFrame();
 					int frame_index = frame.index;
@@ -781,15 +852,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == VK_LEFT) {
 			if (focusChild != NULL) {
-				int type = focusChild->type;
-				if (type == COMBO_BOX) {
+				CHILD_TYPE type = focusChild->type;
+				if (type == CHILD_TYPE::COMBO_BOX) {
 					ComboBox* box = (ComboBox*)focusChild;
 					if (box->pos > 0) {
 						box->pos--;
 						renderDrawings = true;
 					}
 				}
-				else if (type == INPUT_FIELD) {
+				else if (type == CHILD_TYPE::INPUT_FIELD) {
 					InputField* input = (InputField*)focusChild;
 					input->cursorLeft();
 				}
@@ -797,15 +868,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == VK_RIGHT) {
 			if (focusChild != NULL) {
-				int type = focusChild->type;
-				if (type == COMBO_BOX) {
+				CHILD_TYPE type = focusChild->type;
+				if (type == CHILD_TYPE::COMBO_BOX) {
 					ComboBox* box = (ComboBox*)focusChild;
 					if (box->pos < (box->options.size() - 1)) {
 						box->pos++;
 						renderDrawings = true;
 					}
 				}
-				else if (type == INPUT_FIELD) {
+				else if (type == CHILD_TYPE::INPUT_FIELD) {
 					InputField* input = (InputField*)focusChild;
 					input->cursorRight();
 				}
@@ -816,7 +887,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_DOWN) {
 		}
 		else if (wParam == VK_BACK) {
-			if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
+			if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 				InputField* focusField = (InputField*)focusChild;
 				if (focusField->editable) {
 					if (focusField->input.size() > 0) {
@@ -879,7 +950,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				else
 					c2 = c;
 			}
-			if (focusChild != NULL && focusChild->type == INPUT_FIELD) {
+			if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 				InputField& focusField = *(InputField*)focusChild;
 				InterfaceFrame& frame = *focusField.getFrame();
 				if (focusField.editable) {
@@ -1173,7 +1244,7 @@ void pass_command(char* cmd) {
 	InterfaceFrame* frame = frames[MAIN_CHAT_INTERFACE];
 	if (frame && frame->index == MAIN_CHAT_INTERFACE && frame->render) {
 		ChildFrame* child = frame->children[MAIN_CHAT_INPUT];
-		if (child && child->type == INPUT_FIELD && child->focus) {
+		if (child && child->type == CHILD_TYPE::INPUT_FIELD && child->focus) {
 			InputField& input_box = *(InputField*)child;
 
 			input_box.setInput(cmd);
@@ -1187,7 +1258,7 @@ void pass_chars(char* chars) {
 	InterfaceFrame* frame = frames[MAIN_CHAT_INTERFACE];
 	if (frame && frame->index == MAIN_CHAT_INTERFACE && frame->render) {
 		ChildFrame* child = frame->children[MAIN_CHAT_INPUT];
-		if (child && child->type == INPUT_FIELD && child->focus) {
+		if (child && child->type == CHILD_TYPE::INPUT_FIELD && child->focus) {
 			InputField& input_box = *(InputField*)child;
 			input_box.pass_characters(chars);
 		}

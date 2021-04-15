@@ -57,6 +57,17 @@ void Aircraft::setCallsign(std::string value) {
 	Aircraft::callsign = value;
 }
 
+void Aircraft::setAvailableTag(std::string value)
+{
+	if (empty(Aircraft::textTag1)) {
+		Aircraft::textTag1 = value;
+	}
+	else if (empty(Aircraft::textTag2)) 
+	{
+		Aircraft::textTag2 = value;
+	}
+}
+
 std::string Aircraft::getTextTag1() {
 	return Aircraft::textTag1;
 }

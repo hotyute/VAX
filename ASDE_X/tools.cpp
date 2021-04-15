@@ -1,6 +1,3 @@
-#ifndef TOOLS_H
-#define TOOLS_H
-
 #include "tools.h"
 
 #define N_SEG 20 // num points
@@ -503,4 +500,12 @@ void capitalize(std::string& str)
 		x = toupper(x);
 }
 
-#endif
+int random(int start, int end) 
+{
+	if (end < start) {
+		int temp = start;
+		start = end;
+		end = temp;
+	}
+	return start + (rand() % end);
+}

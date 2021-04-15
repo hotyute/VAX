@@ -1,5 +1,6 @@
-#ifndef TOOLS_W_H
-#define TOOLS_W_H
+#ifndef TOOLS_H
+#define TOOLS_H
+
 #include <iostream>
 #include <algorithm> 
 #include <functional>
@@ -83,6 +84,8 @@ void addCollisionToMirrors(Collision* collision);
 bool is_privateinterface(int frame_index);
 
 void capitalize(std::string& str);
+
+int random(int start, int end);
 
 template<typename T>
 T pop_front(std::vector<T>& vec)

@@ -60,6 +60,7 @@ public:
 	FlightPlan* getFlightPlan();
 	std::string getCallsign();
 	void setCallsign(std::string);
+	void setAvailableTag(std::string value);
 	std::string getTextTag1();
 	void setTextTag1(std::string value);
 	std::string getTextTag2();

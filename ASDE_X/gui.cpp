@@ -161,7 +161,7 @@ InputField::InputField(InterfaceFrame* frame, double width, double height) {
 	InputField::editable = true;
 	InputField::centered = false;
 	InputField::focus = false;
-	InputField::type = INPUT_FIELD;
+	InputField::type = CHILD_TYPE::INPUT_FIELD;
 	InputField::inputTextDl = 0;
 	BasicInterface* fieldBounds = new BasicInterface(0.0, width, 10.0, 0.0, height, 10.0, 1.0f, 1.0f, 1.0f, 0.8, false, true);
 	fieldBounds->setBounds(true);
@@ -176,7 +176,7 @@ InputField::InputField(InterfaceFrame* frame, double x, double width, double pad
 	InputField::editable = true;
 	InputField::centered = false;
 	InputField::focus = false;
-	InputField::type = INPUT_FIELD;
+	InputField::type = CHILD_TYPE::INPUT_FIELD;
 	InputField::inputTextDl = 0;
 	BasicInterface* fieldBounds = new BasicInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	fieldBounds->setBounds(true);
@@ -362,7 +362,7 @@ bool InputField::can_type()
 CloseButton::CloseButton(InterfaceFrame* frame, double width, double height) {
 	CloseButton::frame = frame;
 	CloseButton::focus = false;
-	CloseButton::type = CLOSE_BUTTON;
+	CloseButton::type = CHILD_TYPE::CLOSE_BUTTON;
 	BasicInterface* inter = frame->interfaces[CONTENT_PANE];
 	double startX = (inter->getStartX() + inter->getWidth()) - width;
 	double startY = (inter->getStartY() + inter->getHeight()) - height;
@@ -429,7 +429,7 @@ void CloseButton::focusDrawing() {
 ClickButton::ClickButton(InterfaceFrame* frame, std::string text, double x, double width, double y, double height) {
 	ClickButton::frame = frame;
 	ClickButton::focus = false;
-	ClickButton::type = CLICK_BUTTON;
+	ClickButton::type = CHILD_TYPE::CLICK_BUTTON;
 	ClickButton::text = text;
 	BasicInterface* closeBounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	closeBounds->setBounds(true);
@@ -525,7 +525,7 @@ ComboBox::ComboBox(InterfaceFrame* frame, std::vector<std::string> options, doub
 	ComboBox::options = options;
 	ComboBox::pos = 0;
 	ComboBox::focus = false;
-	ComboBox::type = COMBO_BOX;
+	ComboBox::type = CHILD_TYPE::COMBO_BOX;
 	SelectObject(hDC, topBtnFont);
 	ComboBox::largestExtent = getTextExtent(ComboBox::options[ComboBox::pos]);
 	for (size_t i = 0; i < options.size(); i++) {
@@ -631,7 +631,7 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines,
 	DisplayBox::centered = centerText;
 	DisplayBox::numBlocks = numBlocks;
 	DisplayBox::focus = false;
-	DisplayBox::type = DISPLAY_BOX;
+	DisplayBox::type = CHILD_TYPE::DISPLAY_BOX;
 	BasicInterface* comboBounds = new BasicInterface(x, width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	comboBounds->setBounds(true);
 	comboBounds->updateCoordinates();
@@ -902,7 +902,7 @@ Label::Label(InterfaceFrame* interfaceFrame, std::string label, double x, double
 	Label::input = label;
 	Label::labelTextDl = 0;
 	Label::focus = false;
-	Label::type = LABEL_D;
+	Label::type = CHILD_TYPE::LABEL_D;
 	BasicInterface* fieldBounds = new BasicInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	fieldBounds->setRender(false);
 	fieldBounds->setBounds(true);

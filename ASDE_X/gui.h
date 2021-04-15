@@ -7,16 +7,17 @@
 #include "chatinterface.h"
 #include "projection.h"
 
-#define LABEL_D 62442
-#define INPUT_FIELD 62443
-#define CLOSE_BUTTON 62444
-#define CLICK_BUTTON 62445
-#define COMBO_BOX 62446
-#define DISPLAY_BOX 62447
-
 #define NUM_SUB_INTERFACES 2
 
 enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM, ATC };
+enum class CHILD_TYPE {
+	LABEL_D,
+	INPUT_FIELD,
+	CLOSE_BUTTON,
+	CLICK_BUTTON,
+	COMBO_BOX,
+	DISPLAY_BOX
+};
 
 class InterfaceFrame;
 class ChildFrame;
@@ -48,7 +49,7 @@ public:
 	virtual ~ChildFrame();
 	std::vector<BasicInterface*> child_interfaces;
 	BasicInterface *border;
-	int type;
+	CHILD_TYPE type;
 	int index;
 	bool focus;
 	virtual void updatePos(double x, double width, double y, double height) = 0;
