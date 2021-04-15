@@ -13,6 +13,7 @@ DWORD __stdcall CalcThread1(LPVOID)
 		//code here
 		update();
 		CalculateCollisions();
+		CalcDepartures();
 
 		end = boost::posix_time::microsec_clock::local_time();
 
@@ -54,6 +55,37 @@ void CalculateCollisions() {
 		for (auto iter = Collision_Map.begin(); iter != Collision_Map.end(); iter++) {
 			// iterator->first = key
 			Collision* col = iter->second;
+		}
+	}
+}
+
+void CalcDepartures() {
+	if (AcfMap.size() > 0) {
+		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+			Aircraft* acf1 = iter->second;
+			if (acf1) {
+				FlightPlan& fp = *acf1->getFlightPlan();
+				std::string callsign = acf1->getCallsign();
+
+				if (!departures.count(callsign)) {
+					std::vector<std::string> points = split(fp.route, " .");
+
+					if (boost::iequals(fp.departure, icao) && !icao.empty()) {
+						std::vector<std::string> new_points;
+
+						int max_points = 2;
+						while (max_points > 0 && points.size() > 0) {
+							new_points.push_back(pop_front(points));
+							max_points--;
+						}
+						departures.emplace(callsign, new_points);
+					}
+				}
+				else 
+				{
+					//check for removal
+				}
+			}
 		}
 	}
 }

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 #include "projection.h"
 #include "gui.h"
@@ -11,6 +12,8 @@
 #include "usermanager.h"
 #include "main.h"
 #include "interfaces.h"
+
+extern std::unordered_map<std::string, std::vector<std::string>> departures;
 
 extern User* opened_fp;
 

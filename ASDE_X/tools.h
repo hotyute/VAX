@@ -84,4 +84,13 @@ bool is_privateinterface(int frame_index);
 
 void capitalize(std::string& str);
 
+template<typename T>
+T pop_front(std::vector<T>& vec)
+{
+	assert(!vec.empty());
+	auto element = vec.front();
+	vec.erase(vec.begin());
+	return element;
+}
+
 #endif

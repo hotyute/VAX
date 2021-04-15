@@ -1046,8 +1046,8 @@ void CALLBACK combineCallback(GLdouble coords[3],
 	for (int i = 3; i < 6; i++) {
 		vertex[i] = weight[0] * vertex_data[0][i]
 			+ weight[1] * vertex_data[1][i];
-			+ weight[2] * vertex_data[2][i];
-			+ weight[3] * vertex_data[3][i];
+		+weight[2] * vertex_data[2][i];
+		+weight[3] * vertex_data[3][i];
 	}
 	*dataOut = vertex;
 	tesses.push_back(vertex);
@@ -1319,16 +1319,21 @@ void RenderDepartures() {
 	std::string config3, config4, config5;
 	SIZE size3, size4, size5;
 
-	for (int i = 0; i < 2; i++) {
-		if (i == 0) {
-			config3 = "AAL2", config4 = "HEDLY1", config5 = "HEDLY";
-			size3 = getTextExtent(config3), size4 = getTextExtent(config4), size5 = getTextExtent(config5);
+	for (auto it = departures.begin(); it != departures.end(); ++it) {
+		std::vector<std::string> dep = it->second;
+		config3 = it->first;
+		switch (dep.size()) {
+		case 1:
+			config4 = dep[0];
+			config5 = "";
+			break;
+		case 2:
+			config4 = dep[0];
+			config5 = dep[1];
+			break;
 		}
-		else
-		{
-			config3 = "N108MS", config4 = "SKIPS1", config5 = "SKIPS";
-			size3 = getTextExtent(config3), size4 = getTextExtent(config4), size5 = getTextExtent(config5);
-		}
+
+		size3 = getTextExtent(config3), size4 = getTextExtent(config4), size5 = getTextExtent(config5);
 
 		float callsign_x = start_x - size2.cx, fix1_x = (start_x - (size4.cx * 0.5)) - (size2.cx * 0.5), fix2_x = start_x - size5.cx;
 

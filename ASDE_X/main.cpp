@@ -203,6 +203,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setMode(1);
 			AcfMap[cur->getCallsign()] = cur;
 			cur->unlock();
+
+			FlightPlan& fp = *cur->getFlightPlan();
+			fp.departure = "KMIA";
+			fp.route = "HEDLY1.HEDLY LAL";
+			fp.remarks = "/v/";
+			++fp.cycle;
 		}
 		userStorage1[0] = user1;
 		User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
@@ -264,6 +270,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur4->setMode(0);
 			AcfMap[cur4->getCallsign()] = cur4;
 			cur4->unlock();
+
+			FlightPlan& fp = *cur4->getFlightPlan();
+			fp.departure = "KMIA";
+			fp.route = "SKIPS1.SKIPS MNATE";
+			fp.remarks = "/v/";
+			++fp.cycle;
 		}
 		userStorage1[3] = user4;
 		break;

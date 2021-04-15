@@ -2,9 +2,11 @@
 
 User* opened_fp = NULL;
 
+std::unordered_map<std::string, std::vector<std::string>> departures;
+
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {
-	std::string values[11] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", "MYNN", "10000", "08R", "3306" };
+	std::string values[13] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", "MYNN", "10000", "08R", "3306" , "" , ""};
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = NULL;
 }
@@ -13,8 +15,8 @@ void Load_Known_No_FlightPlan_Interface(double x, double y, User& user, bool ref
 {
 	Identity& id = *user.getIdentity();
 	Aircraft& acf = *user.getAircraft();
-	std::string values[11] = { id.callsign, id.login_name, "", "" , "IFR",
-		"", "", "", "", "", "" };
+	std::string values[13] = { id.callsign, id.login_name, "", "" , "IFR",
+		"", "", "", "", "", "", "", "" };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
 }
@@ -25,8 +27,8 @@ void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 	Aircraft &acf = *user.getAircraft();
 	FlightPlan& fp = *user.getAircraft()->getFlightPlan();
 	std::cout << id.login_name << std::endl;
-	std::string values[11] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR", 
-		fp.departure, fp.arrival, fp.alternate, fp.cruise, fp.scratchPad, fp.squawkCode };
+	std::string values[13] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR", 
+		fp.departure, fp.arrival, fp.alternate, fp.cruise, fp.scratchPad, fp.squawkCode, fp.route, fp.remarks };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
 }
@@ -43,7 +45,8 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 	std::string call = strings[0], name = strings[1], pilot_rating = strings[2], 
 		ac_type_txt = strings[3], fr_text = strings[4], depart = strings[5], 
 		arrive = strings[6], alternate = strings[7], cruise = strings[8], 
-		scratch = strings[9], a_squawk = strings[10];
+		scratch = strings[9], a_squawk = strings[10], route = strings[11],
+		remarks = strings[12];
 	InterfaceFrame* fp_frame = frames[FP_INTERFACE];
 	if (!fp_frame || refresh) {
 		if (fp_frame) {
@@ -134,7 +137,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		route_label->centered = 2;
 		fp_frame->children[route_label->index = FP_ROUTE_LABEL] = route_label;
 		std::vector<ChatLine*> list;
-		list.push_back(new ChatLine("SKIPS1.SKIPS", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine(route, CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		double route_box_size = 50.0;
@@ -149,7 +152,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		remarks_label->centered = 2;
 		fp_frame->children[remarks_label->index = FP_REMARKS_LABEL] = remarks_label;
 		std::vector<ChatLine*> remarks_list;
-		remarks_list.push_back(new ChatLine("/v/", CHAT_TYPE::MAIN));
+		remarks_list.push_back(new ChatLine(remarks, CHAT_TYPE::MAIN));
 		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		route_box_size = 30.0;
 		DisplayBox* remarks_box = new DisplayBox(fp_frame, remarks_list, 2, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
