@@ -79,6 +79,7 @@ void CalcDepartures() {
 							max_points--;
 						}
 						departures.emplace(callsign, new_points);
+						renderDepartures = true;
 					}
 				}
 				else 
