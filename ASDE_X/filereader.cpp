@@ -1,7 +1,9 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+
 #include "filereader.h"
+
 #include "point2d.h"
 #include "projection.h"
 #include "dxfdrawing.h"
@@ -57,8 +59,9 @@ int FileReader::LoadADX(std::string path) {
 				if (zoom.length() == 0) {
 					//error handling
 				}
-				else {
-					mZoom = atof(zoom.c_str());
+				else {				
+					range = atof(zoom.c_str());
+					mZoom = zoom_from_range();
 				}
 			}
 			else if (found3 != std::string::npos)

@@ -82,7 +82,6 @@ void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
 void RenderDate();
 void RenderDepartures();
-void LoadInterfaces();
 void GetOGLPos(int, int, double*);
 void BuildFont(LPCWSTR, int, bool, unsigned int*, HFONT*);
 void glPrint(const char*, unsigned int*, ...);

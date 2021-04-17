@@ -46,11 +46,13 @@ int RenderCallsign(Aircraft&, bool, float, float);
 int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float longitude);
 void deleteFrame(InterfaceFrame*);
 
-void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, bool top_bar);
+void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, double rotate, bool top_bar);
 
 int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_segments);
 
-int DrawLine(Collision& collision, unsigned int& line_dl, double zoom);
+int DrawCollisionLine(Collision& collision, unsigned int& line_dl, double zoom);
+
+int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom);
 
 void aircraft_graphics(Aircraft& aircraft, Mirror* mirror);
 
@@ -64,7 +66,7 @@ std::vector<GLdouble*> tesses;
 
 float latitude = 0, longitude = 0;
 double heading = 0;
-double normMapScaleX;
+double normMapScaleX, normMapScaleY;
 double collision_size = 0.5, tag_line_sep = 0.4, config_line_sep = 0.1, dep_line_sep = 0.3;
 
 void CALLBACK beginCallback(GLenum);
@@ -111,7 +113,7 @@ void ResizeMirrorGLScene(Mirror& mirror) {
 	// Clamp the zoom.
 	double zoom = mirror.getZoom();
 
-	set_projection(width, height, mirror.getLat(), mirror.getLon(), zoom, false); // we keep the top bar so we can keep the aspect ratio
+	set_projection(width, height, mirror.getLat(), mirror.getLon(), zoom, mirror.getRotation(), false); // we keep the top bar so we can keep the aspect ratio
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
 	glLoadIdentity();                                    // Reset The Modelview Matrix
@@ -137,7 +139,7 @@ void ResizeGLScene() {
 	glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
 	glLoadIdentity();                                    // Reset The Projection Matrix
 
-	set_projection(clientWidth, clientHeight, CENTER_LAT, CENTER_LON, mZoom, true);
+	set_projection(clientWidth, clientHeight, CENTER_LAT, CENTER_LON, mZoom, rotation, true);
 
 	glMatrixMode(GL_MODELVIEW);                            // Select The Modelview Matrix
 	glLoadIdentity();                                   // Reset The Modelview Matrix
@@ -825,7 +827,7 @@ void RenderButtons() {
 				if (second2.length() > 0) {
 					SIZE center_e = getTextExtent(divider);
 					SIZE first_e = getTextExtent(first2);
-					curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
+					curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 					glRasterPos2f(textXPos2, textYPos2);
 					glPrint(first2.c_str(), &topButtonBase);
 
@@ -833,7 +835,7 @@ void RenderButtons() {
 					glRasterPos2f((textXPos2 + first_e.cx), textYPos2);
 					glPrint(divider.c_str(), &topButtonBase);
 
-					!curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
+					!curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 					glRasterPos2f((textXPos2 + first_e.cx + center_e.cx), textYPos2);
 					glPrint(second2.c_str(), &topButtonBase);
 				}
@@ -846,7 +848,7 @@ void RenderButtons() {
 			if (second.length() > 0) {
 				SIZE center_e = getTextExtent(divider);
 				SIZE first_e = getTextExtent(first);
-				curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
+				curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 				glRasterPos2f(textXPos, textYPos);
 				glPrint(first.c_str(), &topButtonBase);
 
@@ -854,7 +856,7 @@ void RenderButtons() {
 				glRasterPos2f((textXPos + first_e.cx), textYPos);
 				glPrint(divider.c_str(), &topButtonBase);
 
-				!curButton.off ? glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f) : glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f);
+				!curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 				glRasterPos2f((textXPos + first_e.cx + center_e.cx), textYPos);
 				glPrint(second.c_str(), &topButtonBase);
 			}
@@ -1593,7 +1595,7 @@ void deleteFrame(InterfaceFrame* frame) {
 	frames.erase(it, frames.end());
 }
 
-void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, bool top_bar) {
+void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, double rotate, bool top_bar) {
 
 	// Clamp the zoom.
 	if (zoom > MAX_ZOOM) {
@@ -1609,6 +1611,8 @@ void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lo
 		double m = (double)clientHeight / (double)CLIENT_HEIGHT;
 		button_height = BUTTON_HEIGHT * m;
 	}
+
+	double comp = angularCompensation(rotation);
 
 	// Set the min/max lat/lon based on center point, zoom, and client aspect.
 	double coordSysMinLon = c_lon - ((clientWidth / 2.0) * (zoom / NM_PER_DEG));
@@ -1629,12 +1633,14 @@ void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lo
 	// Set up the projection matrix based on these boundaries.
 	gluOrtho2D(minX, maxX, minY, maxY);
 
-	double nmPerLon = 54.0;
-	double mapScaleX = (nmPerLon / 60.0);
-	normMapScaleX = 1.0 / mapScaleX;
-	glScaled(mapScaleX, 1.0, 1.0);
+	double nmPerLon = NauticalMilesPerDegreeLon(c_lat);
+	double mapScaleX = (nmPerLon / 60.0), mapScaleY = 1.0;
+	normMapScaleX = 1.0 / mapScaleX, normMapScaleY = 1.0 / mapScaleY;
+	double diff = (60.0 - nmPerLon) / 60.0;
 
-	glRotatef(rotation, 0.0f, 0.0f, -1.0f);
+	glRotatef(rotate, 0.0f, 0.0f, -1.0f);
+
+	glScaled(mapScaleX, mapScaleY, 1.0);
 }
 
 int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_segments) {
@@ -1683,7 +1689,7 @@ int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_seg
 	return 1;
 }
 
-int DrawLine(Collision& collision, unsigned int& line_dl, double zoom) {
+int DrawCollisionLine(Collision& collision, unsigned int& line_dl, double zoom) {
 
 	Aircraft& from = *collision.getAircraft1();
 	Aircraft& to = *collision.getAircraft2();
@@ -1741,6 +1747,53 @@ int DrawLine(Collision& collision, unsigned int& line_dl, double zoom) {
 	return 1;
 }
 
+int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
+
+	double heading = aircraft.getHeading();
+	bool heavy = aircraft.isHeavy();
+	bool standby = aircraft.getMode() == 0 ? true : false;
+
+	double default_size = get_default_asize(heavy, false);
+	double _aircraft_size = get_asize(heavy, false, zoom);
+
+	double maxX = aircraftBlip->getMaxX();
+	double maxY = aircraftBlip->getMaxY();
+
+	double offset = (maxX > maxY ? maxX : maxY) * 111;
+
+	double x = aircraft.getLongitude(), y = aircraft.getLatitude();
+
+	double z_factor = default_size;
+	if (zoom_phase == 2)
+		z_factor *= _aircraft_size;
+	
+	double length = 0;
+
+	length += offset * z_factor;
+
+	length += vector_length * 0.01;
+
+	Point2 p = getLocFromBearing(y, x, length, heading);
+
+	base = glGenLists(1);
+
+	glNewList(base, GL_COMPILE);
+
+	heavy ? glColor4f(heavy_clr[0], heavy_clr[1], heavy_clr[2], 1.0f) :
+		standby ? glColor4f(unknown_clr[0], unknown_clr[1], unknown_clr[2], 1.0f)
+		: glColor4f(regular_clr[0], regular_clr[1], regular_clr[2], 1.0f);
+
+	glBegin(GL_LINES);
+
+	glVertex2f(x, y);//output vertex 
+	glVertex2f(p.x_, p.y_);//output vertex 
+
+	glEnd();
+
+	glEndList();
+	return 1;
+}
+
 void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	bool is_mirror = mirror ? true : false;
 	aircraft.lock();
@@ -1750,6 +1803,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	bool renderCallsign = aircraft.getRenderFlag(ACF_CALLSIGN);
 	bool renderCollTag = aircraft.getRenderFlag(ACF_COLLISION_TAG);
 	bool renderCollision = aircraft.getRenderFlag(ACF_COLLISION);
+	bool renderVector = aircraft.getRenderFlag(ACF_VECTOR);
 	bool heavy = aircraft.isHeavy();
 	bool standby = aircraft.getMode() == 0 ? true : false;
 	aircraft.unlock();
@@ -1774,7 +1828,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	//keep the drawing in correct aspect ratio
 	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(normMapScaleX, 1.0, 1.0);
+	glScaled(normMapScaleX, normMapScaleY, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
@@ -1788,6 +1842,24 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	glPopMatrix();
 
+	if (!is_mirror) {
+		if (renderVector || renderFlags[GBL_VECTOR]) {
+			if (aircraft.vectorDl != 0) {
+				glDeleteLists(aircraft.vectorDl, 1);
+				aircraft.vectorDl = 0;
+			}
+			DrawVectorLines(aircraft, aircraft.vectorDl, zo);
+		}
+	}
+
+	glPushMatrix();
+
+	if (!standby && SHOW_VECTORS) {
+		glCallList(aircraft.vectorDl);
+	}
+
+	glPopMatrix();
+
 	//move the aircraft first so we have proper movement along the map scale
 	glPushMatrix();
 	glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
@@ -1795,7 +1867,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	//keep the aircraft drawing in correct aspect ratio
 	//std::cout << normMapScaleX << std::endl;
 	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(normMapScaleX, 1.0f, 1.0f);
+	glScaled(normMapScaleX, normMapScaleY, 1.0f);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
@@ -1837,7 +1909,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 	//keep the callsign drawing in correct aspect ratio
 	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(normMapScaleX, 1.0, 1.0);
+	glScaled(normMapScaleX, normMapScaleY, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
 	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
@@ -1871,7 +1943,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 
 		//keep the callsign drawing in correct aspect ratio
 		glTranslated(+longitude, +latitude, 0.0f);
-		glScaled(normMapScaleX, 1.0, 1.0);
+		glScaled(normMapScaleX, normMapScaleY, 1.0);
 		glTranslated(-longitude, -latitude, 0.0f);
 
 		//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
@@ -1918,7 +1990,7 @@ void updateCollisionLine(Collision& collision, unsigned int& base, double zo) {
 		base = 0;
 	}
 	if (collision.getAircraft1() && collision.getAircraft2()) {
-		DrawLine(collision, base, zo);
+		DrawCollisionLine(collision, base, zo);
 	}
 }
 

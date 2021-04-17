@@ -1,3 +1,6 @@
+#ifndef PROJECTION_H
+#define PROJECTION_H
+
 #include <iostream>
 
 //extern const double EARTH_RADIUS;
@@ -15,7 +18,8 @@ extern int CLIENT_WIDTH;
 extern int CLIENT_HEIGHT;
 
 extern double mZoom;
-extern double rotation;
+extern int range;
+extern double rotation, vector_length;
 extern int zoom_phase;
 extern double DEFAULT_ZOOM;
 
@@ -25,6 +29,8 @@ extern double u_aircraft_size, default_u_size;
 extern double elevation;
 extern std::string icao;
 
-extern bool DAY, DB_BLOCK, CAPS, SHIFT_DOWN;
+extern bool DAY, DB_BLOCK, SHOW_VECTORS, CAPS, SHIFT_DOWN;
 
 extern char input_cursor;
+
+#endif

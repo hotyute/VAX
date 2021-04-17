@@ -52,7 +52,7 @@ public:
 	Aircraft *collisionAcf;
 	Aircraft();
 	~Aircraft();
-	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0;
+	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0, vectorDl = 0;
 	int getIndex();
 	void setIndex(int);
 	bool getRenderFlag(int flag);

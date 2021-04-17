@@ -509,3 +509,41 @@ int random(int start, int end)
 	}
 	return start + (rand() % end);
 }
+
+double angularCompensation(double heading) {
+	double ang = heading / 90;
+
+	if (ang > 1) {
+		ang = 2.0 - ang;
+		if (ang < 0) {
+			ang = -ang;
+			if (ang > 1) {
+				ang = 2.0 - ang;
+			}
+		}
+	}
+
+	return ang;
+}
+
+double zoom_from_range() {
+	double nm_per_degree = 60;
+	double nm_per_foot = 0.000164579;
+	double rng = ((range * 100) * nm_per_foot);
+
+	int clientWidth = CLIENT_WIDTH;
+	int clientHeight = CLIENT_HEIGHT;
+	if (clientWidth <= 0)
+		clientWidth = 1;
+	if (clientHeight <= 0)
+		clientHeight = 1;
+
+	int maxDimension = max(clientWidth, clientHeight);
+	double nmPerPixel = rng / (maxDimension / 2.0);
+	return (nmPerPixel / 2.0);
+}
+
+double NauticalMilesPerDegreeLon(double lat)
+{
+	return (M_PI / 180.0) * EARTH_RADIUS_NM * cos(radians(lat));
+}

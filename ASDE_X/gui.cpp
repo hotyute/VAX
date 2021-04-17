@@ -8,6 +8,7 @@
 #include "usermanager.h"
 #include "tools.h"
 
+
 std::vector<InterfaceFrame*> frames(256);
 ChildFrame* focusChild = NULL, * lastFocus = NULL;
 std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
@@ -803,6 +804,16 @@ void DisplayBox::doAction() {
 
 void DisplayBox::focusDrawing() {
 	if (DisplayBox::focus) {
+		int offsetX = 4, offsetY = 4;
+		BasicInterface& param = *DisplayBox::border;
+		double x1 = (param.getStartX() - offsetX), x2 = (param.getStartX() + param.getActualWidth()) + offsetX;
+		double y1 = (param.getStartY() - offsetY), y2 = (param.getStartY() + param.getActualHeight()) + offsetY;
+		glColor3f(0.32549019607f, 0.03137254901f, 0.91372549019f);
+		int line_size = 2;
+		DrawVarLine(x1, y1, x1, y2, line_size, line_size);
+		DrawVarLine(x1, y2, x2, y2, line_size, line_size);
+		DrawVarLine(x2, y2, x2, y1, line_size, line_size);
+		DrawVarLine(x2, y1, x1, y1, line_size, line_size);
 	}
 }
 

@@ -1,5 +1,5 @@
-#ifndef USER_H
-#define USER_H
+#ifndef __USER_H
+#define __USER_H
 
 
 #include <iostream>
@@ -11,16 +11,16 @@
 
 class User;
 
-#ifndef Pmessages_h
-#define Pmessages_h
+#ifndef __Pmessages_h
+#define __Pmessages_h
 struct PrivateMessages
 {
 	std::unordered_map<User*, ChatLine*> message_history;
 };
 #endif
 
-#ifndef Identity_user_h
-#define Identity_user_h
+#ifndef __Identity_user_h
+#define __Identity_user_h
 struct Identity {
 	std::string callsign;
 	std::string login_name;
@@ -33,8 +33,8 @@ struct Identity {
 };
 #endif
 
-#ifndef User_user_h
-#define User_user_h
+#ifndef __User_user_h
+#define __User_user_h
 class User {
 public:
 	User(std::string, int, int, int);

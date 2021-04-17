@@ -1,24 +1,30 @@
 #include "topbutton.h"
 #include "projection.h"
+#include "tools.h"
 
 std::vector<TopButton*> BUTTONS;
+
+TopButton* rangeb = nullptr;
+
 std::string text;
 
 
 
 void loadButtons() {
-	TopButton* range = new TopButton(TOP_TYPE::RANGE_BTN);
-	range->setIndex(0);
-	range->setWidth(0.069259012016);
-	range->setHalf(false);
-	range->setTop(false);
-	range->setDark(true);
-	range->setDualOption(true);
-	range->setTripleOption(false);
-	range->setOption1("RANGE");
-	range->value = 170;
-	range->setOption2(std::to_string(range->value));
-	BUTTONS.push_back(range);
+	rangeb = new TopButton(TOP_TYPE::RANGE_BTN);
+	rangeb->setIndex(0);
+	rangeb->setWidth(0.069259012016);
+	rangeb->setHalf(false);
+	rangeb->setTop(false);
+	rangeb->setDark(true);
+	rangeb->setDualOption(true);
+	rangeb->setTripleOption(false);
+	rangeb->setOption1("RANGE");
+	if (zoom_phase < 2)
+		rangeb->setOption2("NSET");
+	else
+		rangeb->setOption2(std::to_string(rangeb->value = range));
+	BUTTONS.push_back(rangeb);
 	TopButton* mode = new TopButton(TOP_TYPE::ROTATE_BTN);
 	mode->setIndex(1);
 	mode->setWidth(0.069259012016);
@@ -28,7 +34,7 @@ void loadButtons() {
 	mode->setDualOption(false);
 	mode->setTripleOption(false);
 	mode->setOption1("ROTATE");
-	mode->value = 0;
+	mode->value = rotation;
 	BUTTONS.push_back(mode);
 	TopButton* map = new TopButton(TOP_TYPE::MAP_BTN);
 	map->setIndex(1);
@@ -82,7 +88,7 @@ void loadButtons() {
 	daytnite->setTripleOption(false);
 	daytnite->setOption1("DAY");
 	daytnite->setChoice1("NITE");
-	daytnite->off = false;
+	daytnite->on = DAY;
 	BUTTONS.push_back(daytnite);
 	TopButton* brite = new TopButton(TOP_TYPE::BRITE_BTN);
 	brite->setIndex(4);
@@ -115,7 +121,7 @@ void loadButtons() {
 	safety->setTripleOption(true);
 	safety->setOption1("LOGIC");
 	safety->setOption2("SAFETY");
-	safety->setOption3("26L27-00");
+	safety->setOption3("08R09-00");
 	BUTTONS.push_back(safety);
 	TopButton* tools = new TopButton(TOP_TYPE::TOOLS_BTN);
 	tools->setIndex(6);
@@ -138,6 +144,7 @@ void loadButtons() {
 	vector->setOption1("VECTOR");
 	vector->setOption2("ON");
 	vector->setChoice2("OFF");
+	vector->on = SHOW_VECTORS;
 	BUTTONS.push_back(vector);
 	TopButton* vector2 = new TopButton(TOP_TYPE::VECTOR2_BTN);
 	vector2->setIndex(7);
@@ -148,7 +155,7 @@ void loadButtons() {
 	vector2->setDualOption(true);
 	vector2->setTripleOption(false);
 	vector2->setOption1("VECTOR");
-	vector2->setOption2("1");
+	vector2->setOption2(std::to_string(vector2->value = vector_length));
 	BUTTONS.push_back(vector2);
 	TopButton* tmpdata = new TopButton(TOP_TYPE::TEMP_BTN);
 	tmpdata->setIndex(8);
@@ -226,7 +233,7 @@ void loadButtons() {
 	db->setOption1("DB");
 	db->setOption2("ON");
 	db->setChoice2("OFF");
-	db->off = false;
+	db->on = DB_BLOCK;
 	BUTTONS.push_back(db);
 	TopButton* initcntl = new TopButton(TOP_TYPE::INITCNTL);
 	initcntl->setIndex(11);
@@ -272,7 +279,7 @@ void loadButtons() {
 	dcb->setOption1("DCB");
 	dcb->setOption2("ON");
 	dcb->setChoice2("OFF");
-	dcb->off = false;
+	dcb->on = false;
 	BUTTONS.push_back(dcb);
 	TopButton* oper = new TopButton(TOP_TYPE::OPER_BTN);
 	oper->setIndex(13);
@@ -389,41 +396,73 @@ void TopButton::setOption3(std::string value) {
 	TopButton::option3 = value;
 }
 
-void TopButton::handle()
+int TopButton::handle()
 {
 	switch (this->type)
 	{
+	case TOP_TYPE::ROTATE_BTN:
+	{
+		rotation = this->value = 0;
+		return 0;
+	}
 	case TOP_TYPE::DB_BTN:
 	{
 		DB_BLOCK = !DB_BLOCK;
-		break;
+		return 1;
 	}
 	case TOP_TYPE::DAY_NITE_BTN:
 	{
 		DAY = !DAY;
-		break;
+		return 1;
+	}
+	case TOP_TYPE::VECTOR_BTN:
+	{
+		SHOW_VECTORS = !SHOW_VECTORS;
+		if (SHOW_VECTORS)
+		{
+			updateFlags[GBL_VECTOR] = true;
+		}
+		return 1;
 	}
 	default:
 		break;
 	}
+	return 0;
 }
 
-void TopButton::handleScroll(bool hi_scroll)
+int TopButton::handleScroll(bool hi_scroll)
 {
 	switch (this->type)
 	{
 	case TOP_TYPE::RANGE_BTN:
 	{
-		hi_scroll ? mZoom += 0.0002 : mZoom -= 0.0002;
-		updateFlags[GBL_COLLISION_LINE] = true;
-		hi_scroll ? this->value += 1 : this->value -= 1;
-		this->setOption2(std::to_string(this->value));
+		int change = this->value;
+		if (zoom_phase < 2)
+			return 0;
+		if (hi_scroll)
+		{
+			if (!((this->value + 1) > 600)) {
+				this->value += 1;
+			}
+		}
+		else
+		{
+			if (!((this->value - 1) < 3)) {
+				this->value -= 1;
+			}
+		}
 
 		if (zoom_phase == 2) {
 			//hi_scroll ? r_aircraft_size -= (r_aircraft_size * 0.1) : r_aircraft_size += (r_aircraft_size * 0.1);
 			//hi_scroll ? h_aircraft_size -= (h_aircraft_size * 0.1) : h_aircraft_size += (h_aircraft_size * 0.1);
 		}
-		break;
+
+		if (this->value != change) {
+			this->setOption2(std::to_string(range = this->value));//range is set in 100's of feet so 100 = 10,000 feet
+			mZoom = zoom_from_range();
+			updateFlags[GBL_COLLISION_LINE] = true;
+		}
+		return 1;
 	}
 	case TOP_TYPE::ROTATE_BTN:
 	{
@@ -442,9 +481,51 @@ void TopButton::handleScroll(bool hi_scroll)
 				this->value -= 1;
 		}
 		rotation = this->value;
-		break;
+		return 1;
+	}
+	case TOP_TYPE::VECTOR2_BTN:
+	{
+		if (hi_scroll)
+		{
+			if (!((this->value + 1) > 20))
+				this->value += 1;
+		}
+		else
+		{
+			if (!((this->value - 1) < 0))
+				this->value -= 1;
+		}
+		this->setOption2(std::to_string(this->value));
+		vector_length = this->value;
+		if (SHOW_VECTORS)
+		{
+			updateFlags[GBL_VECTOR] = true;
+		}
+		return 1;
 	}
 	default:
 		break;
 	}
+	return 0;
+}
+
+void TopButton::refreshOption2()
+{
+	switch (this->type)
+	{
+	case TOP_TYPE::RANGE_BTN:
+	{
+		if (zoom_phase < 2)
+			this->setOption2("NSET");
+		else
+			this->setOption2(std::to_string(this->value = range));
+		break;
+	}
+	default:
+	{
+		this->setOption2(std::to_string(this->value));
+		break;
+	}
+	}
+	renderButtons = true;
 }

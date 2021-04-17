@@ -32,7 +32,7 @@ private:
 	int params[4];
 	TOP_TYPE type;
 public:
-	bool off;
+	bool on;
 	int value;
 	TopButton(TOP_TYPE type);
 	int getIndex();
@@ -62,11 +62,14 @@ public:
 	int* getParams() { return params; }
 	void updateParams(int x, int y, int x2, int y2) { params[0] = x, params[1] = y, params[2] = x2, params[3] = y2; }
 	TOP_TYPE getType() { return type; }
-	void handle();
-	void handleScroll(bool hi_scroll);// boolean high scroll for if scrolling "up"
+	int handle();
+	int handleScroll(bool hi_scroll);// boolean high scroll for if scrolling "up"
+	void refreshOption2();
 };
 
 extern std::vector<TopButton*> BUTTONS;
+
+extern TopButton* rangeb;
 
 extern void loadButtons();
 

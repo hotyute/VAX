@@ -15,6 +15,7 @@ class Mirror {
 private:
 	int x_, y_, width, height;
 	double zoom_, lat_, lon_;
+	double rotation = 0;
 public:
 	Mirror();
 	~Mirror();
@@ -41,6 +42,7 @@ public:
 	void setLon(double lon) { lon_ = lon; }
 	double getLat() { return lat_; }
 	double getLon() { return lon_; }
+	double getRotation() { return this->rotation; }
 };
 #endif
 

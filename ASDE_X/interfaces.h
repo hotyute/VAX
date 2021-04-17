@@ -1,5 +1,5 @@
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef __INTERFACES_H
+#define __INTERFACES_H
 
 #include "main.h"
 #include "packets.h"

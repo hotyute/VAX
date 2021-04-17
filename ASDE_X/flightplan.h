@@ -5,13 +5,14 @@
 #include <vector>
 #include <unordered_map>
 
+#include "main.h"
 #include "projection.h"
 #include "gui.h"
 #include "constants.h"
 #include "renderer.h"
 #include "usermanager.h"
-#include "main.h"
 #include "interfaces.h"
+#include "user.h"
 
 extern std::unordered_map<std::string, std::vector<std::string>> departures;
 

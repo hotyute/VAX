@@ -1,5 +1,5 @@
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef __TOOLS_H
+#define __TOOLS_H
 
 #include <iostream>
 #include <algorithm> 
@@ -14,8 +14,11 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+
 #include "point2d.h"
 #include "renderer.h"
+#include "constants.h"
 
 extern std::wstring s2ws(const std::string& s);
 
@@ -86,6 +89,12 @@ bool is_privateinterface(int frame_index);
 void capitalize(std::string& str);
 
 int random(int start, int end);
+
+double angularCompensation(double heading);
+
+double zoom_from_range();
+
+double NauticalMilesPerDegreeLon(double lat);
 
 template<typename T>
 T pop_front(std::vector<T>& vec)

@@ -17,6 +17,7 @@
 #include "packets.h"
 #include "interfaces.h"
 #include "calc_cycles.h"
+#include "topbutton.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -304,6 +305,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CLIENT_HEIGHT = height;
 		LoadMainChatInterface(true);
 
+		if (zoom_phase >= 2)
+			mZoom = zoom_from_range();
+
+		updateFlags[GBL_COLLISION_LINE] = true;
+
 		resize = true;
 		renderButtons = true;
 		renderLegend = true;
@@ -400,6 +406,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					renderDepartures = true;
 					updateFlags[GBL_COLLISION_LINE] = true;
 					zoom_phase = 2;
+					rangeb->refreshOption2();
 				}
 			}
 		}
@@ -445,10 +452,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			int verty[4] = { params[1], params[3], params[3], params[1] };
 			bool clicked = pnpoly(4, vertx, verty, x, y);
 			if (clicked) {
-				curButton->off = !curButton->off;
-				renderButtons = true;
+				if (curButton->handle())
+				{
+					curButton->on = !curButton->on;
+					renderButtons = true;
+				}
 				clicked_tbutton = curButton;
-				curButton->handle();
 				break;
 			}
 		}
@@ -649,9 +658,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			int verty[4] = { params[1], params[3], params[3], params[1] };
 			bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
 			if (clicked) {
-				renderButtons = true;
+				if (curButton->handleScroll(val > 0))
+				{
+					renderButtons = true;
+				}
 				clicked_tbutton = curButton;
-				curButton->handleScroll(val > 0);
 				break;
 			}
 		}
@@ -766,7 +777,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_TAB) {
 			if (focusChild != NULL) {
 				CHILD_TYPE type = focusChild->type;
-				if (type == CHILD_TYPE::INPUT_FIELD) {
+				if (type == CHILD_TYPE::INPUT_FIELD || type == CHILD_TYPE::COMBO_BOX) {
 					InputField* focusField = (InputField*)focusChild;
 					InterfaceFrame& frame = *focusField->getFrame();
 					int frame_index = frame.index;
@@ -774,9 +785,17 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						for (int i = focusField->index; i < frame.children.size(); i++) {
 							ChildFrame* child_ptr = frame.children[i];
 							if (child_ptr) {
-								if (child_ptr->type == CHILD_TYPE::INPUT_FIELD && child_ptr != focusField) {
-									InputField* newField = (InputField*)child_ptr;
-									if (newField->editable) {
+								if (child_ptr != focusField) {
+									if (child_ptr->type == CHILD_TYPE::INPUT_FIELD) {
+										InputField* newField = (InputField*)child_ptr;
+										if (newField->editable) {
+											newField->setFocus();
+											break;
+										}
+									}
+									else if (child_ptr->type == CHILD_TYPE::COMBO_BOX)
+									{
+										ComboBox* newField = (ComboBox*)child_ptr;
 										newField->setFocus();
 										break;
 									}
@@ -1008,10 +1027,12 @@ void handleConnect() {
 	if (connectFrame == NULL) {
 		//TODO save X and Y positions when moved
 		RenderConnect(-1, -1);
+		connect_callsign->setFocus();
 	}
 	else {
 		if (!connectFrame->render) {
 			connectFrame->doOpen(false, true);
+			connect_callsign->setFocus();
 		}
 	}
 }
