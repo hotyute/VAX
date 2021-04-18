@@ -1461,7 +1461,7 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 	{
 		aircraft.setTextTag1(aircraft.getSquawkCode());
 	}
-	else 
+	else
 	{
 		aircraft.setTextTag1("");
 	}
@@ -1766,7 +1766,7 @@ int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
 	double z_factor = default_size;
 	if (zoom_phase == 2)
 		z_factor *= _aircraft_size;
-	
+
 	double length = 0;
 
 	length += offset * z_factor;
@@ -2032,7 +2032,7 @@ void preFileRender() {
 
 void CallInterfaces() {
 	for (InterfaceFrame* frame : frames) {
-		if (frame)
+		if (frame && frame->render)
 		{
 			glPushMatrix();
 
@@ -2056,7 +2056,7 @@ void CallInterfaces() {
 void CallDrawings() {
 
 	for (InterfaceFrame* frame : frames) {
-		if (frame)
+		if (frame && frame->render)
 		{
 			glPushMatrix();
 
@@ -2079,7 +2079,7 @@ void CallDrawings() {
 
 void CallFocuses() {
 	for (InterfaceFrame* frame : frames) {
-		if (frame)
+		if (frame && frame->render)
 		{
 			glPushMatrix();
 
@@ -2101,55 +2101,64 @@ void CallFocuses() {
 }
 
 void CallLabels(InterfaceFrame* frame, Label* label) {
-	glPushMatrix();
-
-	if (frame->cur_pt && frame->s_pt)
+	if (frame->render)
 	{
+		glPushMatrix();
 
-		glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+		if (frame->cur_pt && frame->s_pt)
+		{
 
-		glCallList(label->labelTextDl);
+			glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+			glCallList(label->labelTextDl);
+		}
+		else
+		{
+			glCallList(label->labelTextDl);
+		}
+
+		glPopMatrix();
 	}
-	else
-	{
-		glCallList(label->labelTextDl);
-	}
-
-	glPopMatrix();
 }
 
 void CallInputTexts(InterfaceFrame* frame, InputField* field) {
-	glPushMatrix();
-
-	if (frame->cur_pt && frame->s_pt)
+	if (frame->render)
 	{
+		glPushMatrix();
 
-		glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+		if (frame->cur_pt && frame->s_pt)
+		{
 
-		glCallList(field->inputTextDl);
+			glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+			glCallList(field->inputTextDl);
+		}
+		else
+		{
+			glCallList(field->inputTextDl);
+		}
+
+		glPopMatrix();
 	}
-	else
-	{
-		glCallList(field->inputTextDl);
-	}
-
-	glPopMatrix();
 }
 
 void CallInputCursor(InterfaceFrame* frame, InputField* field) {
-	glPushMatrix();
-
-	if (frame->cur_pt && frame->s_pt)
+	if (frame->render)
 	{
+		glPushMatrix();
 
-		glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+		if (frame->cur_pt && frame->s_pt)
+		{
 
-		glCallList(field->inputCursorDl);
+			glTranslated((frame->cur_pt->x - frame->s_pt->x), -(frame->cur_pt->y - frame->s_pt->y), 0.0f);
+
+			glCallList(field->inputCursorDl);
+		}
+		else
+		{
+			glCallList(field->inputCursorDl);
+		}
+
+		glPopMatrix();
 	}
-	else
-	{
-		glCallList(field->inputCursorDl);
-	}
-
-	glPopMatrix();
 }

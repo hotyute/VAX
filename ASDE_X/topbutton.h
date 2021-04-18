@@ -69,7 +69,7 @@ public:
 
 extern std::vector<TopButton*> BUTTONS;
 
-extern TopButton* rangeb;
+extern TopButton* rangeb, * rotateb;
 
 extern void loadButtons();
 

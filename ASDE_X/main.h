@@ -20,6 +20,7 @@
 #define ID_FILE_OPEN 40006
 #define ID_SETTINGS_DEPARTS 40007
 #define ID_SETTINGS_SQUAWKS 40008
+#define ID_SETTINGS_CLIST 40009
 
 #define IDW_SOUND1 1000
 #define IDW_SOUND2 1001
@@ -57,7 +58,7 @@ extern BasicInterface* dragged_bounds;
 extern InputField *connect_callsign, *connect_fullname, *connect_username, *connect_password, * main_chat_input;
 extern Label* callsign_label, *name_label, *user_label, * pass_label;
 extern CloseButton *connect_closeb;
-extern DisplayBox *main_chat;
+extern DisplayBox * main_chat_box;
 extern bool connected, show_departures, show_squawks;
 
 extern int single_opened_frames;

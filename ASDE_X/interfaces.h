@@ -4,6 +4,8 @@
 #include "main.h"
 #include "packets.h"
 
+void RenderControllerList(double x_, double y_);
+
 void RenderConnect(double x, double y);
 
 void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, int index);
@@ -15,5 +17,7 @@ void sendErrorMessage(std::string message);
 void sendMainChatMessage(InputField* focusField);
 
 void sendATCMessage(std::string message);
+
+extern InterfaceFrame* controller_list, *main_chat;
 
 #endif

@@ -58,6 +58,13 @@ InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, doub
 
 InterfaceFrame::~InterfaceFrame()
 {
+	delete cur_pt;
+	cur_pt = nullptr;
+	delete s_pt;
+	s_pt = nullptr;
+	delete end_pt;
+	end_pt = nullptr;
+
 	auto it = interfaces.begin();
 	while (it != interfaces.end()) {
 		BasicInterface* bi = (*it);
@@ -71,6 +78,8 @@ InterfaceFrame::~InterfaceFrame()
 		it2 = children.erase(it2);
 		delete cf;
 	}
+
+	//frames[this->index] = NULL;
 }
 
 void InterfaceFrame::Pane1(double x, double width, double y, double height) {
@@ -99,13 +108,10 @@ void InterfaceFrame::UpdatePane1(double x, double width, double y, double height
 
 void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 {
-	if (frames[InterfaceFrame::index] != this) {
-		InterfaceFrame* frame = frames[InterfaceFrame::index];
-		if (frame) {
-			delete frame;
-			frames[InterfaceFrame::index] = NULL;
-		}
+	InterfaceFrame* frame = frames[InterfaceFrame::index];
+	if (frame && frame != this) {
 		frames[InterfaceFrame::index] = this;
+		delete frame;
 	}
 	InterfaceFrame::renderAllInputText = true;
 	InterfaceFrame::render = true;
@@ -133,6 +139,11 @@ void InterfaceFrame::doClose()
 		break;
 	}
 	case CONNECT_INTERFACE:
+	{
+		main_chat_input->setFocus();
+		break;
+	}
+	case CONTROLLER_INTERFACE:
 	{
 		main_chat_input->setFocus();
 		break;

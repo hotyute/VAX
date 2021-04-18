@@ -24,7 +24,7 @@ public:
 	std::unordered_map<Collision*, std::vector<unsigned int>> c_flags;
 	POINT* s_pt = nullptr, * cur_pt = nullptr, * end_pt = nullptr;
 	int startX = -1, startY = -1;
-	int borderDl;
+	int borderDl = 0;
 	bool renderBorder;
 	bool update_flags[MIR_FLAG_COUNT];
 	bool render_flags[MIR_FLAG_COUNT];

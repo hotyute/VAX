@@ -4,7 +4,7 @@
 
 std::vector<TopButton*> BUTTONS;
 
-TopButton* rangeb = nullptr;
+TopButton* rangeb = nullptr, * rotateb = nullptr;
 
 std::string text;
 
@@ -25,17 +25,17 @@ void loadButtons() {
 	else
 		rangeb->setOption2(std::to_string(rangeb->value = range));
 	BUTTONS.push_back(rangeb);
-	TopButton* mode = new TopButton(TOP_TYPE::ROTATE_BTN);
-	mode->setIndex(1);
-	mode->setWidth(0.069259012016);
-	mode->setHalf(true);
-	mode->setTop(false);
-	mode->setDark(true);
-	mode->setDualOption(false);
-	mode->setTripleOption(false);
-	mode->setOption1("ROTATE");
-	mode->value = rotation;
-	BUTTONS.push_back(mode);
+	rotateb = new TopButton(TOP_TYPE::ROTATE_BTN);
+	rotateb->setIndex(1);
+	rotateb->setWidth(0.069259012016);
+	rotateb->setHalf(true);
+	rotateb->setTop(false);
+	rotateb->setDark(true);
+	rotateb->setDualOption(false);
+	rotateb->setTripleOption(false);
+	rotateb->setOption1("ROTATE");
+	rotateb->value = rotation;
+	BUTTONS.push_back(rotateb);
 	TopButton* map = new TopButton(TOP_TYPE::MAP_BTN);
 	map->setIndex(1);
 	map->setWidth(0.069259012016);
@@ -279,7 +279,7 @@ void loadButtons() {
 	dcb->setOption1("DCB");
 	dcb->setOption2("ON");
 	dcb->setChoice2("OFF");
-	dcb->on = false;
+	dcb->on = true;
 	BUTTONS.push_back(dcb);
 	TopButton* oper = new TopButton(TOP_TYPE::OPER_BTN);
 	oper->setIndex(13);
@@ -403,6 +403,16 @@ int TopButton::handle()
 	case TOP_TYPE::ROTATE_BTN:
 	{
 		rotation = this->value = 0;
+		if (rotation != 0) 
+		{ 
+			rotateb->setDualOption(true);
+			renderButtons = true;
+		}
+		else 
+		{
+			rotateb->setDualOption(false);
+			renderButtons = true;
+		}
 		return 0;
 	}
 	case TOP_TYPE::DB_BTN:
@@ -466,6 +476,7 @@ int TopButton::handleScroll(bool hi_scroll)
 	}
 	case TOP_TYPE::ROTATE_BTN:
 	{
+		int change = this->value;
 		if (hi_scroll)
 		{
 			if ((this->value) + 1 >= 360)
@@ -481,6 +492,10 @@ int TopButton::handleScroll(bool hi_scroll)
 				this->value -= 1;
 		}
 		rotation = this->value;
+		if (this->value != change) {
+			this->setOption2(std::to_string((int) (rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
+		}
+		rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
 		return 1;
 	}
 	case TOP_TYPE::VECTOR2_BTN:

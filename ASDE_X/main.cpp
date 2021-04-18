@@ -42,7 +42,7 @@ BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
-DisplayBox* main_chat = NULL;
+DisplayBox* main_chat_box = NULL;
 
 void handleConnect();
 bool processCommands(std::string);
@@ -170,6 +170,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide Squawk Codes...");
+		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_CLIST, L"&Controller List...");
 		AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
 
 		SetMenu(hwnd, hMenuBar);
@@ -371,6 +372,17 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			show_squawks = !show_squawks;
 			updateFlags[GBL_CALLSIGN] = true;
 
+		}
+		break;
+		case ID_SETTINGS_CLIST:
+		{
+			if (controller_list == NULL) {
+				//TODO save X and Y positions when moved
+				RenderControllerList(-1, -1);
+			}
+			else if (!controller_list->render) {
+				controller_list->doOpen(true, true);
+			}
 		}
 		break;
 		case ID_FILE_OPEN:
@@ -1078,12 +1090,17 @@ bool processCommands(std::string command)
 			InterfaceFrame* pm_frame = frames[PRIVATE_MESSAGE_INTERFACE];
 			int index = PRIVATE_MESSAGE_INTERFACE;
 			int max = 10;
-			while (max > 0 && pm_frame && pm_frame->render) {
+			while (max > 0) {
 				pm_frame = frames[index];
+				if (!pm_frame || !pm_frame->render)
+					break;
 				++index;
 				--max;
 			}
-			LoadPrivateChat(-1, -1, call_sign, true, index);
+			if (max <= 0)
+				sendErrorMessage("Too many private chat interfaces");
+			else
+				LoadPrivateChat(-1, -1, call_sign, true, index);
 		}
 		return true;
 	}
