@@ -8,13 +8,26 @@ void RenderControllerList(double x_, double y_)
 
 	controller_list->title = "CONTROLLERS";
 
-	int width = 200, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
+	int width = 210, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 	int height = 300, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 	controller_list->Pane1(x, width, y, height);
-	const double spacing = 0.15, spacing_y = 0.13;
-	double start_x = 1.15, start_y = 0.15;
+	const double spacing_x = 0.15, spacing_y = 0.07;
+	double start_x = 1.135, start_y = 0.10;
+
+	ClickButton* alpha = new ClickButton(controller_list, "ALPHA Sort", x + (width - (width * (start_x - spacing_x))), 
+		90.0, y + (height - (height * (start_y + spacing_y))), 25.0);
+	controller_list->children[alpha->index = CONTROLLER_LIST_ALPHA] = alpha;
+	ClickButton* pofButton = new ClickButton(controller_list, "POF Only", x + (width - (width * (start_x - spacing_x))) + 105.0, 
+		90.0, y + (height - (height * (start_y += spacing_y))), 25.0);
+	controller_list->children[pofButton->index = CONTROLLER_LIST_POF] = pofButton;
+
+	start_x = 1.15;
 
 	std::vector<ChatLine*> list;
+	list.push_back(new ChatLine("------------DELIVERY----------", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("1A   MIA_DEL           135.350", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
@@ -23,8 +36,8 @@ void RenderControllerList(double x_, double y_)
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	double route_box_size = 150.0;
-	DisplayBox* displayBox = new DisplayBox(controller_list, list, 7, x + (width - (width * (start_x - spacing))), width - 25, 5, y + (height - (height * (start_y += spacing_y)))
-		- (route_box_size - 10), route_box_size, 5, false);
+	DisplayBox* displayBox = new DisplayBox(controller_list, list, list.size(), x + (width - (width * (start_x - spacing_x))), 
+		width - 25, 5, y + (height - (height * (start_y += spacing_y))) - (route_box_size - 10), route_box_size, 5, false);
 	controller_list->children[displayBox->index = CONTROLLER_LIST_BOX] = displayBox;
 
 	CloseButton* closeb = new CloseButton(controller_list, 15, 15);
@@ -92,7 +105,7 @@ void RenderConnect(double x_, double y_)
 	ClickButton* cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
 
-	connectFrame->doOpen(false, true);//delete's old object while opening, thisshould be before setting frame vector
+	connectFrame->doOpen(false, true);//delete's old object while opening, this should be before setting vector
 
 	frames[CONNECT_INTERFACE] = connectFrame;
 }
@@ -120,6 +133,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		double route_box_size = 90.0;
 		DisplayBox* displayBox = new DisplayBox(pm_frame, list, 7, x + (width - (width * (start_x - spacing))), width * 0.93, 5, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
+		displayBox->prune_top = true;
 		pm_frame->children[displayBox->index = PRIVATE_MESSAGE_BOX] = displayBox;
 
 		InputField* pm_input = new InputField(pm_frame, x + (width - (width * (start_x - spacing))), width * 0.93, 5, (y - (route_box_size - 10)) + (height - (height * (start_y += spacing_y))), 20.0, 0.0);
@@ -207,9 +221,9 @@ void LoadMainChatInterface(bool refresh) {
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		DisplayBox* displayBox = new DisplayBox(main_chat, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
+		main_chat->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
 
 		//chatbox
-		main_chat->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
 		std::vector<ChatLine*> list2;
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
@@ -222,6 +236,7 @@ void LoadMainChatInterface(bool refresh) {
 
 		main_chat_box = new DisplayBox(main_chat, list2, 6, x + (controller_list_width + arrow_offset),
 			(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);
+		main_chat_box->prune_top = true;
 		main_chat->children[main_chat_box->index = MAIN_CHAT_MESSAGES] = main_chat_box;
 
 		main_chat_input = new InputField(main_chat, x + (controller_list_width + arrow_offset),

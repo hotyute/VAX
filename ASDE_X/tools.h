@@ -36,7 +36,9 @@ void quad_bezier(Point2&, Point2&, Point2&, std::vector<LinearSegment*> &add_to)
 
 void cubic_bezier(Point2&, Point2&, Point2&, Point2&, std::vector<LinearSegment*> &add_to);
 
-extern std::vector<std::string> split(const std::string&, const std::string&);
+extern std::vector<std::string> split(const std::string&, const std::string&, int times);
+
+std::vector<std::string> split(const std::string& s, const std::string& delim);
 
 extern int binarySearch(double a[], int length, double key);
 

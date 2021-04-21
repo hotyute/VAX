@@ -1,6 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+// if a display box is editable you need to leave the next slot free for the inputfield
+
 //Children Interfaces
 #define CONTENT_PANE 0
 #define FRAME_BOUNDS 1
@@ -71,13 +73,15 @@
 #define FP_SQUAWK_INPUT 19
 
 #define FP_ROUTE_BOX 20
-#define FP_REMARKS_BOX 21
+#define FP_ROUTE_EDIT 21// if a display box is editable you need to leave the next slot free for the inputfield
+#define FP_REMARKS_BOX 22
+#define FP_REMARKS_EDIT 23
 
-#define FP_AMMEND_PLAN 22
-#define FP_REFRESH_PLAN 23
-#define FP_ASSIGN_SQUAWK 24
+#define FP_AMMEND_PLAN 24
+#define FP_REFRESH_PLAN 25
+#define FP_ASSIGN_SQUAWK 26
 
-#define FP_CLOSE_BUTTON 25
+#define FP_CLOSE_BUTTON 27
 
 //PRIVATE_MESSAGE_INTERFACE CHILDREN
 #define PRIVATE_MESSAGE_INPUT 0
@@ -86,7 +90,9 @@
 
 //CONTROLLER_LIST CHILDREN
 #define CONTROLLER_LIST_BOX 0
-#define CONTROLLER_LIST_CLOSE 1
+#define CONTROLLER_LIST_ALPHA 1
+#define CONTROLLER_LIST_POF 2
+#define CONTROLLER_LIST_CLOSE 3
 
 //GLOBAL FLAG COUNT
 #define NUM_FLAGS 5

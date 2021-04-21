@@ -28,6 +28,7 @@ private:
 public:
 	unsigned int interfaceDl = 0, drawingDl = 0, focusDl = 0;
 	POINT *s_pt = nullptr, *cur_pt = nullptr, *end_pt = nullptr;
+	BasicInterface* border = nullptr;
 	BasicInterface* move_bound = nullptr;
 	bool render, renderAllInputText, renderAllLabels, multi_open = true, pannable = false;
 	int index;
@@ -48,22 +49,24 @@ class ChildFrame {
 public:
 	virtual ~ChildFrame();
 	std::vector<BasicInterface*> child_interfaces;
-	BasicInterface *border;
+	BasicInterface *border = nullptr;
 	CHILD_TYPE type;
 	int index;
-	bool focus;
+	bool focus, show_border = true;
 	virtual void updatePos(double x, double width, double y, double height) = 0;
 	virtual void doDrawing() = 0;
 	virtual void setFocus() = 0;
 	virtual void removeFocus() = 0;
 	virtual void doAction() = 0;
 	virtual void focusDrawing() = 0;
+	virtual int handleClick(ChildFrame* clicked, int x, int y) = 0;
 };
 
 class ChatLine {
 private:
 	CHAT_TYPE type;
 	std::string line;
+	int _x = -1, _y = -1, _s_x = -1, _s_y = -1, _p_x = -1, _p_y = -1;
 public:
 	ChatLine* split = nullptr;
 	ChatLine(std::string, CHAT_TYPE);
@@ -73,6 +76,18 @@ public:
 	void setText(std::string text);
 	std::string getText();
 	void playChatSound();
+	void set_p(int x, int y, int t_x, int t_y, int e_x, int e_y) 
+	{
+		this->_x = x; this->_y = y; this->_s_x = t_x; this->_s_y = t_y; this->_p_x = e_x; this->_p_y = e_y;
+	}
+	int get_x() { return _x; }
+	int get_y() { return _y; }
+	int size_x() { return _p_x; }
+	int size_y() { return _p_y; }
+	bool in_bounds(int x, int y);
+	bool in_bounds_text(int x, int y);
+	void reset_p() { this->_x = -1; this->_y = -1; this->_s_x = -1; this->_s_y = -1; }
+	bool has_p() { this->_x != -1 && this->_y != -1; }
 };
 
 class InputField : public ChildFrame {
@@ -84,6 +99,7 @@ public:
 	InputField(InterfaceFrame*, double, double, double, double, double, double);
 public:
 	bool centered, editable;
+	ChatLine* line_ptr = nullptr;
 	std::string pp_input;
 	bool p_protected; // password protection
 	std::string input;
@@ -92,12 +108,15 @@ public:
 	int inputTextDl = 0;
 	int inputCursorDl = 0;
 
+	int offset_x = 3, offset_y = 6;
+
 	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
 	void setFocus();
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	int handleClick(ChildFrame* clicked, int x, int y);
 
 	void pushInput(bool, char);
 	void setCursorAtEnd();
@@ -112,6 +131,7 @@ public:
 	void pass_characters(char* chars);
 	bool can_type();
 	InterfaceFrame* getFrame() { return this->frame; }
+	void handleBox();
 };
 
 class CloseButton : public ChildFrame {
@@ -126,6 +146,7 @@ public:
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	int handleClick(ChildFrame* clicked, int x, int y);
 };
 
 class ClickButton : public ChildFrame {
@@ -142,6 +163,7 @@ public:
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	int handleClick(ChildFrame* clicked, int x, int y);
 };
 
 class ComboBox : public ChildFrame {
@@ -161,18 +183,21 @@ public:
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	int handleClick(ChildFrame* clicked, int x, int y);
 };
 
 class DisplayBox : public ChildFrame {
 private:
 	InterfaceFrame* frame;
+	int noncp = 2;
 public:
 	DisplayBox(InterfaceFrame*, std::vector<ChatLine*>, int, double, double, double, double, double, double, bool);
 public:
 	int numBlocks;
 	int read_index = 0, max_history = 100;
-	bool centered;
+	bool centered, editable = false, prune_top = false;
 	std::vector<ChatLine*> chat_lines;
+	std::vector<ChatLine*> displayed_lines;
 
 	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
@@ -180,6 +205,7 @@ public:
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	int handleClick(ChildFrame* clicked, int x, int y);
 
 	void resetReaderIdx();
 	void doActionUp();
@@ -189,6 +215,8 @@ public:
 	void removeLine(ChatLine* c);
 	void SetChatTextColour(CHAT_TYPE t);
 
+	bool click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset);
+	bool click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset);
 
 };
 
@@ -209,6 +237,7 @@ public:
 	void removeFocus();
 	void doAction();
 	void focusDrawing();
+	int handleClick(ChildFrame* clicked, int x, int y);
 };
 
 

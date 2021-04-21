@@ -35,8 +35,8 @@ std::string regular_text = "Regular Aircraft";
 
 void RenderChatInterface(BasicInterface&);
 void RenderMirrorBorder(Mirror& mirror);
-void RenderInputText(BasicInterface&, int&, std::string&, bool);
-void RenderInputCursor(BasicInterface& border, int& inputCursorDl, std::string& text, bool centered);
+void RenderInputText(InputField&, int&, std::string&, bool);
+void RenderInputCursor(InputField& input, int& inputCursorDl, std::string& text, bool centered);
 void RenderLabel(BasicInterface&, int&, std::string&, int);
 void RenderFocuses(InterfaceFrame* frame);
 void RenderDrawings(InterfaceFrame* frame);
@@ -304,7 +304,6 @@ void DrawInterfaces() {
 			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
 			glDeleteLists(lastFocusField->inputCursorDl, 1);
-			BasicInterface& last_border = *lastFocus->child_interfaces[0];
 			std::string l_input;
 			if (lastFocusField->p_protected)
 			{
@@ -314,15 +313,14 @@ void DrawInterfaces() {
 			{
 				l_input = lastFocusField->input;
 			}
-			RenderInputText(last_border, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
-			RenderInputCursor(last_border, lastFocusField->inputCursorDl, lastFocusField->cursor_input, lastFocusField->centered);
+			RenderInputText(*lastFocusField, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
+			RenderInputCursor(*lastFocusField, lastFocusField->inputCursorDl, lastFocusField->cursor_input, lastFocusField->centered);
 			updateLastFocus = false;
 		}
 		if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 			InputField* focusField = (InputField*)focusChild;
 			glDeleteLists(focusField->inputTextDl, 1);
 			glDeleteLists(focusField->inputCursorDl, 1);
-			BasicInterface& border = *focusField->border;
 			std::string f_input;
 			if (focusField->p_protected) {
 				f_input = focusField->pp_input;
@@ -330,8 +328,8 @@ void DrawInterfaces() {
 			else {
 				f_input = focusField->input;
 			}
-			RenderInputText(border, focusField->inputTextDl, f_input, focusField->centered);
-			RenderInputCursor(border, focusField->inputCursorDl, focusField->cursor_input, focusField->centered);
+			RenderInputText(*focusField, focusField->inputTextDl, f_input, focusField->centered);
+			RenderInputCursor(*focusField, focusField->inputCursorDl, focusField->cursor_input, focusField->centered);
 		}
 		renderInputTextFocus = false;
 	}
@@ -351,7 +349,6 @@ void DrawInterfaces() {
 							glDeleteLists(field->inputCursorDl, 1);
 							field->inputCursorDl = 0;
 						}
-						BasicInterface* border = field->border;
 						std::string f_input;
 						if (field->p_protected) {
 							f_input = field->pp_input;
@@ -359,9 +356,8 @@ void DrawInterfaces() {
 						else {
 							f_input = field->input;
 						}
-						BasicInterface& bord = *border;
-						RenderInputText(bord, field->inputTextDl, f_input, field->centered);
-						RenderInputCursor(bord, field->inputCursorDl, field->cursor_input, field->centered);
+						RenderInputText(*field, field->inputTextDl, f_input, field->centered);
+						RenderInputCursor(*field, field->inputCursorDl, field->cursor_input, field->centered);
 					}
 				}
 				frame->renderAllInputText = false;
@@ -919,7 +915,8 @@ void RenderInterface(InterfaceFrame* frame) {
 			if (children) {
 				for (BasicInterface* inter2 : children->child_interfaces) {
 					if (inter2->isRender()) {
-						RenderChatInterface(*inter2);
+						if (children->show_border)
+							RenderChatInterface(*inter2);
 					}
 				}
 			}
@@ -1139,14 +1136,15 @@ SIZE getTextExtent(std::string& s) {
 	return extent;
 }
 
-void RenderInputText(BasicInterface& border, int& inputTextDl, std::string& text, bool centered) {
-	int x, y = border.getStartY() + 6;
+void RenderInputText(InputField& input, int& inputTextDl, std::string& text, bool centered) {
+	BasicInterface& border = *input.border;
+	int x, y = border.getStartY() + input.offset_y;
 	double aW = border.getActualWidth();
 	if (centered) {
 		x = (border.getStartX() + (aW / 2));
 	}
 	else {
-		x = border.getStartX() + 3;
+		x = border.getStartX() + input.offset_x;
 	}
 
 	inputTextDl = glGenLists(1);
@@ -1171,14 +1169,15 @@ void RenderInputText(BasicInterface& border, int& inputTextDl, std::string& text
 	glEndList();
 }
 
-void RenderInputCursor(BasicInterface& border, int& inputCursorDl, std::string& text, bool centered) {
-	int x, y = border.getStartY() + 6;
+void RenderInputCursor(InputField& input, int& inputCursorDl, std::string& text, bool centered) {
+	BasicInterface& border = *input.border;
+	int x, y = border.getStartY() + input.offset_y;
 	double aW = border.getActualWidth();
 	if (centered) {
 		x = (border.getStartX() + (aW / 2));
 	}
 	else {
-		x = border.getStartX() + 3;
+		x = border.getStartX() + input.offset_x;
 	}
 
 	inputCursorDl = glGenLists(1);

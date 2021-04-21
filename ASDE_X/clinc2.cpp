@@ -1,5 +1,9 @@
 #include "clinc2.h"
 
+#include "events.h"
+#include "config.h"
+#include "usermanager.h"
+
 tcpinterface* intter = new tcpinterface();
 
 static int packetSizes[256][2] = {
@@ -158,7 +162,7 @@ DWORD tcpinterface::run() {
 
 void tcpinterface::sendMessage(Stream *stream) {
 	if(stream->currentOffset == 0) {
-		printf("Can't flush emtpy stream o.O\n");
+		printf("Can't flush empty stream o.O\n");
 		return;
 	}
 

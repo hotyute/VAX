@@ -7,10 +7,8 @@
 #include <string>
 #include <tchar.h>
 
-#include "events.h"
 #include "Stream.h"
-#include "usermanager.h"
-#include "config.h"
+
 
 class tcpinterface {
 public:

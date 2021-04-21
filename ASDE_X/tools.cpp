@@ -56,27 +56,47 @@ void cubic_bezier(Point2& p1, Point2& p2, Point2& p3, Point2& p4, std::vector<Li
 	}
 }
 
-std::vector<std::string>& split(const std::string& str, const std::string& delimiters, std::vector<std::string>& elems) {
+std::vector<std::string>& split(const std::string& str, const std::string& delimiters, std::vector<std::string>& elems, int times) {
 	// Skip delimiters at beginning.
 	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
 	// Find first "non-delimiter".
 	std::string::size_type pos = str.find_first_of(delimiters, lastPos);
 
-	while (std::string::npos != pos || std::string::npos != lastPos) {
-		// Found a token, add it to the vector.
-		elems.push_back(str.substr(lastPos, pos - lastPos));
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
+	if (times != -1)
+	{
+		while (times > 0 && (std::string::npos != pos || std::string::npos != lastPos)) {
+			// Found a token, add it to the vector.
+			elems.push_back(str.substr(lastPos, pos - lastPos));
+			// Skip delimiters.  Note the "not_of"
+			lastPos = str.find_first_not_of(delimiters, pos);
+			// Find next "non-delimiter"
+			pos = str.find_first_of(delimiters, lastPos);
+
+			--times;
+		}
+	}
+	else
+	{
+		while (std::string::npos != pos || std::string::npos != lastPos) {
+			// Found a token, add it to the vector.
+			elems.push_back(str.substr(lastPos, pos - lastPos));
+			// Skip delimiters.  Note the "not_of"
+			lastPos = str.find_first_not_of(delimiters, pos);
+			// Find next "non-delimiter"
+			pos = str.find_first_of(delimiters, lastPos);
+		}
 	}
 	return elems;
 }
 
 
-std::vector<std::string> split(const std::string& s, const std::string& delim) {
+std::vector<std::string> split(const std::string& s, const std::string& delim, int times) {
 	std::vector<std::string> elems;
-	return split(s, delim, elems);
+	return split(s, delim, elems, times);
+}
+
+std::vector<std::string> split(const std::string& s, const std::string& delim) {
+	return split(s, delim, -1);
 }
 
 std::wstring s2ws(const std::string& s) {
@@ -174,8 +194,8 @@ int wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlengt
 			break;
 		}
 	}
-	
-	std::cout << has_space << ", " << (strlen(buffer)) << ", "<<  maxlength << std::endl;
+
+	std::cout << has_space << ", " << (strlen(buffer)) << ", " << maxlength << std::endl;
 
 	if (!has_space && (strlen(buffer) > maxlength)) {
 		return 0;
@@ -500,7 +520,7 @@ void capitalize(std::string& str)
 		x = toupper(x);
 }
 
-int random(int start, int end) 
+int random(int start, int end)
 {
 	if (end < start) {
 		int temp = start;

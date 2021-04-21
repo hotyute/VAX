@@ -6,7 +6,8 @@ std::unordered_map<std::string, std::vector<std::string>> departures;
 
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {
-	std::string values[13] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", "MYNN", "10000", "08R", "3306" , "" , ""};
+	std::string values[13] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", 
+		"MYNN", "10000", "08R", "3306" , "SOME REALLY REALLY LONG LONG SOMETHING ROUTE THAT WE NEED TO GET IN TO TEST WHATS HAPPENING WITH AN EVEN LONGER ONE SO WE CAN TEST ALL THREE LINES" , ""};
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = NULL;
 }
@@ -143,6 +144,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		double route_box_size = 50.0;
 		DisplayBox* displayBox = new DisplayBox(fp_frame, list, 3, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
+		displayBox->editable = true;
 		fp_frame->children[displayBox->index = FP_ROUTE_BOX] = displayBox;
 
 		//5th Line
@@ -157,6 +159,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		route_box_size = 30.0;
 		DisplayBox* remarks_box = new DisplayBox(fp_frame, remarks_list, 2, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
+		remarks_box->editable = true;
 		fp_frame->children[remarks_box->index = FP_REMARKS_BOX] = remarks_box;
 
 		CloseButton* fp_closeb = new CloseButton(fp_frame, 15, 15);

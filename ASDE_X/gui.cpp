@@ -37,6 +37,7 @@ InterfaceFrame::InterfaceFrame(int index, double width, double height) {
 	BasicInterface* bounds = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, false, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
+	InterfaceFrame::border = bounds;
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
@@ -53,6 +54,7 @@ InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, doub
 	BasicInterface* bounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
+	InterfaceFrame::border = bounds;
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
@@ -90,6 +92,7 @@ void InterfaceFrame::Pane1(double x, double width, double y, double height) {
 	BasicInterface* bounds = new BasicInterface(x, width, -5.0, y, height, 5.0, 0.5f, 0.5f, 0.5f, 1.0, true, true);
 	bounds->setBounds(true);
 	bounds->updateCoordinates();
+	InterfaceFrame::border = bounds;
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
@@ -231,6 +234,10 @@ void InputField::removeFocus() {
 		lastFocus = this;
 		focusChild = NULL;
 		renderInputTextFocus = true;
+		if (line_ptr)
+		{
+			handleBox();//this has to come last as it deletes the inputfield
+		}
 	}
 }
 
@@ -238,6 +245,11 @@ void InputField::doAction() {
 }
 
 void InputField::focusDrawing() {
+}
+
+int InputField::handleClick(ChildFrame* clicked, int x, int y)
+{
+	return 0;
 }
 
 void InputField::pushInput(bool uni, char c) {
@@ -370,6 +382,21 @@ bool InputField::can_type()
 	return false;
 }
 
+void InputField::handleBox()
+{
+	ChatLine* c = line_ptr;
+	c->setText(input);
+	clearInput();
+	setCursor();
+	line_ptr = nullptr;
+	if (focusChild == this)
+		removeFocus();
+	frame->children[index] = nullptr;
+	renderInputTextFocus = true;
+	renderDrawings = true;
+	delete this;
+}
+
 
 CloseButton::CloseButton(InterfaceFrame* frame, double width, double height) {
 	CloseButton::frame = frame;
@@ -436,6 +463,11 @@ void CloseButton::doAction() {
 }
 
 void CloseButton::focusDrawing() {
+}
+
+int CloseButton::handleClick(ChildFrame* clicked, int x, int y)
+{
+	return 0;
 }
 
 ClickButton::ClickButton(InterfaceFrame* frame, std::string text, double x, double width, double y, double height) {
@@ -523,6 +555,11 @@ void ClickButton::doAction() {
 
 
 void ClickButton::focusDrawing() {
+}
+
+int ClickButton::handleClick(ChildFrame* clicked, int x, int y)
+{
+	return 0;
 }
 
 void ClickButton::updatePos(double x, double width, double y, double height)
@@ -637,12 +674,18 @@ void ComboBox::focusDrawing() {
 	}
 }
 
+int ComboBox::handleClick(ChildFrame* clicked, int x, int y)
+{
+	return 0;
+}
+
 DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
 	DisplayBox::frame = frame;
 	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::centered = centerText;
 	DisplayBox::numBlocks = numBlocks;
 	DisplayBox::focus = false;
+	DisplayBox::editable = false;
 	DisplayBox::type = CHILD_TYPE::DISPLAY_BOX;
 	BasicInterface* comboBounds = new BasicInterface(x, width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	comboBounds->setBounds(true);
@@ -668,7 +711,6 @@ void DisplayBox::doDrawing() {
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
 	int maxChars = aW / ave;
-	int noncp = 2;
 
 	bool reset_idx = false;
 
@@ -677,13 +719,14 @@ void DisplayBox::doDrawing() {
 	while (it != DisplayBox::chat_lines.begin()) {
 		--it;
 		ChatLine* m = *it;
+		m->reset_p();
 		std::string text = m->getText();
 		CHAT_TYPE type = m->getType();
 		SIZE size = getTextExtent(text);
-		if (size.cx > param.getActualWidth()) {
+		if (size.cx >= (param.getActualWidth() - 1)) {
 			std::vector<std::string> store;
 			if (!wordWrap(store, text.c_str(), maxChars, 0)) {
-				std::cout << "hello" << std::endl;
+				//std::cout << "hello" << std::endl;
 				continue;
 			}
 
@@ -696,12 +739,11 @@ void DisplayBox::doDrawing() {
 				remaining++;
 			}
 
-
 			if (remaining > 0) {
 				m->setText(rtrim(ltrim(store[s_size - 1])));
+
 				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type);
 				it = DisplayBox::chat_lines.insert(it, c) + 1;
-
 
 				c->split = m;
 			}
@@ -716,23 +758,55 @@ void DisplayBox::doDrawing() {
 		bool set_pos = false;
 		if (c->split) {
 			ChatLine* n = *(i + 1);
-			SIZE size = getTextExtent(c->getText() + n->getText());
-			if (size.cx <= param.getActualWidth()) {
-				c->setText(c->getText() + " " + n->getText());
-				DisplayBox::chat_lines.erase(i + 1);
+			std::string next_text = n->getText();
+			std::vector<std::string> store = split(next_text, " ", 1);
+			if (store.size() < 1) {
+				++i;
+				continue;
+			}
+			SIZE size = getTextExtent(c->getText() + " " + store[0]);
+			if (size.cx < (param.getActualWidth() - 1)) {
+				c->setText(c->getText() + " " + store[0]);
+
+				size_t pos = next_text.find(store[0]);
+				if (pos != std::string::npos)
+					next_text.erase(pos, store[0].length());
+
+				next_text = rtrim(ltrim(next_text));
+				if (next_text.size() > 0) {
+					n->setText(next_text);
+					continue;
+				}
 				c->split = n->split;
+				DisplayBox::chat_lines.erase(i + 1);
 				delete n;
 				reset_idx = true;
 			}
-			else
-			{
-				++i;
-			}
+			else ++i;
 		}
-		else
+		else ++i;
+	}
+
+	//prune
+	auto i2 = chat_lines.begin();
+	while (i2 != chat_lines.end()) {
+		if (chat_lines.size() <= numBlocks)
+			break;
+		ChatLine* c = *i2;
+		if (empty(c->getText()))
 		{
-			++i;
+			i2 = chat_lines.erase(i2);
+			delete c;
+			reset_idx = true;
 		}
+		else ++i2;
+	}
+
+	while (chat_lines.size() < numBlocks) {
+		if (prune_top)
+			chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN));
+		else
+			chat_lines.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	}
 
 	if (reset_idx) {
@@ -741,9 +815,11 @@ void DisplayBox::doDrawing() {
 	}
 
 	//draw Text to screen
+	displayed_lines.clear();
 	for (size_t i = read_index; i < read_index + numBlocks; i++) {
-		std::string text = DisplayBox::chat_lines[i]->getText();
-		CHAT_TYPE type = DisplayBox::chat_lines[i]->getType();
+		ChatLine* line = DisplayBox::chat_lines[i];
+		std::string text = line->getText();
+		CHAT_TYPE type = line->getType();
 		//std::cout << text << ", " << i << std::endl;
 		double y, endY;
 		if (last_end_y != -1) {
@@ -768,6 +844,9 @@ void DisplayBox::doDrawing() {
 		glRasterPos2f(textXPos, textYPos);
 		glPrint(text.c_str(), &topButtonBase);
 		last_end_y = endY;
+
+		line->set_p(textXPos, textYPos, size.cx, size.cy, param.getActualWidth(), y_height);
+		displayed_lines.push_back(line);
 	}
 
 	glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
@@ -826,6 +905,83 @@ void DisplayBox::focusDrawing() {
 		DrawVarLine(x2, y2, x2, y1, line_size, line_size);
 		DrawVarLine(x2, y1, x1, y1, line_size, line_size);
 	}
+}
+
+int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
+{
+	int arrow_bounds = 15, arrow_offset = 3;
+	if (click_arrow_bottom(x, y, arrow_bounds, arrow_offset)) {
+		clicked = this;
+		doActionDown();
+		return 1;
+	}
+
+	if (click_arrow_top(x, y, arrow_bounds, arrow_offset)) {
+		clicked = this;
+		doActionUp();
+		return 1;
+	}
+	for (auto d_it = displayed_lines.begin(); d_it != displayed_lines.end(); ++d_it) {
+		ChatLine* line = *d_it;
+		std::string str = line->getText();
+		if (line->in_bounds(x, y))
+		{
+			std::cout << "Line: " << str << ", " << line->size_y() << std::endl;
+			if (editable)
+			{
+				std::string temp;
+				int str_size = str.size();
+				while (str_size > 0) {
+					temp += " ";
+					--str_size;
+				}
+				if (frame->children[index + 1])
+				{
+					((InputField*)frame->children[index + 1])->handleBox();
+				}
+				InputField* input_field = nullptr;
+				if (empty(str))
+				{
+					input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
+					input_field->line_ptr = line;
+					input_field->show_border = false;
+					input_field->offset_x = 0;
+					input_field->offset_y = 0;
+				}
+				else if (line->in_bounds_text(x, y))
+				{
+					//TODO set cursor exactly 
+					input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
+					input_field->line_ptr = line;
+					input_field->show_border = false;
+					input_field->setInput(str);
+					line->setText(temp);
+					input_field->offset_x = 0;
+					input_field->offset_y = 0;
+				}
+				else
+				{
+					input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
+					input_field->line_ptr = line;
+					input_field->show_border = false;
+					input_field->setInput(str);
+					line->setText(temp);
+					input_field->offset_x = 0;
+					input_field->offset_y = 0;
+				}
+				if (input_field) {
+					frame->children[input_field->index = (index + 1)] = input_field;
+					input_field->setFocus();
+					renderInputTextFocus = true;
+					renderInterfaces = true;
+					renderDrawings = true;
+				}
+			}
+			clicked = this;
+			return 1;
+		}
+	}
+	return 0;// returning 1 means break any outside loop
 }
 
 void DisplayBox::addLine(ChatLine* c) {
@@ -912,6 +1068,50 @@ void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 	}
 }
 
+bool DisplayBox::click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset) {
+	bool clicked = false;
+	BasicInterface& inter2 = *this->border;
+	int vertxt[4] = {
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
+	};
+	int vertyt[4] = {
+		inter2.getStartY(),
+		inter2.getStartY() + arrow_bounds,
+		inter2.getStartY() + arrow_bounds,
+		inter2.getStartY()
+	};
+	bool clicked_bottom = pnpoly(4, vertxt, vertyt, x, y);
+	if (clicked_bottom) {
+		clicked = true;
+	}
+	return clicked;
+}
+
+bool DisplayBox::click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset) {
+	bool clicked = false;
+	BasicInterface& inter2 = *this->border;
+	int vertx[4] = {
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
+		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
+	};
+	int verty[4] = {
+		inter2.getStartY() + inter2.getActualHeight(),
+		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
+		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
+		inter2.getStartY() + inter2.getActualHeight()
+	};
+	bool clicked_top = pnpoly(4, vertx, verty, x, y);
+	if (clicked_top) {
+		clicked = true;
+	}
+	return clicked;
+}
+
 Label::Label(InterfaceFrame* interfaceFrame, std::string label, double width, double height)
 {
 	Label::frame = interfaceFrame;
@@ -958,6 +1158,11 @@ void Label::doAction() {
 
 void Label::focusDrawing()
 {
+}
+
+int Label::handleClick(ChildFrame* clicked, int x, int y)
+{
+	return 0;
 }
 
 ChatLine::ChatLine(std::string line, CHAT_TYPE type)
@@ -1017,6 +1222,20 @@ void ChatLine::playChatSound()
 	}
 	break;
 	}
+}
+
+bool ChatLine::in_bounds(int x, int y)
+{
+	int vertx[4] = { _x, _x, (_x + _p_x), (_x + _p_x) };
+	int verty[4] = { _y, (_y + _p_y), (_y + _p_y), _y };
+	return pnpoly(4, vertx, verty, x, y);
+}
+
+bool ChatLine::in_bounds_text(int x, int y)
+{
+	int vertx[4] = { _x, _x, (_x + _s_x), (_x + _s_x) };
+	int verty[4] = { _y, (_y + _s_y), (_y + _s_y), _y };
+	return pnpoly(4, vertx, verty, x, y);
 }
 
 ChildFrame::~ChildFrame()

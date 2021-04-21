@@ -3,6 +3,7 @@
 #include <thread>
 #include <chrono>
 
+#include "events.h"
 #include "projection.h"
 #include "main.h"
 #include "later.h"
@@ -46,8 +47,6 @@ DisplayBox* main_chat_box = NULL;
 
 void handleConnect();
 bool processCommands(std::string);
-bool click_arrow_bottom(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset);
-bool click_arrow_top(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset);
 
 /* Components */
 
@@ -481,36 +480,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
 						ChildFrame* children = *child;
 						if (children) {
-							for (auto iter2 = children->child_interfaces.rbegin(); iter2 != children->child_interfaces.rend(); ++iter2) {
-								BasicInterface* inter2 = *iter2;
-								if (inter2) {
-									if (children->type == CHILD_TYPE::DISPLAY_BOX) {
-										int arrow_bounds = 15, arrow_offset = 3;
-										if (click_arrow_bottom(*inter2, x, y, arrow_bounds, arrow_offset)) {
-											((DisplayBox*)children)->doActionDown();
-											break;
-										}
-
-										if (click_arrow_top(*inter2, x, y, arrow_bounds, arrow_offset)) {
-											((DisplayBox*)children)->doActionUp();
-											break;
-										}
-
-									}
-									if (inter2->isBounds()) {
-										int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
-										int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
-										bool clicked = pnpoly(4, vertx, verty, x, y);
-										if (clicked) {
-											clicked1 = children;
-											break;
-										}
-									}
+							BasicInterface* inter2 = children->border;
+							if (children->handleClick(clicked1, x, y))
+								break;
+							if (!clicked1 && inter2->isBounds()) {
+								int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
+								int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
+								bool clicked = pnpoly(4, vertx, verty, x, y);
+								if (clicked) {
+									clicked1 = children;
+									break;
 								}
 							}
 						}
-						if (clicked1)
-							break;
 					}
 					if (clicked1) {
 						if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
@@ -528,18 +510,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						clicked_interface = true;
 						break;
 					}
-					BasicInterface* clicked2 = nullptr;
-					for (auto iter = frame->interfaces.rbegin(); iter != frame->interfaces.rend(); ++iter) {
-						BasicInterface* inter1 = *iter;
-						if (inter1 && inter1->isBounds() && frame->pannable) {
-							int b_offset_Y = 25;
-							int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
-							int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
-							bool clicked = pnpoly(4, vert_x, vert_y, x, y);
-							if (clicked) {
-								clicked2 = inter1;
-								break;
-							}
+
+					BasicInterface* clicked2 = nullptr, *inter1 = frame->border;
+					if (inter1 && inter1->isBounds() && frame->pannable) {
+						int b_offset_Y = 25;
+						int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
+						int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
+						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+						if (clicked) {
+							clicked2 = inter1;
 						}
 					}
 					if (clicked2)
@@ -836,7 +815,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					InputField* focusField = (InputField*)focusChild;
 					InterfaceFrame& frame = *focusField->getFrame();
 					int frame_index = frame.index;
-					if (frame_index == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
+					if (focusField->line_ptr)
+					{
+						focusField->handleBox();
+						main_chat_input->setFocus();
+					}
+					else if (frame_index == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
 						if (focusField->input.size() > 0) {
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
@@ -1401,46 +1385,4 @@ void resetFlags() {
 			renderFlags[i] = false;
 		}
 	}
-}
-
-bool click_arrow_bottom(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset) {
-	bool clicked = false;
-	int vertxt[4] = {
-		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
-	};
-	int vertyt[4] = {
-		inter2.getStartY(),
-		inter2.getStartY() + arrow_bounds,
-		inter2.getStartY() + arrow_bounds,
-		inter2.getStartY()
-	};
-	bool clicked_bottom = pnpoly(4, vertxt, vertyt, x, y);
-	if (clicked_bottom) {
-		clicked = true;
-	}
-	return clicked;
-}
-
-bool click_arrow_top(BasicInterface& inter2, int x, int y, int arrow_bounds, int arrow_offset) {
-	bool clicked = false;
-	int vertx[4] = {
-		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
-		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
-	};
-	int verty[4] = {
-		inter2.getStartY() + inter2.getActualHeight(),
-		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
-		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
-		inter2.getStartY() + inter2.getActualHeight()
-	};
-	bool clicked_top = pnpoly(4, vertx, verty, x, y);
-	if (clicked_top) {
-		clicked = true;
-	}
-	return clicked;
 }
