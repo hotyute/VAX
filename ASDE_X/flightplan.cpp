@@ -27,7 +27,9 @@ void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 	Identity &id = *user.getIdentity();
 	Aircraft &acf = *user.getAircraft();
 	FlightPlan& fp = *user.getAircraft()->getFlightPlan();
+#ifdef _DEBUG
 	std::cout << id.login_name << std::endl;
+#endif
 	std::string values[13] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR", 
 		fp.departure, fp.arrival, fp.alternate, fp.cruise, fp.scratchPad, fp.squawkCode, fp.route, fp.remarks };
 	Load_FlightPlan_Interface(x, y, values, refresh);

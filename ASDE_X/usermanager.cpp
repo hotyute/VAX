@@ -124,7 +124,9 @@ void decodePackets(int opCode, Stream &stream) {
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
 		int cur_cycle = stream.readUnsignedWord();
+#ifdef _DEBUG
 		std::cout << cur_cycle << '\n' << std::endl;
+#endif
 		if (user1 != NULL) {
 			User &user_to_update = *user1;
 			if (user_to_update.getIdentity()->type == PILOT_CLIENT) {

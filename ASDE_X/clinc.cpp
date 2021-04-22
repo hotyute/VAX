@@ -9,7 +9,7 @@ tcpinterface1::tcpinterface1() {
 }
 
 DWORD WINAPI tcpinterface1::staticStart(void* param) {
-	tcpinterface1* intter = (tcpinterface1*) param;
+	tcpinterface1* intter = (tcpinterface1*)param;
 	return intter->run();
 }
 int nBytesReceived1 = 0;
@@ -28,13 +28,15 @@ DWORD tcpinterface1::run() {
 				break;
 			strmessage += message;
 			int length = strmessage.length();
-			if (length >= 2) 
+			if (length >= 2)
 			{
-				if(strmessage[length - 2] == '\r' && strmessage[length - 1] == '\n') 
+				if (strmessage[length - 2] == '\r' && strmessage[length - 1] == '\n')
 				{
+#ifdef _DEBUG
 					std::cout << strmessage.c_str() << std::endl;
+#endif
 					fBreak1 = true;
-					if (strmessage.length() != 0) 
+					if (strmessage.length() != 0)
 					{
 						if (strmessage.substr(strmessage.length() - 1) == "\0")
 						{
@@ -53,67 +55,70 @@ DWORD tcpinterface1::run() {
 								{
 								case '#':
 								case '$':
+								{
+									if (array3[0].length() < 3)
 									{
-										if (array3[0].length() < 3)
-										{
-											printf("%s%s", "Invalid PDU type.", text);
-											throw;
-										}
-										break;
+										printf("%s%s", "Invalid PDU type.", text);
+										throw;
 									}
+									break;
+								}
 								default:
+								{
+									if (c2 != '@')
 									{
-										if (c2 != '@')
-										{
-											//goto IL_1058;
-											break;
-										}
-										array3[0] = array3[0].substr(1);
-										/*if (this.Field_5 != null)
-										{
-										this.Field_5(this, new Class_177_EventArgs<Class_233_Class_176_Object>(Class_233_Class_176_Object.Function_Class_233_Class_176_Object_26(array3), this.Field_53));
-										}*/
-										char header = array3[0][0];
-										if (header == 'S' || header == 'N' || header == 'Y') {
-											std::string callsign = array3[1];
-											Aircraft* cur = AcfMap[callsign];
-											unsigned int hash;
-											std::stringstream ss(array3[8]);
-											ss >> hash;
-											unsigned int num2 = hash >> 22;
-											unsigned int num3 = hash >> 12 & 1023u;
-											unsigned int num4 = hash >> 2 & 1023u;
-											double pitch = num2 / 1024.0 * -360.0;
-											double roll = num3 / 1024.0 * -360.0;
-											double heading = num4 / 1024.0 * 360.0;
-											if (!cur) {
-												cur = new Aircraft();
-												cur->lock();
-												cur->setCallsign(callsign);
-												cur->setLatitude(atof(array3[4].c_str()));
-												cur->setLongitude(atof(array3[5].c_str()));
-												cur->setSpeed(atof(array3[7].c_str()));
-												cur->setHeading(heading);
-												cur->setUpdateFlag(ACF_CALLSIGN, true);
-												AcfMap[callsign] = cur;
-												cur->unlock();
-											} else {
-												cur->lock();
-												cur->setLatitude(atof(array3[4].c_str()));
-												cur->setLongitude(atof(array3[5].c_str()));
-												cur->setSpeed(atof(array3[7].c_str()));
-												cur->setHeading(heading);
-												double result[2];
-												double coords1[2][2] = {{0, 0}, {4, 4}};
-												Spline2D spline(coords1);
-												double what = 0.5;
-												spline.getPoint(what, result);
-												std::cout << result[0] << ", " << result[1] << std::endl;
-												cur->unlock();
-											}
-										}
+										//goto IL_1058;
 										break;
 									}
+									array3[0] = array3[0].substr(1);
+									/*if (this.Field_5 != null)
+									{
+									this.Field_5(this, new Class_177_EventArgs<Class_233_Class_176_Object>(Class_233_Class_176_Object.Function_Class_233_Class_176_Object_26(array3), this.Field_53));
+									}*/
+									char header = array3[0][0];
+									if (header == 'S' || header == 'N' || header == 'Y') {
+										std::string callsign = array3[1];
+										Aircraft* cur = AcfMap[callsign];
+										unsigned int hash;
+										std::stringstream ss(array3[8]);
+										ss >> hash;
+										unsigned int num2 = hash >> 22;
+										unsigned int num3 = hash >> 12 & 1023u;
+										unsigned int num4 = hash >> 2 & 1023u;
+										double pitch = num2 / 1024.0 * -360.0;
+										double roll = num3 / 1024.0 * -360.0;
+										double heading = num4 / 1024.0 * 360.0;
+										if (!cur) {
+											cur = new Aircraft();
+											cur->lock();
+											cur->setCallsign(callsign);
+											cur->setLatitude(atof(array3[4].c_str()));
+											cur->setLongitude(atof(array3[5].c_str()));
+											cur->setSpeed(atof(array3[7].c_str()));
+											cur->setHeading(heading);
+											cur->setUpdateFlag(ACF_CALLSIGN, true);
+											AcfMap[callsign] = cur;
+											cur->unlock();
+										}
+										else {
+											cur->lock();
+											cur->setLatitude(atof(array3[4].c_str()));
+											cur->setLongitude(atof(array3[5].c_str()));
+											cur->setSpeed(atof(array3[7].c_str()));
+											cur->setHeading(heading);
+											double result[2];
+											double coords1[2][2] = { {0, 0}, {4, 4} };
+											Spline2D spline(coords1);
+											double what = 0.5;
+											spline.getPoint(what, result);
+#ifdef _DEBUG
+											std::cout << result[0] << ", " << result[1] << std::endl;
+#endif
+											cur->unlock();
+										}
+									}
+									break;
+								}
 								}
 							}
 						}
@@ -127,11 +132,11 @@ DWORD tcpinterface1::run() {
 
 DWORD tcpinterface1::sendMessage(std::string message) {
 	message += "\r\n";
-	return send(tcpinterface1::sConnect, message.c_str(), message.length(), NULL);  
+	return send(tcpinterface1::sConnect, message.c_str(), message.length(), NULL);
 }
 
 void tcpinterface1::startT(HWND hWnd) {
-	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) staticStart, (void*) this, 0, NULL);
+	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)staticStart, (void*)this, 0, NULL);
 }
 
 int tcpinterface1::connectNew(HWND hWnd, std::string saddr, unsigned short port) {
@@ -156,7 +161,7 @@ int tcpinterface1::connectNew(HWND hWnd, std::string saddr, unsigned short port)
 	if (connect(tcpinterface1::sConnect, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR) {
 		std::cout << "Failed to connect!" << std::endl;
 		MessageBox(hWnd, L"Failed to connect to Server!", L"Notice",
-							MB_OK | MB_ICONINFORMATION);
+			MB_OK | MB_ICONINFORMATION);
 		return 0;
 	}
 	return 1;

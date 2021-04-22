@@ -199,7 +199,9 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 		int iError = WSAGetLastError();
 		if(iError == WSAEWOULDBLOCK)
 		{
+#ifdef _DEBUG
 			std::cout << "Attempting to connect.\n";
+#endif
 			fd_set Write, Err;
 			TIMEVAL Timeout;
 			int TimeoutSec = 5; // timeout after 5 seconds

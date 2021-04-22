@@ -102,4 +102,6 @@ void CallInputTexts(InterfaceFrame* frame, InputField* field);
 
 void CallInputCursor(InterfaceFrame* frame, InputField* field);
 
+const std::string* currentDateTime();
+
 #endif

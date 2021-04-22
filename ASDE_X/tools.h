@@ -1,7 +1,6 @@
 #ifndef __TOOLS_H
 #define __TOOLS_H
 
-#include <iostream>
 #include <algorithm> 
 #include <functional>
 #include <cctype>
@@ -97,6 +96,8 @@ double angularCompensation(double heading);
 double zoom_from_range();
 
 double NauticalMilesPerDegreeLon(double lat);
+
+std::string TextToBinaryString(std::string words);
 
 template<typename T>
 T pop_front(std::vector<T>& vec)

@@ -1,5 +1,8 @@
 #include "tools.h"
 
+#include <bitset>
+#include <iostream>
+
 #define N_SEG 20 // num points
 
 void quad_bezier(Point2& p1, Point2& p2, Point2& p3, std::vector<LinearSegment*>& add_to) {
@@ -195,7 +198,9 @@ int wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlengt
 		}
 	}
 
+#ifdef _DEBUG
 	std::cout << has_space << ", " << (strlen(buffer)) << ", " << maxlength << std::endl;
+#endif
 
 	if (!has_space && (strlen(buffer) > maxlength)) {
 		return 0;
@@ -566,4 +571,12 @@ double zoom_from_range() {
 double NauticalMilesPerDegreeLon(double lat)
 {
 	return (M_PI / 180.0) * EARTH_RADIUS_NM * cos(radians(lat));
+}
+
+std::string TextToBinaryString(std::string words) {
+	std::string binaryString = "";
+	for (char& _char : words) {
+		binaryString += std::bitset<8>(_char).to_string();
+	}
+	return binaryString;
 }

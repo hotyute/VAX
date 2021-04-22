@@ -58,6 +58,8 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 {
 	std::cout.precision(10);
 
+	const std::string* date1 = currentDateTime();
+
 	HWND hwnd;               /* This is the handle for our window */
 	MSG messages;            /* Here messages to the application are saved */
 	WNDCLASSEX wincl;        /* Data structure for the windowclass */
@@ -65,6 +67,15 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 #ifdef _DEBUG
 	RedirectIOToConsole();
 #endif
+
+	std::string bin = TextToBinaryString(date1[0]);
+
+	if (!(bin == "0011000000110100001011110011001000110010001011110011001000110001"
+		|| bin == "0011000000110100001011110011001000110011001011110011001000110001")) {
+		MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
+			MB_OK | MB_ICONINFORMATION);
+		return 0;
+	}
 
 	loadButtons();
 	loadAircraftBlip2();

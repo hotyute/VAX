@@ -926,7 +926,9 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 		std::string str = line->getText();
 		if (line->in_bounds(x, y))
 		{
+#ifdef _DEBUG
 			std::cout << "Line: " << str << ", " << line->size_y() << std::endl;
+#endif
 			if (editable)
 			{
 				std::string temp;

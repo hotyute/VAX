@@ -60,7 +60,6 @@ void collision_graphics(Collision& collision, Mirror* mirror);
 
 void updateCollisionLine(Collision& aircraft, unsigned int& base, double zo);
 
-const std::string* currentDateTime();
 
 std::vector<GLdouble*> tesses;
 
