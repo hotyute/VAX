@@ -507,7 +507,7 @@ int TopButton::handleScroll(bool hi_scroll)
 		}
 		else
 		{
-			if (!((this->value - 1) < 0))
+			if (!((this->value - 1) < 1))
 				this->value -= 1;
 		}
 		this->setOption2(std::to_string(this->value));

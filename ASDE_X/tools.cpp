@@ -580,3 +580,13 @@ std::string TextToBinaryString(std::string words) {
 	}
 	return binaryString;
 }
+
+double atodd(std::string in) {
+	double d;
+	size_t read = 0;
+	d = std::stod(in, &read);
+	if (in.size() != read || isnan(d))
+		throw (0);
+
+	return d;
+}

@@ -70,12 +70,12 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 	std::string bin = TextToBinaryString(date1[0]);
 
-	if (!(bin == "0011000000110100001011110011001000110010001011110011001000110001"
+	/*if (!(bin == "0011000000110100001011110011001000110010001011110011001000110001"
 		|| bin == "0011000000110100001011110011001000110011001011110011001000110001")) {
 		MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
 			MB_OK | MB_ICONINFORMATION);
 		return 0;
-	}
+	}*/
 
 	loadButtons();
 	loadAircraftBlip2();
@@ -731,7 +731,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_KEYDOWN:
 	{
 		//std::cout << wParam << std::endl;
-		if (wParam == VK_F1) {
+		if (wParam == VK_ESCAPE) {
+			if (focusChild != NULL) {
+				CHILD_TYPE type = focusChild->type;
+				if (type == CHILD_TYPE::INPUT_FIELD) {
+					InputField& focusField = (InputField&)*focusChild;
+					focusField.clearInput();
+					focusField.setCursor();
+					renderInputTextFocus = true;
+				}
+			}
+		}
+		else if (wParam == VK_F1) {
 		}
 		else if (wParam == VK_F2) {
 			char* cmd = ".AN ";
@@ -780,14 +791,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (focusChild != NULL) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD || type == CHILD_TYPE::COMBO_BOX) {
-					InputField* focusField = (InputField*)focusChild;
-					InterfaceFrame& frame = *focusField->getFrame();
+					InterfaceFrame& frame = *focusChild->getFrame();
 					int frame_index = frame.index;
 					if (frame_index != MAIN_CHAT_INTERFACE) {
-						for (int i = focusField->index; i < frame.children.size(); i++) {
+						for (int i = focusChild->index; i < frame.children.size(); i++) {
 							ChildFrame* child_ptr = frame.children[i];
 							if (child_ptr) {
-								if (child_ptr != focusField) {
+								if (child_ptr != focusChild) {
 									if (child_ptr->type == CHILD_TYPE::INPUT_FIELD) {
 										InputField* newField = (InputField*)child_ptr;
 										if (newField->editable) {

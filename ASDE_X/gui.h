@@ -46,6 +46,8 @@ public:
 };
 
 class ChildFrame {
+protected:
+	InterfaceFrame* frame;
 public:
 	virtual ~ChildFrame();
 	std::vector<BasicInterface*> child_interfaces;
@@ -60,6 +62,7 @@ public:
 	virtual void doAction() = 0;
 	virtual void focusDrawing() = 0;
 	virtual int handleClick(ChildFrame* clicked, int x, int y) = 0;
+	InterfaceFrame* getFrame() { return this->frame; }
 };
 
 class ChatLine {
@@ -91,8 +94,6 @@ public:
 };
 
 class InputField : public ChildFrame {
-private:
-	InterfaceFrame *frame;
 public:
 	virtual ~InputField();
 	InputField(InterfaceFrame*, double, double);
@@ -130,13 +131,10 @@ public:
 	void setUneditable(std::string);
 	void pass_characters(char* chars);
 	bool can_type();
-	InterfaceFrame* getFrame() { return this->frame; }
 	void handleBox();
 };
 
 class CloseButton : public ChildFrame {
-private:
-	InterfaceFrame *frame;
 public:
 	CloseButton(InterfaceFrame*, double, double);
 public:
@@ -150,8 +148,6 @@ public:
 };
 
 class ClickButton : public ChildFrame {
-private:
-	InterfaceFrame *frame;
 public:
 	ClickButton(InterfaceFrame*, std::string, double x, double width, double y, double height);
 public:
@@ -167,8 +163,6 @@ public:
 };
 
 class ComboBox : public ChildFrame {
-private:
-	InterfaceFrame *frame;
 public:
 	ComboBox(InterfaceFrame*, std::vector<std::string>, double, double, double, double, double, double);
 public:
@@ -188,7 +182,6 @@ public:
 
 class DisplayBox : public ChildFrame {
 private:
-	InterfaceFrame* frame;
 	int noncp = 2;
 public:
 	DisplayBox(InterfaceFrame*, std::vector<ChatLine*>, int, double, double, double, double, double, double, bool);
@@ -221,8 +214,6 @@ public:
 };
 
 class Label : public ChildFrame {
-private:
-	InterfaceFrame* frame;
 public:
 	Label(InterfaceFrame*, std::string, double, double);
 	Label(InterfaceFrame*, std::string, double, double, double, double, double, double);

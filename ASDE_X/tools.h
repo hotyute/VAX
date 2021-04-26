@@ -99,6 +99,8 @@ double NauticalMilesPerDegreeLon(double lat);
 
 std::string TextToBinaryString(std::string words);
 
+double atodd(std::string in);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {

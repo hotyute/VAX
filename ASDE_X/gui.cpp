@@ -987,10 +987,11 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 }
 
 void DisplayBox::addLine(ChatLine* c) {
-	if (DisplayBox::chat_lines.size() > max_history)
+	if (DisplayBox::chat_lines.size() >= max_history)
 		DisplayBox::chat_lines.erase(DisplayBox::chat_lines.begin());
 	DisplayBox::chat_lines.push_back(c);
-	read_index++;
+	if ((read_index + numBlocks) < max_history)
+		read_index++;
 }
 
 void DisplayBox::removeLine(ChatLine* c)

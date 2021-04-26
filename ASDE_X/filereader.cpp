@@ -38,6 +38,7 @@ int FileReader::LoadADX(std::string path) {
 		std::string string6 = "ICAO=";
 		std::string string7 = "elevation=";
 		std::string commentStart = ";";
+		int line_number = 1;
 		while (myfile.good()) {
 			getline(myfile, line);
 			size_t foundComment = line.find(commentStart);
@@ -52,228 +53,241 @@ int FileReader::LoadADX(std::string path) {
 			size_t found5 = line.find(string5);
 			size_t found6 = line.find(string6);
 			size_t found7 = line.find(string7);
-			if (found2 != std::string::npos)
+			try
 			{
-				int start = (found2 + string2.length());
-				std::string zoom = line.substr(start);
-				if (zoom.length() == 0) {
-					//error handling
-				}
-				else {				
-					range = atof(zoom.c_str());
-					mZoom = zoom_from_range();
-				}
-			}
-			else if (found3 != std::string::npos)
-			{
-				int start = (found3 + string3.length());
-				std::string aSize = line.substr(start);
-				if (aSize.length() == 0) {
-					//error handling
-				}
-				else {
-					r_aircraft_size = atof(aSize.c_str());
-				}
-			}
-			else if (found4 != std::string::npos)
-			{
-				int start = (found4 + string4.length());
-				std::string aSize = line.substr(start);
-				if (aSize.length() == 0) {
-					//error handling
-				}
-				else {
-					h_aircraft_size = atof(aSize.c_str());
-				}
-			}
-			else if (found5 != std::string::npos)
-			{
-				int start = (found5 + string5.length());
-				std::string aSize = line.substr(start);
-				if (aSize.length() == 0) {
-					//error handling
-				}
-				else {
-					u_aircraft_size = atof(aSize.c_str());
-				}
-			}
-			else if (found6 != std::string::npos)
-			{
-				int start = (found6 + string6.length());
-				std::string apt_icao = line.substr(start);
-				if (apt_icao.length() == 0) {
-					//error handling
-				}
-				else {
-					icao = apt_icao.c_str();
-				}
-			}
-			else if (found7 != std::string::npos)
-			{
-				int start = (found7 + string7.length());
-				std::string elevation = line.substr(start);
-				if (elevation.length() == 0) {
-					//error handling
-				}
-				else {
-					elevation = atof(elevation.c_str());
-				}
-			}
-			else if (found1 != std::string::npos)
-			{
-				size_t end = line.find(">>");
-				if (end == std::string::npos) {
-					//error handling
-				}
-				else {
-					int start = (found1 + string1.length());
-					header = line.substr(start, (end - start));
-					//std::cout << header << std::endl;
-					if (header.length() == 0) {
+				if (found2 != std::string::npos)
+				{
+					int start = (found2 + string2.length());
+					std::string zoom = line.substr(start);
+					if (zoom.length() == 0) {
 						//error handling
 					}
-					else
-					{
-						if (header == "CENTER" || header == "HOLE" || header == "MIRROR") {
+					else {
+						range = atodd(zoom.c_str());
+						mZoom = zoom_from_range();
+					}
+				}
+				else if (found3 != std::string::npos)
+				{
+					int start = (found3 + string3.length());
+					std::string aSize = line.substr(start);
+					if (aSize.length() == 0) {
+						//error handling
+					}
+					else {
+						r_aircraft_size = atodd(aSize.c_str());
+					}
+				}
+				else if (found4 != std::string::npos)
+				{
+					int start = (found4 + string4.length());
+					std::string aSize = line.substr(start);
+					if (aSize.length() == 0) {
+						//error handling
+					}
+					else {
+						h_aircraft_size = atodd(aSize.c_str());
+					}
+				}
+				else if (found5 != std::string::npos)
+				{
+					int start = (found5 + string5.length());
+					std::string aSize = line.substr(start);
+					if (aSize.length() == 0) {
+						//error handling
+					}
+					else {
+						u_aircraft_size = atodd(aSize.c_str());
+					}
+				}
+				else if (found6 != std::string::npos)
+				{
+					int start = (found6 + string6.length());
+					std::string apt_icao = line.substr(start);
+					if (apt_icao.length() == 0) {
+						//error handling
+					}
+					else {
+						icao = apt_icao.c_str();
+					}
+				}
+				else if (found7 != std::string::npos)
+				{
+					int start = (found7 + string7.length());
+					std::string elevation = line.substr(start);
+					if (elevation.length() == 0) {
+						//error handling
+					}
+					else {
+						elevation = atodd(elevation.c_str());
+					}
+				}
+				else if (found1 != std::string::npos)
+				{
+					size_t end = line.find(">>");
+					if (end == std::string::npos) {
+						//error handling
+					}
+					else {
+						int start = (found1 + string1.length());
+						header = line.substr(start, (end - start));
+						//std::cout << header << std::endl;
+						if (header.length() == 0) {
+							//error handling
+						}
+						else
+						{
+							if (header == "CENTER" || header == "HOLE" || header == "MIRROR") {
 
+							}
+							else
+							{
+								if (point2d != NULL)
+								{
+									ALL.push_back(point2d);
+									point2d = NULL;
+								}
+								point2d = new PointTess();
+								if (header == "RUNWAY")
+								{
+									point2d->set_type(RUNWAY);
+								}
+								else if (header == "RUNWAY LINE")
+								{
+									point2d->set_type(RUNWAY);
+								}
+								else if (header == "PARKING")
+								{
+									point2d->set_type(PARKING);
+								}
+								else if (header == "TAXIWAY")
+								{
+									point2d->set_type(TAXIWAY);
+								}
+								else if (header == "APRON")
+								{
+									point2d->set_type(APRON);
+								}
+							}
+						}
+					}
+				}
+				else if (line.length() > 0)
+				{
+					std::string slatitude, slongitude;
+					if (header == "HOLE" || header == "RUNWAY" || "RUNWAY LINE" || header == "PARKING" || header == "APRON"
+						|| header == "TAXIWAY" || header == "CENTER" || header == "MIRROR") {
+						if (header == "RUNWAY LINE") {
+							//std::cout << whole_line << std::endl;
+							std::vector<std::string> args = split(line, " ");
+							std::string rw1 = args[0], rw2 = args[3];
+							double p1[2] = { atodd(args[1].c_str()),  atodd(args[2].c_str()) };
+							double p2[2] = { atodd(args[4].c_str()),  atodd(args[5].c_str()) };
+							double shoulder = atodd(args[7].c_str());
+							double* bounds[5];
+							for (int i = 0; i < 5; ++i)
+								bounds[i] = new double[2];
+							getRunwayBounds(p1, p2, atodd(args[6].c_str()) + shoulder, bounds);
+							for (int i = 0; i < 5; i++) {
+								point2d->add_coordinates(bounds[i][1], bounds[i][0], 0);
+							}
+							for (int i = 0; i < 5; ++i)
+								delete[] bounds[i];
+						}
+						else if (header == "CENTER")
+						{
+							std::vector<std::string> args = split(line, " ");
+							double lon = atodd(args[1].c_str()), lat = atodd(args[0].c_str());
+							CENTER_LAT = lat;
+							CENTER_LON = lon;
+						}
+						else if (header == "MIRROR")
+						{
+							std::vector<std::string> args = split(line, " ");
+							double lon = atodd(args[2].c_str()), lat = atodd(args[1].c_str());
+							std::string id = args[0];
+							Mirror* mir = new Mirror();
+							mir->setX(atodd(args[3].c_str())), mir->setY(atodd(args[4].c_str()));
+							mir->setWidth(atodd(args[5].c_str())), mir->setHeight(atodd(args[6].c_str()));
+							mir->setZoom(atodd(args[7].c_str()));
+							mir->setLat(lat);
+							mir->setLon(lon);
+							mirrors_storage.emplace(id, mir);
+							mir->id_ = id;
 						}
 						else
 						{
 							if (point2d != NULL)
 							{
-								ALL.push_back(point2d);
-								point2d = NULL;
-							}
-							point2d = new PointTess();
-							if (header == "RUNWAY")
-							{
-								point2d->set_type(RUNWAY);
-							}
-							else if (header == "RUNWAY LINE")
-							{
-								point2d->set_type(RUNWAY);
-							}
-							else if (header == "PARKING")
-							{
-								point2d->set_type(PARKING);
-							}
-							else if (header == "TAXIWAY")
-							{
-								point2d->set_type(TAXIWAY);
-							}
-							else if (header == "APRON")
-							{
-								point2d->set_type(APRON);
-							}
-						}
-					}
-				}
-			}
-			else if (line.length() > 0)
-			{
-				std::string slatitude, slongitude;
-				if (header == "HOLE" || header == "RUNWAY" || "RUNWAY LINE" || header == "PARKING" || header == "APRON"
-					|| header == "TAXIWAY" || header == "CENTER" || header == "MIRROR") {
-					if (header == "RUNWAY LINE") {
-						//std::cout << whole_line << std::endl;
-						std::vector<std::string> args = split(line, " ");
-						std::string rw1 = args[0], rw2 = args[3];
-						double p1[2] = { atof(args[1].c_str()),  atof(args[2].c_str()) };
-						double p2[2] = { atof(args[4].c_str()),  atof(args[5].c_str()) };
-						double shoulder = atof(args[7].c_str());
-						double* bounds[5];
-						for (int i = 0; i < 5; ++i)
-							bounds[i] = new double[2];
-						getRunwayBounds(p1, p2, atof(args[6].c_str()) + shoulder, bounds);
-						for (int i = 0; i < 5; i++) {
-							point2d->add_coordinates(bounds[i][1], bounds[i][0], 0);
-						}
-						for (int i = 0; i < 5; ++i)
-							delete[] bounds[i];
-					}
-					else if (header == "CENTER")
-					{
-						std::vector<std::string> args = split(line, " ");
-						double lon = atof(args[1].c_str()), lat = atof(args[0].c_str());
-						CENTER_LAT = lat;
-						CENTER_LON = lon;
-					}
-					else if (header == "MIRROR")
-					{
-						std::vector<std::string> args = split(line, " ");
-						double lon = atof(args[2].c_str()), lat = atof(args[1].c_str());
-						std::string id = args[0];
-						Mirror* mir = new Mirror();
-						mir->setX(atof(args[3].c_str())), mir->setY(atof(args[4].c_str()));
-						mir->setWidth(atof(args[5].c_str())), mir->setHeight(atof(args[6].c_str()));
-						mir->setZoom(atof(args[7].c_str()));
-						mir->setLat(lat);
-						mir->setLon(lon);
-						mirrors_storage.emplace(id, mir);
-						mir->id_ = id;
-					}
-					else
-					{
-						if (point2d != NULL)
-						{
-							std::vector<std::string> args = split(line, " ");
-							char loop_type = args[0].c_str()[0];
-							double lon = atof(args[2].c_str()), lat = atof(args[1].c_str());
+								std::vector<std::string> args = split(line, " ");
+								char loop_type = args[0].c_str()[0];
+								double lon = atodd(args[2].c_str()), lat = atodd(args[1].c_str());
 
-							LinearSegment* seg = new LinearSegment();
+								if (lat == 'NaN')
+								std::cout << lat << std::endl;
 
-							switch (loop_type)
-							{
-							case 'L':
-								seg->loop_type = LOOP_TYPE::LOOP;
-								break;
-							case 'C':
-								seg->loop_type = LOOP_TYPE::CLOSE;
-								break;
-							case 'E':
-								seg->loop_type = LOOP_TYPE::END;
-								break;
-							default:
-								seg->loop_type = LOOP_TYPE::LOOP;
-								break;
-							}
+								LinearSegment* seg = new LinearSegment();
 
-							seg->pt = Point2(lon, lat);
-							if (args.size() > 3)
-							{
-								seg->ctrl = Point2(atof(args[4].c_str()), atof(args[3].c_str()));
-								seg->type = LINE_TYPE::NODE_CTRL;
-								point2d->add_coordinates(seg);
-
-
-								//std::string next_line;
-								//// Get current position
-								//int len = myfile.tellg();
-								//// Read line
-								//getline(myfile, next_line);
-								////Return to position before "Read line".
-								//myfile.seekg(len, std::ios_base::beg);
-
-								//cubic_bezier(start_lon, start_lat, c1_lon, c1_lat, c2_lon, c2_lat, end_lon, end_lat, point2d);
-
-							}
-							else
-							{
-
-								if (header == "HOLE")
+								switch (loop_type)
 								{
-									point2d->add_holes(seg);
+								case 'L':
+									seg->loop_type = LOOP_TYPE::LOOP;
+									break;
+								case 'C':
+									seg->loop_type = LOOP_TYPE::CLOSE;
+									break;
+								case 'E':
+									seg->loop_type = LOOP_TYPE::END;
+									break;
+								default:
+									seg->loop_type = LOOP_TYPE::LOOP;
+									break;
+								}
+
+								seg->pt = Point2(lon, lat);
+								if (args.size() > 3)
+								{
+									seg->ctrl = Point2(atodd(args[4].c_str()), atodd(args[3].c_str()));
+									seg->type = LINE_TYPE::NODE_CTRL;
+									point2d->add_coordinates(seg);
+
+
+									//std::string next_line;
+									//// Get current position
+									//int len = myfile.tellg();
+									//// Read line
+									//getline(myfile, next_line);
+									////Return to position before "Read line".
+									//myfile.seekg(len, std::ios_base::beg);
+
+									//cubic_bezier(start_lon, start_lat, c1_lon, c1_lat, c2_lon, c2_lat, end_lon, end_lat, point2d);
+
 								}
 								else
 								{
-									seg->type = LINE_TYPE::NODE;
-									point2d->add_coordinates(seg);
+
+									if (header == "HOLE")
+									{
+										point2d->add_holes(seg);
+									}
+									else
+									{
+										seg->type = LINE_TYPE::NODE;
+										point2d->add_coordinates(seg);
+									}
 								}
 							}
 						}
 					}
 				}
+			} catch (...) 
+			{
+				std::stringstream box_message;
+				box_message << "Error int adx file at line: " << line_number;
+				MessageBoxA(hWnd, box_message.str().c_str(), "Notice",
+					MB_OK | MB_ICONINFORMATION);
 			}
+			++line_number;
 		}
 		if (point2d != NULL)
 		{
