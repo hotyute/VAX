@@ -513,10 +513,22 @@ void addCollisionToMirrors(Collision* collision)
 }
 
 bool is_privateinterface(int frame_index) {
-	return frame_index == PRIVATE_MESSAGE_INTERFACE || frame_index == PRIVATE_MESSAGE_INTERFACE2 || frame_index == PRIVATE_MESSAGE_INTERFACE3 ||
-		frame_index == PRIVATE_MESSAGE_INTERFACE4 || frame_index == PRIVATE_MESSAGE_INTERFACE5 || frame_index == PRIVATE_MESSAGE_INTERFACE6
-		|| frame_index == PRIVATE_MESSAGE_INTERFACE7 || frame_index == PRIVATE_MESSAGE_INTERFACE8 || frame_index == PRIVATE_MESSAGE_INTERFACE9
-		|| frame_index == PRIVATE_MESSAGE_INTERFACE10;
+	switch (frame_index) {
+	case PRIVATE_MESSAGE_INTERFACE:
+	case PRIVATE_MESSAGE_INTERFACE2:
+	case PRIVATE_MESSAGE_INTERFACE3:
+	case PRIVATE_MESSAGE_INTERFACE4:
+	case PRIVATE_MESSAGE_INTERFACE5:
+	case PRIVATE_MESSAGE_INTERFACE6:
+	case PRIVATE_MESSAGE_INTERFACE7:
+	case PRIVATE_MESSAGE_INTERFACE8:
+	case PRIVATE_MESSAGE_INTERFACE9:
+	case PRIVATE_MESSAGE_INTERFACE10:
+		return true;
+	default:
+		return false;
+	}
+	return false;
 }
 
 void capitalize(std::string& str)

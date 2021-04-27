@@ -6,8 +6,8 @@ std::unordered_map<std::string, std::vector<std::string>> departures;
 
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {
-	std::string values[13] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN", 
-		"MYNN", "10000", "08R", "3306" , "SOME REALLY REALLY LONG LONG SOMETHING ROUTE THAT WE NEED TO GET IN TO TEST WHATS HAPPENING WITH AN EVEN LONGER ONE SO WE CAN TEST ALL THREE LINES" , ""};
+	std::string values[13] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN",
+		"MYNN", "10000", "08R", "3306" , "SOME REALLY REALLY LONG LONG SOMETHING ROUTE THAT WE NEED TO GET IN TO TEST WHATS HAPPENING WITH AN EVEN LONGER ONE SO WE CAN TEST ALL THREE LINES" , "" };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = NULL;
 }
@@ -24,13 +24,13 @@ void Load_Known_No_FlightPlan_Interface(double x, double y, User& user, bool ref
 
 void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 {
-	Identity &id = *user.getIdentity();
-	Aircraft &acf = *user.getAircraft();
+	Identity& id = *user.getIdentity();
+	Aircraft& acf = *user.getAircraft();
 	FlightPlan& fp = *user.getAircraft()->getFlightPlan();
 #ifdef _DEBUG
 	std::cout << id.login_name << std::endl;
 #endif
-	std::string values[13] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR", 
+	std::string values[13] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR",
 		fp.departure, fp.arrival, fp.alternate, fp.cruise, fp.scratchPad, fp.squawkCode, fp.route, fp.remarks };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
@@ -45,20 +45,17 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 	options1.push_back("IFR");
 	options1.push_back("VFR");
 	options1.push_back("SVFR");
-	std::string call = strings[0], name = strings[1], pilot_rating = strings[2], 
-		ac_type_txt = strings[3], fr_text = strings[4], depart = strings[5], 
-		arrive = strings[6], alternate = strings[7], cruise = strings[8], 
+	std::string call = strings[0], name = strings[1], pilot_rating = strings[2],
+		ac_type_txt = strings[3], fr_text = strings[4], depart = strings[5],
+		arrive = strings[6], alternate = strings[7], cruise = strings[8],
 		scratch = strings[9], a_squawk = strings[10], route = strings[11],
 		remarks = strings[12];
-	InterfaceFrame* fp_frame = frames[FP_INTERFACE];
+	InterfaceFrame* fp_frame = frames_def[FP_INTERFACE];
 	if (!fp_frame || refresh) {
-		if (fp_frame) {
-			delete fp_frame;
-		}
-		frames[FP_INTERFACE] = fp_frame = new InterfaceFrame(FP_INTERFACE);
+		fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
 		int width = 450, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
-		int height = 220, y = y_ == -1 ?(CLIENT_HEIGHT / 2) - (height / 2) : y_;
+		int height = 220, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 		fp_frame->Pane1(x, width, y, height);
 		const double spacing_x = 0.125, spacing_y = 0.13;
 		double start_x = 1.0, start_y = 0.2;
@@ -78,14 +75,14 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		fp_frame->children[ac_type->index = FP_ACTYPE_INPUT] = ac_type;
 		Label* fr_label = new Label(fp_frame, "Flight Rules:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fr_label->centered = 2;
-		fp_frame->children[fr_label->index = FP_FLIGHTRULES_LABEL] = fr_label;		
+		fp_frame->children[fr_label->index = FP_FLIGHTRULES_LABEL] = fr_label;
 		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing_x))) + 10, (input_width - 20.0), 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fp_frame->children[comboBox1->index = FP_FLIGHTRULES_INPUT] = comboBox1;
-		
+
 		ClickButton* amendButton = new ClickButton(fp_frame, "AMEND PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * start_y)), 20.0);// set button from the left
 		fp_frame->children[amendButton->index = FP_AMMEND_PLAN] = amendButton;
 
-		
+
 		//2nd Line
 		start_x = 1.0;
 		Label* depart_label = new Label(fp_frame, "Depart:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
@@ -169,7 +166,10 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 
 
 		fp_frame->doOpen(false, true);
-	} else {
+
+		fp_frame->doInsert();
+	}
+	else {
 		if (!fp_frame->render) {
 			fp_frame->doOpen(false, true);
 		}

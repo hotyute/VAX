@@ -8,29 +8,29 @@
 #include "usermanager.h"
 #include "tools.h"
 
-
-std::vector<InterfaceFrame*> frames(256);
+std::vector<InterfaceFrame*> frames_def(700);
+std::vector<InterfaceFrame*> rendered_frames;
 ChildFrame* focusChild = NULL, * lastFocus = NULL;
 std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 bool updateLastFocus = false;
 InterfaceFrame* _openedframe = NULL;
 
-InterfaceFrame::InterfaceFrame(int index) {
+InterfaceFrame::InterfaceFrame(int id) {
 	InterfaceFrame::children.resize(256);
 	InterfaceFrame::interfaces.resize(NUM_SUB_INTERFACES);
-	InterfaceFrame::index = index;
+	InterfaceFrame::id = id;
 	InterfaceFrame::render = false;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::renderAllLabels = false;
 }
 
-InterfaceFrame::InterfaceFrame(int index, double width, double height) {
+InterfaceFrame::InterfaceFrame(int id, double width, double height) {
 	InterfaceFrame::children.resize(256);
 	InterfaceFrame::interfaces.resize(NUM_SUB_INTERFACES);
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::renderAllLabels = false;
-	InterfaceFrame::index = index;
+	InterfaceFrame::id = id;
 	BasicInterface* contentPane = new BasicInterface(0.0, width, 5.0, 0.0, height, 5.0, 0.0f, 0.0f, 0.0f, 0.6, false, false);
 	contentPane->updateCoordinates();
 	InterfaceFrame::interfaces[contentPane->index = CONTENT_PANE] = contentPane;
@@ -41,13 +41,13 @@ InterfaceFrame::InterfaceFrame(int index, double width, double height) {
 	InterfaceFrame::interfaces[bounds->index = FRAME_BOUNDS] = bounds;
 }
 
-InterfaceFrame::InterfaceFrame(int index, double x, double width, double y, double height) {
+InterfaceFrame::InterfaceFrame(int id, double x, double width, double y, double height) {
 	InterfaceFrame::children.resize(256);
 	InterfaceFrame::interfaces.resize(NUM_SUB_INTERFACES);
 	InterfaceFrame::render = true;
 	InterfaceFrame::renderAllInputText = false;
 	InterfaceFrame::renderAllLabels = false;
-	InterfaceFrame::index = index;
+	InterfaceFrame::id = id;
 	BasicInterface* contentPane = new BasicInterface(x, width, 0.0, y, height, 0.0, 0.0f, 0.0f, 0.0f, 0.6, true, false);
 	contentPane->updateCoordinates();
 	InterfaceFrame::interfaces[contentPane->index = CONTENT_PANE] = contentPane;
@@ -111,11 +111,7 @@ void InterfaceFrame::UpdatePane1(double x, double width, double y, double height
 
 void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 {
-	InterfaceFrame* frame = frames[InterfaceFrame::index];
-	if (frame && frame != this) {
-		frames[InterfaceFrame::index] = this;
-		delete frame;
-	}
+	doReplace();
 	InterfaceFrame::renderAllInputText = true;
 	InterfaceFrame::render = true;
 	InterfaceFrame::multi_open = multi_open;
@@ -125,7 +121,7 @@ void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 	renderDrawings = true;
 	renderAllLabels = true;
 	_openedframe = this;
-	if (InterfaceFrame::index == CONNECT_INTERFACE)
+	if (InterfaceFrame::id == CONNECT_INTERFACE)
 		InterfaceFrame::children[CONN_CALLSIGN_LABEL]->setFocus();
 	if (!multi_open)
 		single_opened_frames++;
@@ -133,7 +129,7 @@ void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 
 void InterfaceFrame::doClose()
 {
-	switch (InterfaceFrame::index)
+	switch (this->id)
 	{
 	case FP_INTERFACE:
 	{
@@ -160,6 +156,31 @@ void InterfaceFrame::doClose()
 	_openedframe = NULL;
 	if (!multi_open)
 		single_opened_frames--;
+}
+
+void InterfaceFrame::doReplace()
+{
+	InterfaceFrame* frame = frames_def[this->id];
+	if (frame && frame != this) {
+		frames_def[this->id] = this;
+		rendered_frames[this->index] = this;
+		delete frame;
+	}
+}
+
+void InterfaceFrame::doInsert()
+{
+	InterfaceFrame* frame = frames_def[this->id];
+	if (frame && frame != this)
+	{
+		doReplace();
+	}
+	else
+	{
+		frames_def[this->id] = this;
+		rendered_frames.push_back(this);
+		this->index = rendered_frames.size() - 1;
+	}
 }
 
 /*void InterfaceFrame::addInputField(InputField* field) {
@@ -521,7 +542,7 @@ void ClickButton::removeFocus() {
 	}
 }
 void ClickButton::doAction() {
-	switch (ClickButton::frame->index)
+	switch (frame->id)
 	{
 	case CONNECT_INTERFACE://connect frame
 	{

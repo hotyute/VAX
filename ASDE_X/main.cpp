@@ -484,7 +484,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		if (!clicked_tbutton) {
-			for (auto it = frames.rbegin(); it != frames.rend(); ++it) {
+			for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
 				InterfaceFrame* frame = *it;
 				if (frame && frame->render) {
 					ChildFrame* clicked1 = nullptr;
@@ -522,7 +522,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						break;
 					}
 
-					BasicInterface* clicked2 = nullptr, *inter1 = frame->border;
+					BasicInterface* clicked2 = nullptr, * inter1 = frame->border;
 					if (inter1 && inter1->isBounds() && frame->pannable) {
 						int b_offset_Y = 25;
 						int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
@@ -536,8 +536,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						if (!frame->s_pt)
 							frame->s_pt = new POINT();
-						if (frames.back() != *it)
-							std::swap(*it, frames.back()); //bring interface to the front
+
+						if (rendered_frames.back() != *it) { //TODO This is bugged as the location is changed in the MAP but the index of the object remains the same
+							InterfaceFrame* _back = rendered_frames.back();
+							int back_idx = _back->index, c_idx = frame->index;
+							frame->index = back_idx, _back->index = c_idx;
+							std::swap(*it, rendered_frames.back()); //bring interface to the front
+						}
 						frame->s_pt->x = (int)(short)LOWORD(lParam);
 						frame->s_pt->y = (int)(short)HIWORD(lParam);
 						dragged = frame;
@@ -690,7 +695,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (!used_focused)
 			{
 				//search unfocused display boxes
-				for (auto it = frames.rbegin(); it != frames.rend(); ++it) {
+				for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
 					InterfaceFrame* frame = *it;
 					if (frame && frame->render) {
 						ChildFrame* clicked1 = nullptr;
@@ -792,8 +797,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD || type == CHILD_TYPE::COMBO_BOX) {
 					InterfaceFrame& frame = *focusChild->getFrame();
-					int frame_index = frame.index;
-					if (frame_index != MAIN_CHAT_INTERFACE) {
+					int frame_id = frame.id;
+					if (frame_id != MAIN_CHAT_INTERFACE) {
 						for (int i = focusChild->index; i < frame.children.size(); i++) {
 							ChildFrame* child_ptr = frame.children[i];
 							if (child_ptr) {
@@ -835,13 +840,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				if (type == CHILD_TYPE::INPUT_FIELD) {
 					InputField* focusField = (InputField*)focusChild;
 					InterfaceFrame& frame = *focusField->getFrame();
-					int frame_index = frame.index;
+					int frame_id = frame.id;
 					if (focusField->line_ptr)
 					{
 						focusField->handleBox();
 						main_chat_input->setFocus();
 					}
-					else if (frame_index == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
+					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
 						if (focusField->input.size() > 0) {
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
@@ -854,7 +859,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							}
 						}
 					}
-					else if (is_privateinterface(frame_index))
+					else if (is_privateinterface(frame_id))
 					{
 						if (focusField->index == PRIVATE_MESSAGE_INPUT) {
 							if (focusField->input.size() > 0) {
@@ -1092,20 +1097,27 @@ bool processCommands(std::string command)
 			std::string call_sign = array3[1];
 
 			//TODO, make Private Chat User* (Pointer) oriented specific.
-			InterfaceFrame* pm_frame = frames[PRIVATE_MESSAGE_INTERFACE];
-			int index = PRIVATE_MESSAGE_INTERFACE;
-			int max = 10;
-			while (max > 0) {
-				pm_frame = frames[index];
-				if (!pm_frame || !pm_frame->render)
-					break;
-				++index;
-				--max;
+			InterfaceFrame* pm_frame = nullptr;
+			int id = 0, items_opened = 0, c_id = -1;
+			const int max = 10;
+			while (items_opened < max) {
+				if (is_privateinterface(id)) {
+					pm_frame = frames_def[id];
+					if (!pm_frame || !pm_frame->render) {
+						c_id = id;
+						break;
+					}
+					else {
+						++items_opened;
+					}
+				}
+				++id;
 			}
-			if (max <= 0)
+
+			if (items_opened >= max || c_id == -1)
 				sendErrorMessage("Too many private chat interfaces");
 			else
-				LoadPrivateChat(-1, -1, call_sign, true, index);
+				LoadPrivateChat(-1, -1, call_sign, true, c_id);
 		}
 		return true;
 	}
@@ -1238,7 +1250,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 
 	InitOpenGL();
 	LoadMainChatInterface(false);
-	((InputField*)frames[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
+	((InputField*)frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	renderAircraft = true;
 	std::cout.precision(10);
 	Event& position_updates = ConfigUpdates();
@@ -1284,8 +1296,8 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 }
 
 void pass_command(char* cmd) {
-	InterfaceFrame* frame = frames[MAIN_CHAT_INTERFACE];
-	if (frame && frame->index == MAIN_CHAT_INTERFACE && frame->render) {
+	InterfaceFrame* frame = frames_def[MAIN_CHAT_INTERFACE];
+	if (frame && frame->id == MAIN_CHAT_INTERFACE && frame->render) {
 		ChildFrame* child = frame->children[MAIN_CHAT_INPUT];
 		if (child && child->type == CHILD_TYPE::INPUT_FIELD && child->focus) {
 			InputField& input_box = *(InputField*)child;
@@ -1298,8 +1310,8 @@ void pass_command(char* cmd) {
 }
 
 void pass_chars(char* chars) {
-	InterfaceFrame* frame = frames[MAIN_CHAT_INTERFACE];
-	if (frame && frame->index == MAIN_CHAT_INTERFACE && frame->render) {
+	InterfaceFrame* frame = frames_def[MAIN_CHAT_INTERFACE];
+	if (frame && frame->id == MAIN_CHAT_INTERFACE && frame->render) {
 		ChildFrame* child = frame->children[MAIN_CHAT_INPUT];
 		if (child && child->type == CHILD_TYPE::INPUT_FIELD && child->focus) {
 			InputField& input_box = *(InputField*)child;

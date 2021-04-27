@@ -179,20 +179,6 @@ void DrawGLScene() {
 	{
 		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
 	}
-	/*if (MOUSE_MOVE) {
-	double lol[3];
-	GetOGLPos(MOUSE_X, MOUSE_Y, lol);
-	std::cout << std::fixed << lol[0] << ", " << lol[1] << std::endl;
-	MOUSE_MOVE = false;
-	}*/
-	if (queueDeleteInterface && frames.size() >= 1) {
-		std::vector<InterfaceFrame*>::iterator it = deleteInterfaces.begin();
-		while (it != deleteInterfaces.end()) {
-			deleteFrame((*it));
-			it = deleteInterfaces.erase(it);
-		}
-		queueDeleteInterface = false;
-	}
 	if (renderSector) {
 		glDeleteLists(sectorDl, 1);
 		glPushMatrix();
@@ -250,7 +236,7 @@ void DrawInterfaces() {
 	glCallList(buttonsDl);
 	glPopMatrix();
 	if (renderInterfaces) {
-		for (InterfaceFrame* frame : frames) {
+		for (InterfaceFrame* frame : rendered_frames) {
 			if (frame)
 			{
 				if (frame->interfaceDl != 0)
@@ -266,7 +252,7 @@ void DrawInterfaces() {
 	CallInterfaces();
 	if (renderDrawings) {
 		//TODO add optimizations (refresh per object basis)
-		for (InterfaceFrame* frame : frames) {
+		for (InterfaceFrame* frame : rendered_frames) {
 			if (frame)
 			{
 				if (frame->drawingDl != 0)
@@ -282,7 +268,7 @@ void DrawInterfaces() {
 	CallDrawings();
 	if (renderFocus) {
 		//TODO add optimizations (refresh per object basis)
-		for (InterfaceFrame* frame : frames) {
+		for (InterfaceFrame* frame : rendered_frames) {
 			if (frame)
 			{
 				if (frame->focusDl != 0)
@@ -334,7 +320,7 @@ void DrawInterfaces() {
 	}
 
 	//frame specific input text
-	for (InterfaceFrame* frame : frames) {
+	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render) {
 			if (frame->renderAllInputText) {
 				for (ChildFrame* child : frame->children) {
@@ -372,7 +358,7 @@ void DrawInterfaces() {
 			}
 		}
 	}
-	for (InterfaceFrame* frame : frames) {
+	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render) {
 			if (frame->renderAllLabels) {
 				for (ChildFrame* child : frame->children) {
@@ -1588,11 +1574,6 @@ void RenderFocuses(InterfaceFrame* frame) {
 	glEndList();
 }
 
-void deleteFrame(InterfaceFrame* frame) {
-	std::vector<InterfaceFrame*>::iterator it = std::remove(frames.begin(), frames.end(), frame);
-	frames.erase(it, frames.end());
-}
-
 void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, double rotate, bool top_bar) {
 
 	// Clamp the zoom.
@@ -2029,7 +2010,7 @@ void preFileRender() {
 }
 
 void CallInterfaces() {
-	for (InterfaceFrame* frame : frames) {
+	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render)
 		{
 			glPushMatrix();
@@ -2053,7 +2034,7 @@ void CallInterfaces() {
 
 void CallDrawings() {
 
-	for (InterfaceFrame* frame : frames) {
+	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render)
 		{
 			glPushMatrix();
@@ -2076,7 +2057,7 @@ void CallDrawings() {
 }
 
 void CallFocuses() {
-	for (InterfaceFrame* frame : frames) {
+	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render)
 		{
 			glPushMatrix();

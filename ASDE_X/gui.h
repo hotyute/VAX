@@ -26,12 +26,13 @@ class ChatLine;
 class InterfaceFrame {
 private:
 public:
+	int id = -1;
 	unsigned int interfaceDl = 0, drawingDl = 0, focusDl = 0;
 	POINT *s_pt = nullptr, *cur_pt = nullptr, *end_pt = nullptr;
 	BasicInterface* border = nullptr;
 	BasicInterface* move_bound = nullptr;
 	bool render, renderAllInputText, renderAllLabels, multi_open = true, pannable = false;
-	int index;
+	int index = -1;
 	std::string title;
 	std::vector<BasicInterface*> interfaces;
 	std::vector<ChildFrame*> children;
@@ -43,6 +44,8 @@ public:
 	void UpdatePane1(double, double, double, double);
 	void doOpen(bool multi_open, bool pannable);
 	void doClose();
+	void doReplace();
+	void doInsert();
 };
 
 class ChildFrame {
@@ -231,9 +234,8 @@ public:
 	int handleClick(ChildFrame* clicked, int x, int y);
 };
 
-
-
-extern std::vector<InterfaceFrame*> frames;
+extern std::vector<InterfaceFrame*> frames_def;
+extern std::vector<InterfaceFrame*> rendered_frames;
 extern ChildFrame *focusChild, *lastFocus;
 extern std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 extern bool updateLastFocus;

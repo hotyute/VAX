@@ -45,7 +45,7 @@ void RenderControllerList(double x_, double y_)
 
 	controller_list->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
 
-	frames[CONTROLLER_INTERFACE] = controller_list;	
+	controller_list->doInsert();
 }
 
 void RenderConnect(double x_, double y_)
@@ -107,14 +107,14 @@ void RenderConnect(double x_, double y_)
 
 	connectFrame->doOpen(false, true);//delete's old object while opening, this should be before setting vector
 
-	frames[CONNECT_INTERFACE] = connectFrame;
+	connectFrame->doInsert();
 }
 
-void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, int index) {
-	InterfaceFrame* pm_frame = frames[index];
+void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, int id) {
+	InterfaceFrame* pm_frame = frames_def[id];
 	if (!pm_frame || refresh) {
 
-		pm_frame = new InterfaceFrame(index);
+		pm_frame = new InterfaceFrame(id);
 		pm_frame->title = "PRIVATE CHAT: " + callsign;
 		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
@@ -144,7 +144,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 
 		pm_frame->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
 
-		frames[index] = pm_frame;
+		pm_frame->doInsert();
 	}
 	else {
 		if (!pm_frame->render) {
@@ -197,13 +197,6 @@ void LoadMainChatInterface(bool refresh) {
 	}
 	else
 	{
-
-		if (main_chat) {
-			frames[main_chat->index] = nullptr;
-			delete main_chat;
-			main_chat = nullptr;//no point in this.. we create a new object with pointer in next line..
-		}
-
 		main_chat = new InterfaceFrame(MAIN_CHAT_INTERFACE);
 
 		main_chat->Pane1(x, width, 0, 125);
@@ -243,7 +236,7 @@ void LoadMainChatInterface(bool refresh) {
 			(CLIENT_WIDTH * width) - width_offset, 10.0, 5, 20, 5);
 		main_chat->children[main_chat_input->index = MAIN_CHAT_INPUT] = main_chat_input;
 
-		frames[MAIN_CHAT_INTERFACE] = main_chat;
+		main_chat->doInsert();
 	}
 }
 
