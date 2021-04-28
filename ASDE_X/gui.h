@@ -46,6 +46,8 @@ public:
 	void doClose();
 	void doReplace();
 	void doInsert();
+	void move(int dx, int dy);
+	bool withinClient();
 };
 
 class ChildFrame {
@@ -154,6 +156,7 @@ class ClickButton : public ChildFrame {
 public:
 	ClickButton(InterfaceFrame*, std::string, double x, double width, double y, double height);
 public:
+	int border_pix = 4;
 	std::string text;
 
 	void updatePos(double x, double width, double y, double height);

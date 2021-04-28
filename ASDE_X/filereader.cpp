@@ -223,9 +223,6 @@ int FileReader::LoadADX(std::string path) {
 								char loop_type = args[0].c_str()[0];
 								double lon = atodd(args[2].c_str()), lat = atodd(args[1].c_str());
 
-								if (lat == 'NaN')
-								std::cout << lat << std::endl;
-
 								LinearSegment* seg = new LinearSegment();
 
 								switch (loop_type)

@@ -163,7 +163,7 @@ void InterfaceFrame::doReplace()
 	InterfaceFrame* frame = frames_def[this->id];
 	if (frame && frame != this) {
 		frames_def[this->id] = this;
-		rendered_frames[this->index] = this;
+		rendered_frames[this->index = frame->index] = this;
 		delete frame;
 	}
 }
@@ -171,9 +171,10 @@ void InterfaceFrame::doReplace()
 void InterfaceFrame::doInsert()
 {
 	InterfaceFrame* frame = frames_def[this->id];
-	if (frame && frame != this)
+	if (frame)
 	{
-		doReplace();
+		if (frame != this)
+			doReplace();
 	}
 	else
 	{
@@ -181,6 +182,60 @@ void InterfaceFrame::doInsert()
 		rendered_frames.push_back(this);
 		this->index = rendered_frames.size() - 1;
 	}
+}
+
+void InterfaceFrame::move(int dx, int dy)
+{
+	if (dx != 0 || dy != 0)
+	{
+		if (this->pannable) {
+			for (BasicInterface* inter1 : this->interfaces) {
+				if (inter1)
+				{
+					inter1->setPosX(inter1->getPosX() + dx);
+					inter1->setPosY(inter1->getPosY() + dy);
+					inter1->updateCoordinates();
+				}
+			}
+			for (ChildFrame* children : this->children) {
+				if (children) {
+					for (BasicInterface* inter2 : children->child_interfaces) {
+						inter2->setPosX(inter2->getPosX() + dx);
+						inter2->setPosY(inter2->getPosY() + dy);
+						inter2->updateCoordinates();
+					}
+				}
+			}
+
+			this->renderAllInputText = true;
+			this->renderAllLabels = true;
+			renderDrawings = true;
+			renderFocus = true;
+			renderInterfaces = true;
+		}
+	}
+}
+
+bool InterfaceFrame::withinClient()
+{
+	int s_x = border->getStartX(), e_x = border->getEndX();
+	int s_y = border->getStartY(), e_y = border->getEndY();
+	int dx = 0, dy = 0;
+	if (e_x > CLIENT_WIDTH)
+	{
+		dx = CLIENT_WIDTH - e_x;
+	}
+	if (e_y > CLIENT_HEIGHT)
+	{
+		dy = CLIENT_HEIGHT - e_y;
+	}
+
+	if (dx != 0 || dy != 0)
+	{
+		move(dx, dy);
+		return false;
+	}
+	return true;
 }
 
 /*void InterfaceFrame::addInputField(InputField* field) {
@@ -508,15 +563,43 @@ void ClickButton::doDrawing() {
 	double x = (param.getStartX() + (param.getWidth() / 2));
 	double y = (param.getStartY() + (param.getHeight() / 2));
 	SelectObject(hDC, topBtnFont);
-	SIZE extent = getTextExtent(ClickButton::text);
+	SIZE extent = getTextExtent(this->text);
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	int tH = tm.tmAscent - tm.tmInternalLeading;
-	int textXPos = x - (extent.cx / 2);
-	int textYPos = y - (tH / 2);
+	double textXPos = x - (extent.cx / 2);
+	double textYPos = y - ((extent.cy / 2) / 2);
 	glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 	glRasterPos2f(textXPos, textYPos);
 	glPrint(ClickButton::text.c_str(), &topButtonBase);
+
+	int start_x = param.getStartX(), end_x = param.getEndX();
+	int start_y = param.getStartY(), end_y = param.getEndY();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(start_x + border_pix, start_y + border_pix);
+	glVertex2d(start_x + border_pix, end_y - border_pix);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(start_x + border_pix, end_y - border_pix);
+	glVertex2d(end_x - border_pix, end_y - border_pix);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(end_x - border_pix, param.getStartY() + border_pix);
+	glVertex2d(end_x - border_pix, param.getEndY() - border_pix);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(start_x + border_pix, start_y + border_pix);
+	glVertex2d(end_x - border_pix, start_y + border_pix);
+	glEnd();
+
+	DrawVarLine(start_x, start_y, start_x + border_pix, start_y + border_pix, 1, 1);
+	DrawVarLine(start_x, end_y, start_x + border_pix, end_y - border_pix, 1, 1);
+	DrawVarLine(end_x, start_y, end_x - border_pix, start_y + border_pix, 1, 1);
+	DrawVarLine(end_x, end_y, end_x - border_pix, end_y - border_pix, 1, 1);
 }
 
 void ClickButton::setFocus() {
@@ -633,11 +716,11 @@ void ComboBox::doDrawing() {
 	double x = (param.getStartX() + (param.getActualWidth() / 2));
 	double y = (param.getStartY() + (param.getActualHeight() / 2));
 	SelectObject(hDC, topBtnFont);
-	TEXTMETRIC tm;
-	GetTextMetrics(hDC, &tm);
-	int tH = tm.tmAscent - tm.tmInternalLeading;
-	int textXPos = x - (ComboBox::extents[ComboBox::pos].cx / 2);
-	int textYPos = y - (tH / 2);
+	//TEXTMETRIC tm;
+	//GetTextMetrics(hDC, &tm);
+	//int tH = tm.tmAscent - tm.tmInternalLeading;
+	double textXPos = x - (ComboBox::extents[ComboBox::pos].cx / 2.0);
+	double textYPos = y - ((ComboBox::extents[ComboBox::pos].cy / 2.0) / 2.0);
 	glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 	glRasterPos2f(textXPos, textYPos);
 	glPrint(ComboBox::options[ComboBox::pos].c_str(), &topButtonBase);
@@ -725,7 +808,8 @@ void DisplayBox::doDrawing() {
 	else {
 		x = param.getStartX();
 	}
-	double y_height = (param.getActualHeight() / DisplayBox::numBlocks);
+	int dbox_padding = 0;
+	double y_height = ((param.getActualHeight() - dbox_padding) / DisplayBox::numBlocks);
 	double last_end_y = -1;
 	SelectObject(hDC, topBtnFont);
 	TEXTMETRIC tm;
@@ -852,15 +936,15 @@ void DisplayBox::doDrawing() {
 			endY = (param.getEndY() - y_height);
 		}
 		SIZE size = getTextExtent(text);
-		int tH = tm.tmAscent - tm.tmInternalLeading;
+		//int tH = tm.tmAscent - tm.tmInternalLeading;
 		double textXPos;
 		if (DisplayBox::centered) {
-			textXPos = x - (size.cx / 2);
+			textXPos = x - (size.cx / 2.0);
 		}
 		else {
 			textXPos = x + noncp;
 		}
-		double textYPos = y - (tH / 2);
+		double textYPos = y - ((size.cy / 2.0) / 2.0);
 		DisplayBox::SetChatTextColour(type);
 		glRasterPos2f(textXPos, textYPos);
 		glPrint(text.c_str(), &topButtonBase);

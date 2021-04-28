@@ -47,6 +47,7 @@ DisplayBox* main_chat_box = NULL;
 
 void handleConnect();
 bool processCommands(std::string);
+void moveInterfacesOnSize();
 
 /* Components */
 
@@ -70,12 +71,14 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 	std::string bin = TextToBinaryString(date1[0]);
 
-	/*if (!(bin == "0011000000110100001011110011001000110010001011110011001000110001"
-		|| bin == "0011000000110100001011110011001000110011001011110011001000110001")) {
+	//std::cout << TextToBinaryString("04/28/21") << std::endl;
+
+	if (!(bin == "0011000000110100001011110011001000110111001011110011001000110001"
+		|| bin == "0011000000110100001011110011001000111000001011110011001000110001")) {
 		MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
 			MB_OK | MB_ICONINFORMATION);
 		return 0;
-	}*/
+	}
 
 	loadButtons();
 	loadAircraftBlip2();
@@ -315,6 +318,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CLIENT_WIDTH = width;
 		CLIENT_HEIGHT = height;
 		LoadMainChatInterface(true);
+		moveInterfacesOnSize();
 
 		if (zoom_phase >= 2)
 			mZoom = zoom_from_range();
@@ -595,34 +599,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				int dx = (dragged->cur_pt->x - dragged->s_pt->x);
 				int dy = (dragged->cur_pt->y - dragged->s_pt->y);
 
-				if (dx != 0 || dy != 0)
-				{
-					if (dragged->pannable) {
-						for (BasicInterface* inter1 : dragged->interfaces) {
-							if (inter1)
-							{
-								inter1->setPosX(inter1->getPosX() + dx);
-								inter1->setPosY(inter1->getPosY() + -dy);
-								inter1->updateCoordinates();
-							}
-						}
-						for (ChildFrame* children : dragged->children) {
-							if (children) {
-								for (BasicInterface* inter2 : children->child_interfaces) {
-									inter2->setPosX(inter2->getPosX() + dx);
-									inter2->setPosY(inter2->getPosY() + -dy);
-									inter2->updateCoordinates();
-								}
-							}
-						}
-
-						dragged->renderAllInputText = true;
-						dragged->renderAllLabels = true;
-						renderDrawings = true;
-						renderFocus = true;
-						renderInterfaces = true;
-					}
-				}
+				dragged->move(dx, -dy);
 			}
 
 			delete dragged->s_pt;
@@ -1166,6 +1143,20 @@ bool processCommands(std::string command)
 		return true;
 	}
 	return false;
+}
+
+void moveInterfacesOnSize()
+{
+	for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
+		InterfaceFrame* frame = *it;
+		if (frame && frame->pannable) 
+		{
+			if (frame->withinClient())
+			{
+
+			}
+		}
+	}
 }
 
 void connect() {

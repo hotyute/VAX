@@ -871,16 +871,13 @@ void RenderInterface(InterfaceFrame* frame) {
 				if (inter1->index == CONTENT_PANE) {
 					if (frame->title.size() > 0) {
 						std::string title = frame->title;
-						int offsetY = 10;
-						int x = inter1->getStartX() + (inter1->getWidth() / 2);
-						int y = inter1->getStartY() + (inter1->getHeight() - offsetY);
+						int title_height = 25;
+						double x = inter1->getStartX() + (inter1->getWidth() / 2);
+						double y = (inter1->getEndY() - title_height) + (title_height / 2);
 						SelectObject(hDC, titleFont);
 						SIZE extent = getTextExtent(title);
-						TEXTMETRIC tm;
-						GetTextMetrics(hDC, &tm);
-						int tH = tm.tmAscent - tm.tmInternalLeading;
-						int textXPos = x - (extent.cx / 2);
-						int textYPos = y - (tH / 2);
+						double textXPos = x - (extent.cx / 2);
+						double textYPos = y - ((extent.cy / 2) / 2);
 						glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], 1.0f);
 						glRasterPos2f(textXPos, textYPos);
 						glPrint(title.c_str(), &titleBase);

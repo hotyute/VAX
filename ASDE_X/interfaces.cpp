@@ -11,7 +11,7 @@ void RenderControllerList(double x_, double y_)
 	int width = 210, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 	int height = 300, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 	controller_list->Pane1(x, width, y, height);
-	const double spacing_x = 0.15, spacing_y = 0.07;
+	double spacing_x = 0.15, spacing_y = 0.07;
 	double start_x = 1.135, start_y = 0.10;
 
 	ClickButton* alpha = new ClickButton(controller_list, "ALPHA Sort", x + (width - (width * (start_x - spacing_x))), 
@@ -39,6 +39,17 @@ void RenderControllerList(double x_, double y_)
 	DisplayBox* displayBox = new DisplayBox(controller_list, list, list.size(), x + (width - (width * (start_x - spacing_x))), 
 		width - 25, 5, y + (height - (height * (start_y += spacing_y))) - (route_box_size - 10), route_box_size, 5, false);
 	controller_list->children[displayBox->index = CONTROLLER_LIST_BOX] = displayBox;
+
+
+	spacing_y = 0.02;
+	std::vector<ChatLine*> list2;
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	double route_box_size2 = 75.0;
+	DisplayBox* displayBox2 = new DisplayBox(controller_list, list2, list2.size(), x + (width - (width * (start_x - spacing_x))),
+		width - 25, 5, y + ((height - (height * (start_y += spacing_y))) - (route_box_size2 - 10)) - route_box_size, route_box_size2, 5, false);
+	controller_list->children[displayBox2->index = CONTROLLER_LIST_INFOBOX] = displayBox2;
 
 	CloseButton* closeb = new CloseButton(controller_list, 15, 15);
 	controller_list->children[closeb->index = CONTROLLER_LIST_CLOSE] = closeb;

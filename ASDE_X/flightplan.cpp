@@ -79,7 +79,8 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing_x))) + 10, (input_width - 20.0), 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fp_frame->children[comboBox1->index = FP_FLIGHTRULES_INPUT] = comboBox1;
 
-		ClickButton* amendButton = new ClickButton(fp_frame, "AMEND PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * start_y)), 20.0);// set button from the left
+		ClickButton* amendButton = new ClickButton(fp_frame, "AMEND PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * start_y)) - 2, 24.0);// set button from the left
+		amendButton->border_pix = 3;
 		fp_frame->children[amendButton->index = FP_AMMEND_PLAN] = amendButton;
 
 
@@ -104,7 +105,8 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		altern_input->setUneditable(alternate);
 		fp_frame->children[altern_input->index = FP_ALTERNATE_INPUT] = altern_input;
 
-		ClickButton* refreshButton = new ClickButton(fp_frame, "REFRESH PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))), 20.0);// set button from the left
+		ClickButton* refreshButton = new ClickButton(fp_frame, "REFRESH PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))) - 2, 24.0);// set button from the left
+		refreshButton->border_pix = 3;
 		fp_frame->children[refreshButton->index = FP_REFRESH_PLAN] = refreshButton;
 
 		//3rd Line
@@ -128,7 +130,8 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		squawk_input->setUneditable(a_squawk);
 		fp_frame->children[squawk_input->index = FP_SQUAWK_INPUT] = squawk_input;
 
-		ClickButton* assignButton = new ClickButton(fp_frame, "ASSIGN SQUAWK", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))), 20.0);// set button from the left
+		ClickButton* assignButton = new ClickButton(fp_frame, "ASSIGN SQUAWK", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))) - 2, 24.0);// set button from the left
+		assignButton->border_pix = 3;
 		fp_frame->children[assignButton->index = FP_ASSIGN_SQUAWK] = assignButton;
 
 		//4th Line
