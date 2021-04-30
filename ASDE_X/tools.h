@@ -19,17 +19,17 @@
 #include "renderer.h"
 #include "constants.h"
 
-extern std::wstring s2ws(const std::string& s);
+std::wstring s2ws(const std::string& s);
 
-extern char *s2ca1(const std::string &s);
+char *s2ca1(const std::string &s);
 
-extern SIZE getBitTextLength(HDC, HFONT, std::string);
+SIZE getBitTextLength(HDC, HFONT, std::string);
 
-extern std::string ltrim(std::string s);
+std::string ltrim(std::string s);
 
-extern std::string rtrim(std::string s);
+std::string rtrim(std::string s);
 
-extern std::string trim(std::string s);
+std::string trim(std::string s);
 
 void quad_bezier(Point2&, Point2&, Point2&, std::vector<LinearSegment*> &add_to);
 

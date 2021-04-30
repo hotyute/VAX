@@ -35,7 +35,7 @@ HWND text123, text124, lblNone, strUsers, lblNumUsrs;
 bool done = false, connected = false, show_departures = false, show_squawks = false;
 int single_opened_frames = 0;
 
-const int proto_version = 32698;
+#define PROTO_VERSION 32698
 
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
 Mirror* dragged_mir = nullptr;
@@ -1168,7 +1168,7 @@ void connect() {
 		intter->hand_shake = true;
 		intter->current_op = 45;
 		stream.createFrameVarSizeWord(45);
-		stream.writeDWord(proto_version);
+		stream.writeDWord(PROTO_VERSION);
 		char* callsign = s2ca1(USER->getIdentity()->callsign);
 		char* fullname = s2ca1(USER->getIdentity()->login_name);
 		char* username = s2ca1(USER->getIdentity()->username);
