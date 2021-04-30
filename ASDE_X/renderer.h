@@ -19,7 +19,7 @@ extern std::vector<Mirror*> mirrors;
 extern std::string heavy_text, regular_text;
 
 extern bool renderAircraft, renderSector, renderButtons, renderLegend, renderInterfaces, renderInputTextFocus, 
-renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures;
+renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText;
 
 extern bool updateFlags[NUM_FLAGS];
 extern bool renderFlags[NUM_FLAGS];
@@ -101,6 +101,8 @@ void CallLabels(InterfaceFrame* frame, Label* label);
 void CallInputTexts(InterfaceFrame* frame, InputField* field);
 
 void CallInputCursor(InterfaceFrame* frame, InputField* field);
+
+void RenderInterfaceInputText(bool do_all);
 
 const std::string* currentDateTime();
 

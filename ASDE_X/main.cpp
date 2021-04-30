@@ -73,12 +73,12 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 	//std::cout << TextToBinaryString("04/28/21") << std::endl;
 
-	if (!(bin == "0011000000110100001011110011001000110111001011110011001000110001"
-		|| bin == "0011000000110100001011110011001000111000001011110011001000110001")) {
-		MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
-			MB_OK | MB_ICONINFORMATION);
-		return 0;
-	}
+	//if (!(bin == "0011000000110100001011110011001000110111001011110011001000110001"
+	//	|| bin == "0011000000110100001011110011001000111000001011110011001000110001")) {
+	//	MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
+	//		MB_OK | MB_ICONINFORMATION);
+	//	return 0;
+	//}
 
 	loadButtons();
 	loadAircraftBlip2();
@@ -144,20 +144,20 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 {
 	switch (Message)
 	{
-	case WM_INITDIALOG:
+		case WM_INITDIALOG:
 
-		return TRUE;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDOK:
-			EndDialog(hwnd, IDOK);
+			return TRUE;
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case IDOK:
+					EndDialog(hwnd, IDOK);
+					break;
+					break;
+			}
 			break;
-			break;
-		}
-		break;
-	default:
-		return FALSE;
+		default:
+			return FALSE;
 	}
 	return TRUE;
 }
@@ -168,510 +168,327 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 {
 	switch (message)                  /* handle the messages */
 	{
-	case WM_CREATE: {
-		HMENU hMenuBar = CreateMenu();
-		HMENU hFile = CreateMenu();
-		HMENU hSettings = CreateMenu();
-		HMENU hHelp = CreateMenu();
+		case WM_CREATE: {
+			HMENU hMenuBar = CreateMenu();
+			HMENU hFile = CreateMenu();
+			HMENU hSettings = CreateMenu();
+			HMENU hHelp = CreateMenu();
 
-		AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hFile, L"&File");
-		AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hSettings, L"&Settings");
-		AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hHelp, L"&Help");
+			AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hFile, L"&File");
+			AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hSettings, L"&Settings");
+			AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hHelp, L"&Help");
 
-		AppendMenu(hFile, MF_STRING, ID_FILE_CONNECT, L"&Connect to Sever...");
-		AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
-		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
-		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
-		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide Squawk Codes...");
-		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_CLIST, L"&Controller List...");
-		AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
+			AppendMenu(hFile, MF_STRING, ID_FILE_CONNECT, L"&Connect to Sever...");
+			AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
+			AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
+			AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
+			AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide Squawk Codes...");
+			AppendMenu(hSettings, MF_STRING, ID_SETTINGS_CLIST, L"&Controller List...");
+			AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
 
-		SetMenu(hwnd, hMenuBar);
+			SetMenu(hwnd, hMenuBar);
 
-		//opengl stuff
+			//opengl stuff
 
-		hWnd = hwnd;
+			hWnd = hwnd;
 
-		if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
-			CAPS = true;
-		else
-			CAPS = false;
+			if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
+				CAPS = true;
+			else
+				CAPS = false;
 
-		CreateThread(NULL, 0, OpenGLThread, hwnd, 0, 0);
-		CreateThread(NULL, 0, EventThread1, hwnd, 0, NULL);
-		CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
-		userStorage1.resize(MAX_AIRCRAFT_SIZE);
+			CreateThread(NULL, 0, OpenGLThread, hwnd, 0, 0);
+			CreateThread(NULL, 0, EventThread1, hwnd, 0, NULL);
+			CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
+			userStorage1.resize(MAX_AIRCRAFT_SIZE);
 
-		User* user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
-		Aircraft* cur = new Aircraft();
-		user1->setAircraft(cur);
-		if (cur != NULL) {
-			cur->lock();
-			cur->setHeavy(true);
-			cur->setCallsign("AAL2");
-			cur->setLatitude(25.800704);
-			cur->setLongitude(-80.300770);
-			cur->setSpeed(0.0);
-			cur->setHeading(85.0);
-			cur->setUpdateFlag(ACF_CALLSIGN, true);
-			cur->setUpdateFlag(ACF_COLLISION, true);
-			cur->setCollision(true);
-			cur->setMode(1);
-			AcfMap[cur->getCallsign()] = cur;
-			cur->unlock();
+			User* user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
+			Aircraft* cur = new Aircraft();
+			user1->setAircraft(cur);
+			if (cur != NULL) {
+				cur->lock();
+				cur->setHeavy(true);
+				cur->setCallsign("AAL2");
+				cur->setLatitude(25.800704);
+				cur->setLongitude(-80.300770);
+				cur->setSpeed(0.0);
+				cur->setHeading(85.0);
+				cur->setUpdateFlag(ACF_CALLSIGN, true);
+				cur->setUpdateFlag(ACF_COLLISION, true);
+				cur->setCollision(true);
+				cur->setMode(1);
+				AcfMap[cur->getCallsign()] = cur;
+				cur->unlock();
 
-			cur->setSquawkCode(std::to_string(random(1000, 9999)));
+				cur->setSquawkCode(std::to_string(random(1000, 9999)));
 
-			FlightPlan& fp = *cur->getFlightPlan();
-			fp.departure = "KMIA";
-			fp.route = "HEDLY1.HEDLY LAL";
-			fp.remarks = "/v/";
-			++fp.cycle;
-		}
-		userStorage1[0] = user1;
-		User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
-		Aircraft* cur2 = new Aircraft();
-		user2->setAircraft(cur2);
-		if (cur2 != NULL) {
-			cur2->lock();
-			cur2->setHeavy(false);
-			cur2->setCallsign("EGF4427");
-			cur2->setLatitude(25.798267);
-			cur2->setLongitude(-80.282544);
-			cur2->setSpeed(0.0);
-			cur2->setHeading(190.0);
-			cur2->setUpdateFlag(ACF_CALLSIGN, true);
-			cur2->setUpdateFlag(ACF_COLLISION, true);
-			cur2->setCollision(true);
-			cur2->setMode(1);
-			AcfMap[cur2->getCallsign()] = cur2;
-			cur2->unlock();
-
-			cur2->setSquawkCode(std::to_string(random(1000, 9999)));
-		}
-		userStorage1[1] = user2;
-		cur->collisionAcf = cur2;
-
-		Collision* collision = new Collision(cur, cur2);
-		Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
-
-		User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
-		Aircraft* cur3 = new Aircraft();
-		user3->setAircraft(cur3);
-		if (cur3 != NULL) {
-			cur3->lock();
-			cur3->setHeavy(false);
-			cur3->setCallsign("DAL220");
-			cur3->setLatitude(25.798429);
-			cur3->setLongitude(-80.278852);
-			cur3->setSpeed(0.0);
-			cur3->setHeading(120.0);
-			cur3->setUpdateFlag(ACF_CALLSIGN, true);
-			cur3->setUpdateFlag(ACF_COLLISION, true);
-			cur3->setMode(1);
-			AcfMap[cur3->getCallsign()] = cur3;
-			cur3->unlock();
-
-			cur3->setSquawkCode(std::to_string(random(1000, 9999)));
-		}
-		userStorage1[2] = user3;
-
-		User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
-		Aircraft* cur4 = new Aircraft();
-		user4->setAircraft(cur4);
-		if (cur4 != NULL) {
-			cur4->lock();
-			cur4->setHeavy(false);
-			cur4->setCallsign("N108MS");
-			cur4->setLatitude(25.792179);
-			cur4->setLongitude(-80.305309);
-			cur4->setSpeed(0.0);
-			cur4->setHeading(220.0);
-			cur4->setUpdateFlag(ACF_CALLSIGN, true);
-			cur4->setUpdateFlag(ACF_COLLISION, true);
-			cur4->setMode(0);
-			AcfMap[cur4->getCallsign()] = cur4;
-			cur4->unlock();
-
-			FlightPlan& fp = *cur4->getFlightPlan();
-			fp.departure = "KMIA";
-			fp.route = "SKIPS1.SKIPS MNATE";
-			fp.remarks = "/v/";
-			++fp.cycle;
-		}
-		userStorage1[3] = user4;
-		break;
-	}
-	case WM_SIZE:
-	{
-		int width = LOWORD(lParam);
-		int height = HIWORD(lParam);
-
-		RECT rect;
-		if (GetWindowRect(hwnd, &rect))
-		{
-			int width2 = rect.right - rect.left;
-			int height2 = rect.bottom - rect.top;
-			WIDTH = width2;
-			HEIGHT = height2;
-		}
-		CLIENT_WIDTH = width;
-		CLIENT_HEIGHT = height;
-		LoadMainChatInterface(true);
-		moveInterfacesOnSize();
-
-		if (zoom_phase >= 2)
-			mZoom = zoom_from_range();
-
-		updateFlags[GBL_COLLISION_LINE] = true;
-
-		resize = true;
-		renderButtons = true;
-		renderLegend = true;
-		renderInterfaces = true;
-		renderDrawings = true;
-		renderConf = true;
-		renderDate = true;
-		renderDepartures = true;
-		renderInputTextFocus = true;
-		//renderAircraft = true;
-	}
-	break;
-	case WM_MOUSEMOVE:
-	{
-		if (dragged && dragged_bounds && dragged->pannable)
-		{
-			if (!dragged->cur_pt) {
-				dragged->cur_pt = new POINT();
+				FlightPlan& fp = *cur->getFlightPlan();
+				fp.departure = "KMIA";
+				fp.route = "HEDLY1.HEDLY LAL";
+				fp.remarks = "/v/";
+				++fp.cycle;
 			}
+			userStorage1[0] = user1;
+			User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
+			Aircraft* cur2 = new Aircraft();
+			user2->setAircraft(cur2);
+			if (cur2 != NULL) {
+				cur2->lock();
+				cur2->setHeavy(false);
+				cur2->setCallsign("EGF4427");
+				cur2->setLatitude(25.798267);
+				cur2->setLongitude(-80.282544);
+				cur2->setSpeed(0.0);
+				cur2->setHeading(190.0);
+				cur2->setUpdateFlag(ACF_CALLSIGN, true);
+				cur2->setUpdateFlag(ACF_COLLISION, true);
+				cur2->setCollision(true);
+				cur2->setMode(1);
+				AcfMap[cur2->getCallsign()] = cur2;
+				cur2->unlock();
 
-			dragged->cur_pt->x = (int)(short)LOWORD(lParam);
-			dragged->cur_pt->y = (int)(short)HIWORD(lParam);
-
-
-			dragged->move_bound = dragged_bounds;
-		}
-		else if (dragged_mir)
-		{
-			if (!dragged_mir->cur_pt) {
-				dragged_mir->cur_pt = new POINT();
+				cur2->setSquawkCode(std::to_string(random(1000, 9999)));
 			}
+			userStorage1[1] = user2;
+			cur->collisionAcf = cur2;
 
-			dragged_mir->cur_pt->x = (int)(short)LOWORD(lParam);
-			dragged_mir->cur_pt->y = (int)(short)HIWORD(lParam);
+			Collision* collision = new Collision(cur, cur2);
+			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
 
-			double dx = dragged_mir->cur_pt->x - dragged_mir->s_pt->x;
-			double dy = dragged_mir->cur_pt->y - dragged_mir->s_pt->y;
+			User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
+			Aircraft* cur3 = new Aircraft();
+			user3->setAircraft(cur3);
+			if (cur3 != NULL) {
+				cur3->lock();
+				cur3->setHeavy(false);
+				cur3->setCallsign("DAL220");
+				cur3->setLatitude(25.798429);
+				cur3->setLongitude(-80.278852);
+				cur3->setSpeed(0.0);
+				cur3->setHeading(120.0);
+				cur3->setUpdateFlag(ACF_CALLSIGN, true);
+				cur3->setUpdateFlag(ACF_COLLISION, true);
+				cur3->setMode(1);
+				AcfMap[cur3->getCallsign()] = cur3;
+				cur3->unlock();
 
-			dragged_mir->setX(dragged_mir->startX + dx);
-			dragged_mir->setY(dragged_mir->startY + -dy);
-		}
-	}
-	break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case ID_FILE_CONNECT:
-		{
-			handleConnect();
-		}
-		break;
-		case ID_SETTINGS_DEPARTS:
-		{
-			show_departures = !show_departures;
-		}
-		break;
-		case ID_SETTINGS_SQUAWKS:
-		{
-			show_squawks = !show_squawks;
-			updateFlags[GBL_CALLSIGN] = true;
-
-		}
-		break;
-		case ID_SETTINGS_CLIST:
-		{
-			if (controller_list == NULL) {
-				//TODO save X and Y positions when moved
-				RenderControllerList(-1, -1);
+				cur3->setSquawkCode(std::to_string(random(1000, 9999)));
 			}
-			else if (!controller_list->render) {
-				controller_list->doOpen(true, true);
+			userStorage1[2] = user3;
+
+			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
+			Aircraft* cur4 = new Aircraft();
+			user4->setAircraft(cur4);
+			if (cur4 != NULL) {
+				cur4->lock();
+				cur4->setHeavy(false);
+				cur4->setCallsign("N108MS");
+				cur4->setLatitude(25.792179);
+				cur4->setLongitude(-80.305309);
+				cur4->setSpeed(0.0);
+				cur4->setHeading(220.0);
+				cur4->setUpdateFlag(ACF_CALLSIGN, true);
+				cur4->setUpdateFlag(ACF_COLLISION, true);
+				cur4->setMode(0);
+				AcfMap[cur4->getCallsign()] = cur4;
+				cur4->unlock();
+
+				FlightPlan& fp = *cur4->getFlightPlan();
+				fp.departure = "KMIA";
+				fp.route = "SKIPS1.SKIPS MNATE";
+				fp.remarks = "/v/";
+				++fp.cycle;
 			}
-		}
-		break;
-		case ID_FILE_OPEN:
-		{
-			OPENFILENAME ofn;
-			TCHAR szFileName[MAX_PATH] = L"";
-
-			ZeroMemory(&ofn, sizeof(ofn));
-
-			ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
-			ofn.hwndOwner = hwnd;
-			ofn.lpstrFilter = L"ASDE-X Files (*.adx)\0*.adx\0All Files (*.*)\0*.*\0";
-			ofn.lpstrFile = szFileName;
-			ofn.nMaxFile = MAX_PATH;
-			ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-			ofn.lpstrDefExt = L"adx";
-
-			if (GetOpenFileName(&ofn))
-			{
-				std::wstring wide(szFileName);
-				std::string final1(wide.begin(), wide.end());
-				if (FileReader::LoadADX(final1)) {
-					preFileRender();
-					resize = true;
-					renderSector = true;
-					renderButtons = true;
-					updateFlags[GBL_CALLSIGN] = true;
-					renderLegend = true;
-					renderInterfaces = true;
-					renderDrawings = true;
-					renderConf = true;
-					renderDate = true;
-					renderDepartures = true;
-					updateFlags[GBL_COLLISION_LINE] = true;
-					zoom_phase = 2;
-					rangeb->refreshOption2();
-				}
-			}
-		}
-		break;
-		case ID_FILE_EXIT:
-			PostMessage(hwnd, WM_CLOSE, 0, 0);
+			userStorage1[3] = user4;
 			break;
-		case ID_HELP_ABOUT:
+		}
+		case WM_SIZE:
 		{
-			int ret = DialogBox(GetModuleHandle(NULL),
-				MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
-			if (ret == IDOK) {
-				//MessageBox(hwnd, L"Dialog exited with IDOK.", L"Notice",
-				//MB_OK | MB_ICONINFORMATION);
+			int width = LOWORD(lParam);
+			int height = HIWORD(lParam);
+
+			RECT rect;
+			if (GetWindowRect(hwnd, &rect))
+			{
+				int width2 = rect.right - rect.left;
+				int height2 = rect.bottom - rect.top;
+				WIDTH = width2;
+				HEIGHT = height2;
 			}
-			else if (ret == -1) {
-				//MessageBox(hwnd, L"Dialog failed!", L"Error",
-				//MB_OK | MB_ICONINFORMATION);
-			}
+			CLIENT_WIDTH = width;
+			CLIENT_HEIGHT = height;
+			LoadMainChatInterface(true);
+			moveInterfacesOnSize();
+
+			if (zoom_phase >= 2)
+				mZoom = zoom_from_range();
+
+			updateFlags[GBL_COLLISION_LINE] = true;
+
+			resize = true;
+			renderButtons = true;
+			renderLegend = true;
+			renderInterfaces = true;
+			renderDrawings = true;
+			renderConf = true;
+			renderDate = true;
+			renderDepartures = true;
+			renderInputTextFocus = true;
+			renderAllInputText = true;
+			//renderAircraft = true;
 		}
 		break;
-		case ID_BUTTON:
+		case WM_MOUSEMOVE:
 		{
-		}
-		break;
-		}
-		break;
-	case WM_DESTROY:
-	{
-		done = true;
-		PostQuitMessage(0);       /* send a WM_QUIT to the message queue */
-	}
-	break;
-	case WM_LBUTTONDOWN:
-	{
-		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
-		bool clicked_interface = false;
-		TopButton* clicked_tbutton = nullptr;
-		for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) {
-			TopButton* curButton = *btn;
-			int* params = curButton->getParams();
-			int vertx[4] = { params[0], params[0], params[2], params[2] };
-			int verty[4] = { params[1], params[3], params[3], params[1] };
-			bool clicked = pnpoly(4, vertx, verty, x, y);
-			if (clicked) {
-				if (curButton->handle())
-				{
-					curButton->on = !curButton->on;
-					renderButtons = true;
+			if (dragged && dragged_bounds && dragged->pannable)
+			{
+				if (!dragged->cur_pt) {
+					dragged->cur_pt = new POINT();
 				}
-				clicked_tbutton = curButton;
+
+				dragged->cur_pt->x = (int)(short)LOWORD(lParam);
+				dragged->cur_pt->y = (int)(short)HIWORD(lParam);
+
+
+				dragged->move_bound = dragged_bounds;
+			}
+			else if (dragged_mir)
+			{
+				if (!dragged_mir->cur_pt) {
+					dragged_mir->cur_pt = new POINT();
+				}
+
+				dragged_mir->cur_pt->x = (int)(short)LOWORD(lParam);
+				dragged_mir->cur_pt->y = (int)(short)HIWORD(lParam);
+
+				double dx = dragged_mir->cur_pt->x - dragged_mir->s_pt->x;
+				double dy = dragged_mir->cur_pt->y - dragged_mir->s_pt->y;
+
+				dragged_mir->setX(dragged_mir->startX + dx);
+				dragged_mir->setY(dragged_mir->startY + -dy);
+			}
+		}
+		break;
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case ID_FILE_CONNECT:
+				{
+					handleConnect();
+				}
+				break;
+				case ID_SETTINGS_DEPARTS:
+				{
+					show_departures = !show_departures;
+				}
+				break;
+				case ID_SETTINGS_SQUAWKS:
+				{
+					show_squawks = !show_squawks;
+					updateFlags[GBL_CALLSIGN] = true;
+
+				}
+				break;
+				case ID_SETTINGS_CLIST:
+				{
+					if (controller_list == NULL) {
+						//TODO save X and Y positions when moved
+						RenderControllerList(-1, -1);
+					}
+					else if (!controller_list->render) {
+						controller_list->doOpen(true, true);
+					}
+				}
+				break;
+				case ID_FILE_OPEN:
+				{
+					OPENFILENAME ofn;
+					TCHAR szFileName[MAX_PATH] = L"";
+
+					ZeroMemory(&ofn, sizeof(ofn));
+
+					ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
+					ofn.hwndOwner = hwnd;
+					ofn.lpstrFilter = L"ASDE-X Files (*.adx)\0*.adx\0All Files (*.*)\0*.*\0";
+					ofn.lpstrFile = szFileName;
+					ofn.nMaxFile = MAX_PATH;
+					ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+					ofn.lpstrDefExt = L"adx";
+
+					if (GetOpenFileName(&ofn))
+					{
+						std::wstring wide(szFileName);
+						std::string final1(wide.begin(), wide.end());
+						if (FileReader::LoadADX(final1)) {
+							preFileRender();
+							resize = true;
+							renderSector = true;
+							renderButtons = true;
+							updateFlags[GBL_CALLSIGN] = true;
+							renderLegend = true;
+							renderInterfaces = true;
+							renderDrawings = true;
+							renderConf = true;
+							renderDate = true;
+							renderDepartures = true;
+							updateFlags[GBL_COLLISION_LINE] = true;
+							zoom_phase = 2;
+							rangeb->refreshOption2();
+						}
+					}
+				}
+				break;
+				case ID_FILE_EXIT:
+					PostMessage(hwnd, WM_CLOSE, 0, 0);
+					break;
+				case ID_HELP_ABOUT:
+				{
+					int ret = DialogBox(GetModuleHandle(NULL),
+						MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
+					if (ret == IDOK) {
+						//MessageBox(hwnd, L"Dialog exited with IDOK.", L"Notice",
+						//MB_OK | MB_ICONINFORMATION);
+					}
+					else if (ret == -1) {
+						//MessageBox(hwnd, L"Dialog failed!", L"Error",
+						//MB_OK | MB_ICONINFORMATION);
+					}
+				}
+				break;
+				case ID_BUTTON:
+				{
+				}
 				break;
 			}
-		}
-		if (!clicked_tbutton) {
-			for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
-				InterfaceFrame* frame = *it;
-				if (frame && frame->render) {
-					ChildFrame* clicked1 = nullptr;
-					for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
-						ChildFrame* children = *child;
-						if (children) {
-							BasicInterface* inter2 = children->border;
-							if (children->handleClick(clicked1, x, y))
-								break;
-							if (!clicked1 && inter2->isBounds()) {
-								int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
-								int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
-								bool clicked = pnpoly(4, vertx, verty, x, y);
-								if (clicked) {
-									clicked1 = children;
-									break;
-								}
-							}
-						}
-					}
-					if (clicked1) {
-						if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
-							//dont do anything with non editable field
-						}
-						else
-						{
-							if (focusChild != clicked1) {
-								clicked1->setFocus();
-							}
-							if (focusChild == clicked1) {
-								clicked1->doAction();
-							}
-						}
-						clicked_interface = true;
-						break;
-					}
-
-					BasicInterface* clicked2 = nullptr, * inter1 = frame->border;
-					if (inter1 && inter1->isBounds() && frame->pannable) {
-						int b_offset_Y = 25;
-						int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
-						int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
-						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
-						if (clicked) {
-							clicked2 = inter1;
-						}
-					}
-					if (clicked2)
-					{
-						if (!frame->s_pt)
-							frame->s_pt = new POINT();
-
-						if (rendered_frames.back() != *it) { //TODO This is bugged as the location is changed in the MAP but the index of the object remains the same
-							InterfaceFrame* _back = rendered_frames.back();
-							int back_idx = _back->index, c_idx = frame->index;
-							frame->index = back_idx, _back->index = c_idx;
-							std::swap(*it, rendered_frames.back()); //bring interface to the front
-						}
-						frame->s_pt->x = (int)(short)LOWORD(lParam);
-						frame->s_pt->y = (int)(short)HIWORD(lParam);
-						dragged = frame;
-						dragged_bounds = clicked2;
-						clicked_interface = true;
-						break;
-					}
-				}
-			}
-			if (!clicked_interface)
-			{
-				//check for mirrors
-				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3) {
-					Mirror* mir = *it3;
-					if (mir)
-					{
-						Mirror& mirror = *mir;
-						int b_offset_Y = 25;
-						double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
-						int vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
-						int vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
-						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
-						if (clicked) {
-							if (!mir->s_pt) {
-								mir->s_pt = new POINT();
-							}
-							mir->s_pt->x = (int)(short)LOWORD(lParam);
-							mir->s_pt->y = (int)(short)HIWORD(lParam);
-							mir->startX = mir->getX();
-							mir->startY = mir->getY();
-							dragged_mir = mir;
-
-							if (mirrors.back() != *it3)
-								std::swap(*it3, mirrors.back());
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	break;
-	case WM_LBUTTONUP:
-	{
-		if (dragged && dragged_bounds)
+			break;
+		case WM_DESTROY:
 		{
-			if (dragged->cur_pt && dragged->s_pt)
-			{
-
-				int dx = (dragged->cur_pt->x - dragged->s_pt->x);
-				int dy = (dragged->cur_pt->y - dragged->s_pt->y);
-
-				dragged->move(dx, -dy);
-			}
-
-			delete dragged->s_pt;
-			dragged->s_pt = nullptr;
-			delete dragged->cur_pt;
-			dragged->cur_pt = nullptr;
-			delete dragged->end_pt;
-			dragged->end_pt = nullptr;
-			dragged = nullptr;
-			dragged_bounds = nullptr;
+			done = true;
+			PostQuitMessage(0);       /* send a WM_QUIT to the message queue */
 		}
-		else if (dragged_mir)
+		break;
+		case WM_LBUTTONDOWN:
 		{
-			delete dragged_mir->s_pt;
-			dragged_mir->s_pt = nullptr;
-			delete dragged_mir->cur_pt;
-			dragged_mir->cur_pt = nullptr;
-			delete dragged_mir->end_pt;
-			dragged_mir->end_pt = nullptr;
-			dragged_mir = nullptr;
-		}
-	}
-	break;
-	case WM_MOUSEWHEEL:
-	{
-		POINT pt;
-		pt.x = GET_X_LPARAM(lParam);
-		pt.y = GET_Y_LPARAM(lParam);
-		ScreenToClient(hWnd, &pt);
-
-		pt.y = (CLIENT_HEIGHT - pt.y);
-
-		const int val = GET_WHEEL_DELTA_WPARAM(wParam);
-
-		TopButton* clicked_tbutton = nullptr;
-		for (size_t i = 0; i < BUTTONS.size(); i++) {
-			TopButton* curButton = BUTTONS[i];
-			int* params = curButton->getParams();
-			int vertx[4] = { params[0], params[0], params[2], params[2] };
-			int verty[4] = { params[1], params[3], params[3], params[1] };
-			bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
-			if (clicked) {
-				if (curButton->handleScroll(val > 0))
-				{
-					renderButtons = true;
-				}
-				clicked_tbutton = curButton;
-				break;
-			}
-		}
-		if (!clicked_tbutton) {
-			bool used_focused = false;
-			ChildFrame* focus = focusChild;
-			if (focus) {
-				if (focus->type == CHILD_TYPE::DISPLAY_BOX) {
-					BasicInterface& bdr = *((DisplayBox*)focus)->border;
-					if (bdr.isBounds()) {
-						if (val < 0) {
-							((DisplayBox*)focus)->doActionDown();
-						}
-
-						if (val > 0) {
-							((DisplayBox*)focus)->doActionUp();
-						}
-						used_focused = true;
+			WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
+			bool clicked_interface = false;
+			TopButton* clicked_tbutton = nullptr;
+			for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) {
+				TopButton* curButton = *btn;
+				int* params = curButton->getParams();
+				int vertx[4] = { params[0], params[0], params[2], params[2] };
+				int verty[4] = { params[1], params[3], params[3], params[1] };
+				bool clicked = pnpoly(4, vertx, verty, x, y);
+				if (clicked) {
+					if (curButton->handle())
+					{
+						curButton->on = !curButton->on;
+						renderButtons = true;
 					}
+					clicked_tbutton = curButton;
+					break;
 				}
-
 			}
-			if (!used_focused)
-			{
-				//search unfocused display boxes
+			if (!clicked_tbutton) {
 				for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
 					InterfaceFrame* frame = *it;
 					if (frame && frame->render) {
@@ -679,22 +496,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
 							ChildFrame* children = *child;
 							if (children) {
-
-								BasicInterface& border = *children->border;
-								if (border.isBounds()) {
-									int vertx[4] = { border.getStartX(), border.getStartX(), border.getEndX(), border.getEndX() };
-									int verty[4] = { border.getStartY(), border.getEndY(), border.getEndY(), border.getStartY() };
-									bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
+								BasicInterface* inter2 = children->border;
+								if (children->handleClick(clicked1, x, y))
+									break;
+								if (!clicked1 && inter2->isBounds()) {
+									int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
+									int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
+									bool clicked = pnpoly(4, vertx, verty, x, y);
 									if (clicked) {
-										if (val < 0) {
-											((DisplayBox*)children)->doActionDown();
-											break;
-										}
-
-										if (val > 0) {
-											((DisplayBox*)children)->doActionUp();
-											break;
-										}
 										clicked1 = children;
 										break;
 									}
@@ -702,96 +511,289 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							}
 						}
 						if (clicked1) {
+							if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
+								//dont do anything with non editable field
+							}
+							else
+							{
+								if (focusChild != clicked1) {
+									clicked1->setFocus();
+								}
+								if (focusChild == clicked1) {
+									clicked1->doAction();
+								}
+							}
+							clicked_interface = true;
 							break;
+						}
+
+						BasicInterface* clicked2 = nullptr, * inter1 = frame->border;
+						if (inter1 && inter1->isBounds() && frame->pannable) {
+							int b_offset_Y = 25;
+							int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
+							int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
+							bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+							if (clicked) {
+								clicked2 = inter1;
+							}
+						}
+						if (clicked2)
+						{
+							if (!frame->s_pt)
+								frame->s_pt = new POINT();
+
+							if (rendered_frames.back() != *it) { //TODO This is bugged as the location is changed in the MAP but the index of the object remains the same
+								InterfaceFrame* _back = rendered_frames.back();
+								int back_idx = _back->index, c_idx = frame->index;
+								frame->index = back_idx, _back->index = c_idx;
+								std::swap(*it, rendered_frames.back()); //bring interface to the front
+							}
+							frame->s_pt->x = (int)(short)LOWORD(lParam);
+							frame->s_pt->y = (int)(short)HIWORD(lParam);
+							dragged = frame;
+							dragged_bounds = clicked2;
+							clicked_interface = true;
+							break;
+						}
+					}
+				}
+				if (!clicked_interface)
+				{
+					//check for mirrors
+					for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3) {
+						Mirror* mir = *it3;
+						if (mir)
+						{
+							Mirror& mirror = *mir;
+							int b_offset_Y = 25;
+							double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
+							int vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
+							int vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
+							bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+							if (clicked) {
+								if (!mir->s_pt) {
+									mir->s_pt = new POINT();
+								}
+								mir->s_pt->x = (int)(short)LOWORD(lParam);
+								mir->s_pt->y = (int)(short)HIWORD(lParam);
+								mir->startX = mir->getX();
+								mir->startY = mir->getY();
+								dragged_mir = mir;
+
+								if (mirrors.back() != *it3)
+									std::swap(*it3, mirrors.back());
+								break;
+							}
 						}
 					}
 				}
 			}
 		}
-	}
-	break;
-	case WM_KEYDOWN:
-	{
-		//std::cout << wParam << std::endl;
-		if (wParam == VK_ESCAPE) {
-			if (focusChild != NULL) {
-				CHILD_TYPE type = focusChild->type;
-				if (type == CHILD_TYPE::INPUT_FIELD) {
-					InputField& focusField = (InputField&)*focusChild;
-					focusField.clearInput();
-					focusField.setCursor();
-					renderInputTextFocus = true;
+		break;
+		case WM_LBUTTONUP:
+		{
+			if (dragged && dragged_bounds)
+			{
+				if (dragged->cur_pt && dragged->s_pt)
+				{
+
+					int dx = (dragged->cur_pt->x - dragged->s_pt->x);
+					int dy = (dragged->cur_pt->y - dragged->s_pt->y);
+
+					dragged->move(dx, -dy);
 				}
+
+				delete dragged->s_pt;
+				dragged->s_pt = nullptr;
+				delete dragged->cur_pt;
+				dragged->cur_pt = nullptr;
+				delete dragged->end_pt;
+				dragged->end_pt = nullptr;
+				dragged = nullptr;
+				dragged_bounds = nullptr;
+			}
+			else if (dragged_mir)
+			{
+				delete dragged_mir->s_pt;
+				dragged_mir->s_pt = nullptr;
+				delete dragged_mir->cur_pt;
+				dragged_mir->cur_pt = nullptr;
+				delete dragged_mir->end_pt;
+				dragged_mir->end_pt = nullptr;
+				dragged_mir = nullptr;
 			}
 		}
-		else if (wParam == VK_F1) {
-		}
-		else if (wParam == VK_F2) {
-			char* cmd = ".AN ";
-			pass_command(cmd);
-		}
-		else if (wParam == VK_F3) {
-		}
-		else if (wParam == VK_F4) {
-		}
-		else if (wParam == VK_F5) {
-		}
-		else if (wParam == VK_F6) {
-			char* cmd = ".SS ";
-			pass_command(cmd);
-		}
-		else if (wParam == VK_F7) {
-		}
-		else if (wParam == VK_F8) {
-		}
-		else if (wParam == VK_F9) {
-		}
-		else if (wParam == VK_F10) {
-		}
-		else if (wParam == VK_F11) {
-		}
-		else if (wParam == VK_F12) {
-		}
-		else if (wParam == VK_CAPITAL) {
-			if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
-				CAPS = true;
-			else
-				CAPS = false;
-		}
-		else if (wParam == VK_SHIFT) {
-			if (!SHIFT_DOWN) {
-				if (!CAPS) {
-					CAPS = true;
+		break;
+		case WM_MOUSEWHEEL:
+		{
+			POINT pt;
+			pt.x = GET_X_LPARAM(lParam);
+			pt.y = GET_Y_LPARAM(lParam);
+			ScreenToClient(hWnd, &pt);
+
+			pt.y = (CLIENT_HEIGHT - pt.y);
+
+			const int val = GET_WHEEL_DELTA_WPARAM(wParam);
+
+			TopButton* clicked_tbutton = nullptr;
+			for (size_t i = 0; i < BUTTONS.size(); i++) {
+				TopButton* curButton = BUTTONS[i];
+				int* params = curButton->getParams();
+				int vertx[4] = { params[0], params[0], params[2], params[2] };
+				int verty[4] = { params[1], params[3], params[3], params[1] };
+				bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
+				if (clicked) {
+					if (curButton->handleScroll(val > 0))
+					{
+						renderButtons = true;
+					}
+					clicked_tbutton = curButton;
+					break;
 				}
-				else {
-					CAPS = false;
-				}
-				SHIFT_DOWN = true;
 			}
-		}
-		else if (wParam == VK_TAB) {
-			if (focusChild != NULL) {
-				CHILD_TYPE type = focusChild->type;
-				if (type == CHILD_TYPE::INPUT_FIELD || type == CHILD_TYPE::COMBO_BOX) {
-					InterfaceFrame& frame = *focusChild->getFrame();
-					int frame_id = frame.id;
-					if (frame_id != MAIN_CHAT_INTERFACE) {
-						for (int i = focusChild->index; i < frame.children.size(); i++) {
-							ChildFrame* child_ptr = frame.children[i];
-							if (child_ptr) {
-								if (child_ptr != focusChild) {
-									if (child_ptr->type == CHILD_TYPE::INPUT_FIELD) {
-										InputField* newField = (InputField*)child_ptr;
-										if (newField->editable) {
-											newField->setFocus();
+			if (!clicked_tbutton) {
+				bool used_focused = false;
+				ChildFrame* focus = focusChild;
+				if (focus) {
+					if (focus->type == CHILD_TYPE::DISPLAY_BOX) {
+						BasicInterface& bdr = *((DisplayBox*)focus)->border;
+						if (bdr.isBounds()) {
+							if (val < 0) {
+								((DisplayBox*)focus)->doActionDown();
+							}
+
+							if (val > 0) {
+								((DisplayBox*)focus)->doActionUp();
+							}
+							used_focused = true;
+						}
+					}
+
+				}
+				if (!used_focused)
+				{
+					//search unfocused display boxes
+					for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
+						InterfaceFrame* frame = *it;
+						if (frame && frame->render) {
+							ChildFrame* clicked1 = nullptr;
+							for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
+								ChildFrame* children = *child;
+								if (children) {
+
+									BasicInterface& border = *children->border;
+									if (border.isBounds()) {
+										int vertx[4] = { border.getStartX(), border.getStartX(), border.getEndX(), border.getEndX() };
+										int verty[4] = { border.getStartY(), border.getEndY(), border.getEndY(), border.getStartY() };
+										bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
+										if (clicked) {
+											if (val < 0) {
+												((DisplayBox*)children)->doActionDown();
+												break;
+											}
+
+											if (val > 0) {
+												((DisplayBox*)children)->doActionUp();
+												break;
+											}
+											clicked1 = children;
 											break;
 										}
 									}
-									else if (child_ptr->type == CHILD_TYPE::COMBO_BOX)
-									{
-										ComboBox* newField = (ComboBox*)child_ptr;
-										newField->setFocus();
-										break;
+								}
+							}
+							if (clicked1) {
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
+		case WM_KEYDOWN:
+		{
+			//std::cout << wParam << std::endl;
+			if (wParam == VK_ESCAPE) {
+				if (focusChild != NULL) {
+					CHILD_TYPE type = focusChild->type;
+					if (type == CHILD_TYPE::INPUT_FIELD) {
+						InputField& focusField = (InputField&)*focusChild;
+						focusField.clearInput();
+						focusField.setCursor();
+						renderInputTextFocus = true;
+					}
+				}
+			}
+			else if (wParam == VK_F1) {
+			}
+			else if (wParam == VK_F2) {
+				char* cmd = ".AN ";
+				pass_command(cmd);
+			}
+			else if (wParam == VK_F3) {
+			}
+			else if (wParam == VK_F4) {
+			}
+			else if (wParam == VK_F5) {
+			}
+			else if (wParam == VK_F6) {
+				char* cmd = ".SS ";
+				pass_command(cmd);
+			}
+			else if (wParam == VK_F7) {
+			}
+			else if (wParam == VK_F8) {
+			}
+			else if (wParam == VK_F9) {
+			}
+			else if (wParam == VK_F10) {
+			}
+			else if (wParam == VK_F11) {
+			}
+			else if (wParam == VK_F12) {
+			}
+			else if (wParam == VK_CAPITAL) {
+				if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
+					CAPS = true;
+				else
+					CAPS = false;
+			}
+			else if (wParam == VK_SHIFT) {
+				if (!SHIFT_DOWN) {
+					if (!CAPS) {
+						CAPS = true;
+					}
+					else {
+						CAPS = false;
+					}
+					SHIFT_DOWN = true;
+				}
+			}
+			else if (wParam == VK_TAB) {
+				if (focusChild != NULL) {
+					CHILD_TYPE type = focusChild->type;
+					if (type == CHILD_TYPE::INPUT_FIELD || type == CHILD_TYPE::COMBO_BOX) {
+						InterfaceFrame& frame = *focusChild->getFrame();
+						int frame_id = frame.id;
+						if (frame_id != MAIN_CHAT_INTERFACE) {
+							for (int i = focusChild->index; i < frame.children.size(); i++) {
+								ChildFrame* child_ptr = frame.children[i];
+								if (child_ptr) {
+									if (child_ptr != focusChild) {
+										if (child_ptr->type == CHILD_TYPE::INPUT_FIELD) {
+											InputField* newField = (InputField*)child_ptr;
+											if (newField->editable) {
+												newField->setFocus();
+												break;
+											}
+										}
+										else if (child_ptr->type == CHILD_TYPE::COMBO_BOX)
+										{
+											ComboBox* newField = (ComboBox*)child_ptr;
+											newField->setFocus();
+											break;
+										}
 									}
 								}
 							}
@@ -799,67 +801,187 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 				}
 			}
-		}
-		else if (wParam == 0x11) {//control (any)
+			else if (wParam == 0x11) {//control (any)
 
-		}
-		else if (wParam == VK_LCONTROL) {
+			}
+			else if (wParam == VK_LCONTROL) {
 
-		}
-		else if (wParam == VK_RCONTROL) {
-		}
-		else if (wParam == 0xFF) {//FN Key
+			}
+			else if (wParam == VK_RCONTROL) {
+			}
+			else if (wParam == 0xFF) {//FN Key
 
-		}
-		else if (wParam == VK_RETURN) {
-			if (focusChild != NULL) {
-				CHILD_TYPE type = focusChild->type;
-				if (type == CHILD_TYPE::INPUT_FIELD) {
-					InputField* focusField = (InputField*)focusChild;
-					InterfaceFrame& frame = *focusField->getFrame();
-					int frame_id = frame.id;
-					if (focusField->line_ptr)
-					{
-						focusField->handleBox();
-						main_chat_input->setFocus();
-					}
-					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
-						if (focusField->input.size() > 0) {
-							if (processCommands(focusField->input)) {
-								focusField->clearInput();
-								focusField->setCursor();
-								renderInputTextFocus = true;
-							}
-							else
-							{
-								sendMainChatMessage(focusField);
-							}
+			}
+			else if (wParam == VK_RETURN) {
+				if (focusChild != NULL) {
+					CHILD_TYPE type = focusChild->type;
+					if (type == CHILD_TYPE::INPUT_FIELD) {
+						InputField* focusField = (InputField*)focusChild;
+						InterfaceFrame& frame = *focusField->getFrame();
+						int frame_id = frame.id;
+						if (focusField->line_ptr)
+						{
+							focusField->handleBox();
+							main_chat_input->setFocus();
 						}
-					}
-					else if (is_privateinterface(frame_id))
-					{
-						if (focusField->index == PRIVATE_MESSAGE_INPUT) {
+						else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
 							if (focusField->input.size() > 0) {
-								if (processCommands(focusField->input))
-								{
+								if (processCommands(focusField->input)) {
 									focusField->clearInput();
 									focusField->setCursor();
 									renderInputTextFocus = true;
 								}
 								else
 								{
-									for (size_t i = 0; i < userStorage1.size(); i++) {
-										User* curUsr = userStorage1[i];
-										if (curUsr != NULL && curUsr != USER) {
-											sendUserMessage(*curUsr, focusField->input);
-										}
+									sendMainChatMessage(focusField);
+								}
+							}
+						}
+						else if (is_privateinterface(frame_id))
+						{
+							if (focusField->index == PRIVATE_MESSAGE_INPUT) {
+								if (focusField->input.size() > 0) {
+									if (processCommands(focusField->input))
+									{
+										focusField->clearInput();
+										focusField->setCursor();
+										renderInputTextFocus = true;
 									}
-									DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
-									box.resetReaderIdx();
-									box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
-									renderDrawings = true;
-									focusField->clearInput();
-									focusField->setCursor();
+									else
+									{
+										for (size_t i = 0; i < userStorage1.size(); i++) {
+											User* curUsr = userStorage1[i];
+											if (curUsr != NULL && curUsr != USER) {
+												sendUserMessage(*curUsr, focusField->input);
+											}
+										}
+										DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
+										box.resetReaderIdx();
+										box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
+										renderDrawings = true;
+										focusField->clearInput();
+										focusField->setCursor();
+										renderInputTextFocus = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (wParam == VK_LEFT) {
+				if (focusChild != NULL) {
+					CHILD_TYPE type = focusChild->type;
+					if (type == CHILD_TYPE::COMBO_BOX) {
+						ComboBox* box = (ComboBox*)focusChild;
+						if (box->pos > 0) {
+							box->pos--;
+							renderDrawings = true;
+						}
+					}
+					else if (type == CHILD_TYPE::INPUT_FIELD) {
+						InputField* input = (InputField*)focusChild;
+						input->cursorLeft();
+					}
+				}
+			}
+			else if (wParam == VK_RIGHT) {
+				if (focusChild != NULL) {
+					CHILD_TYPE type = focusChild->type;
+					if (type == CHILD_TYPE::COMBO_BOX) {
+						ComboBox* box = (ComboBox*)focusChild;
+						if (box->pos < (box->options.size() - 1)) {
+							box->pos++;
+							renderDrawings = true;
+						}
+					}
+					else if (type == CHILD_TYPE::INPUT_FIELD) {
+						InputField* input = (InputField*)focusChild;
+						input->cursorRight();
+					}
+				}
+			}
+			else if (wParam == VK_UP) {
+			}
+			else if (wParam == VK_DOWN) {
+			}
+			else if (wParam == VK_BACK) {
+				if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
+					InputField* focusField = (InputField*)focusChild;
+					if (focusField->editable) {
+						if (focusField->input.size() > 0) {
+							focusField->popInput();
+							focusField->setCursor();
+							renderInputTextFocus = true;
+						}
+					}
+				}
+			}
+			else {
+				char c = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
+				char c2;
+				if (!CAPS)
+					c2 = tolower(c);
+				else {
+					char spec = NULL;
+					switch (wParam) {
+						case 49:
+							spec = '!';
+							break;
+						case 191:
+							spec = '?';
+							break;
+						case 57:
+							spec = '(';
+							break;
+						case 48:
+							spec = ')';
+							break;
+						case 189:
+							spec = '_';
+							break;
+						case 186:
+							spec = ':';
+							break;
+						case 222:
+							spec = '"';
+							break;
+						case 50:
+							spec = '@';
+							break;
+						case 51:
+							spec = '#';
+							break;
+						case 52:
+							spec = '$';
+							break;
+						case 53:
+							spec = '%';
+							break;
+						case 56:
+							spec = '*';
+							break;
+						default:
+							break;
+					}
+					if (spec != NULL)
+						c2 = spec;
+					else
+						c2 = c;
+				}
+				if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
+					InputField& focusField = *(InputField*)focusChild;
+					InterfaceFrame& frame = *focusField.getFrame();
+					if (focusField.editable) {
+						if (frame.interfaces[FRAME_BOUNDS]) {
+							BYTE keyboardState[256];
+							BOOL ks = GetKeyboardState(keyboardState);
+							WORD ascii;
+							int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
+							if (len == 1) {
+								if (focusField.can_type()) {
+									focusField.pushInput(false, c2);
+									focusField.setCursor();
 									renderInputTextFocus = true;
 								}
 							}
@@ -868,148 +990,27 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				}
 			}
 		}
-		else if (wParam == VK_LEFT) {
-			if (focusChild != NULL) {
-				CHILD_TYPE type = focusChild->type;
-				if (type == CHILD_TYPE::COMBO_BOX) {
-					ComboBox* box = (ComboBox*)focusChild;
-					if (box->pos > 0) {
-						box->pos--;
-						renderDrawings = true;
-					}
-				}
-				else if (type == CHILD_TYPE::INPUT_FIELD) {
-					InputField* input = (InputField*)focusChild;
-					input->cursorLeft();
-				}
-			}
-		}
-		else if (wParam == VK_RIGHT) {
-			if (focusChild != NULL) {
-				CHILD_TYPE type = focusChild->type;
-				if (type == CHILD_TYPE::COMBO_BOX) {
-					ComboBox* box = (ComboBox*)focusChild;
-					if (box->pos < (box->options.size() - 1)) {
-						box->pos++;
-						renderDrawings = true;
-					}
-				}
-				else if (type == CHILD_TYPE::INPUT_FIELD) {
-					InputField* input = (InputField*)focusChild;
-					input->cursorRight();
-				}
-			}
-		}
-		else if (wParam == VK_UP) {
-		}
-		else if (wParam == VK_DOWN) {
-		}
-		else if (wParam == VK_BACK) {
-			if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
-				InputField* focusField = (InputField*)focusChild;
-				if (focusField->editable) {
-					if (focusField->input.size() > 0) {
-						focusField->popInput();
-						focusField->setCursor();
-						renderInputTextFocus = true;
-					}
-				}
-			}
-		}
-		else {
-			char c = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
-			char c2;
-			if (!CAPS)
-				c2 = tolower(c);
-			else {
-				char spec = NULL;
-				switch (wParam) {
-				case 49:
-					spec = '!';
-					break;
-				case 191:
-					spec = '?';
-					break;
-				case 57:
-					spec = '(';
-					break;
-				case 48:
-					spec = ')';
-					break;
-				case 189:
-					spec = '_';
-					break;
-				case 186:
-					spec = ':';
-					break;
-				case 222:
-					spec = '"';
-					break;
-				case 50:
-					spec = '@';
-					break;
-				case 51:
-					spec = '#';
-					break;
-				case 52:
-					spec = '$';
-					break;
-				case 53:
-					spec = '%';
-					break;
-				case 56:
-					spec = '*';
-					break;
-				default:
-					break;
-				}
-				if (spec != NULL)
-					c2 = spec;
+		break;
+		case WM_KEYUP:
+		{
+			if (wParam == VK_CAPITAL) {
+				if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
+					CAPS = true;
 				else
-					c2 = c;
-			}
-			if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
-				InputField& focusField = *(InputField*)focusChild;
-				InterfaceFrame& frame = *focusField.getFrame();
-				if (focusField.editable) {
-					if (frame.interfaces[FRAME_BOUNDS]) {
-						BYTE keyboardState[256];
-						BOOL ks = GetKeyboardState(keyboardState);
-						WORD ascii;
-						int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
-						if (len == 1) {
-							if (focusField.can_type()) {
-								focusField.pushInput(false, c2);
-								focusField.setCursor();
-								renderInputTextFocus = true;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	break;
-	case WM_KEYUP:
-	{
-		if (wParam == VK_CAPITAL) {
-			if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
-				CAPS = true;
-			else
-				CAPS = false;
-		}
-		if (wParam == VK_SHIFT) {
-			if (SHIFT_DOWN) {
-				if (CAPS) {
 					CAPS = false;
+			}
+			if (wParam == VK_SHIFT) {
+				if (SHIFT_DOWN) {
+					if (CAPS) {
+						CAPS = false;
+					}
+					SHIFT_DOWN = false;
 				}
-				SHIFT_DOWN = false;
 			}
 		}
-	}
-	break;
-	default:                      /* for messages that we don't deal with */
-		return DefWindowProc(hwnd, message, wParam, lParam);
+		break;
+		default:                      /* for messages that we don't deal with */
+			return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 
 	return 0;
@@ -1149,7 +1150,7 @@ void moveInterfacesOnSize()
 {
 	for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
 		InterfaceFrame* frame = *it;
-		if (frame && frame->pannable) 
+		if (frame && frame->pannable)
 		{
 			if (frame->withinClient())
 			{

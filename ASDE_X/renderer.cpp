@@ -19,7 +19,7 @@ std::vector<Mirror*> mirrors;
 
 bool renderAircraft = false, renderSector = false, renderButtons = false, renderLegend = false, renderInterfaces = false,
 renderInputTextFocus = false, renderConf = false, renderDate = false, renderFocus = false, renderDrawings = false,
-queueDeleteInterface = false, renderDepartures = false;
+queueDeleteInterface = false, renderDepartures = false, renderAllInputText = false;
 
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
@@ -318,45 +318,14 @@ void DrawInterfaces() {
 		}
 		renderInputTextFocus = false;
 	}
-
-	//frame specific input text
-	for (InterfaceFrame* frame : rendered_frames) {
-		if (frame && frame->render) {
-			if (frame->renderAllInputText) {
-				for (ChildFrame* child : frame->children) {
-					if (child != NULL && child->type == CHILD_TYPE::INPUT_FIELD) {
-						InputField* field = (InputField*)child;
-						if (field->inputTextDl != 0) {
-							glDeleteLists(field->inputTextDl, 1);
-							field->inputTextDl = 0;
-						}
-						if (field->inputCursorDl != 0) {
-							glDeleteLists(field->inputCursorDl, 1);
-							field->inputCursorDl = 0;
-						}
-						std::string f_input;
-						if (field->p_protected) {
-							f_input = field->pp_input;
-						}
-						else {
-							f_input = field->input;
-						}
-						RenderInputText(*field, field->inputTextDl, f_input, field->centered);
-						RenderInputCursor(*field, field->inputCursorDl, field->cursor_input, field->centered);
-					}
-				}
-				frame->renderAllInputText = false;
-			}
-			for (ChildFrame* child : frame->children) {
-				if (child) {
-					if (child->type == CHILD_TYPE::INPUT_FIELD) {
-						InputField* field = (InputField*)child;
-						CallInputTexts(frame, field);
-						CallInputCursor(frame, field);
-					}
-				}
-			}
-		}
+	if (renderAllInputText) 
+	{
+		RenderInterfaceInputText(true);
+		renderAllInputText = false;
+	}
+	else 
+	{
+		RenderInterfaceInputText(false);
 	}
 	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render) {
@@ -2136,5 +2105,47 @@ void CallInputCursor(InterfaceFrame* frame, InputField* field) {
 		}
 
 		glPopMatrix();
+	}
+}
+
+void RenderInterfaceInputText(bool do_all) {
+	//frame specific input text
+	for (InterfaceFrame* frame : rendered_frames) {
+		if (frame && frame->render) {
+			if (frame->renderAllInputText || do_all) {
+				for (ChildFrame* child : frame->children) {
+					if (child != NULL && child->type == CHILD_TYPE::INPUT_FIELD) {
+						InputField* field = (InputField*)child;
+						if (field->inputTextDl != 0) {
+							glDeleteLists(field->inputTextDl, 1);
+							field->inputTextDl = 0;
+						}
+						if (field->inputCursorDl != 0) {
+							glDeleteLists(field->inputCursorDl, 1);
+							field->inputCursorDl = 0;
+						}
+						std::string f_input;
+						if (field->p_protected) {
+							f_input = field->pp_input;
+						}
+						else {
+							f_input = field->input;
+						}
+						RenderInputText(*field, field->inputTextDl, f_input, field->centered);
+						RenderInputCursor(*field, field->inputCursorDl, field->cursor_input, field->centered);
+					}
+				}
+				frame->renderAllInputText = false;
+			}
+			for (ChildFrame* child : frame->children) {
+				if (child) {
+					if (child->type == CHILD_TYPE::INPUT_FIELD) {
+						InputField* field = (InputField*)child;
+						CallInputTexts(frame, field);
+						CallInputCursor(frame, field);
+					}
+				}
+			}
+		}
 	}
 }
