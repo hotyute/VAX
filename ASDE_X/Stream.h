@@ -55,6 +55,7 @@ class Stream {
 		int readSignedWordA();
 		int readSignedWordBigEndian();
 		int readSignedWordBigEndianA();
+		int read3Byte();
 		void readString(char* output);
 		unsigned char readUnsignedByte();
 		unsigned char readUnsignedByteA();

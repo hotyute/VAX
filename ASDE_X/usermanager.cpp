@@ -93,8 +93,7 @@ void decodePackets(int opCode, Stream &stream) {
 			AcfMap[cur->getCallsign()] = cur;
 			cur->unlock();
 		}
-		user1->setLatitude(latitude);
-		user1->setLongitude(longitude);
+		user1->handleMovement(latitude, longitude);
 	}
 	if (opCode == 16) {
 		int index = stream.readUnsignedWord();

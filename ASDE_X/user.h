@@ -78,6 +78,7 @@ public:
 	PrivateMessages* getPrivateMsgs() {
 		return private_messages;
 	}
+	void handleMovement(double n_lat, double n_lon);
 private:
 	int userIndex;
 	double latitude;

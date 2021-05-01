@@ -1,5 +1,7 @@
 #include "user.h"
 
+#include "usermanager.h"
+
 User::User(std::string callSign, int type, int controllerRating, int pilotRating) {
 	User::aircraft = NULL;
 	this->userIndex = -1;
@@ -14,4 +16,22 @@ User::~User() {
 	delete User::aircraft;
 	delete User::identity;
 	delete User::private_messages;
+}
+
+void User::handleMovement(double n_lat, double n_lon)
+{
+	double c_lat = latitude, c_lon = longitude;
+	if (c_lat != n_lat || c_lon != n_lon)
+	{// if moved
+		int type = identity->type;
+		if (type == PILOT_CLIENT) 
+		{
+			if (SHOW_VECTORS)
+			{
+				aircraft->setUpdateFlag(ACF_VECTOR, true);
+			}
+		}
+	}
+	latitude = n_lat;
+	longitude = n_lon;
 }

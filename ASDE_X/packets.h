@@ -3,9 +3,9 @@
 
 #include "user.h"
 
-extern void sendPositionUpdates(User &user);
-extern void sendPingPacket(User &user);
-extern void sendUserMessage(User &to, std::string message);
+void sendPositionUpdates(User &user);
+void sendPingPacket(User &user);
+void sendUserMessage(User &to, std::string message);
 
 void sendFlightPlanRequest(User& user_for);
 

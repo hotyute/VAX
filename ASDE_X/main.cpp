@@ -255,7 +255,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			Collision* collision = new Collision(cur, cur2);
 			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
 
-			User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
+			/*User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
 			Aircraft* cur3 = new Aircraft();
 			user3->setAircraft(cur3);
 			if (cur3 != NULL) {
@@ -274,7 +274,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 				cur3->setSquawkCode(std::to_string(random(1000, 9999)));
 			}
-			userStorage1[2] = user3;
+			userStorage1[2] = user3;*/
 
 			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
 			Aircraft* cur4 = new Aircraft();

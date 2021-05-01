@@ -1,5 +1,7 @@
 #include "aircraft.h"
 
+#include "projection.h"
+
 Aircraft::Aircraft() {
 	Aircraft::aMutex = CreateMutex(NULL, FALSE, L"Aircraft Mutex");
 	Aircraft::mode = 0;

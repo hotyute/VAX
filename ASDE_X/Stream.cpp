@@ -315,6 +315,17 @@ int Stream::readSignedWordBigEndianA() {
 	return i;
 }
 
+int Stream::read3Byte() {
+	currentOffset += 3;
+	int i = (((buffer[currentOffset - 3] & 0xff) << 16)
+		+ ((buffer[currentOffset - 2] & 0xff) << 8)
+		+ (0xff & buffer[currentOffset - 1]));
+	if (i > 8388607) {
+		i -= 16777216;
+	}
+	return i;
+}
+
 void Stream::readString(char* output) {
 	int count = 0;
 	byte b;
