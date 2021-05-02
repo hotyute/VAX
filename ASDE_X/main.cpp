@@ -276,7 +276,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 			userStorage1[2] = user3;*/
 
-			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
+/*			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
 			Aircraft* cur4 = new Aircraft();
 			user4->setAircraft(cur4);
 			if (cur4 != NULL) {
@@ -299,7 +299,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				fp.remarks = "/v/";
 				++fp.cycle;
 			}
-			userStorage1[3] = user4;
+			userStorage1[3] = user4;*/
 			break;
 		}
 		case WM_SIZE:

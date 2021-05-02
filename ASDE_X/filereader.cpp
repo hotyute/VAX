@@ -280,7 +280,7 @@ int FileReader::LoadADX(std::string path) {
 			} catch (...) 
 			{
 				std::stringstream box_message;
-				box_message << "Error int adx file at line: " << line_number;
+				box_message << "Error in adx file at line: " << line_number;
 				MessageBoxA(hWnd, box_message.str().c_str(), "Notice",
 					MB_OK | MB_ICONINFORMATION);
 			}
