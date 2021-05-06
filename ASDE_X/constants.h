@@ -1,6 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+extern const char* PILOT_RATINGS[];
+
 // if a display box is editable you need to leave the next slot free for the inputfield
 
 //Children Interfaces

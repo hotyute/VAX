@@ -123,8 +123,11 @@ void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 	_openedframe = this;
 	if (InterfaceFrame::id == CONNECT_INTERFACE)
 		InterfaceFrame::children[CONN_CALLSIGN_LABEL]->setFocus();
-	if (!multi_open)
-		single_opened_frames++;
+	if (!(InterfaceFrame::id == FP_INTERFACE && opened_fp))
+	{
+		if (!multi_open)
+			single_opened_frames++;
+	}
 }
 
 void InterfaceFrame::doClose()

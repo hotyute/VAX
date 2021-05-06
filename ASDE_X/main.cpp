@@ -1044,22 +1044,26 @@ bool processCommands(std::string command)
 		if (array3.size() == 2) {
 			capitalize(array3[1]);
 			std::string call_sign = array3[1];
-			std::unordered_map<std::string, User*>::const_iterator got = users_map.find(call_sign);
+			auto got = users_map.find(call_sign);
 			if (got != users_map.end()) {
 				User& user = *got->second;
 				if (user.getIdentity()->type == PILOT_CLIENT) {
 					FlightPlan& fp = *user.getAircraft()->getFlightPlan();
-					sendFlightPlanRequest(user);
-					if (fp.cycle) {
+					//sendFlightPlanRequest(user);
+					std::cout << fp.cycle << ", " << fp.acType << std::endl;
+					if (fp.cycle) 
+					{
 						Load_FlightPlan_Interface(-1, -1, user, true);
 					}
-					else {
+					else 
+					{
 						//TODO Change to No flight plan filed, rather than Unknown User
 						Load_Known_No_FlightPlan_Interface(-1, -1, user, true);
 					}
 				}
 			}
-			else {
+			else 
+			{
 				Load_Unknown_FlightPlan_Interface(-1, -1, (char*)call_sign.c_str(), true);
 			}
 		}

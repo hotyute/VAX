@@ -1,12 +1,14 @@
 #include "flightplan.h"
 
+#include "constants.h"
+
 User* opened_fp = NULL;
 
 std::unordered_map<std::string, std::vector<std::string>> departures;
 
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {
-	std::string values[13] = { call_sign, "Unknown", "R1", "C172/L" , "IFR", "KMIA", "MMUN",
+	std::string values[13] = { call_sign, "Unknown", PILOT_RATINGS[0], "C172/L" , "IFR", "KMIA", "MMUN",
 		"MYNN", "10000", "08R", "3306" , "SOME REALLY REALLY LONG LONG SOMETHING ROUTE THAT WE NEED TO GET IN TO TEST WHATS HAPPENING WITH AN EVEN LONGER ONE SO WE CAN TEST ALL THREE LINES" , "" };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = NULL;
@@ -30,14 +32,14 @@ void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
 #ifdef _DEBUG
 	std::cout << id.login_name << std::endl;
 #endif
-	std::string values[13] = { id.callsign, id.login_name, "R1", "A321/L" , "IFR",
+	std::string values[13] = { id.callsign, id.login_name, PILOT_RATINGS[id.pilot_rating], fp.acType , "IFR",
 		fp.departure, fp.arrival, fp.alternate, fp.cruise, fp.scratchPad, fp.squawkCode, fp.route, fp.remarks };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
 }
 
 void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool refresh) {
-	if (single_opened_frames) {
+	if (single_opened_frames && !opened_fp) {
 		sendErrorMessage("This is not allowed (Designated Interface)");
 		return;
 	}

@@ -11,6 +11,8 @@
 
 
 class tcpinterface {
+private:
+	HANDLE writeMutex;
 public:
 	SOCKET sConnect;
 	tcpinterface();
@@ -26,6 +28,9 @@ public:
 	Stream* out_stream;
 	bool hand_shake;
 	int current_op;
+
+	void w_lock();
+	void w_unlock();
 };
 
 extern tcpinterface* intter;

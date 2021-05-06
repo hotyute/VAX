@@ -166,8 +166,10 @@ void tcpinterface::sendMessage(Stream *stream) {
 		return;
 	}
 
+	w_lock();
 	DWORD what = send(tcpinterface::sConnect, stream->buffer, stream->currentOffset, NULL);
 	stream->currentOffset = 0;
+	w_unlock();
 }
 
 void tcpinterface::startT(HWND hWnd) {
@@ -258,4 +260,14 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 	}
 	std::cout << "Connected!\n";
 	return 1;
+}
+
+void tcpinterface::w_lock()
+{
+	WaitForSingleObject(writeMutex, INFINITE);
+}
+
+void tcpinterface::w_unlock()
+{
+	ReleaseMutex(writeMutex);
 }

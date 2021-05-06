@@ -21,8 +21,8 @@ class FlightPlan {
 public:
 	std::string departure, arrival, alternate, squawkCode;
 	std::string acType, scratchPad, cruise, route, remarks;
-	int flightRules;
-	int cycle;
+	int flightRules = 0;
+	int cycle = 0;
 };
 #endif
 
