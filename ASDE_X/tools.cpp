@@ -563,6 +563,15 @@ double angularCompensation(double heading) {
 	return ang;
 }
 
+double hdg(double heading)
+{
+	if (heading < 0)
+		heading += 360.0;
+	else if (heading > 360.0)
+		heading -= 360.0;
+	return heading;
+}
+
 double zoom_from_range() {
 	double nm_per_degree = 60;
 	double nm_per_foot = 0.000164579;

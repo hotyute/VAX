@@ -41,6 +41,7 @@ void decodePackets(int opCode, Stream &stream) {
 			aircraft1->setUpdateFlag(ACF_CALLSIGN, true);
 			aircraft1->setUpdateFlag(ACF_COLLISION, true);
 			aircraft1->setMode(squawkMode);
+			aircraft1->setSquawkCode(trans_code);
 			aircraft1->unlock();
 			user1->setAircraft(aircraft1);
 			addAircraftToMirrors(aircraft1);

@@ -93,6 +93,8 @@ int random(int start, int end);
 
 double angularCompensation(double heading);
 
+double hdg(double heading);
+
 double zoom_from_range();
 
 double NauticalMilesPerDegreeLon(double lat);
