@@ -69,9 +69,6 @@ DWORD tcpinterface::run() {
 					in.markReaderIndex();
 					if (nBytesReceived >= 11)
 					{
-						Stream& in = Stream(11);
-						in.currentOffset = 0;
-						memcpy(in.buffer, message, 11);
 						int loginCode = in.readUnsignedByte();
 						int index = in.readUnsignedWord();
 						long long updateTimeInMillis = in.readQWord();
