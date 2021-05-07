@@ -251,6 +251,15 @@ void LoadMainChatInterface(bool refresh) {
 	}
 }
 
+void sendSystemMessage(std::string message)
+{
+	main_chat_box->resetReaderIdx();
+	ChatLine* c = new ChatLine(std::string("[") + message + std::string("]"), CHAT_TYPE::SYSTEM);
+	main_chat_box->addLine(c);
+	c->playChatSound();
+	renderDrawings = true;
+}
+
 void sendErrorMessage(std::string message) {
 	main_chat_box->resetReaderIdx();
 	ChatLine* c = new ChatLine(std::string("[ERROR: ") + message + std::string("]"), CHAT_TYPE::ERRORS);

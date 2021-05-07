@@ -1444,7 +1444,7 @@
 #define psh1                            0x0400
 #define GL_STENCIL_BUFFER_BIT           0x00000400
 #define GL_FRONT_LEFT                   0x0400
-#define MAX_AIRCRAFT_SIZE               1024
+#define MAX_USER_SIZE               1024
 #define _WIN32_IE_IE401                 0x0401
 #define psh2                            0x0401
 #define GL_FRONT_RIGHT                  0x0401

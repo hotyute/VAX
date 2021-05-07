@@ -12,6 +12,8 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 
 void LoadMainChatInterface(bool refresh);
 
+void sendSystemMessage(std::string message);
+
 void sendErrorMessage(std::string message);
 
 void sendMainChatMessage(InputField* focusField);

@@ -32,6 +32,8 @@ PAINTSTRUCT ps;
 TCHAR szClassName[] = TEXT("WindowsApp");
 HWND text123, text124, lblNone, strUsers, lblNumUsrs;
 
+HMENU hFile = NULL;
+
 bool done = false, connected = false, show_departures = false, show_squawks = false;
 int single_opened_frames = 0;
 
@@ -46,6 +48,7 @@ CloseButton* connect_closeb = NULL;
 DisplayBox* main_chat_box = NULL;
 
 void handleConnect();
+void handleDisconnect();
 bool processCommands(std::string);
 void moveInterfacesOnSize();
 
@@ -170,7 +173,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		case WM_CREATE: {
 			HMENU hMenuBar = CreateMenu();
-			HMENU hFile = CreateMenu();
+			hFile = CreateMenu();
 			HMENU hSettings = CreateMenu();
 			HMENU hHelp = CreateMenu();
 
@@ -179,6 +182,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hHelp, L"&Help");
 
 			AppendMenu(hFile, MF_STRING, ID_FILE_CONNECT, L"&Connect to Sever...");
+			AppendMenu(hFile, MF_STRING, ID_FILE_DISCONNECT, L"&Disconnect...");
 			AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
 			AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
 			AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
@@ -187,6 +191,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
 
 			SetMenu(hwnd, hMenuBar);
+
+			EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_DISABLED);
 
 			//opengl stuff
 
@@ -200,7 +206,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			CreateThread(NULL, 0, OpenGLThread, hwnd, 0, 0);
 			CreateThread(NULL, 0, EventThread1, hwnd, 0, NULL);
 			CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
-			userStorage1.resize(MAX_AIRCRAFT_SIZE);
+			userStorage1.resize(MAX_USER_SIZE);
 
 			User* user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
 			Aircraft* cur = new Aircraft();
@@ -276,30 +282,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 			userStorage1[2] = user3;*/
 
-/*			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
-			Aircraft* cur4 = new Aircraft();
-			user4->setAircraft(cur4);
-			if (cur4 != NULL) {
-				cur4->lock();
-				cur4->setHeavy(false);
-				cur4->setCallsign("N108MS");
-				cur4->setLatitude(25.792179);
-				cur4->setLongitude(-80.305309);
-				cur4->setSpeed(0.0);
-				cur4->setHeading(220.0);
-				cur4->setUpdateFlag(ACF_CALLSIGN, true);
-				cur4->setUpdateFlag(ACF_COLLISION, true);
-				cur4->setMode(0);
-				AcfMap[cur4->getCallsign()] = cur4;
-				cur4->unlock();
+			/*			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
+						Aircraft* cur4 = new Aircraft();
+						user4->setAircraft(cur4);
+						if (cur4 != NULL) {
+							cur4->lock();
+							cur4->setHeavy(false);
+							cur4->setCallsign("N108MS");
+							cur4->setLatitude(25.792179);
+							cur4->setLongitude(-80.305309);
+							cur4->setSpeed(0.0);
+							cur4->setHeading(220.0);
+							cur4->setUpdateFlag(ACF_CALLSIGN, true);
+							cur4->setUpdateFlag(ACF_COLLISION, true);
+							cur4->setMode(0);
+							AcfMap[cur4->getCallsign()] = cur4;
+							cur4->unlock();
 
-				FlightPlan& fp = *cur4->getFlightPlan();
-				fp.departure = "KMIA";
-				fp.route = "SKIPS1.SKIPS MNATE";
-				fp.remarks = "/v/";
-				++fp.cycle;
-			}
-			userStorage1[3] = user4;*/
+							FlightPlan& fp = *cur4->getFlightPlan();
+							fp.departure = "KMIA";
+							fp.route = "SKIPS1.SKIPS MNATE";
+							fp.remarks = "/v/";
+							++fp.cycle;
+						}
+						userStorage1[3] = user4;*/
 			break;
 		}
 		case WM_SIZE:
@@ -375,6 +381,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				case ID_FILE_CONNECT:
 				{
 					handleConnect();
+				}
+				break;
+				case ID_FILE_DISCONNECT:
+				{
+					handleDisconnect();
 				}
 				break;
 				case ID_SETTINGS_DEPARTS:
@@ -1037,6 +1048,13 @@ void handleConnect() {
 	}
 }
 
+void handleDisconnect() {
+	if (!connected) {
+		return;
+	}
+	disconnect();
+}
+
 bool processCommands(std::string command)
 {
 	if (boost::istarts_with(command, ".SS")) {
@@ -1051,18 +1069,18 @@ bool processCommands(std::string command)
 					FlightPlan& fp = *user.getAircraft()->getFlightPlan();
 					//sendFlightPlanRequest(user);
 					std::cout << fp.cycle << ", " << fp.acType << std::endl;
-					if (fp.cycle) 
+					if (fp.cycle)
 					{
 						Load_FlightPlan_Interface(-1, -1, user, true);
 					}
-					else 
+					else
 					{
 						//TODO Change to No flight plan filed, rather than Unknown User
 						Load_Known_No_FlightPlan_Interface(-1, -1, user, true);
 					}
 				}
 			}
-			else 
+			else
 			{
 				Load_Unknown_FlightPlan_Interface(-1, -1, (char*)call_sign.c_str(), true);
 			}
@@ -1167,6 +1185,7 @@ void moveInterfacesOnSize()
 void connect() {
 	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
 		connected = true;
+		EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_ENABLED);
 		Stream stream = Stream(200);
 		int type = USER->getIdentity()->type;
 		intter->hand_shake = true;
@@ -1201,6 +1220,20 @@ void connect() {
 
 void disconnect()
 {
+	sendSystemMessage("Disconnected.");
+	intter->disconnect_socket();
+	for (int i = 1; i < MAX_USER_SIZE; i++)
+	{
+		User* user = userStorage1[1];
+		if (user)
+		{
+			delete user;
+			userStorage1[i] = nullptr;
+		}
+	}
+	AcfMap.clear();
+	connected = false;
+	EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_DISABLED);
 }
 
 DWORD WINAPI EventThread1(LPVOID lpParameter) {

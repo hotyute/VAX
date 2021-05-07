@@ -1,8 +1,14 @@
 #include "clinc2.h"
 
+#include <thread>
+#include <iostream>
+#include <chrono>
+
 #include "events.h"
 #include "config.h"
 #include "usermanager.h"
+
+using namespace std::chrono_literals;
 
 tcpinterface* intter = new tcpinterface();
 
@@ -32,8 +38,16 @@ DWORD WINAPI tcpinterface::staticStart(void* param) {
 }
 
 DWORD tcpinterface::run() {
-	bool closed = false;
 	while (!quit) {
+		if (closed)
+		{
+			auto start = std::chrono::high_resolution_clock::now();
+			std::this_thread::sleep_for(30ms);
+			auto end = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double, std::milli> elapsed = end - start;
+			continue;
+		}
+
 		ZeroMemory(message, sizeof(message));
 
 		FD_ZERO(&rfds);
@@ -47,6 +61,7 @@ DWORD tcpinterface::run() {
 			if (nBytesReceived <= 0)
 			{
 				in_stream->clearBuf();
+				disconnect();
 				closed = true;
 				printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
 				break;
@@ -107,6 +122,8 @@ DWORD tcpinterface::run() {
 	}
 	if (retval == SOCKET_ERROR)
 	{
+		in_stream->clearBuf();
+		disconnect();
 		//do somethin
 	}
 	return 0;
@@ -194,6 +211,18 @@ void tcpinterface::startT(HWND hWnd) {
 	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)staticStart, (void*)this, 0, NULL);
 }
 
+int tcpinterface::disconnect_socket() {
+	int iResult = shutdown(tcpinterface::sConnect, 0x01);
+	closed = true;
+	if (iResult == SOCKET_ERROR) {
+		printf("shutdown failed: %d\n", WSAGetLastError());
+		closesocket(tcpinterface::sConnect);
+		WSACleanup();
+		return 1;
+	}
+	return 0;
+}
+
 int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) {
 	int err;
 	WSADATA wsaData;
@@ -257,7 +286,7 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 			{
 				if (FD_ISSET(tcpinterface::sConnect, &Write))
 				{
-					std::cout << "Connected!\n";
+					std::cout << "Had to Re-Process, but Connected!\n";
 				}
 				if (FD_ISSET(tcpinterface::sConnect, &Err))
 				{
@@ -276,6 +305,7 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 			return 0;
 		}
 	}
+	closed = false;
 	std::cout << "Connected!\n";
 	return 1;
 }

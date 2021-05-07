@@ -20,6 +20,7 @@ public:
 	DWORD run();
 	void sendMessage(Stream*);
 	void startT(HWND);
+	int disconnect_socket();
 	int connectNew(HWND, std::string, unsigned short);
 
 	char message[5000];
@@ -32,6 +33,7 @@ public:
 	int TimeoutSec1 = 30; //
 	fd_set rfds;
 	int retval;
+	bool closed = true;
 
 	void w_lock();
 	void w_unlock();
