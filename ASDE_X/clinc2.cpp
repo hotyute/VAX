@@ -32,13 +32,9 @@ DWORD WINAPI tcpinterface::staticStart(void* param) {
 }
 
 DWORD tcpinterface::run() {
-	memset(tcpinterface::message, 0, 5000);
-	timeout1.tv_sec = TimeoutSec1;
-	timeout1.tv_usec = 0;
 	bool closed = false;
 	while (!quit) {
 		ZeroMemory(message, sizeof(message));
-		int size1 = 0;
 
 		FD_ZERO(&rfds);
 		FD_SET(tcpinterface::sConnect, &rfds);
@@ -93,13 +89,16 @@ DWORD tcpinterface::run() {
 							in.deleteReaderBlock();
 						}
 					}
+					else
+					{
+						in.resetReaderIndex();
+					}
 				}
 			}
 
 			if (!hand_shake) {
 				if (in.remaining() > 0)
 				{
-					//std::cout << aircraft->getIdentity()->callsign << ", " << in.peek() << std::endl;
 					decode(in);
 				}
 			}
