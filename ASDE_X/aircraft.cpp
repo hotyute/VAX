@@ -2,7 +2,10 @@
 
 #include "projection.h"
 
-Aircraft::Aircraft() {
+Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating) 
+	: User::User(callSign, controllerRating, pilotRating) 
+{
+	identity->type = CLIENT_TYPES::PILOT_CLIENT;
 	Aircraft::aMutex = CreateMutex(NULL, FALSE, L"Aircraft Mutex");
 	Aircraft::mode = 0;
 	Aircraft::squawkCode = "0000";
@@ -49,14 +52,6 @@ void Aircraft::setRenderFlag(int flag, bool val)
 FlightPlan* Aircraft::getFlightPlan()
 {
 	return Aircraft::flight_plan;
-}
-
-std::string Aircraft::getCallsign() {
-	return Aircraft::callsign;
-}
-
-void Aircraft::setCallsign(std::string value) {
-	Aircraft::callsign = value;
 }
 
 void Aircraft::setAvailableTag(std::string value)

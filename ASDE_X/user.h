@@ -6,8 +6,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "aircraft.h"
 #include "gui.h"
+#include "constants.h"
 
 class User;
 
@@ -29,7 +29,7 @@ struct Identity {
 	int id;
 	int controller_rating;
 	int pilot_rating = 0;
-	int type;
+	CLIENT_TYPES type;
 };
 #endif
 
@@ -37,20 +37,14 @@ struct Identity {
 #define __User_user_h
 class User {
 public:
-	User(std::string, int, int, int);
-	~User();
-	void setLatitude(double value) {
-		this->latitude = value;
-	}
-	double getLatitude() {
-		return this->latitude;
-	}
-	void setLongitude(double value) {
-		this->longitude = value;
-	}
-	double getLongitude() {
-		return this->longitude;
-	}
+	User(std::string, int, int);
+	virtual ~User();
+	virtual void setLatitude(double value) = 0;
+	virtual double getLatitude() = 0;
+	virtual void setLongitude(double value) = 0;
+	virtual double getLongitude() = 0;
+	std::string getCallsign() { return identity->callsign; }
+	void setCallsign(std::string new_callsign) { identity->callsign = new_callsign; }
 	Identity* getIdentity() {
 		return this->identity;
 	}
@@ -69,24 +63,18 @@ public:
 	void setUpdateTime(long long value) {
 		update_time = value;
 	}
-	Aircraft* getAircraft() {
-		return aircraft;
-	}
-	void setAircraft(Aircraft* value) {
-		aircraft = value;
-	}
 	PrivateMessages* getPrivateMsgs() {
 		return private_messages;
 	}
 	void handleMovement(double n_lat, double n_lon);
 private:
-	int userIndex;
-	double latitude;
-	double longitude;
-	Identity* identity;
-	Aircraft* aircraft;
 	PrivateMessages* private_messages;
 	long long update_time;
+protected:
+	int userIndex;
+	Identity* identity;
+	double latitude;
+	double longitude;
 };
 #endif
 

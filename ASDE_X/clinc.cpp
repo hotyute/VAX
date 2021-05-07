@@ -90,9 +90,8 @@ DWORD tcpinterface1::run() {
 										double roll = num3 / 1024.0 * -360.0;
 										double heading = num4 / 1024.0 * 360.0;
 										if (!cur) {
-											cur = new Aircraft();
+											cur = new Aircraft(callsign, 0, 0);
 											cur->lock();
-											cur->setCallsign(callsign);
 											cur->setLatitude(atof(array3[4].c_str()));
 											cur->setLongitude(atof(array3[5].c_str()));
 											cur->setSpeed(atof(array3[7].c_str()));

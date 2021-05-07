@@ -2,12 +2,13 @@
 #define PACKETS_H
 
 #include "user.h"
+#include "aircraft.h"
 
 void sendPositionUpdates(User &user);
 void sendPingPacket(User &user);
 void sendUserMessage(User &to, std::string message);
 
-void sendFlightPlanRequest(User& user_for);
+void sendFlightPlanRequest(Aircraft& user_for);
 
 const int _AIRCRAFT_POS_UPDATE = 1,
 _UPDATE_TRANSPONDER = 2,

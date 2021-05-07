@@ -14,21 +14,19 @@ void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool
 	opened_fp = NULL;
 }
 
-void Load_Known_No_FlightPlan_Interface(double x, double y, User& user, bool refresh)
+void Load_Known_No_FlightPlan_Interface(double x, double y, Aircraft& user, bool refresh)
 {
 	Identity& id = *user.getIdentity();
-	Aircraft& acf = *user.getAircraft();
 	std::string values[13] = { id.callsign, id.login_name, "", "" , "IFR",
 		"", "", "", "", "", "", "", "" };
 	Load_FlightPlan_Interface(x, y, values, refresh);
 	opened_fp = &user;
 }
 
-void Load_FlightPlan_Interface(double x, double y, User& user, bool refresh)
+void Load_FlightPlan_Interface(double x, double y, Aircraft& user, bool refresh)
 {
 	Identity& id = *user.getIdentity();
-	Aircraft& acf = *user.getAircraft();
-	FlightPlan& fp = *user.getAircraft()->getFlightPlan();
+	FlightPlan& fp = *user.getFlightPlan();
 #ifdef _DEBUG
 	std::cout << id.login_name << std::endl;
 #endif

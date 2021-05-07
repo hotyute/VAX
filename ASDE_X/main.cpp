@@ -208,13 +208,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
 			userStorage1.resize(MAX_USER_SIZE);
 
-			User* user1 = new User("AAL2", PILOT_CLIENT, 0, 0);
-			Aircraft* cur = new Aircraft();
-			user1->setAircraft(cur);
+			Aircraft* cur = new Aircraft("AAL2", 0, 0);
 			if (cur != NULL) {
 				cur->lock();
 				cur->setHeavy(true);
-				cur->setCallsign("AAL2");
 				cur->setLatitude(25.800704);
 				cur->setLongitude(-80.300770);
 				cur->setSpeed(0.0);
@@ -223,7 +220,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				cur->setUpdateFlag(ACF_COLLISION, true);
 				cur->setCollision(true);
 				cur->setMode(1);
-				AcfMap[cur->getCallsign()] = cur;
+				AcfMap[((User*)cur)->getCallsign()] = cur;
 				cur->unlock();
 
 				cur->setSquawkCode(std::to_string(random(1000, 9999)));
@@ -234,14 +231,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				fp.remarks = "/v/";
 				++fp.cycle;
 			}
-			userStorage1[0] = user1;
-			User* user2 = new User("EGF4427", PILOT_CLIENT, 0, 0);
-			Aircraft* cur2 = new Aircraft();
-			user2->setAircraft(cur2);
+			userStorage1[0] = (User*)cur;
+
+
+			Aircraft* cur2 = new Aircraft("EGF4427", 0, 0);
 			if (cur2 != NULL) {
 				cur2->lock();
 				cur2->setHeavy(false);
-				cur2->setCallsign("EGF4427");
 				cur2->setLatitude(25.798267);
 				cur2->setLongitude(-80.282544);
 				cur2->setSpeed(0.0);
@@ -255,57 +251,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 				cur2->setSquawkCode(std::to_string(random(1000, 9999)));
 			}
-			userStorage1[1] = user2;
+			userStorage1[1] = cur2;
+
 			cur->collisionAcf = cur2;
 
 			Collision* collision = new Collision(cur, cur2);
 			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
 
-			/*User* user3 = new User("DAL220", PILOT_CLIENT, 0, 0);
-			Aircraft* cur3 = new Aircraft();
-			user3->setAircraft(cur3);
-			if (cur3 != NULL) {
-				cur3->lock();
-				cur3->setHeavy(false);
-				cur3->setCallsign("DAL220");
-				cur3->setLatitude(25.798429);
-				cur3->setLongitude(-80.278852);
-				cur3->setSpeed(0.0);
-				cur3->setHeading(120.0);
-				cur3->setUpdateFlag(ACF_CALLSIGN, true);
-				cur3->setUpdateFlag(ACF_COLLISION, true);
-				cur3->setMode(1);
-				AcfMap[cur3->getCallsign()] = cur3;
-				cur3->unlock();
-
-				cur3->setSquawkCode(std::to_string(random(1000, 9999)));
-			}
-			userStorage1[2] = user3;*/
-
-			/*			User* user4 = new User("N108MS", PILOT_CLIENT, 0, 0);
-						Aircraft* cur4 = new Aircraft();
-						user4->setAircraft(cur4);
-						if (cur4 != NULL) {
-							cur4->lock();
-							cur4->setHeavy(false);
-							cur4->setCallsign("N108MS");
-							cur4->setLatitude(25.792179);
-							cur4->setLongitude(-80.305309);
-							cur4->setSpeed(0.0);
-							cur4->setHeading(220.0);
-							cur4->setUpdateFlag(ACF_CALLSIGN, true);
-							cur4->setUpdateFlag(ACF_COLLISION, true);
-							cur4->setMode(0);
-							AcfMap[cur4->getCallsign()] = cur4;
-							cur4->unlock();
-
-							FlightPlan& fp = *cur4->getFlightPlan();
-							fp.departure = "KMIA";
-							fp.route = "SKIPS1.SKIPS MNATE";
-							fp.remarks = "/v/";
-							++fp.cycle;
-						}
-						userStorage1[3] = user4;*/
 			break;
 		}
 		case WM_SIZE:
@@ -1062,20 +1014,18 @@ bool processCommands(std::string command)
 		if (array3.size() == 2) {
 			capitalize(array3[1]);
 			std::string call_sign = array3[1];
-			auto got = users_map.find(call_sign);
-			if (got != users_map.end()) {
-				User& user = *got->second;
-				if (user.getIdentity()->type == PILOT_CLIENT) {
-					FlightPlan& fp = *user.getAircraft()->getFlightPlan();
-					//sendFlightPlanRequest(user);
-					std::cout << fp.cycle << ", " << fp.acType << std::endl;
+			auto got = AcfMap.find(call_sign);
+			if (got != AcfMap.end()) {
+				Aircraft& user = *got->second;
+				if (user.getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) {
+					FlightPlan& fp = *user.getFlightPlan();
+					sendFlightPlanRequest(user);
 					if (fp.cycle)
 					{
 						Load_FlightPlan_Interface(-1, -1, user, true);
 					}
 					else
 					{
-						//TODO Change to No flight plan filed, rather than Unknown User
 						Load_Known_No_FlightPlan_Interface(-1, -1, user, true);
 					}
 				}
@@ -1187,7 +1137,7 @@ void connect() {
 		connected = true;
 		EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_ENABLED);
 		Stream stream = Stream(200);
-		int type = USER->getIdentity()->type;
+		CLIENT_TYPES type = USER->getIdentity()->type;
 		intter->hand_shake = true;
 		intter->current_op = 45;
 		stream.createFrameVarSizeWord(45);
@@ -1207,7 +1157,7 @@ void connect() {
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
 		stream.writeWord(600);
 		stream.writeByte(type);
-		if (type == PILOT_CLIENT) {
+		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			stream.writeString("King Air 350");
 			stream.writeString("0000");
 			stream.writeByte(0);

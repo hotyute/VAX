@@ -6,7 +6,7 @@
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
 
-User* USER = new User("(NOT_LOGGED)", CONTROLLER_CLIENT, 11, 0);
+Controller* USER = new Controller("(NOT_LOGGED)", 11, 0);
 
 void decodePackets(int opCode, Stream& stream) {
 	if (opCode == 10) {
@@ -24,9 +24,7 @@ void decodePackets(int opCode, Stream& stream) {
 		stream.readString(callSign1);
 		stream.readString(username);
 		stream.readString(full_name);
-		User* user1 = new User(callSign1, type, 0, 0);
-		user1->getIdentity()->login_name = full_name;
-		user1->getIdentity()->username = username;
+		User* user1 = nullptr;
 		if (type == CONTROLLER_CLIENT) 
 		{
 
@@ -38,7 +36,8 @@ void decodePackets(int opCode, Stream& stream) {
 			char trans_code[1024];
 			stream.readString(trans_code);
 			int squawkMode = stream.readUnsignedByte();
-			Aircraft* aircraft1 = new Aircraft();
+			Aircraft* aircraft1 = new Aircraft(callSign1, 0, 0);
+			user1 = (User*)aircraft1;
 			aircraft1->lock();
 			aircraft1->setCallsign(callSign1);
 			aircraft1->setUpdateFlag(ACF_CALLSIGN, true);
@@ -46,10 +45,13 @@ void decodePackets(int opCode, Stream& stream) {
 			aircraft1->setMode(squawkMode);
 			aircraft1->setSquawkCode(trans_code);
 			aircraft1->unlock();
-			user1->setAircraft(aircraft1);
 			addAircraftToMirrors(aircraft1);
-			users_map.emplace(user1->getAircraft()->getCallsign(), user1);
+			AcfMap[aircraft1->getCallsign()] = aircraft1;
 		}
+		user1->getIdentity()->login_name = full_name;
+		user1->getIdentity()->username = username;
+
+		users_map.emplace(user1->getCallsign(), user1);
 		user1->setUserIndex(index);
 		userStorage1[index] = user1;
 
@@ -60,10 +62,12 @@ void decodePackets(int opCode, Stream& stream) {
 		if (user1 != NULL) {
 			userStorage1[index] = NULL;
 			int type = user1->getIdentity()->type;
-			if (type == PILOT_CLIENT) {
-				users_map.erase(user1->getAircraft()->getCallsign());
+			if (type == PILOT_CLIENT) 
+			{
+				users_map.erase(user1->getCallsign());
 			}
-			else if (type == CONTROLLER_CLIENT) {
+			else if (type == CONTROLLER_CLIENT) 
+			{
 
 			}
 			delete user1;
@@ -87,15 +91,14 @@ void decodePackets(int opCode, Stream& stream) {
 		int groundSpeed = stream.readUnsignedWord();
 		long long alt = stream.readQWord();
 		double altitude = *(double*)&alt;
-		Aircraft* cur = user1->getAircraft();
-		if (cur != NULL) {
+		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) {
+			Aircraft* cur = (Aircraft*)user1;
 			cur->lock();
 			cur->setHeavy(false);
 			cur->setLatitude(latitude);
 			cur->setLongitude(longitude);
 			cur->setSpeed((double)groundSpeed);
 			cur->setHeading(heading);
-			AcfMap[cur->getCallsign()] = cur;
 			cur->unlock();
 		}
 		user1->handleMovement(latitude, longitude);
@@ -105,9 +108,9 @@ void decodePackets(int opCode, Stream& stream) {
 		int mode = stream.readUnsignedByte();
 		User* user1 = userStorage1.at(index);
 		if (user1 != NULL) {
-			int type = user1->getIdentity()->type;
-			if (type == PILOT_CLIENT) {
-				Aircraft* acf = user1->getAircraft();
+			CLIENT_TYPES type = user1->getIdentity()->type;
+			if (type == CLIENT_TYPES::PILOT_CLIENT) {
+				Aircraft* acf = (Aircraft*)user1;
 				if (acf != NULL) {
 					acf->setMode(mode);
 				}
@@ -148,27 +151,29 @@ void decodePackets(int opCode, Stream& stream) {
 			stream.readString(remarks);
 
 			if (user1 != NULL) {
-				User& user_to_update = *user1;
+				CLIENT_TYPES type = user1->getIdentity()->type;
+				if (type == CLIENT_TYPES::PILOT_CLIENT) {
+					Aircraft& acf = *((Aircraft*)user1);
+					FlightPlan& fp = *acf.getFlightPlan();
 
-				FlightPlan& fp = *user_to_update.getAircraft()->getFlightPlan();
+					fp.cycle = cur_cycle;
 
-				fp.cycle = cur_cycle;
+					fp.flightRules = fr;
 
-				fp.flightRules = fr;
+					fp.squawkCode = assigned_squawk;
+					fp.departure = departure;
+					fp.arrival = arrival;
+					fp.alternate = alternate;
+					fp.cruise = cruise;
+					fp.acType = ac_type;
+					fp.scratchPad = scratch;
+					fp.route = route;
+					fp.remarks = remarks;
 
-				fp.squawkCode = assigned_squawk;
-				fp.departure = departure;
-				fp.arrival = arrival;
-				fp.alternate = alternate;
-				fp.cruise = cruise;
-				fp.acType = ac_type;
-				fp.scratchPad = scratch;
-				fp.route = route;
-				fp.remarks = remarks;
-
-				//TODO open Flight Plan
-				if (opened_fp == user1 && cur_cycle) {
-					Load_FlightPlan_Interface(-1, -1, user_to_update, true);
+					//TODO open Flight Plan
+					if (opened_fp == user1 && cur_cycle) {
+						Load_FlightPlan_Interface(-1, -1, acf, true);
+					}
 				}
 			}
 		}

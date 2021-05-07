@@ -96,6 +96,7 @@
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="constants.cpp" />
+    <ClCompile Include="controller.cpp" />
     <ClCompile Include="dxfdrawing.cpp" />
     <ClCompile Include="events.cpp" />
     <ClCompile Include="filereader.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="collision.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="controller.h" />
     <ClInclude Include="dxfdrawing.h" />
     <ClInclude Include="events.h" />
     <ClInclude Include="filereader.h" />

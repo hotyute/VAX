@@ -44,11 +44,11 @@ void sendPrivateMessage(User& to, std::string message) {
 	intter->sendMessage(&out);
 }
 
-void sendFlightPlanRequest(User& user_for) {
+void sendFlightPlanRequest(Aircraft& user_for) {
 	Stream& out = Stream(5);
 	out.createFrame(_FLIGHT_PLAN_REQ);
 	out.writeWord(user_for.getUserIndex());
-	out.writeWord(user_for.getAircraft()->getFlightPlan()->cycle);
+	out.writeWord(user_for.getFlightPlan()->cycle);
 	intter->sendMessage(&out);
 }
 
