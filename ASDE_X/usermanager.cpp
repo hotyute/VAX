@@ -29,7 +29,10 @@ void decodePackets(int opCode, Stream& stream) {
 		{
 			Controller* controller1 = new Controller(callSign1, 0, 0);
 			user1 = (User*)controller1;
+			controller1->lock();
 			controller1->setCallsign(callSign1);
+			controller1->unlock();
+			controller_map[callSign1] = controller1;
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT) 
 		{
@@ -49,7 +52,7 @@ void decodePackets(int opCode, Stream& stream) {
 			aircraft1->setSquawkCode(trans_code);
 			aircraft1->unlock();
 			addAircraftToMirrors(aircraft1);
-			AcfMap[aircraft1->getCallsign()] = aircraft1;
+			AcfMap[callSign1] = aircraft1;
 		}
 
 		if (user1) {
