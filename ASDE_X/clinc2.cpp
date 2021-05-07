@@ -18,19 +18,18 @@ static int packetSizes[256][2] = {
 };
 
 tcpinterface::tcpinterface() {
-	this->out_stream = new Stream(5000);
+	this->in_stream = new Stream(5000);
+	this->in_stream->clearBuf();
+	memset(tcpinterface::message, 0, 5000);
+	timeout1.tv_sec = TimeoutSec1;
+	timeout1.tv_usec = 0;
+	sConnect = INVALID_SOCKET;
 }
 
 DWORD WINAPI tcpinterface::staticStart(void* param) {
-	tcpinterface* tcp = (tcpinterface*) param;
+	tcpinterface* tcp = (tcpinterface*)param;
 	return tcp->run();
 }
-int nBytesReceived = 0;
-bool fBreak = false;
-TIMEVAL timeout1;
-int TimeoutSec1 = 30; //
-fd_set rfds;
-int retval;
 
 DWORD tcpinterface::run() {
 	memset(tcpinterface::message, 0, 5000);
@@ -39,129 +38,152 @@ DWORD tcpinterface::run() {
 	bool closed = false;
 	while (!quit) {
 		ZeroMemory(message, sizeof(message));
-		fBreak = false;
-		tcpinterface::packetType = -1;
-		tcpinterface::packetSize = -3;
 		int size1 = 0;
 
 		FD_ZERO(&rfds);
 		FD_SET(tcpinterface::sConnect, &rfds);
 
-		retval = select(tcpinterface::sConnect+1,&rfds,0,0,&timeout1);
+		retval = select(tcpinterface::sConnect + 1, &rfds, 0, 0, &timeout1);
 
-		while (!fBreak) {
-			if(FD_ISSET(tcpinterface::sConnect, &rfds))
+		if (FD_ISSET(tcpinterface::sConnect, &rfds))
+		{
+			nBytesReceived = recv(tcpinterface::sConnect, message, 5000, 0);
+			if (nBytesReceived <= 0)
 			{
-				nBytesReceived = recv(tcpinterface::sConnect, message, 5000, 0);
-				if(nBytesReceived <= 0) 
+				in_stream->clearBuf();
+				closed = true;
+				printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
+				break;
+			}
+
+			if (nBytesReceived == SOCKET_ERROR)
+				break;
+
+			if (nBytesReceived == 0)
+				continue;
+
+			Stream& in = *in_stream;
+			memcpy(in.buffer + in.length, message, nBytesReceived);
+			in.length += nBytesReceived;
+
+			if (tcpinterface::hand_shake)
+			{
+				if (tcpinterface::current_op == 45)
 				{
-					closed = true;
-					printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
-					break;
-				}
-
-				if (nBytesReceived == SOCKET_ERROR)
-					break;
-
-				if(nBytesReceived == 0) 
-					continue;
-
-				if (tcpinterface::hand_shake) 
-				{
-					if (tcpinterface::current_op == 45) 
+					in.markReaderIndex();
+					if (nBytesReceived >= 11)
 					{
-						if (nBytesReceived >= 11) 
+						Stream& in = Stream(11);
+						in.currentOffset = 0;
+						memcpy(in.buffer, message, 11);
+						int loginCode = in.readUnsignedByte();
+						int index = in.readUnsignedWord();
+						long long updateTimeInMillis = in.readQWord();
+						if (loginCode == 1)
 						{
-							Stream &in = Stream(11);
-							in.currentOffset = 0;
-							memcpy(in.buffer, message, 11);
-							int loginCode = in.readUnsignedByte();
-							int index = in.readUnsignedWord();
-							long long updateTimeInMillis = in.readQWord();
-							if (loginCode == 1) 
-							{
-								//setIndex
-								//setUpdateTimeinMillis
-								//sendUpdates
-								USER->setUserIndex(index);
-								USER->setUpdateTime(updateTimeInMillis);
-								Event &position_updates = PositionUpdates();
-								position_updates.eAction.setTicks(0);
-								event_manager1->addEvent(&position_updates);
-								tcpinterface::hand_shake = false;
-								fBreak = true;
-							}
-						}
-					}
-				} 
-				else 
-				{
-					int available = nBytesReceived;
-					int offset = 0;
-					packetType = (unsigned char)(message[offset++]);
-					available--;
-					if (packetType != -1) 
-					{
-						for(int j = 0; j < 256; j++) 
-						{
-							if (packetSizes[j][0] == packetType) 
-							{
-								packetSize = packetSizes[j][1];
-								break;
-							}
-						}
-						if (packetSize == -1) 
-						{
-							if (available >= 1) 
-							{
-								packetSize = (unsigned char)message[offset++];
-								available--;
-							}
-						} 
-						else if (packetSize == -2) 
-						{
-							if (available >= 2) 
-							{
-
-								int firstByte = (((unsigned char)message[offset++]) << 8);
-								packetSize = firstByte + (unsigned char)message[offset++];
-								available -= 2;
-							}
-						} 
-						else if (packetSize == -3) 
-						{
-							//packetSize = available; //Uncomment to auto buffer
-						}
-#ifdef _DEBUG
-						std::cout << "Packet_Id: " << (int)packetType << ", Packet_Size: " << packetSize << ", Bytes_Ava: " << available << std::endl;
-#endif
-						if (available >= packetSize) 
-						{
-							Stream &stream_in = Stream(tcpinterface::packetSize);
-							stream_in.currentOffset = 0;
-							memcpy(stream_in.buffer, message + offset, packetSize);
-							//handle
-							decodePackets(tcpinterface::packetType, stream_in);
-							fBreak = true;
+							//setIndex
+							//setUpdateTimeinMillis
+							//sendUpdates
+							USER->setUserIndex(index);
+							USER->setUpdateTime(updateTimeInMillis);
+							Event& position_updates = PositionUpdates();
+							position_updates.eAction.setTicks(0);
+							event_manager1->addEvent(&position_updates);
+							tcpinterface::hand_shake = false;
+							in.deleteReaderBlock();
 						}
 					}
 				}
 			}
-			FD_ZERO(&rfds);
-			FD_SET(tcpinterface::sConnect, &rfds);
 
-			retval = select(tcpinterface::sConnect+1,&rfds,0,0,&timeout1);
+			if (!hand_shake) {
+				if (in.remaining() > 0)
+				{
+					//std::cout << aircraft->getIdentity()->callsign << ", " << in.peek() << std::endl;
+					decode(in);
+				}
+			}
 		}
-		if (retval == SOCKET_ERROR)
-		{
-			//do somethin
-		}
+		FD_ZERO(&rfds);
+		FD_SET(tcpinterface::sConnect, &rfds);
+
+		retval = select(tcpinterface::sConnect + 1, &rfds, 0, 0, &timeout1);
+	}
+	if (retval == SOCKET_ERROR)
+	{
+		//do somethin
 	}
 	return 0;
 }
 
-void tcpinterface::sendMessage(Stream *stream) {
-	if(stream->currentOffset == 0) {
+void decode(Stream& in)
+{
+	while (in.remaining() > 0)
+	{
+		in.markReaderIndex();
+		int opCode = in.readUnsignedByte(), length = -3;
+		if (opCode != -1)
+		{
+			for (int j = 0; j < 256; j++)
+			{
+				if (packetSizes[j][0] == opCode)
+				{
+					length = packetSizes[j][1];
+					break;
+				}
+			}
+			if (length == -1)
+			{
+				if (in.remaining() >= 1)
+				{
+					length = in.readUnsignedByte();
+				}
+				else
+				{
+					in.resetReaderIndex();
+					break;
+				}
+			}
+			else if (length == -2)
+			{
+				if (in.remaining() >= 2)
+				{
+					length = in.readUnsignedWord();
+				}
+				else
+				{
+					in.resetReaderIndex();
+					break;
+				}
+			}
+			else if (length == -3)
+			{
+			#ifdef _DEBUG
+				std::cout << "Unhandled Packet_Id!! : [" << (int)opCode << ", Packet_Size: "
+					<< length << ", Bytes_Ava: " << in.remaining() << "] ... Skipping" << std::endl;
+			#endif
+				length = in.remaining();
+			}
+		#ifdef _DEBUG
+			std::cout << "Packet_Id: " << (int)opCode << ", Packet_Size: " << length << ", Bytes_Ava: " << in.remaining() << std::endl;
+		#endif
+			if (in.remaining() >= length)
+			{
+				//handle
+				decodePackets(opCode, in);
+				in.deleteReaderBlock();
+			}
+			else
+			{
+				in.resetReaderIndex();
+				break;
+			}
+		}
+	}
+}
+
+void tcpinterface::sendMessage(Stream* stream) {
+	if (stream->currentOffset == 0) {
 		printf("Can't flush empty stream o.O\n");
 		return;
 	}
@@ -173,7 +195,7 @@ void tcpinterface::sendMessage(Stream *stream) {
 }
 
 void tcpinterface::startT(HWND hWnd) {
-	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) staticStart, (void*) this, 0, NULL);
+	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)staticStart, (void*)this, 0, NULL);
 }
 
 int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) {
@@ -206,11 +228,11 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 
 	if (iResult == SOCKET_ERROR) {
 		int iError = WSAGetLastError();
-		if(iError == WSAEWOULDBLOCK)
+		if (iError == WSAEWOULDBLOCK)
 		{
-#ifdef _DEBUG
+		#ifdef _DEBUG
 			std::cout << "Attempting to connect.\n";
-#endif
+		#endif
 			fd_set Write, Err;
 			TIMEVAL Timeout;
 			int TimeoutSec = 5; // timeout after 5 seconds
@@ -228,7 +250,7 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 				&Write,    //Write Check
 				&Err,      //Error Check
 				&Timeout);
-			if(iResult == 0)
+			if (iResult == 0)
 			{
 				std::cout << "Connect Timeout (" << TimeoutSec << " Sec).\n";
 				system("pause");
@@ -237,11 +259,11 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 			}
 			else
 			{
-				if(FD_ISSET(tcpinterface::sConnect, &Write))
+				if (FD_ISSET(tcpinterface::sConnect, &Write))
 				{
 					std::cout << "Connected!\n";
 				}
-				if(FD_ISSET(tcpinterface::sConnect, &Err))
+				if (FD_ISSET(tcpinterface::sConnect, &Err))
 				{
 					std::cout << "Select error.\n";
 					//system("pause");
@@ -249,7 +271,7 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 				}
 			}
 		}
-		else 
+		else
 		{
 			std::cout << "Failed to connect!" << std::endl;
 			MessageBox(hWnd, L"Failed to connect to Server!", L"Notice",

@@ -1,65 +1,128 @@
 #include "Stream.h"
 
+#include <iostream>
+
+#define _WINSOCK2API_
+#include <windows.h> //for everything extra
+#include <stdlib.h> //for NULL (conversations s2i s2l s2ul s2d) rand srand system
+#include <stdio.h>  //for printf()
+
+
 Stream::Stream() {
 	buffer = new char[5000];
-	memset(buffer, 0, 5000); 
+	memset(buffer, 0, 5000);
+	size = 5000;
 
 	currentOffset = 0;
-	for(int i = 0; i < 32; i++)
+	lastReaderIndex = 0;
+	for (int i = 0; i < 32; i++)
 		bitMaskOut[i] = (1 << i) - 1;
 	frameStackPtr = -1;
-	memset(frameStack, 0, frameStackSize*sizeof(int));
+	memset(frameStack, 0, frameStackSize * sizeof(int));
 }
 
 Stream::Stream(int newSize) {
 	buffer = new char[newSize];
 	memset(buffer, 0, newSize);
+	size = newSize;
 
 	currentOffset = 0;
-	for(int i = 0; i < 32; i++)
+	lastReaderIndex = 0;
+	length = newSize;
+	for (int i = 0; i < 32; i++)
 		bitMaskOut[i] = (1 << i) - 1;
 	frameStackPtr = -1;
-	memset(frameStack, 0, frameStackSize*sizeof(int));
+	memset(frameStack, 0, frameStackSize * sizeof(int));
 }
 
 Stream::~Stream() {
- delete [] buffer;
+	delete[] buffer;
+}
+
+int Stream::remaining() {
+	return currentOffset < length ? length - currentOffset : 0;
+}
+
+bool Stream::markReaderIndex()
+{
+	lastReaderIndex = currentOffset;
+	return false;
+}
+
+bool Stream::resetReaderIndex()
+{
+	currentOffset = lastReaderIndex;
+	return false;
+}
+
+bool Stream::deleteReaderBlock() {
+	int block_size = (length - lastReaderIndex);
+	if (block_size > 0)
+	{
+		int rem_block_size = (length - currentOffset);
+		if (rem_block_size > 0)
+		{
+			char* temp = new char[rem_block_size];
+			memcpy(temp, buffer + currentOffset, rem_block_size);
+			memset(buffer + lastReaderIndex, 0, block_size);
+			length -= (block_size - rem_block_size);
+			memcpy(buffer + lastReaderIndex, temp, rem_block_size);
+			delete[] temp;
+		}
+		else
+		{
+			memset(buffer + lastReaderIndex, 0, block_size);
+			length -= block_size;
+		}
+		currentOffset = lastReaderIndex;
+	}
+	return false;
+}
+
+bool Stream::clearBuf()
+{
+	currentOffset = 0;
+	ZeroMemory(buffer, length);
+	length = 0;
+	return false;
 }
 
 void Stream::createFrame(int id) {
-	buffer[currentOffset++] = (unsigned char) id;
+	buffer[currentOffset++] = (unsigned char)id;
 }
 
 void Stream::createFrameVarSize(int id) { // creates a variable sized
 											// frame
-	buffer[currentOffset++] = (unsigned char) id;
+	buffer[currentOffset++] = (unsigned char)id;
 	buffer[currentOffset++] = 0; // placeholder for size byte
 	if (frameStackPtr >= frameStackSize - 1) {
 		printf("Stack overflow\n");
-	} else
+	}
+	else
 		frameStack[++frameStackPtr] = currentOffset;
 }
 
 void Stream::createFrameVarSizeWord(int id) { // creates a variable sized
 												// frame
-	buffer[currentOffset++] = (unsigned char) id;
+	buffer[currentOffset++] = (unsigned char)id;
 	writeWord(0); // placeholder for size word
 	if (frameStackPtr >= frameStackSize - 1) {
 		printf("Stack overflow\n");
-	} else
+	}
+	else
 		frameStack[++frameStackPtr] = currentOffset;
 }
 
 void Stream::endFrameVarSize() {// ends a variable sized frame
 	if (frameStackPtr < 0)
-		printf("Stack empty\n");
+		printf("Stack empty (byte)\n");
 	else
 		writeFrameSize(currentOffset - frameStack[frameStackPtr--]);
 }
 
 void Stream::endFrameVarSizeWord() { // ends a variable sized frame
 	if (frameStackPtr < 0)
-		printf("Stack empty\n");
+		printf("Stack empty (short)\n");
 	else
 		writeFrameSizeWord(currentOffset - frameStack[frameStackPtr--]);
 }
@@ -67,15 +130,15 @@ void Stream::endFrameVarSizeWord() { // ends a variable sized frame
 
 //Write types
 void Stream::writeByte(int i) {
-	buffer[currentOffset++] = (char) i; //umm (byte)?
+	buffer[currentOffset++] = (char)i; //umm (byte)?
 }
 
 void Stream::writeByteA(int i) {
-	buffer[currentOffset++] = (char) (i + 128);
+	buffer[currentOffset++] = (char)(i + 128);
 }
 
 void Stream::writeByteC(int i) {
-	buffer[currentOffset++] = (char) (-i);
+	buffer[currentOffset++] = (char)(-i);
 }
 
 void Stream::writeBytes(char abyte0[], int i, int j) {
@@ -85,7 +148,7 @@ void Stream::writeBytes(char abyte0[], int i, int j) {
 }
 
 void Stream::writeByteS(int i) {
-	buffer[currentOffset++] = (char) (128 - i);
+	buffer[currentOffset++] = (char)(128 - i);
 }
 
 void Stream::writeBytes_reverse(char abyte0[], int i, int j) {
@@ -96,92 +159,92 @@ void Stream::writeBytes_reverse(char abyte0[], int i, int j) {
 
 void Stream::writeBytes_reverseA(char abyte0[], int i, int j) {
 	for (int k = (j + i) - 1; k >= j; k--)
-		buffer[currentOffset++] = (char) (abyte0[k] + 128);
+		buffer[currentOffset++] = (char)(abyte0[k] + 128);
 
 }
 
 void Stream::write3Byte(int i) {
-	buffer[currentOffset++] = (char) (i >> 16);
-	buffer[currentOffset++] = (char) (i >> 8);
-	buffer[currentOffset++] = (char) i;
+	buffer[currentOffset++] = (char)(i >> 16);
+	buffer[currentOffset++] = (char)(i >> 8);
+	buffer[currentOffset++] = (char)i;
 }
 
 void Stream::writeDWord(int i) {
-	buffer[currentOffset++] = (char) (i >> 24);
-	buffer[currentOffset++] = (char) (i >> 16);
-	buffer[currentOffset++] = (char) (i >> 8);
-	buffer[currentOffset++] = (char) i;
+	buffer[currentOffset++] = (char)(i >> 24);
+	buffer[currentOffset++] = (char)(i >> 16);
+	buffer[currentOffset++] = (char)(i >> 8);
+	buffer[currentOffset++] = (char)i;
 }
 
 void Stream::writeDWord_v1(int i) {
-	buffer[currentOffset++] = (char) (i >> 8);
-	buffer[currentOffset++] = (char) i;
-	buffer[currentOffset++] = (char) (i >> 24);
-	buffer[currentOffset++] = (char) (i >> 16);
+	buffer[currentOffset++] = (char)(i >> 8);
+	buffer[currentOffset++] = (char)i;
+	buffer[currentOffset++] = (char)(i >> 24);
+	buffer[currentOffset++] = (char)(i >> 16);
 }
 
 void Stream::writeDWord_v2(int i) {
-	buffer[currentOffset++] = (char) (i >> 16);
-	buffer[currentOffset++] = (char) (i >> 24);
-	buffer[currentOffset++] = (char) i;
-	buffer[currentOffset++] = (char) (i >> 8);
+	buffer[currentOffset++] = (char)(i >> 16);
+	buffer[currentOffset++] = (char)(i >> 24);
+	buffer[currentOffset++] = (char)i;
+	buffer[currentOffset++] = (char)(i >> 8);
 }
 
 void Stream::writeDWordBigEndian(int i) {
-	buffer[currentOffset++] = (char) i;
-	buffer[currentOffset++] = (char) (i >> 8);
-	buffer[currentOffset++] = (char) (i >> 16);
-	buffer[currentOffset++] = (char) (i >> 24);
+	buffer[currentOffset++] = (char)i;
+	buffer[currentOffset++] = (char)(i >> 8);
+	buffer[currentOffset++] = (char)(i >> 16);
+	buffer[currentOffset++] = (char)(i >> 24);
 }
 
 void Stream::writeFrameSize(int i) {
-	buffer[currentOffset - i - 1] = (char) i;
+	buffer[currentOffset - i - 1] = (char)i;
 }
 
 void Stream::writeFrameSizeWord(int i) {
-	buffer[currentOffset - i - 2] = (char) (i >> 8);
-	buffer[currentOffset - i - 1] = (char) i;
+	buffer[currentOffset - i - 2] = (char)(i >> 8);
+	buffer[currentOffset - i - 1] = (char)i;
 }
 
 void Stream::writeQWord(unsigned __int64 l) {
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 56);
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 48);
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 40);
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 32);
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 24);
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 16);
-	buffer[currentOffset++] = (char) (unsigned int) (l >> 8);
-	buffer[currentOffset++] = (char) (unsigned int) l;
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 56);
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 48);
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 40);
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 32);
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 24);
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 16);
+	buffer[currentOffset++] = (char)(unsigned int)(l >> 8);
+	buffer[currentOffset++] = (char)(unsigned int)l;
 }
 
 void Stream::writeString(char* s) {
-	memcpy(buffer+currentOffset,s,strlen(s));
+	memcpy(buffer + currentOffset, s, strlen(s));
 	currentOffset += strlen(s);
 	buffer[currentOffset++] = 0;
 }
 
 void Stream::writeWord(int i) {
-	buffer[currentOffset++] = (char) (i >> 8);
-	buffer[currentOffset++] = (char) i;
+	buffer[currentOffset++] = (char)(i >> 8);
+	buffer[currentOffset++] = (char)i;
 }
 
 void Stream::writeWordA(int i) {
-	buffer[currentOffset++] = (char) (i >> 8);
-	buffer[currentOffset++] = (char) (i + 128);
+	buffer[currentOffset++] = (char)(i >> 8);
+	buffer[currentOffset++] = (char)(i + 128);
 }
 
 void Stream::writeWordBigEndian(int i) {
-	buffer[currentOffset++] = (char) i;
-	buffer[currentOffset++] = (char) (i >> 8);
+	buffer[currentOffset++] = (char)i;
+	buffer[currentOffset++] = (char)(i >> 8);
 }
 void Stream::writeWordBigEndian_dup(int i) {
-	buffer[currentOffset++] = (char) i;
-	buffer[currentOffset++] = (char) (i >> 8);
+	buffer[currentOffset++] = (char)i;
+	buffer[currentOffset++] = (char)(i >> 8);
 }
 
 void Stream::writeWordBigEndianA(int i) {
-	buffer[currentOffset++] = (char) (i + 128);
-	buffer[currentOffset++] = (char) (i >> 8);
+	buffer[currentOffset++] = (char)(i + 128);
+	buffer[currentOffset++] = (char)(i >> 8);
 }
 
 //bit editing
@@ -193,17 +256,18 @@ void Stream::writeBits(int numBits, int value) {
 	int bytePos = bitPosition >> 3;
 	int bitOffset = 8 - (bitPosition & 7);
 	bitPosition += numBits;
-	for(; numBits > bitOffset; bitOffset = 8) {
-		buffer[bytePos] &= ~ bitMaskOut[bitOffset];		// mask out the desired area
-		buffer[bytePos++] |= (value >> (numBits-bitOffset)) & bitMaskOut[bitOffset];
+	for (; numBits > bitOffset; bitOffset = 8) {
+		buffer[bytePos] &= ~bitMaskOut[bitOffset];		// mask out the desired area
+		buffer[bytePos++] |= (value >> (numBits - bitOffset)) & bitMaskOut[bitOffset];
 		numBits -= bitOffset;
 	}
-	if(numBits == bitOffset) {
-		buffer[bytePos] &= ~ bitMaskOut[bitOffset];
+	if (numBits == bitOffset) {
+		buffer[bytePos] &= ~bitMaskOut[bitOffset];
 		buffer[bytePos] |= value & bitMaskOut[bitOffset];
-	} else {
-		buffer[bytePos] &= ~ (bitMaskOut[numBits]<<(bitOffset - numBits));
-		buffer[bytePos] |= (value&bitMaskOut[numBits]) << (bitOffset - numBits);
+	}
+	else {
+		buffer[bytePos] &= ~(bitMaskOut[numBits] << (bitOffset - numBits));
+		buffer[bytePos] |= (value & bitMaskOut[numBits]) << (bitOffset - numBits);
 	}
 }
 
@@ -228,38 +292,38 @@ void Stream::readBytes_reverse(char abyte0[], int i, int j) {
 
 void Stream::readBytes_reverseA(char abyte0[], int i, int j) {
 	for (int k = (j + i) - 1; k >= j; k--)
-		abyte0[k] = (char) (buffer[currentOffset++] - 128);
+		abyte0[k] = (char)(buffer[currentOffset++] - 128);
 
 }
 
 unsigned int Stream::readDWord() {
 	currentOffset += 4;
 	return ((buffer[currentOffset - 4] & 0xff) << 24)
-			+ ((buffer[currentOffset - 3] & 0xff) << 16)
-			+ ((buffer[currentOffset - 2] & 0xff) << 8)
-			+ (buffer[currentOffset - 1] & 0xff);
+		+ ((buffer[currentOffset - 3] & 0xff) << 16)
+		+ ((buffer[currentOffset - 2] & 0xff) << 8)
+		+ (buffer[currentOffset - 1] & 0xff);
 }
 
 int Stream::readDWord_v1() {
 	currentOffset += 4;
 	return ((buffer[currentOffset - 2] & 0xff) << 24)
-			+ ((buffer[currentOffset - 1] & 0xff) << 16)
-			+ ((buffer[currentOffset - 4] & 0xff) << 8)
-			+ (buffer[currentOffset - 3] & 0xff);
+		+ ((buffer[currentOffset - 1] & 0xff) << 16)
+		+ ((buffer[currentOffset - 4] & 0xff) << 8)
+		+ (buffer[currentOffset - 3] & 0xff);
 }
 
 int Stream::readDWord_v2() {
 	currentOffset += 4;
 	return ((buffer[currentOffset - 3] & 0xff) << 24)
-			+ ((buffer[currentOffset - 4] & 0xff) << 16)
-			+ ((buffer[currentOffset - 1] & 0xff) << 8)
-			+ (buffer[currentOffset - 2] & 0xff);
+		+ ((buffer[currentOffset - 4] & 0xff) << 16)
+		+ ((buffer[currentOffset - 1] & 0xff) << 8)
+		+ (buffer[currentOffset - 2] & 0xff);
 }
 
 unsigned  __int64 Stream::readQWord() {
 	unsigned int dw1 = readDWord();
 	unsigned int dw2 = readDWord();
-	return (((__int64) dw1) << 32) | (__int64)dw2;
+	return (((__int64)dw1) << 32) | (__int64)dw2;
 }
 
 char Stream::readSignedByte() {
@@ -267,21 +331,21 @@ char Stream::readSignedByte() {
 }
 
 char Stream::readSignedByteA() {
-	return (char) (buffer[currentOffset++] - 128);
+	return (char)(buffer[currentOffset++] - 128);
 }
 
 char Stream::readSignedByteC() {
-	return (char) (-buffer[currentOffset++]);
+	return (char)(-buffer[currentOffset++]);
 }
 
 char Stream::readSignedByteS() {
-	return (char) (128 - buffer[currentOffset++]);
+	return (char)(128 - buffer[currentOffset++]);
 }
 
 int Stream::readSignedWord() {
 	currentOffset += 2;
 	int i = ((buffer[currentOffset - 2] & 0xff) << 8)
-			+ (buffer[currentOffset - 1] & 0xff);
+		+ (buffer[currentOffset - 1] & 0xff);
 	if (i > 32767) {
 		i -= 0x10000;
 	}
@@ -290,7 +354,7 @@ int Stream::readSignedWord() {
 int Stream::readSignedWordA() {
 	currentOffset += 2;
 	int i = ((buffer[currentOffset - 2] & 0xff) << 8)
-			+ (buffer[currentOffset - 1] - 128 & 0xff);
+		+ (buffer[currentOffset - 1] - 128 & 0xff);
 	if (i > 32767) {
 		i -= 0x10000;
 	}
@@ -300,7 +364,7 @@ int Stream::readSignedWordA() {
 int Stream::readSignedWordBigEndian() {
 	currentOffset += 2;
 	int i = ((buffer[currentOffset - 1] & 0xff) << 8)
-			+ (buffer[currentOffset - 2] & 0xff);
+		+ (buffer[currentOffset - 2] & 0xff);
 	if (i > 32767)
 		i -= 0x10000;
 	return i;
@@ -309,20 +373,9 @@ int Stream::readSignedWordBigEndian() {
 int Stream::readSignedWordBigEndianA() {
 	currentOffset += 2;
 	int i = ((buffer[currentOffset - 1] & 0xff) << 8)
-			+ (buffer[currentOffset - 2] - 128 & 0xff);
+		+ (buffer[currentOffset - 2] - 128 & 0xff);
 	if (i > 32767)
 		i -= 0x10000;
-	return i;
-}
-
-int Stream::read3Byte() {
-	currentOffset += 3;
-	int i = (((buffer[currentOffset - 3] & 0xff) << 16)
-		+ ((buffer[currentOffset - 2] & 0xff) << 8)
-		+ (0xff & buffer[currentOffset - 1]));
-	if (i > 8388607) {
-		i -= 16777216;
-	}
 	return i;
 }
 
@@ -355,23 +408,39 @@ unsigned char Stream::readUnsignedByteS() {
 int Stream::readUnsignedWord() {
 	currentOffset += 2;
 	return ((buffer[currentOffset - 2] & 0xff) << 8)
-			+ (buffer[currentOffset - 1] & 0xff);
+		+ (buffer[currentOffset - 1] & 0xff);
+}
+
+int Stream::read3Byte() {
+	currentOffset += 3;
+	int i = (((buffer[currentOffset - 3] & 0xff) << 16)
+		+ ((buffer[currentOffset - 2] & 0xff) << 8)
+		+ (0xff & buffer[currentOffset - 1]));
+	if (i > 8388607) {
+		i -= 16777216;
+	}
+	return i;
 }
 
 int Stream::readUnsignedWordA() {
 	currentOffset += 2;
 	return ((buffer[currentOffset - 2] & 0xff) << 8)
-			+ (buffer[currentOffset - 1] - 128 & 0xff);
+		+ (buffer[currentOffset - 1] - 128 & 0xff);
 }
 
 int Stream::readUnsignedWordBigEndian() {
 	currentOffset += 2;
 	return ((buffer[currentOffset - 1] & 0xff) << 8)
-			+ (buffer[currentOffset - 2] & 0xff);
+		+ (buffer[currentOffset - 2] & 0xff);
 }
 
 int Stream::readUnsignedWordBigEndianA() {
 	currentOffset += 2;
 	return ((buffer[currentOffset - 1] & 0xff) << 8)
-			+ (buffer[currentOffset - 2] - 128 & 0xff);
+		+ (buffer[currentOffset - 2] - 128 & 0xff);
+}
+
+int Stream::peek(int position)
+{
+	return (buffer[currentOffset + position] & 0xff);
 }
