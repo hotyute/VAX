@@ -14,7 +14,11 @@ public:
 	double getLatitude();
 	void setLongitude(double value);
 	double getLongitude();
+	void lock();
+	void unlock();
 };
 #endif
+
+extern std::unordered_map<std::string, Controller*> controller_map;
 
 #endif

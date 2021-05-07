@@ -2,6 +2,8 @@
 
 #include "projection.h"
 
+std::unordered_map<std::string, Aircraft*>AcfMap;
+
 Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating) 
 	: User::User(callSign, controllerRating, pilotRating) 
 {
@@ -28,8 +30,6 @@ Aircraft::~Aircraft()
 {
 	delete Aircraft::flight_plan;
 }
-
-std::unordered_map<std::string, Aircraft*>AcfMap;
 
 int Aircraft::getIndex() {
 	return Aircraft::index;
@@ -143,10 +143,6 @@ double Aircraft::getHeading() {
 
 void Aircraft::setHeading(double value) {
 	Aircraft::heading = value;
-}
-
-HANDLE Aircraft::getMutex() {
-	return Aircraft::aMutex;
 }
 
 void Aircraft::lock() {

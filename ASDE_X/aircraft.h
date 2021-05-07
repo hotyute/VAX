@@ -34,7 +34,6 @@ public:
 class Aircraft;
 class Aircraft : public User {
 private:
-	HANDLE aMutex;
 	int index;
 	bool collision;
 	bool heavy;
@@ -80,7 +79,6 @@ public:
 	void setSpeed(double);
 	double getHeading();
 	void setHeading(double);
-	HANDLE getMutex();
 	void lock();
 	void unlock();
 	//void setUser1(User*);

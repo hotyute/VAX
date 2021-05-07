@@ -1156,7 +1156,7 @@ void connect() {
 		stream.writeQWord(doubleToRawBits(USER->getLatitude()));
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
 		stream.writeWord(600);
-		stream.writeByte(type);
+		stream.writeByte(static_cast<int>(type));
 		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			stream.writeString("King Air 350");
 			stream.writeString("0000");

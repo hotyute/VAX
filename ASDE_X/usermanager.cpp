@@ -19,23 +19,26 @@ void decodePackets(int opCode, Stream& stream) {
 	if (opCode == 9) {
 		//create new user packet
 		int index = stream.readUnsignedWord();
-		int type = stream.readUnsignedByte();
+		CLIENT_TYPES type = static_cast<CLIENT_TYPES>(stream.readUnsignedByte());
 		char callSign1[1024], full_name[1024], username[1024];
 		stream.readString(callSign1);
 		stream.readString(username);
 		stream.readString(full_name);
 		User* user1 = nullptr;
-		if (type == CONTROLLER_CLIENT) 
+		if (type == CLIENT_TYPES::CONTROLLER_CLIENT) 
 		{
-
+			Controller* controller1 = new Controller(callSign1, 0, 0);
+			user1 = (User*)controller1;
+			controller1->setCallsign(callSign1);
 		}
-		else if (type == PILOT_CLIENT) 
+		else if (type == CLIENT_TYPES::PILOT_CLIENT) 
 		{
 			char acfTitle[1024];
 			stream.readString(acfTitle);
 			char trans_code[1024];
 			stream.readString(trans_code);
 			int squawkMode = stream.readUnsignedByte();
+			//TODO SEND THE BLOODY HEADINGS PITCH AND ROLL!
 			Aircraft* aircraft1 = new Aircraft(callSign1, 0, 0);
 			user1 = (User*)aircraft1;
 			aircraft1->lock();
@@ -48,25 +51,27 @@ void decodePackets(int opCode, Stream& stream) {
 			addAircraftToMirrors(aircraft1);
 			AcfMap[aircraft1->getCallsign()] = aircraft1;
 		}
-		user1->getIdentity()->login_name = full_name;
-		user1->getIdentity()->username = username;
 
-		users_map.emplace(user1->getCallsign(), user1);
-		user1->setUserIndex(index);
-		userStorage1[index] = user1;
+		if (user1) {
+			user1->getIdentity()->login_name = full_name;
+			user1->getIdentity()->username = username;
 
+			users_map.emplace(user1->getCallsign(), user1);
+			user1->setUserIndex(index);
+			userStorage1[index] = user1;
+		}
 	}
 	if (opCode == 12) {//delete user packet
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
 		if (user1 != NULL) {
 			userStorage1[index] = NULL;
-			int type = user1->getIdentity()->type;
-			if (type == PILOT_CLIENT) 
+			CLIENT_TYPES type = user1->getIdentity()->type;
+			if (type == CLIENT_TYPES::PILOT_CLIENT)
 			{
 				users_map.erase(user1->getCallsign());
 			}
-			else if (type == CONTROLLER_CLIENT) 
+			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
 
 			}
@@ -133,11 +138,11 @@ void decodePackets(int opCode, Stream& stream) {
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
 		int cur_cycle = stream.readUnsignedWord();
-		int type = stream.readUnsignedByte();
+		CLIENT_TYPES type = static_cast<CLIENT_TYPES>(stream.readUnsignedByte());
 	#ifdef _DEBUG
 		std::cout << "cycle: " << cur_cycle << '\n' << std::endl;
 	#endif
-		if (type == PILOT_CLIENT) {
+		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			int fr = stream.readUnsignedByte();
 			char assigned_squawk[5], departure[5], arrival[5], alternate[5], cruise[6], ac_type[8], scratch[6], route[128], remarks[128];
 			stream.readString(assigned_squawk);

@@ -43,6 +43,8 @@ public:
 	virtual double getLatitude() = 0;
 	virtual void setLongitude(double value) = 0;
 	virtual double getLongitude() = 0;
+	virtual void lock() = 0;
+	virtual void unlock() = 0;
 	std::string getCallsign() { return identity->callsign; }
 	void setCallsign(std::string new_callsign) { identity->callsign = new_callsign; }
 	Identity* getIdentity() {
@@ -75,6 +77,7 @@ protected:
 	Identity* identity;
 	double latitude;
 	double longitude;
+	HANDLE aMutex;
 };
 #endif
 
