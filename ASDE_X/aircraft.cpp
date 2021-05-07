@@ -2,7 +2,7 @@
 
 #include "projection.h"
 
-std::unordered_map<std::string, Aircraft*>AcfMap;
+std::unordered_map<std::string, Aircraft*>acf_map;
 
 Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating) 
 	: User::User(callSign, controllerRating, pilotRating) 

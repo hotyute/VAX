@@ -79,7 +79,7 @@ DWORD tcpinterface1::run() {
 									char header = array3[0][0];
 									if (header == 'S' || header == 'N' || header == 'Y') {
 										std::string callsign = array3[1];
-										Aircraft* cur = AcfMap[callsign];
+										Aircraft* cur = acf_map[callsign];
 										unsigned int hash;
 										std::stringstream ss(array3[8]);
 										ss >> hash;
@@ -97,7 +97,7 @@ DWORD tcpinterface1::run() {
 											cur->setSpeed(atof(array3[7].c_str()));
 											cur->setHeading(heading);
 											cur->setUpdateFlag(ACF_CALLSIGN, true);
-											AcfMap[callsign] = cur;
+											acf_map[callsign] = cur;
 											cur->unlock();
 										}
 										else {

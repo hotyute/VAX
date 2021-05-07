@@ -197,8 +197,8 @@ void DrawGLScene() {
 		RenderUnknown(false, unkTarDl);
 		renderAircraft = false;
 	}
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
@@ -395,8 +395,8 @@ void DrawMirrorScenes(Mirror& mirror)
 
 	glCallList(sectorDl);
 
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
@@ -1940,8 +1940,8 @@ void updateCollisionLine(Collision& collision, unsigned int& base, double zo) {
 }
 
 void preFileRender() {
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* acf = iter->second;
 			if (acf != NULL) {

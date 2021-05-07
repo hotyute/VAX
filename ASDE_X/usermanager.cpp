@@ -52,7 +52,7 @@ void decodePackets(int opCode, Stream& stream) {
 			aircraft1->setSquawkCode(trans_code);
 			aircraft1->unlock();
 			addAircraftToMirrors(aircraft1);
-			AcfMap[callSign1] = aircraft1;
+			acf_map[callSign1] = aircraft1;
 		}
 
 		if (user1) {

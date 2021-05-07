@@ -220,7 +220,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				cur->setUpdateFlag(ACF_COLLISION, true);
 				cur->setCollision(true);
 				cur->setMode(1);
-				AcfMap[((User*)cur)->getCallsign()] = cur;
+				acf_map[((User*)cur)->getCallsign()] = cur;
 				cur->unlock();
 
 				cur->setSquawkCode(std::to_string(random(1000, 9999)));
@@ -246,7 +246,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				cur2->setUpdateFlag(ACF_COLLISION, true);
 				cur2->setCollision(true);
 				cur2->setMode(1);
-				AcfMap[cur2->getCallsign()] = cur2;
+				acf_map[cur2->getCallsign()] = cur2;
 				cur2->unlock();
 
 				cur2->setSquawkCode(std::to_string(random(1000, 9999)));
@@ -1014,8 +1014,8 @@ bool processCommands(std::string command)
 		if (array3.size() == 2) {
 			capitalize(array3[1]);
 			std::string call_sign = array3[1];
-			auto got = AcfMap.find(call_sign);
-			if (got != AcfMap.end()) {
+			auto got = acf_map.find(call_sign);
+			if (got != acf_map.end()) {
 				Aircraft& user = *got->second;
 				if (user.getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) {
 					FlightPlan& fp = *user.getFlightPlan();
@@ -1181,7 +1181,7 @@ void disconnect()
 			userStorage1[i] = nullptr;
 		}
 	}
-	AcfMap.clear();
+	acf_map.clear();
 	connected = false;
 	EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_DISABLED);
 }
@@ -1322,8 +1322,8 @@ void preFlags() {
 			}
 		}
 	}
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {
@@ -1353,8 +1353,8 @@ void preFlags() {
 }
 
 void resetFlags() {
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
 			if (aircraft != NULL) {

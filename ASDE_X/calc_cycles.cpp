@@ -34,12 +34,12 @@ void update()
 }
 
 void CalculateCollisions() {
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			Aircraft* acf1 = iter->second;
 			if (acf1) {
 				Aircraft& aircraft1 = *acf1;
-				for (auto iter2 = AcfMap.begin(); iter2 != AcfMap.end(); iter2++) {
+				for (auto iter2 = acf_map.begin(); iter2 != acf_map.end(); iter2++) {
 					Aircraft* acf2 = iter2->second;
 					if (acf2 && acf2 != acf1) {
 						Aircraft& aircraft2 = *acf2;
@@ -60,8 +60,8 @@ void CalculateCollisions() {
 }
 
 void CalcDepartures() {
-	if (AcfMap.size() > 0) {
-		for (auto iter = AcfMap.begin(); iter != AcfMap.end(); iter++) {
+	if (acf_map.size() > 0) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			Aircraft* acf1 = iter->second;
 			if (acf1) {
 				FlightPlan& fp = *acf1->getFlightPlan();

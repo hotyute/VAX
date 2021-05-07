@@ -92,7 +92,7 @@ public:
 #endif
 
 
-extern std::unordered_map<std::string, Aircraft*> AcfMap;
+extern std::unordered_map<std::string, Aircraft*> acf_map;
 
 extern Aircraft *getAircraftByIndex(int);
 
