@@ -34,7 +34,6 @@ public:
 class Aircraft;
 class Aircraft : public User {
 private:
-	int index;
 	bool collision;
 	bool heavy;
 	int mode;
@@ -51,8 +50,6 @@ public:
 	Aircraft(std::string, int, int);
 	virtual ~Aircraft();
 	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0, vectorDl = 0;
-	int getIndex();
-	void setIndex(int);
 	bool getRenderFlag(int flag);
 	void setRenderFlag(int flag, bool val);
 	bool getUpdateFlag(int flag) { return update_flags[flag]; }

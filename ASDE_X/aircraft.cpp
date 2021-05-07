@@ -31,14 +31,6 @@ Aircraft::~Aircraft()
 	delete Aircraft::flight_plan;
 }
 
-int Aircraft::getIndex() {
-	return Aircraft::index;
-}
-
-void Aircraft::setIndex(int value) {
-	Aircraft::index = value;
-}
-
 bool Aircraft::getRenderFlag(int flag)
 {
 	return Aircraft::render_flags[flag];
