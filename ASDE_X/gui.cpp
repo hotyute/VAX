@@ -410,7 +410,14 @@ void InputField::clearInput() {
 
 void InputField::setInput(std::string text) {
 	InputField::clearInput();
-	InputField::input = text;
+	if (InputField::p_protected) 
+	{
+		for (int i = 0; i < text.size(); i++) 
+		{
+			InputField::pp_input += '*';
+		}
+	}
+		InputField::input = text;
 
 	last_cursor_pos = cursor_pos;
 	for (int i = 0; i < text.size(); i++) {

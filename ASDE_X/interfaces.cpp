@@ -1,6 +1,6 @@
 #include "interfaces.h"
 
-InterfaceFrame* controller_list = nullptr, *main_chat = nullptr;
+InterfaceFrame* controller_list = nullptr, * main_chat = nullptr;
 
 void RenderControllerList(double x_, double y_)
 {
@@ -14,10 +14,10 @@ void RenderControllerList(double x_, double y_)
 	double spacing_x = 0.15, spacing_y = 0.07;
 	double start_x = 1.135, start_y = 0.10;
 
-	ClickButton* alpha = new ClickButton(controller_list, "ALPHA Sort", x + (width - (width * (start_x - spacing_x))), 
+	ClickButton* alpha = new ClickButton(controller_list, "ALPHA Sort", x + (width - (width * (start_x - spacing_x))),
 		90.0, y + (height - (height * (start_y + spacing_y))), 25.0);
 	controller_list->children[alpha->index = CONTROLLER_LIST_ALPHA] = alpha;
-	ClickButton* pofButton = new ClickButton(controller_list, "POF Only", x + (width - (width * (start_x - spacing_x))) + 105.0, 
+	ClickButton* pofButton = new ClickButton(controller_list, "POF Only", x + (width - (width * (start_x - spacing_x))) + 105.0,
 		90.0, y + (height - (height * (start_y += spacing_y))), 25.0);
 	controller_list->children[pofButton->index = CONTROLLER_LIST_POF] = pofButton;
 
@@ -36,7 +36,7 @@ void RenderControllerList(double x_, double y_)
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	double route_box_size = 150.0;
-	DisplayBox* displayBox = new DisplayBox(controller_list, list, list.size(), x + (width - (width * (start_x - spacing_x))), 
+	DisplayBox* displayBox = new DisplayBox(controller_list, list, list.size(), x + (width - (width * (start_x - spacing_x))),
 		width - 25, 5, y + (height - (height * (start_y += spacing_y))) - (route_box_size - 10), route_box_size, 5, false);
 	controller_list->children[displayBox->index = CONTROLLER_LIST_BOX] = displayBox;
 
@@ -83,6 +83,12 @@ void RenderConnect(double x_, double y_)
 	connect_password = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 95.0), 20, -10.0);
 	connect_password->p_protected = true;
 	connectFrame->children[connect_password->index = PASSWORD_INPUT] = connect_password;
+#ifdef _DEBUG
+	connect_callsign->setInput("SM_SUP");
+	connect_fullname->setInput("Samuel Mason");
+	connect_username->setInput("971202");
+	connect_password->setInput("583562");
+#endif
 	std::vector<std::string> options1;
 	options1.push_back("Student 1");
 	options1.push_back("Student 2");
@@ -184,23 +190,23 @@ void LoadMainChatInterface(bool refresh) {
 			for (ChildFrame* child : main_chat->children) {
 				if (child) {
 					switch (child->index) {
-					case MAIN_CONTROLLERS_BOX:
-					{
-						((DisplayBox*)child)->updatePos(x, controller_list_width, 5, 114);
-					}
-					break;
-					case MAIN_CHAT_MESSAGES:
-					{
-						((DisplayBox*)child)->updatePos(x + (controller_list_width + arrow_offset),
-							(CLIENT_WIDTH * width) - width_offset, 27, 87);
-					}
-					break;
-					case MAIN_CHAT_INPUT:
-					{
-						((InputField*)child)->updatePos(x + (controller_list_width + arrow_offset),
-							(CLIENT_WIDTH * width) - width_offset, 5, 20);
-					}
-					break;
+						case MAIN_CONTROLLERS_BOX:
+						{
+							((DisplayBox*)child)->updatePos(x, controller_list_width, 5, 114);
+						}
+						break;
+						case MAIN_CHAT_MESSAGES:
+						{
+							((DisplayBox*)child)->updatePos(x + (controller_list_width + arrow_offset),
+								(CLIENT_WIDTH * width) - width_offset, 27, 87);
+						}
+						break;
+						case MAIN_CHAT_INPUT:
+						{
+							((InputField*)child)->updatePos(x + (controller_list_width + arrow_offset),
+								(CLIENT_WIDTH * width) - width_offset, 5, 20);
+						}
+						break;
 					}
 				}
 			}
