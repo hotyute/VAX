@@ -381,7 +381,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					if (GetOpenFileName(&ofn))
 					{
 						std::wstring wide(szFileName);
-						std::string final1(wide.begin(), wide.end());
+						std::string final1 = ws2s(wide);
 						if (FileReader::LoadADX(final1)) {
 							preFileRender();
 							resize = true;

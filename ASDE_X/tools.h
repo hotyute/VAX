@@ -21,6 +21,8 @@
 
 std::wstring s2ws(const std::string& s);
 
+std::string ws2s(const std::wstring& wstr);
+
 char *s2ca1(const std::string &s);
 
 SIZE getBitTextLength(HDC, HFONT, std::string);
