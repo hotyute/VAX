@@ -13,7 +13,6 @@ User::User(std::string callSign, int controllerRating, int pilotRating) {
 
 User::~User() {
 	delete User::identity;
-	delete User::private_messages;
 }
 
 void User::handleMovement(double n_lat, double n_lon)

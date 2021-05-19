@@ -51,6 +51,7 @@ void handleConnect();
 void handleDisconnect();
 bool processCommands(std::string);
 void moveInterfacesOnSize();
+void conn_clean();
 
 /* Components */
 
@@ -1135,6 +1136,7 @@ void moveInterfacesOnSize()
 void connect() {
 	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
 		connected = true;
+		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
 		EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_ENABLED);
 		Stream stream = Stream(200);
 		CLIENT_TYPES type = USER->getIdentity()->type;
@@ -1172,18 +1174,33 @@ void disconnect()
 {
 	sendSystemMessage("Disconnected.");
 	intter->disconnect_socket();
+	intter->position_updates->stop();
+	conn_clean();
+	connected = false;
+	EnableMenuItem(hFile, ID_FILE_CONNECT, MF_ENABLED);
+	EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_DISABLED);
+}
+
+void conn_clean()
+{
 	for (int i = 1; i < MAX_USER_SIZE; i++)
 	{
-		User* user = userStorage1[1];
+		User* user = userStorage1[i];
 		if (user)
 		{
 			delete user;
 			userStorage1[i] = nullptr;
 		}
 	}
+	for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
+		Collision* collision = it->second;
+		if (collision != nullptr) {
+			delete collision;
+		}
+	}
+	Collision_Map.clear();
+	controller_map.clear();
 	acf_map.clear();
-	connected = false;
-	EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_DISABLED);
 }
 
 DWORD WINAPI EventThread1(LPVOID lpParameter) {

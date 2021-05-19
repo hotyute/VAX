@@ -239,7 +239,7 @@ void LoadMainChatInterface(bool refresh) {
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-		list2.push_back(new ChatLine("[Performing Version Check..]", CHAT_TYPE::SYSTEM));
+		list2.push_back(new ChatLine("[00:00:00] [Performing Version Check..]", CHAT_TYPE::SYSTEM));
 		ChatLine* c = new ChatLine("[ERROR: Unable to retrieve version]", CHAT_TYPE::ERRORS);
 		list2.push_back(c);
 		c->playChatSound();
@@ -260,7 +260,7 @@ void LoadMainChatInterface(bool refresh) {
 void sendSystemMessage(std::string message)
 {
 	main_chat_box->resetReaderIdx();
-	ChatLine* c = new ChatLine(std::string("[") + message + std::string("]"), CHAT_TYPE::SYSTEM);
+	ChatLine* c = new ChatLine(std::string("[00:00:00] ") + message, CHAT_TYPE::SYSTEM);
 	main_chat_box->addLine(c);
 	c->playChatSound();
 	renderDrawings = true;

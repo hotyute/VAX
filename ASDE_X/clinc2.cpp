@@ -4,7 +4,6 @@
 #include <iostream>
 #include <chrono>
 
-#include "events.h"
 #include "config.h"
 #include "usermanager.h"
 
@@ -94,9 +93,9 @@ DWORD tcpinterface::run() {
 							//sendUpdates
 							USER->setUserIndex(index);
 							USER->setUpdateTime(updateTimeInMillis);
-							Event& position_updates = PositionUpdates();
-							position_updates.eAction.setTicks(0);
-							event_manager1->addEvent(&position_updates);
+							position_updates = new PositionUpdates();
+							position_updates->eAction.setTicks(0);
+							event_manager1->addEvent(position_updates);
 							tcpinterface::hand_shake = false;
 							in.deleteReaderBlock();
 						}

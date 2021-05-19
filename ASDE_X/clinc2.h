@@ -7,6 +7,7 @@
 #include <string>
 #include <tchar.h>
 
+#include "events.h"
 #include "Stream.h"
 
 
@@ -22,6 +23,7 @@ public:
 	void startT(HWND);
 	int disconnect_socket();
 	int connectNew(HWND, std::string, unsigned short);
+	Event* position_updates = nullptr;
 
 	char message[5000];
 	Stream* in_stream;

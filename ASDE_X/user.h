@@ -65,12 +65,12 @@ public:
 	void setUpdateTime(long long value) {
 		update_time = value;
 	}
-	PrivateMessages* getPrivateMsgs() {
+	PrivateMessages& getPrivateMsgs() {
 		return private_messages;
 	}
 	void handleMovement(double n_lat, double n_lon);
 private:
-	PrivateMessages* private_messages;
+	PrivateMessages private_messages;
 	long long update_time;
 protected:
 	int userIndex;
