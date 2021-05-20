@@ -423,6 +423,7 @@ int TopButton::handle()
 	case TOP_TYPE::DAY_NITE_BTN:
 	{
 		DAY = !DAY;
+		renderSectorColours = true;
 		return 1;
 	}
 	case TOP_TYPE::VECTOR_BTN:

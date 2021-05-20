@@ -387,6 +387,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							preFileRender();
 							resize = true;
 							renderSector = true;
+							renderSectorColours = true;
 							renderButtons = true;
 							updateFlags[GBL_CALLSIGN] = true;
 							renderLegend = true;

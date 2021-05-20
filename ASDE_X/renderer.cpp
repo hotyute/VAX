@@ -17,15 +17,16 @@
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
-bool renderAircraft = false, renderSector = false, renderButtons = false, renderLegend = false, renderInterfaces = false,
-renderInputTextFocus = false, renderConf = false, renderDate = false, renderFocus = false, renderDrawings = false,
-queueDeleteInterface = false, renderDepartures = false, renderAllInputText = false;
+bool renderAircraft = false, renderSector = false, renderSectorColours = false,
+renderButtons = false, renderLegend = false, renderInterfaces = false, renderInputTextFocus = false, renderConf = false,
+renderDate = false, renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
+renderAllInputText = false;
 
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
 
 bool resize = false;
-int sectorDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl;
+int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -180,13 +181,25 @@ void DrawGLScene() {
 		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
 	}
 	if (renderSector) {
-		glDeleteLists(sectorDl, 1);
+		glDeleteLists(taxiwaysDl, 1);
+		glDeleteLists(apronDl, 1);
+		glDeleteLists(runwaysDl, 1);
+		glDeleteLists(parkingDl, 1);
 		glPushMatrix();
 		DrawSceneryData(nullptr);
 		glPopMatrix();
 		renderSector = false;
 	}
+
+	if (renderSectorColours)
+	{
+		glDeleteLists(sectorDl, 1);
+		CreateSectorColours();
+		renderSectorColours = false;
+	}
+
 	glCallList(sectorDl);
+
 	if (renderAircraft) {
 		//We use default zoom because they all get downsized by glScale anyway
 		glDeleteLists(aircraftDl, 1);
@@ -318,12 +331,12 @@ void DrawInterfaces() {
 		}
 		renderInputTextFocus = false;
 	}
-	if (renderAllInputText) 
+	if (renderAllInputText)
 	{
 		RenderInterfaceInputText(true);
 		renderAllInputText = false;
 	}
-	else 
+	else
 	{
 		RenderInterfaceInputText(false);
 	}
@@ -448,10 +461,32 @@ void SetPixelFormat(HDC hDC) {
 	SetPixelFormat(hDC, index, &pfd);
 }
 
+int CreateSectorColours() {
+	sectorDl = glGenLists(1);
 
+	glNewList(sectorDl, GL_COMPILE);
+
+	DAY ? glColor3f(taxiway_clr[0], taxiway_clr[1], taxiway_clr[2]) : glColor3f(taxiway_nite_clr[0], taxiway_nite_clr[1], taxiway_nite_clr[2]);
+	glCallList(taxiwaysDl);
+
+	DAY ? glColor3f(apron_clr[0], apron_clr[1], apron_clr[2]) : glColor3f(apron_nite_clr[0], apron_nite_clr[1], apron_nite_clr[2]);
+	glCallList(apronDl);
+
+	glColor3f(runway_clr[0], runway_clr[1], runway_clr[2]);
+	glCallList(runwaysDl);
+
+	DAY ? glColor3f(parking_clr[0], parking_clr[1], parking_clr[2]) : glColor3f(parking_nite_clr[0], parking_nite_clr[1], parking_nite_clr[2]);
+	glCallList(parkingDl);
+
+	glEndList();
+	return 1;
+}
 
 int DrawSceneryData(Mirror* mirror) {
-	sectorDl = glGenLists(1);
+	runwaysDl = glGenLists(1);
+	taxiwaysDl = glGenLists(1);
+	parkingDl = glGenLists(1);
+	apronDl = glGenLists(1);
 
 	GLUtesselator* tess = gluNewTess(); // create a tessellator
 	if (tess == NULL)
@@ -470,7 +505,6 @@ int DrawSceneryData(Mirror* mirror) {
 	std::vector<PointTess*> taxiways;
 	std::vector<PointTess*> aprons;
 
-	glNewList(sectorDl, GL_COMPILE);
 	for (size_t i = 0; i < ALL.size(); i++) {
 		PointTess* point2d = ALL[i];
 		int type = point2d->get_type();
@@ -488,11 +522,11 @@ int DrawSceneryData(Mirror* mirror) {
 		}
 	}
 	//order rendered counts for overlapping
+	glNewList(taxiwaysDl, GL_COMPILE);
 	for (PointTess* point2d1 : taxiways) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
-		glColor3f(taxiway_clr[0], taxiway_clr[1], taxiway_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
 		for (LinearSegment* aCoordinates11 : coordinates11) {
@@ -501,27 +535,14 @@ int DrawSceneryData(Mirror* mirror) {
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
-		if (DAY) {
-			glColor3f(day_background[0], day_background[1], day_background[2]);
-			gluTessBeginPolygon(tess, 0);
-			gluTessBeginContour(tess);
-			for (LinearSegment* aHoles11 : holes11) {
-				double* data = aHoles11->pt.as_array();
-				gluTessVertex(tess, data, data);
-			}
-			gluTessEndContour(tess);
-			gluTessEndPolygon(tess);
-		}
-		else {
-			//handle NITE
-		}
-		//delete point2d;
 	}
+	glEndList();
+
+	glNewList(apronDl, GL_COMPILE);
 	for (PointTess* point2d1 : aprons) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
 		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
-		glColor3f(apron_clr[0], apron_clr[1], apron_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
 		for (LinearSegment* aCoordinates11 : coordinates11) {
@@ -530,27 +551,14 @@ int DrawSceneryData(Mirror* mirror) {
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
-		if (DAY) {
-			glColor3f(day_background[0], day_background[1], day_background[2]);
-			gluTessBeginPolygon(tess, 0);
-			gluTessBeginContour(tess);
-			for (LinearSegment* aHoles11 : holes11) {
-				double* data = aHoles11->pt.as_array();
-				gluTessVertex(tess, data, data);
-			}
-			gluTessEndContour(tess);
-			gluTessEndPolygon(tess);
-		}
-		else {
-			//handle NITE
-		}
 		//delete point2d;
 	}
+	glEndList();
+
+	glNewList(runwaysDl, GL_COMPILE);
 	for (PointTess* point2d1 : runways) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
-		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
-		glColor3f(runway_clr[0], runway_clr[1], runway_clr[2]);
 		gluTessBeginPolygon(tess, 0);
 		gluTessBeginContour(tess);
 		for (LinearSegment* aCoordinates11 : coordinates11) {
@@ -559,27 +567,13 @@ int DrawSceneryData(Mirror* mirror) {
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
-		if (DAY) {
-			glColor3f(day_background[0], day_background[1], day_background[2]);
-			gluTessBeginPolygon(tess, 0);
-			gluTessBeginContour(tess);
-			for (LinearSegment* aHoles11 : holes11) {
-				double* data = aHoles11->pt.as_array();
-				gluTessVertex(tess, data, data);
-			}
-			gluTessEndContour(tess);
-			gluTessEndPolygon(tess);
-		}
-		else {
-			//handle NITE
-		}
-		//delete point2d;
 	}
+	glEndList();
+
+	glNewList(parkingDl, GL_COMPILE);
 	for (PointTess* point2d1 : parking) {
 		std::vector<LinearSegment*> coordinates11 = point2d1->get_coordinates();
 		std::vector<LinearSegment*> holes11 = point2d1->get_holes();
-		//std::cout << point2d1->get_coordinates()[0][0] << std::endl;
-		glColor3f(parking_clr[0], parking_clr[1], parking_clr[2]);
 		gluTessBeginPolygon(tess, 0);                   // with NULL data
 		gluTessBeginContour(tess);
 		for (LinearSegment* aCoordinates11 : coordinates11) {
@@ -588,7 +582,7 @@ int DrawSceneryData(Mirror* mirror) {
 		}
 		gluTessEndContour(tess);
 		gluTessEndPolygon(tess);
-		if (DAY) {
+		/*if (DAY) {
 			glColor3f(day_background[0], day_background[1], day_background[2]);
 			gluTessBeginPolygon(tess, 0);
 			gluTessBeginContour(tess);
@@ -599,9 +593,10 @@ int DrawSceneryData(Mirror* mirror) {
 			gluTessEndContour(tess);
 			gluTessEndPolygon(tess);
 		}
-		else {
+		else
+		{
 			//handle NITE
-		}
+		}*/
 	}
 	glEndList();
 
@@ -1275,14 +1270,14 @@ void RenderDepartures() {
 		std::vector<std::string> dep = it->second;
 		config3 = it->first;
 		switch (dep.size()) {
-		case 1:
-			config4 = dep[0];
-			config5 = "";
-			break;
-		case 2:
-			config4 = dep[0];
-			config5 = dep[1];
-			break;
+			case 1:
+				config4 = dep[0];
+				config5 = "";
+				break;
+			case 2:
+				config4 = dep[0];
+				config5 = dep[1];
+				break;
 		}
 
 		size3 = getTextExtent(config3), size4 = getTextExtent(config4), size5 = getTextExtent(config5);

@@ -18,7 +18,7 @@ extern std::vector<Mirror*> mirrors;
 
 extern std::string heavy_text, regular_text;
 
-extern bool renderAircraft, renderSector, renderButtons, renderLegend, renderInterfaces, renderInputTextFocus, 
+extern bool renderAircraft, renderSector, renderSectorColours, renderButtons, renderLegend, renderInterfaces, renderInputTextFocus,
 renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText;
 
 extern bool updateFlags[NUM_FLAGS];
@@ -26,7 +26,7 @@ extern bool renderFlags[NUM_FLAGS];
 
 extern bool resize;
 
-extern int sectorDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
+extern int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
 
 extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont, errorFont;
@@ -43,11 +43,14 @@ static double BUTTON_WIDTH = 70;
 const static double BUTTON_LAYOUT_HEIGHT = 0.1;
 
 const static float day_background[] = {0.0f, 0.35686274509f, 0.49019607843f};
-const static float nite_background[] = { 0.11111111111f, 0.11111111111f, 0.11111111111f };
+const static float nite_background[] = { 0.34509803921f, 0.34509803921f, 0.34509803921f };
 const static float runway_clr[] = {0.06274509803f, 0.06274509803f, 0.06274509803f};
 const static float taxiway_clr[] = {0.16078431372f, 0.16078431372f, 0.16078431372f};
+const static float taxiway_nite_clr[] = { 0.06666666666f, 0.15294117647f, 0.31372549019f };
 const static float apron_clr[] = {0.31764705882f, 0.31764705882f, 0.31764705882f};
+const static float apron_nite_clr[] = { 0.07058823529f, 0.21568627451f, 0.38039215686f };
 const static float parking_clr[] = {0.38823529411f, 0.38823529411f, 0.38823529411f};
+const static float parking_nite_clr[] = { 0.13333333333f, 0.24705882352f, 0.40392156862f };
 const static float regular_clr[] = {1.0f, 10.f, 10.f};
 const static float heavy_clr[] = {0.99215686274f, 0.56862745098f, 0.15294117647f};
 const static float button_clr_d[] = {0.22745098039f, 0.22745098039f, 0.22745098039f};
@@ -74,6 +77,7 @@ void DrawGLScene();
 void DrawInterfaces();
 void DrawMirrorScenes(Mirror&);
 void SetPixelFormat(HDC);
+int CreateSectorColours();
 int DrawSceneryData(Mirror* mirror);
 void RenderLegend();
 void RenderButtons();
