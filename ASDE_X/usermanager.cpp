@@ -126,7 +126,7 @@ void decodePackets(int opCode, Stream& stream) {
 		}
 	}
 
-	if (opCode == 11) {// recieve message
+	if (opCode == 11) {// recieve main message
 		int index = stream.readUnsignedWord();
 		char msg[2048];
 		stream.readString(msg);

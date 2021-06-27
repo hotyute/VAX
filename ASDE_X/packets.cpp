@@ -27,8 +27,8 @@ void sendUserMessage(User &to, std::string message) {
 	out.createFrameVarSizeWord(_USER_MESSAGE);
 	out.writeWord(USER->getUserIndex());
 	out.writeWord(to.getUserIndex());
-	char *msg = s2ca1(message);
-	out.writeString(msg);
+	out.writeDWord(99998);//frequency
+	out.writeString((char*)message.c_str());
 	out.endFrameVarSizeWord();
 	intter->sendMessage(&out);
 }
@@ -38,8 +38,7 @@ void sendPrivateMessage(User& to, std::string message) {
 	out.createFrameVarSizeWord(_PRIVATE_MESSAGE);
 	out.writeWord(USER->getUserIndex());
 	out.writeWord(to.getUserIndex());
-	char* msg = s2ca1(message);
-	out.writeString(msg);
+	out.writeString((char*)message.c_str());
 	out.endFrameVarSizeWord();
 	intter->sendMessage(&out);
 }
