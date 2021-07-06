@@ -24,8 +24,6 @@ void RenderControllerList(double x_, double y_)
 	start_x = 1.15;
 
 	std::vector<ChatLine*> list;
-	list.push_back(new ChatLine("------------DELIVERY----------", CHAT_TYPE::MAIN));
-	list.push_back(new ChatLine("1A   MIA_DEL           135.350", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
@@ -35,10 +33,13 @@ void RenderControllerList(double x_, double y_)
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+
 	double route_box_size = 150.0;
-	DisplayBox* displayBox = new DisplayBox(controller_list, list, list.size(), x + (width - (width * (start_x - spacing_x))),
+	controller_list_box = new DisplayBox(controller_list, list, list.size(), x + (width - (width * (start_x - spacing_x))),
 		width - 25, 5, y + (height - (height * (start_y += spacing_y))) - (route_box_size - 10), route_box_size, 5, false);
-	controller_list->children[displayBox->index = CONTROLLER_LIST_BOX] = displayBox;
+	controller_list->children[controller_list_box->index = CONTROLLER_LIST_BOX] = controller_list_box;
 
 
 	spacing_y = 0.02;
@@ -90,6 +91,7 @@ void RenderConnect(double x_, double y_)
 	connect_password->setInput("583562");
 #endif
 	std::vector<std::string> options1;
+	options1.push_back("Observer");
 	options1.push_back("Student 1");
 	options1.push_back("Student 2");
 	options1.push_back("Student 3");
@@ -276,11 +278,9 @@ void sendErrorMessage(std::string message) {
 
 void sendMainChatMessage(InputField* focusField)
 {
-	for (size_t i = 0; i < userStorage1.size(); i++) {
-		User* curUsr = userStorage1[i];
-		if (curUsr != NULL && curUsr != USER) {
-			sendUserMessage(*curUsr, focusField->input);
-		}
+	if (connected)
+	{
+		sendUserMessage(99998, focusField->input);
 	}
 	main_chat_box->resetReaderIdx();
 	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);

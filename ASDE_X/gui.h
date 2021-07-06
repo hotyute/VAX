@@ -9,7 +9,7 @@
 
 #define NUM_SUB_INTERFACES 2
 
-enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM, ATC };
+enum class CHAT_TYPE { MAIN, ERRORS, SYSTEM, ATC, SUP, SUP_POS };
 enum class CHILD_TYPE {
 	LABEL_D,
 	INPUT_FIELD,

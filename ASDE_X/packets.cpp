@@ -22,12 +22,11 @@ void sendPingPacket(User &user) {
 	intter->sendMessage(&out);
 }
 
-void sendUserMessage(User &to, std::string message) {
+void sendUserMessage(int frequency, std::string message) {
 	Stream &out = Stream(512);
 	out.createFrameVarSizeWord(_USER_MESSAGE);
 	out.writeWord(USER->getUserIndex());
-	out.writeWord(to.getUserIndex());
-	out.writeDWord(99998);//frequency
+	out.writeDWord(frequency);//99998 = 199.998
 	out.writeString((char*)message.c_str());
 	out.endFrameVarSizeWord();
 	intter->sendMessage(&out);

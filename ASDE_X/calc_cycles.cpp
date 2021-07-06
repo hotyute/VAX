@@ -14,6 +14,7 @@ DWORD __stdcall CalcThread1(LPVOID)
 		update();
 		CalculateCollisions();
 		CalcDepartures();
+		CalcControllerList();
 
 		end = boost::posix_time::microsec_clock::local_time();
 
@@ -70,6 +71,7 @@ void CalcDepartures() {
 				if (!departures.count(callsign)) {
 					std::vector<std::string> points = split(fp.route, " .");
 
+					//check if the aircraft is departing from this airport
 					if (boost::iequals(fp.departure, icao) && !icao.empty()) {
 						std::vector<std::string> new_points;
 
@@ -82,11 +84,106 @@ void CalcDepartures() {
 						renderDepartures = true;
 					}
 				}
-				else 
+				else
 				{
 					//check for removal
 				}
 			}
 		}
 	}
+}
+
+void CalcControllerList() {
+	if (controller_map.size() > 0) {
+		for (int i = 0; i < 9; i++)
+		{
+			for (auto iter = controller_map.begin(); iter != controller_map.end(); iter++)
+			{
+				Controller* ctlr = iter->second;
+				if (ctlr) {
+					std::string callsign = ctlr->getCallsign();
+
+					if (dist(USER->getLatitude(), USER->getLongitude(), ctlr->getLatitude(), ctlr->getLongitude()) <= USER->getVisibility())
+					{
+						if (i == 0)
+						{
+							if (!obs_list.count(callsign))
+							{
+								if (obs_list.size() < 1)
+									controller_list_box->addLine("------------OBSERVER----------", CHAT_TYPE::MAIN);
+
+								std::vector<std::string> data;
+
+								data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
+								data.push_back("1A");
+								data.push_back("199.998");
+								data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
+
+								add_to_ctrl_list(callsign, data, obs_list);
+
+							}
+						}
+						else if (i == 1)
+						{
+							if (!del_list.count(callsign))
+							{
+								if (del_list.size() < 1)
+									controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
+
+								std::vector<std::string> data;
+
+								data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
+								data.push_back("1A");
+								data.push_back("135.350");
+								data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
+
+								add_to_ctrl_list(callsign, data, del_list);
+
+							}
+						}
+					}
+					else
+					{
+						//check for removal
+					}
+				}
+			}
+			//for (auto &iter : ctrl_list)
+			//{
+
+			//}
+		}
+	}
+}
+
+void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data, 
+	std::unordered_map<std::string, ChatLine*>& store)
+{
+	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
+	std::string controller_user = "";
+	for (size_t i = 0; i < 7; i++)
+	{
+		if (i < data[1].length())
+			controller_user += data[1][i];
+		else
+			controller_user += " ";
+	}
+	for (size_t i = 0; i < 16; i++)
+	{
+		if (i < callsign.length())
+			controller_user += callsign[i];
+		else
+			controller_user += " ";
+	}
+	controller_user += data[2];
+	c->setText(controller_user);
+
+	controller_list_box->resetReaderIdx();
+
+	if (atodd(data[3]) == 10 || atodd(data[3]) == 11)
+		c->setType(CHAT_TYPE::SUP_POS);
+
+	controller_list_box->addLine(c);
+
+	store.emplace(callsign, c);
 }

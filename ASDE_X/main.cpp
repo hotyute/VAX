@@ -45,7 +45,7 @@ BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
-DisplayBox* main_chat_box = NULL;
+DisplayBox* main_chat_box = NULL, *controller_list_box = NULL;
 
 void handleConnect();
 void handleDisconnect();
@@ -239,8 +239,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (cur2 != NULL) {
 				cur2->lock();
 				cur2->setHeavy(false);
-				cur2->setLatitude(25.798267);
-				cur2->setLongitude(-80.282544);
+				cur2->setLatitude(25.801866);
+				cur2->setLongitude(-80.285309);
 				cur2->setSpeed(0.0);
 				cur2->setHeading(190.0);
 				cur2->setUpdateFlag(ACF_CALLSIGN, true);
@@ -817,7 +817,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 										for (size_t i = 0; i < userStorage1.size(); i++) {
 											User* curUsr = userStorage1[i];
 											if (curUsr != NULL && curUsr != USER) {
-												sendUserMessage(*curUsr, focusField->input);
+												//sendPrivateMessage(*curUsr, focusField->input);
 											}
 										}
 										DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
@@ -1137,6 +1137,7 @@ void moveInterfacesOnSize()
 void connect() {
 	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
 		connected = true;
+		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
 		EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_ENABLED);
 		Stream stream = Stream(200);
@@ -1158,7 +1159,7 @@ void connect() {
 		stream.writeQWord(1000);//request time
 		stream.writeQWord(doubleToRawBits(USER->getLatitude()));
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
-		stream.writeWord(600);
+		stream.writeWord(USER->getVisibility());
 		stream.writeByte(static_cast<int>(type));
 		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			stream.writeString("King Air 350");

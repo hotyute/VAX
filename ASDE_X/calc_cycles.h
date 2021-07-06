@@ -23,5 +23,10 @@ void CalculateCollisions();
 
 void CalcDepartures();
 
+void CalcControllerList();
+
+void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
+	std::unordered_map<std::string, ChatLine*>& store);
+
 #endif
 

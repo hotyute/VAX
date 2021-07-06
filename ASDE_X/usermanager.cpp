@@ -55,7 +55,8 @@ void decodePackets(int opCode, Stream& stream) {
 			acf_map[callSign1] = aircraft1;
 		}
 
-		if (user1) {
+		if (user1) 
+		{
 			user1->getIdentity()->login_name = full_name;
 			user1->getIdentity()->username = username;
 
@@ -111,6 +112,21 @@ void decodePackets(int opCode, Stream& stream) {
 		}
 		user1->handleMovement(latitude, longitude);
 	}
+
+	if (opCode == 15) {
+		int index = stream.readUnsignedWord();
+		int frequency = stream.readDWord();
+		char msg[2048];
+		stream.readString(msg);
+		User* user1 = userStorage1.at(index);
+		if (user1 != NULL) 
+		{
+			main_chat_box->resetReaderIdx();
+			main_chat_box->addLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+			renderDrawings = true;
+		}
+	}
+
 	if (opCode == 16) {
 		int index = stream.readUnsignedWord();
 		int mode = stream.readUnsignedByte();
@@ -126,7 +142,7 @@ void decodePackets(int opCode, Stream& stream) {
 		}
 	}
 
-	if (opCode == 11) {// recieve main message
+	if (opCode == 11) {// recieve private message
 		int index = stream.readUnsignedWord();
 		char msg[2048];
 		stream.readString(msg);

@@ -27,7 +27,8 @@ struct Identity {
 	std::string password;
 	std::string username;
 	int id;
-	int controller_rating;
+	int controller_rating = 0;
+	int controller_position = 0;
 	int pilot_rating = 0;
 	CLIENT_TYPES type;
 };
@@ -46,13 +47,13 @@ public:
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
 	std::string getCallsign() { return identity->callsign; }
+	int getVisibility() { return visibility; }
+	void setVisibility(int vis) { this->visibility = vis; }
 	void setCallsign(std::string new_callsign) { identity->callsign = new_callsign; }
 	Identity* getIdentity() {
 		return this->identity;
 	}
-	void setIdentity(Identity* userIdentity) {
-		this->identity = userIdentity;
-	}
+	void setIdentity(Identity* userIdentity) { this->identity = userIdentity; }
 	int getUserIndex() {
 		return userIndex;
 	}
@@ -72,6 +73,7 @@ public:
 private:
 	PrivateMessages private_messages;
 	long long update_time;
+	int visibility = 300;
 protected:
 	int userIndex;
 	Identity* identity;

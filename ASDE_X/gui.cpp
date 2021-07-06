@@ -1178,6 +1178,11 @@ void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 		glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
 	}
 	break;
+	case CHAT_TYPE::SUP_POS:
+	{
+		glColor4f(text_suppos_clr[0], text_suppos_clr[1], text_suppos_clr[2], 1.0f);
+	}
+	break;
 	default:
 	{
 		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);

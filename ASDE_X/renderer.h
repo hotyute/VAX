@@ -60,6 +60,7 @@ const static float button_text_clr[] = {0.80588235294f, 0.80588235294f, 0.805882
 const static float text_error_clr[] = { 0.90588235294f, 0.0f, 0.0f };
 const static float text_system_clr[] = { 0.90588235294f, 0.90588235294f, 0.0f };
 const static float text_atc_clr[] = { 0.0f, 0.5f, 0.0f };
+const static float text_suppos_clr[] = { 0.62352941176f, 0.16862745098f, 0.40784313725f };
 const static float callsign_clr[] = {0.83921568627f, 0.83921568627f, 0.31372549019f};
 const static float conf_clr[] = {0.00392156862f, 0.72549019607f, 0.00392156862f};
 const static float unknown_clr[] = {0.0f, 0.85490196078f, 0.81176470588f};
