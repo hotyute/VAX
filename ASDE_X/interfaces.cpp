@@ -2,7 +2,7 @@
 
 InterfaceFrame* controller_list = nullptr, * main_chat = nullptr;
 
-void RenderControllerList(double x_, double y_)
+void RenderControllerList(bool open, double x_, double y_)
 {
 	controller_list = new InterfaceFrame(CONTROLLER_INTERFACE);
 
@@ -55,7 +55,14 @@ void RenderControllerList(double x_, double y_)
 	CloseButton* closeb = new CloseButton(controller_list, 15, 15);
 	controller_list->children[closeb->index = CONTROLLER_LIST_CLOSE] = closeb;
 
-	controller_list->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
+	if (open)
+	{
+		controller_list->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
+	}
+	else
+	{
+		controller_list->doClose();
+	}
 
 	controller_list->doInsert();
 }
@@ -103,8 +110,8 @@ void RenderConnect(double x_, double y_)
 	options1.push_back("Instructor 3");
 	options1.push_back("Supervisor");
 	options1.push_back("Administrator");
-	ComboBox* comboBox1 = new ComboBox(connectFrame, options1, (x + 15.0), -1, 10.0, y + (height - 130), 22.0, -10.0);
-	connectFrame->children[comboBox1->index = RATING_COMBO] = comboBox1;
+	connect_rating = new ComboBox(connectFrame, options1, (x + 15.0), -1, 10.0, y + (height - 130), 22.0, -10.0);
+	connectFrame->children[connect_rating->index = RATING_COMBO] = connect_rating;
 	std::vector<std::string> options2;
 	options2.push_back("Observer");
 	options2.push_back("Delivery");
@@ -115,8 +122,8 @@ void RenderConnect(double x_, double y_)
 	options2.push_back("Center");
 	options2.push_back("Oceanic");
 	options2.push_back("FSS");
-	ComboBox* comboBox2 = new ComboBox(connectFrame, options2, (x + 15) + 163, -1, 10.0, y + (height - 130), 22.0, -10.0);
-	connectFrame->children[comboBox2->index = CONN_POSITION_COMBO] = comboBox2;
+	connect_position = new ComboBox(connectFrame, options2, (x + 15) + 163, -1, 10.0, y + (height - 130), 22.0, -10.0);
+	connectFrame->children[connect_position->index = CONN_POSITION_COMBO] = connect_position;
 	connect_closeb = new CloseButton(connectFrame, 15, 15);
 	connectFrame->children[connect_closeb->index = CONN_CLOSE_BUTTON] = connect_closeb;
 	ClickButton* okButton = new ClickButton(connectFrame, "CONNECT", x + 30.0, 100.0, y + 10.0 + (height - 190.0), 25.0);

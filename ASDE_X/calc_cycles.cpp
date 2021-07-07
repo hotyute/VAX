@@ -94,50 +94,57 @@ void CalcDepartures() {
 }
 
 void CalcControllerList() {
-	if (controller_map.size() > 0) {
+	if (controller_map.size() > 0) 
+	{
 		for (int i = 0; i < 9; i++)
 		{
 			for (auto iter = controller_map.begin(); iter != controller_map.end(); iter++)
 			{
 				Controller* ctlr = iter->second;
-				if (ctlr) {
+				if (ctlr) 
+				{
 					std::string callsign = ctlr->getCallsign();
 
 					if (dist(USER->getLatitude(), USER->getLongitude(), ctlr->getLatitude(), ctlr->getLongitude()) <= USER->getVisibility())
 					{
 						if (i == 0)
 						{
-							if (!obs_list.count(callsign))
+							if (!obs_list.count(callsign) && ctlr->getIdentity()->controller_position == 0)
 							{
-								if (obs_list.size() < 1)
-									controller_list_box->addLine("------------OBSERVER----------", CHAT_TYPE::MAIN);
 
 								std::vector<std::string> data;
 
 								data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
 								data.push_back("1A");
-								data.push_back("199.998");
+								data.push_back(frequency_to_string(ctlr->frequency[0]));
 								data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
 
 								add_to_ctrl_list(callsign, data, obs_list);
+
+								if (obs_list.empty())
+									controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
+
+								renderDrawings = true;
 
 							}
 						}
 						else if (i == 1)
 						{
-							if (!del_list.count(callsign))
+							if (!del_list.count(callsign) && ctlr->getIdentity()->controller_position == 1)
 							{
-								if (del_list.size() < 1)
-									controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
+								//if (del_list.empty())
+								//	controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
 
-								std::vector<std::string> data;
+								/*std::vector<std::string> data;
 
 								data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
 								data.push_back("1A");
-								data.push_back("135.350");
+								data.push_back(frequency_to_string(ctlr->frequency[0]));
 								data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
 
-								add_to_ctrl_list(callsign, data, del_list);
+								add_to_ctrl_list(callsign, data, del_list);*/
+
+								renderDrawings = true;
 
 							}
 						}
@@ -180,10 +187,12 @@ void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
 
 	controller_list_box->resetReaderIdx();
 
+	std::cout << atodd(data[3]) << std::endl;
+
 	if (atodd(data[3]) == 10 || atodd(data[3]) == 11)
 		c->setType(CHAT_TYPE::SUP_POS);
 
-	controller_list_box->addLine(c);
+	controller_list_box->addLineTop(c);
 
 	store.emplace(callsign, c);
 }

@@ -38,6 +38,7 @@ struct Identity {
 #define __User_user_h
 class User {
 public:
+	int frequency[2];
 	User(std::string, int, int);
 	virtual ~User();
 	virtual void setLatitude(double value) = 0;

@@ -134,22 +134,22 @@ void InterfaceFrame::doClose()
 {
 	switch (this->id)
 	{
-	case FP_INTERFACE:
-	{
-		opened_fp = NULL;
-		main_chat_input->setFocus();
-		break;
-	}
-	case CONNECT_INTERFACE:
-	{
-		main_chat_input->setFocus();
-		break;
-	}
-	case CONTROLLER_INTERFACE:
-	{
-		main_chat_input->setFocus();
-		break;
-	}
+		case FP_INTERFACE:
+		{
+			opened_fp = NULL;
+			main_chat_input->setFocus();
+			break;
+		}
+		case CONNECT_INTERFACE:
+		{
+			main_chat_input->setFocus();
+			break;
+		}
+		case CONTROLLER_INTERFACE:
+		{
+			main_chat_input->setFocus();
+			break;
+		}
 	}
 	InterfaceFrame::render = false;
 	renderInterfaces = true;
@@ -168,6 +168,20 @@ void InterfaceFrame::doReplace()
 		frames_def[this->id] = this;
 		rendered_frames[this->index = frame->index] = this;
 		delete frame;
+	}
+}
+
+void InterfaceFrame::doDefinition()
+{
+	InterfaceFrame* frame = frames_def[this->id];
+	if (frame && frame != this)
+	{
+		frames_def[this->id] = this;
+		delete frame;
+	}
+	else
+	{
+		frames_def[this->id] = this;
 	}
 }
 
@@ -410,14 +424,14 @@ void InputField::clearInput() {
 
 void InputField::setInput(std::string text) {
 	InputField::clearInput();
-	if (InputField::p_protected) 
+	if (InputField::p_protected)
 	{
-		for (int i = 0; i < text.size(); i++) 
+		for (int i = 0; i < text.size(); i++)
 		{
 			InputField::pp_input += '*';
 		}
 	}
-		InputField::input = text;
+	InputField::input = text;
 
 	last_cursor_pos = cursor_pos;
 	for (int i = 0; i < text.size(); i++) {
@@ -637,33 +651,35 @@ void ClickButton::removeFocus() {
 void ClickButton::doAction() {
 	switch (frame->id)
 	{
-	case CONNECT_INTERFACE://connect frame
-	{
-		switch (ClickButton::index)
+		case CONNECT_INTERFACE://connect frame
 		{
-		case CONN_OKAY_BUTTON:
-		{
-			Identity& id = *USER->getIdentity();
-			id.callsign = connect_callsign->input.c_str();
-			id.login_name = connect_fullname->input.c_str();
-			id.username = connect_username->input.c_str();
-			id.password = connect_password->input.c_str();
-			connect_closeb->doAction();
-			connect();
+			switch (ClickButton::index)
+			{
+				case CONN_OKAY_BUTTON:
+				{
+					Identity& id = *USER->getIdentity();
+					id.callsign = connect_callsign->input.c_str();
+					id.login_name = connect_fullname->input.c_str();
+					id.username = connect_username->input.c_str();
+					id.password = connect_password->input.c_str();
+					id.controller_rating = connect_rating->pos;
+					id.controller_position = connect_position->pos;
+					connect_closeb->doAction();
+					connect();
+				}
+				break;
+				case CONN_CANCEL_BUTTON:
+				{
+					connect_callsign->clearInput();
+					connect_fullname->clearInput();
+					connect_username->clearInput();
+					connect_password->clearInput();
+					connect_closeb->doAction();
+				}
+				break;
+			}
 		}
 		break;
-		case CONN_CANCEL_BUTTON:
-		{
-			connect_callsign->clearInput();
-			connect_fullname->clearInput();
-			connect_username->clearInput();
-			connect_password->clearInput();
-			connect_closeb->doAction();
-		}
-		break;
-		}
-	}
-	break;
 	}
 }
 
@@ -1041,9 +1057,9 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 		std::string str = line->getText();
 		if (line->in_bounds(x, y))
 		{
-#ifdef _DEBUG
+		#ifdef _DEBUG
 			std::cout << "Line: " << str << ", " << line->size_y() << std::endl;
-#endif
+		#endif
 			if (editable)
 			{
 				std::string temp;
@@ -1109,6 +1125,14 @@ void DisplayBox::addLine(ChatLine* c) {
 		read_index++;
 }
 
+void DisplayBox::addLineTop(ChatLine* c) {
+	if (DisplayBox::chat_lines.size() >= max_history)
+		DisplayBox::chat_lines.pop_back();
+	DisplayBox::chat_lines.insert(DisplayBox::chat_lines.begin(), c);
+	if ((read_index + numBlocks) < max_history)
+		read_index++;
+}
+
 void DisplayBox::removeLine(ChatLine* c)
 {
 	auto it = std::find(std::begin(DisplayBox::chat_lines), std::end(DisplayBox::chat_lines), c);
@@ -1135,6 +1159,11 @@ void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
 	addLine(c);
 }
 
+void DisplayBox::addLineTop(std::string text, CHAT_TYPE type) {
+	ChatLine* c = new ChatLine(text, type);
+	addLineTop(c);
+}
+
 void DisplayBox::doActionUp()
 {
 	if ((read_index - 1) >= 0) {
@@ -1156,38 +1185,43 @@ void DisplayBox::resetReaderIdx()
 	read_index = ((chat_lines.end() - numBlocks) - chat_lines.begin());
 }
 
+void DisplayBox::resetReaderIdxTop()
+{
+	read_index = 0;
+}
+
 void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 	switch (t) {
-	case CHAT_TYPE::MAIN:
-	{
-		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-	}
-	break;
-	case CHAT_TYPE::ERRORS:
-	{
-		glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
-	}
-	break;
-	case CHAT_TYPE::SYSTEM:
-	{
-		glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
-	}
-	break;
-	case CHAT_TYPE::ATC:
-	{
-		glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
-	}
-	break;
-	case CHAT_TYPE::SUP_POS:
-	{
-		glColor4f(text_suppos_clr[0], text_suppos_clr[1], text_suppos_clr[2], 1.0f);
-	}
-	break;
-	default:
-	{
-		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-	}
-	break;
+		case CHAT_TYPE::MAIN:
+		{
+			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::ERRORS:
+		{
+			glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::SYSTEM:
+		{
+			glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::ATC:
+		{
+			glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
+		}
+		break;
+		case CHAT_TYPE::SUP_POS:
+		{
+			glColor4f(text_suppos_clr[0], text_suppos_clr[1], text_suppos_clr[2], 1.0f);
+		}
+		break;
+		default:
+		{
+			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+		}
+		break;
 	}
 }
 
@@ -1321,29 +1355,29 @@ std::string ChatLine::getText()
 void ChatLine::playChatSound()
 {
 	switch (ChatLine::type) {
-	case CHAT_TYPE::MAIN:
-	{
-	}
-	break;
-	case CHAT_TYPE::ERRORS:
-	{
-		PlaySound(MAKEINTRESOURCE(IDW_SOUND2), NULL, SND_RESOURCE | SND_ASYNC);
-	}
-	break;
-	case CHAT_TYPE::SYSTEM:
-	{
+		case CHAT_TYPE::MAIN:
+		{
+		}
+		break;
+		case CHAT_TYPE::ERRORS:
+		{
+			PlaySound(MAKEINTRESOURCE(IDW_SOUND2), NULL, SND_RESOURCE | SND_ASYNC);
+		}
+		break;
+		case CHAT_TYPE::SYSTEM:
+		{
 
-	}
-	break;
-	case CHAT_TYPE::ATC:
-	{
-		PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
-	}
-	break;
-	default:
-	{
-	}
-	break;
+		}
+		break;
+		case CHAT_TYPE::ATC:
+		{
+			PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
+		}
+		break;
+		default:
+		{
+		}
+		break;
 	}
 }
 

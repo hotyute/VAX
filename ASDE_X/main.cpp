@@ -43,9 +43,10 @@ InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
+ComboBox* connect_rating = NULL, *connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
-DisplayBox* main_chat_box = NULL, *controller_list_box = NULL;
+DisplayBox* main_chat_box = NULL, * controller_list_box = NULL;
 
 void handleConnect();
 void handleDisconnect();
@@ -357,9 +358,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				{
 					if (controller_list == NULL) {
 						//TODO save X and Y positions when moved
-						RenderControllerList(-1, -1);
+						RenderControllerList(true, -1, -1);
 					}
 					else if (!controller_list->render) {
+						std::cout << "hello" << std::endl;
 						controller_list->doOpen(true, true);
 					}
 				}
@@ -1112,6 +1114,11 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
+	else if (boost::istarts_with(command, ".test")) {
+		controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
+		renderDrawings = true;
+		return true;
+	}
 	else if (boost::istarts_with(command, "/")) {
 		command.erase(0, 1);
 		sendATCMessage(command);
@@ -1154,17 +1161,23 @@ void connect() {
 		stream.writeString(fullname);
 		stream.writeString(username);
 		stream.writeString(pass);
-		stream.writeByte(USER->getIdentity()->controller_rating);
-		stream.writeByte(USER->getIdentity()->pilot_rating);
 		stream.writeQWord(1000);//request time
 		stream.writeQWord(doubleToRawBits(USER->getLatitude()));
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
 		stream.writeWord(USER->getVisibility());
 		stream.writeByte(static_cast<int>(type));
-		if (type == CLIENT_TYPES::PILOT_CLIENT) {
+		if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
+		{
+			stream.writeByte(USER->getIdentity()->controller_rating);
+			stream.writeByte(USER->getIdentity()->controller_position);
+		}
+		else if (type == CLIENT_TYPES::PILOT_CLIENT) 
+		{
+			stream.writeByte(0);
 			stream.writeString("King Air 350");
 			stream.writeString("0000");
 			stream.writeByte(0);
+			stream.writeQWord(0);//info hash
 		}
 		stream.endFrameVarSizeWord();
 		intter->sendMessage(&stream);
@@ -1248,6 +1261,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 
 	InitOpenGL();
 	LoadMainChatInterface(false);
+	RenderControllerList(false, -1, -1);
 	((InputField*)frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	renderAircraft = true;
 	std::cout.precision(10);

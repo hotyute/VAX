@@ -620,3 +620,13 @@ double atodd(std::string in) {
 
 	return d;
 }
+
+std::string frequency_to_string(int frequency)
+{
+	std::string raw = std::to_string(frequency);
+
+	raw.insert(0, "1");
+	raw.insert(3, ".");
+
+	return raw;
+}

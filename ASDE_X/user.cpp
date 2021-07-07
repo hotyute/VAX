@@ -9,6 +9,10 @@ User::User(std::string callSign, int controllerRating, int pilotRating) {
 	User::identity->callsign = callSign;
 	User::identity->controller_rating = controllerRating;
 	User::identity->pilot_rating = pilotRating;
+	for (int i = 0; i < sizeof(frequency) / sizeof(frequency[0]); ++i)
+	{
+		frequency[i] = 99998;
+	}
 }
 
 User::~User() {

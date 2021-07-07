@@ -6,7 +6,7 @@
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
 
-Controller* USER = new Controller("(NOT_LOGGED)", 11, 0);
+Controller* USER = new Controller("(NOT_LOGGED)", 0, 0);
 
 void decodePackets(int opCode, Stream& stream) {
 	if (opCode == 10) {
@@ -28,6 +28,8 @@ void decodePackets(int opCode, Stream& stream) {
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT) 
 		{
 			Controller* controller1 = new Controller(callSign1, 0, 0);
+			controller1->getIdentity()->controller_rating = stream.readUnsignedByte();
+			controller1->getIdentity()->controller_position = stream.readUnsignedByte();
 			user1 = (User*)controller1;
 			controller1->lock();
 			controller1->setCallsign(callSign1);
@@ -82,7 +84,8 @@ void decodePackets(int opCode, Stream& stream) {
 			delete user1;
 		}
 	}
-	if (opCode == 14) {
+	if (opCode == 14) 
+	{
 		//Pilot  Update Packet
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
@@ -108,6 +111,26 @@ void decodePackets(int opCode, Stream& stream) {
 			cur->setLongitude(longitude);
 			cur->setSpeed((double)groundSpeed);
 			cur->setHeading(heading);
+			cur->unlock();
+		}
+		user1->handleMovement(latitude, longitude);
+	}
+
+	if (opCode == 18)
+	{
+		//Controller Update Packet
+		int index = stream.readUnsignedWord();
+		User* user1 = userStorage1.at(index);
+		long long lat = stream.readQWord();
+		long long lon = stream.readQWord();
+		double latitude = *(double*)&lat;
+		double longitude = *(double*)&lon;
+		int flags = stream.readUnsignedWord();
+		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT) {
+			Controller* cur = (Controller*)user1;
+			cur->lock();
+			cur->setLatitude(latitude);
+			cur->setLongitude(longitude);
 			cur->unlock();
 		}
 		user1->handleMovement(latitude, longitude);

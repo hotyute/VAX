@@ -105,6 +105,8 @@ std::string TextToBinaryString(std::string words);
 
 double atodd(std::string in);
 
+std::string frequency_to_string(int frequency);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {

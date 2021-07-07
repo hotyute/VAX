@@ -20,7 +20,8 @@ static int packetSizes[256][2] = {
 	{15, -2},
 	{16, 3},
 	{11, -2},
-	{17, -2}
+	{17, -2},
+	{18, 18},
 };
 
 tcpinterface::tcpinterface() {

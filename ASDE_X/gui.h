@@ -45,6 +45,7 @@ public:
 	void doOpen(bool multi_open, bool pannable);
 	void doClose();
 	void doReplace();
+	void doDefinition();
 	void doInsert();
 	void move(int dx, int dy);
 	bool withinClient();
@@ -207,10 +208,13 @@ public:
 	int handleClick(ChildFrame* clicked, int x, int y);
 
 	void resetReaderIdx();
+	void resetReaderIdxTop();
 	void doActionUp();
 	void doActionDown();
 	void addLine(std::string, CHAT_TYPE type);
+	void addLineTop(std::string, CHAT_TYPE type);
 	void addLine(ChatLine* c);
+	void addLineTop(ChatLine* c);
 	void removeLine(ChatLine* c);
 	void SetChatTextColour(CHAT_TYPE t);
 

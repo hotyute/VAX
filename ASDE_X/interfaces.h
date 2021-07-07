@@ -4,7 +4,7 @@
 #include "main.h"
 #include "packets.h"
 
-void RenderControllerList(double x_, double y_);
+void RenderControllerList(bool open, double x_, double y_);
 
 void RenderConnect(double x, double y);
 
