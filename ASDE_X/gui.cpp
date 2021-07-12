@@ -1110,6 +1110,55 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 					renderDrawings = true;
 				}
 			}
+			else
+			{
+				switch (this->frame->id)
+				{
+					case CONTROLLER_INTERFACE:
+						switch (this->index)
+						{
+							case CONTROLLER_LIST_BOX:
+								std::cout << "hello there!!" << std::endl;
+								//handle controller click
+								controller_info_box->clearLines();
+
+								if (!str.empty())
+								{
+
+									std::string callsign = trim(str.substr(6, 16));
+
+									if (!callsign.empty())
+									{
+
+										Controller* controller_selected = controller_map[callsign];
+
+										if (controller_selected)
+										{
+											controller_info_box->addLineTop(new ChatLine(
+												"Vis Range: " + std::to_string(controller_selected->getVisibility()), 
+												CHAT_TYPE::MAIN));
+											controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
+											controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
+											controller_info_box->addLineTop(new ChatLine(controller_selected->getIdentity()->login_name
+												+ " ("+ CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")", 
+												CHAT_TYPE::MAIN));
+											
+											controller_info_box->addLineTop(new ChatLine(controller_selected->getCallsign(),
+												CHAT_TYPE::MAIN));
+										}
+									}
+								}
+								else
+								{
+
+								}
+
+								renderDrawings = true;
+								break;
+						}
+						break;
+				}
+			}
 			clicked = this;
 			return 1;
 		}
@@ -1222,6 +1271,23 @@ void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 		}
 		break;
+	}
+}
+
+void DisplayBox::clearLines()
+{
+	resetReaderIdxTop();
+	for (size_t i = read_index; i < read_index + numBlocks; i++)
+	{
+		ChatLine* line = DisplayBox::chat_lines[i];
+		line->setText("");
+	}
+	auto p_it = DisplayBox::chat_lines.begin() + (read_index + numBlocks);
+	while (p_it != DisplayBox::chat_lines.end())
+	{
+		ChatLine* line = *p_it;
+		p_it = DisplayBox::chat_lines.erase(p_it);
+		delete line;
 	}
 }
 

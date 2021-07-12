@@ -24,6 +24,7 @@ void decodePackets(int opCode, Stream& stream) {
 		stream.readString(callSign1);
 		stream.readString(username);
 		stream.readString(full_name);
+		int vis_range = stream.readUnsignedWord();
 		User* user1 = nullptr;
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT) 
 		{
@@ -61,6 +62,7 @@ void decodePackets(int opCode, Stream& stream) {
 		{
 			user1->getIdentity()->login_name = full_name;
 			user1->getIdentity()->username = username;
+			user1->setVisibility(vis_range);
 
 			users_map.emplace(user1->getCallsign(), user1);
 			user1->setUserIndex(index);
@@ -91,8 +93,8 @@ void decodePackets(int opCode, Stream& stream) {
 		User* user1 = userStorage1.at(index);
 		long long lat = stream.readQWord();
 		long long lon = stream.readQWord();
-		double latitude = *(double*)&lat;
-		double longitude = *(double*)&lon;
+		double _latitude = *(double*)&lat;
+		double _longitude = *(double*)&lon;
 		long long hash = stream.readQWord();
 		unsigned long long num2 = hash >> 22;
 		unsigned int num3 = hash >> 12 & 1023u;
@@ -103,17 +105,16 @@ void decodePackets(int opCode, Stream& stream) {
 		int groundSpeed = stream.readUnsignedWord();
 		long long alt = stream.readQWord();
 		double altitude = *(double*)&alt;
-		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) {
+		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) 
+		{
 			Aircraft* cur = (Aircraft*)user1;
 			cur->lock();
 			cur->setHeavy(false);
-			cur->setLatitude(latitude);
-			cur->setLongitude(longitude);
 			cur->setSpeed((double)groundSpeed);
 			cur->setHeading(heading);
 			cur->unlock();
 		}
-		user1->handleMovement(latitude, longitude);
+		user1->handleMovement(_latitude, _longitude);
 	}
 
 	if (opCode == 18)
@@ -123,17 +124,17 @@ void decodePackets(int opCode, Stream& stream) {
 		User* user1 = userStorage1.at(index);
 		long long lat = stream.readQWord();
 		long long lon = stream.readQWord();
-		double latitude = *(double*)&lat;
-		double longitude = *(double*)&lon;
-		int flags = stream.readUnsignedWord();
-		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT) {
+		double _latitude = *(double*)&lat;
+		double _longitude = *(double*)&lon;
+		int flags = stream.readUnsignedByte();
+		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT) 
+		{
 			Controller* cur = (Controller*)user1;
 			cur->lock();
-			cur->setLatitude(latitude);
-			cur->setLongitude(longitude);
+			cur->setOnBreak(false);
 			cur->unlock();
 		}
-		user1->handleMovement(latitude, longitude);
+		user1->handleMovement(_latitude, _longitude);
 	}
 
 	if (opCode == 15) {
@@ -173,6 +174,17 @@ void decodePackets(int opCode, Stream& stream) {
 		if (user1 != NULL) {
 			main_chat_box->addLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
 			renderDrawings = true;
+		}
+	}
+
+	if (opCode == 19)
+	{
+		int index = stream.readUnsignedWord();
+		User* user1 = userStorage1.at(index);
+		int vis_range = stream.readUnsignedWord();
+		if (user1 != NULL)
+		{
+			user1->setVisibility(vis_range);
 		}
 	}
 

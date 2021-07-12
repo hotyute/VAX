@@ -11,7 +11,8 @@ using namespace std::chrono_literals;
 
 tcpinterface* intter = new tcpinterface();
 
-static int packetSizes[256][2] = {
+static int packetSizes[256][2] = 
+{
 	{10, 8},
 	{13, 0},
 	{9, -1},
@@ -21,7 +22,8 @@ static int packetSizes[256][2] = {
 	{16, 3},
 	{11, -2},
 	{17, -2},
-	{18, 18},
+	{18, 19},
+	{19, 4}
 };
 
 tcpinterface::tcpinterface() {
@@ -59,12 +61,13 @@ DWORD tcpinterface::run() {
 		if (FD_ISSET(tcpinterface::sConnect, &rfds))
 		{
 			nBytesReceived = recv(tcpinterface::sConnect, message, 5000, 0);
-			if (nBytesReceived <= 0)
+			if (queue_clean)
 			{
 				in_stream->clearBuf();
-				disconnect();
+				//disconnect();
 				closed = true;
 				printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
+				queue_clean = false;
 				break;
 			}
 
@@ -95,7 +98,7 @@ DWORD tcpinterface::run() {
 							//sendUpdates
 							USER->setUserIndex(index);
 							USER->setUpdateTime(updateTimeInMillis);
-							position_updates = new PositionUpdates();
+							this->position_updates = new PositionUpdates();
 							position_updates->eAction.setTicks(0);
 							event_manager1->addEvent(position_updates);
 							tcpinterface::hand_shake = false;

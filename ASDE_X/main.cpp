@@ -43,10 +43,10 @@ InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
-ComboBox* connect_rating = NULL, *connect_position = NULL;
+ComboBox* connect_rating = NULL, * connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
-DisplayBox* main_chat_box = NULL, * controller_list_box = NULL;
+DisplayBox* main_chat_box = NULL, * controller_list_box = NULL, * controller_info_box = NULL;
 
 void handleConnect();
 void handleDisconnect();
@@ -76,14 +76,14 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 	std::string bin = TextToBinaryString(date1[0]);
 
-	//std::cout << TextToBinaryString("04/28/21") << std::endl;
+	//std::cout << TextToBinaryString("07/10/21") << std::endl;
 
-	//if (!(bin == "0011000000110100001011110011001000110111001011110011001000110001"
-	//	|| bin == "0011000000110100001011110011001000111000001011110011001000110001")) {
-	//	MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
-	//		MB_OK | MB_ICONINFORMATION);
-	//	return 0;
-	//}
+	/*if (!(bin == "0011000000110111001011110011000000111001001011110011001000110001"
+		|| bin == "0011000000110111001011110011000100110000001011110011001000110001")) {
+		MessageBox(hWnd, L"Time Expired! Please contact the developer for an Extension", L"Notice",
+			MB_OK | MB_ICONINFORMATION);
+		return 0;
+	}*/
 
 	loadButtons();
 	loadAircraftBlip2();
@@ -360,8 +360,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						//TODO save X and Y positions when moved
 						RenderControllerList(true, -1, -1);
 					}
-					else if (!controller_list->render) {
-						std::cout << "hello" << std::endl;
+					else if (!controller_list->render) 
+					{
 						controller_list->doOpen(true, true);
 					}
 				}
@@ -1142,7 +1142,7 @@ void moveInterfacesOnSize()
 }
 
 void connect() {
-	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
+	if (intter->connectNew(hWnd, "34.142.27.168", 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
@@ -1171,7 +1171,7 @@ void connect() {
 			stream.writeByte(USER->getIdentity()->controller_rating);
 			stream.writeByte(USER->getIdentity()->controller_position);
 		}
-		else if (type == CLIENT_TYPES::PILOT_CLIENT) 
+		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{
 			stream.writeByte(0);
 			stream.writeString("King Air 350");
@@ -1187,9 +1187,12 @@ void connect() {
 
 void disconnect()
 {
+	sendDisconnect();
 	sendSystemMessage("Disconnected.");
+	intter->queue_clean = true;
 	intter->disconnect_socket();
-	intter->position_updates->stop();
+	if (intter->position_updates)
+		intter->position_updates->stop();
 	conn_clean();
 	connected = false;
 	EnableMenuItem(hFile, ID_FILE_CONNECT, MF_ENABLED);

@@ -36,6 +36,7 @@ public:
 	fd_set rfds;
 	int retval;
 	bool closed = true;
+	bool queue_clean = false;
 
 	void w_lock();
 	void w_unlock();

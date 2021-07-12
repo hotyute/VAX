@@ -14,8 +14,12 @@ public:
 	double getLatitude();
 	void setLongitude(double value);
 	double getLongitude();
+	void setOnBreak(bool value) { on_break = value; }
+	bool isBreak() { return on_break; }
 	void lock();
 	void unlock();
+private:
+	bool on_break;
 };
 #endif
 

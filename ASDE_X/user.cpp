@@ -2,6 +2,7 @@
 
 #include "usermanager.h"
 #include "aircraft.h"
+#include "tools.h"
 
 User::User(std::string callSign, int controllerRating, int pilotRating) {
 	this->userIndex = -1;

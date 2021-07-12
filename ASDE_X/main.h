@@ -60,7 +60,7 @@ extern InputField *connect_callsign, *connect_fullname, *connect_username, *conn
 extern ComboBox* connect_rating, * connect_position;
 extern Label* callsign_label, *name_label, *user_label, * pass_label;
 extern CloseButton *connect_closeb;
-extern DisplayBox * main_chat_box, *controller_list_box;
+extern DisplayBox * main_chat_box, *controller_list_box, *controller_info_box;
 extern bool connected, show_departures, show_squawks;
 
 extern int single_opened_frames;

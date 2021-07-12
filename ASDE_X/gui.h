@@ -217,6 +217,7 @@ public:
 	void addLineTop(ChatLine* c);
 	void removeLine(ChatLine* c);
 	void SetChatTextColour(CHAT_TYPE t);
+	void clearLines();
 
 	bool click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset);
 	bool click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset);

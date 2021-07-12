@@ -53,6 +53,6 @@ void sendFlightPlanRequest(Aircraft& user_for) {
 void sendDisconnect() {
 	Stream &out = Stream(2);
 	out.createFrame(_DISCONNECT_PACKET);
-	out.writeWord(USER->getUserIndex());
+	out.writeByte(0);
 	intter->sendMessage(&out);
 }

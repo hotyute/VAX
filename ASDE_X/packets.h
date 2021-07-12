@@ -10,6 +10,8 @@ void sendUserMessage(int frequency, std::string message);
 
 void sendFlightPlanRequest(Aircraft& user_for);
 
+void sendDisconnect();
+
 const int _AIRCRAFT_POS_UPDATE = 1,
 _UPDATE_TRANSPONDER = 2,
 CONTROLLER_POS_UPDATE = 3,

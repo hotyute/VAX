@@ -47,10 +47,12 @@ void RenderControllerList(bool open, double x_, double y_)
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 	double route_box_size2 = 75.0;
-	DisplayBox* displayBox2 = new DisplayBox(controller_list, list2, list2.size(), x + (width - (width * (start_x - spacing_x))),
+	controller_info_box = new DisplayBox(controller_list, list2, list2.size(), x + (width - (width * (start_x - spacing_x))),
 		width - 25, 5, y + ((height - (height * (start_y += spacing_y))) - (route_box_size2 - 10)) - route_box_size, route_box_size2, 5, false);
-	controller_list->children[displayBox2->index = CONTROLLER_LIST_INFOBOX] = displayBox2;
+	controller_list->children[controller_info_box->index = CONTROLLER_LIST_INFOBOX] = controller_info_box;
 
 	CloseButton* closeb = new CloseButton(controller_list, 15, 15);
 	controller_list->children[closeb->index = CONTROLLER_LIST_CLOSE] = closeb;
@@ -91,12 +93,7 @@ void RenderConnect(double x_, double y_)
 	connect_password = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 95.0), 20, -10.0);
 	connect_password->p_protected = true;
 	connectFrame->children[connect_password->index = PASSWORD_INPUT] = connect_password;
-#ifdef _DEBUG
-	connect_callsign->setInput("SM_SUP");
-	connect_fullname->setInput("Samuel Mason");
-	connect_username->setInput("971202");
-	connect_password->setInput("583562");
-#endif
+
 	std::vector<std::string> options1;
 	options1.push_back("Observer");
 	options1.push_back("Student 1");
@@ -130,6 +127,14 @@ void RenderConnect(double x_, double y_)
 	connectFrame->children[okButton->index = CONN_OKAY_BUTTON] = okButton;
 	ClickButton* cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
+
+#ifdef _DEBUG
+	connect_callsign->setInput("SM_SUP");
+	connect_fullname->setInput("Samuel Mason");
+	connect_username->setInput("971202");
+	connect_password->setInput("583562");
+	connect_rating->pos = 10;
+#endif
 
 	connectFrame->doOpen(false, true);//delete's old object while opening, this should be before setting vector
 
