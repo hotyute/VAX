@@ -48,6 +48,7 @@ private:
 public:
 	Aircraft *collisionAcf;
 	Aircraft(std::string, int, int);
+	void handleModeChange(int new_mode);
 	virtual ~Aircraft();
 	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0, vectorDl = 0;
 	bool getRenderFlag(int flag);

@@ -1822,11 +1822,14 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	if (standby) {
 		glCallList(unkTarDl);
 	}
-	else {
-		if (!heavy) {
+	else 
+	{
+		if (!heavy) 
+		{
 			glCallList(aircraftDl);
 		}
-		else {
+		else 
+		{
 			glCallList(heavyDl);
 		}
 	}

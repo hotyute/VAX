@@ -160,6 +160,7 @@ void decodePackets(int opCode, Stream& stream) {
 			if (type == CLIENT_TYPES::PILOT_CLIENT) {
 				Aircraft* acf = (Aircraft*)user1;
 				if (acf != NULL) {
+					acf->handleModeChange(mode);
 					acf->setMode(mode);
 				}
 			}

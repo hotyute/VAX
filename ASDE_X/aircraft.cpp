@@ -26,6 +26,20 @@ Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating)
 	Aircraft::collTag2 = "DISPLAY#0000";
 }
 
+void Aircraft::handleModeChange(int new_mode)
+{
+	bool is_cur_standby = new_mode == 0 ? true : false;
+	bool is_standby = mode == 0 ? true : false;
+
+	if (!is_cur_standby && is_standby) // moving from standby to anything else
+	{
+		if (SHOW_VECTORS)
+		{
+			setUpdateFlag(ACF_VECTOR, true);
+		}
+	}
+}
+
 Aircraft::~Aircraft()
 {
 	delete Aircraft::flight_plan;
