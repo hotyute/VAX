@@ -1210,7 +1210,8 @@ void conn_clean()
 			userStorage1[i] = nullptr;
 		}
 	}
-	for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
+	for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) 
+	{
 		Collision* collision = it->second;
 		if (collision != nullptr) {
 			delete collision;
@@ -1219,6 +1220,7 @@ void conn_clean()
 	Collision_Map.clear();
 	controller_map.clear();
 	acf_map.clear();
+	users_map.clear();
 }
 
 DWORD WINAPI EventThread1(LPVOID lpParameter) {

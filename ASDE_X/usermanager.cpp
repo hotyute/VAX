@@ -9,13 +9,6 @@ std::unordered_map<std::string, User*> users_map;
 Controller* USER = new Controller("(NOT_LOGGED)", 0, 0);
 
 void decodePackets(int opCode, Stream& stream) {
-	if (opCode == 10) {
-		//update Cycle Change
-		USER->setUpdateTime(stream.readQWord());
-	}
-	if (opCode == 13) {
-		//ping packet
-	}
 	if (opCode == 9) {
 		//create new user packet
 		int index = stream.readUnsignedWord();
@@ -69,22 +62,37 @@ void decodePackets(int opCode, Stream& stream) {
 			userStorage1[index] = user1;
 		}
 	}
-	if (opCode == 12) {//delete user packet
+	if (opCode == 10) {
+		//update Cycle Change
+		USER->setUpdateTime(stream.readQWord());
+	}
+	if (opCode == 12) 
+	{//delete user packet
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
 		if (user1 != NULL) {
-			userStorage1[index] = NULL;
+			std::string callsign = user1->getCallsign();
 			CLIENT_TYPES type = user1->getIdentity()->type;
+
+			delete user1;
+			userStorage1[index] = nullptr;
+
+			//TODO Handle Collisions
+
 			if (type == CLIENT_TYPES::PILOT_CLIENT)
 			{
-				users_map.erase(user1->getCallsign());
+				acf_map.erase(callsign);
 			}
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
-
+				controller_map.erase(callsign);
 			}
-			delete user1;
+
+			users_map.erase(callsign);
 		}
+	}
+	if (opCode == 13) {
+		//ping packet
 	}
 	if (opCode == 14) 
 	{
@@ -137,7 +145,8 @@ void decodePackets(int opCode, Stream& stream) {
 		user1->handleMovement(_latitude, _longitude);
 	}
 
-	if (opCode == 15) {
+	if (opCode == 15) 
+	{
 		int index = stream.readUnsignedWord();
 		int frequency = stream.readDWord();
 		char msg[2048];
@@ -179,7 +188,7 @@ void decodePackets(int opCode, Stream& stream) {
 	}
 
 	if (opCode == 19)
-	{
+	{//update visibility packet
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
 		int vis_range = stream.readUnsignedWord();
