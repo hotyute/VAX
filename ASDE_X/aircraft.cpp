@@ -151,6 +151,13 @@ void Aircraft::setHeading(double value) {
 	Aircraft::heading = value;
 }
 
+void Aircraft::setThreeFactor(double hdg, double pit, double rol)
+{
+	Aircraft::heading = hdg;
+	Aircraft::pitch = pit;
+	Aircraft::roll = rol;
+}
+
 void Aircraft::lock() {
 	WaitForSingleObject(Aircraft::aMutex, INFINITE);
 }

@@ -2,6 +2,7 @@
 #include "main.h"
 #include "renderer.h"
 #include "tools.h"
+#include "calc_cycles.h"
 
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
@@ -18,6 +19,8 @@ void decodePackets(int opCode, Stream& stream) {
 		stream.readString(username);
 		stream.readString(full_name);
 		int vis_range = stream.readUnsignedWord();
+		long long lat = stream.readQWord();
+		long long lon = stream.readQWord();
 		User* user1 = nullptr;
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT) 
 		{
@@ -29,6 +32,7 @@ void decodePackets(int opCode, Stream& stream) {
 			controller1->setCallsign(callSign1);
 			controller1->unlock();
 			controller_map[callSign1] = controller1;
+			check_add_ctrl_list(*controller1);
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT) 
 		{
@@ -37,6 +41,13 @@ void decodePackets(int opCode, Stream& stream) {
 			char trans_code[1024];
 			stream.readString(trans_code);
 			int squawkMode = stream.readUnsignedByte();
+			long long hash = stream.readQWord();
+			unsigned long long num2 = hash >> 22;
+			unsigned int num3 = hash >> 12 & 1023u;
+			unsigned int num4 = hash >> 2 & 1023u;
+			double pitch = num2 / 1024.0 * -360.0;
+			double roll = num3 / 1024.0 * -360.0;
+			double heading = num4 / 1024.0 * 360.0;
 			//TODO SEND THE BLOODY HEADINGS PITCH AND ROLL!
 			Aircraft* aircraft1 = new Aircraft(callSign1, 0, 0);
 			user1 = (User*)aircraft1;
@@ -46,6 +57,7 @@ void decodePackets(int opCode, Stream& stream) {
 			aircraft1->setUpdateFlag(ACF_COLLISION, true);
 			aircraft1->setMode(squawkMode);
 			aircraft1->setSquawkCode(trans_code);
+			aircraft1->setThreeFactor(heading, pitch, roll);
 			aircraft1->unlock();
 			addAircraftToMirrors(aircraft1);
 			acf_map[callSign1] = aircraft1;
@@ -57,9 +69,17 @@ void decodePackets(int opCode, Stream& stream) {
 			user1->getIdentity()->username = username;
 			user1->setVisibility(vis_range);
 
+			user1->setLatitude((*(double*)&lat));
+			user1->setLongitude((*(double*)&lon));
+
 			users_map.emplace(user1->getCallsign(), user1);
 			user1->setUserIndex(index);
 			userStorage1[index] = user1;
+
+			if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
+			{
+				check_add_ctrl_list(*(Controller*)user1);
+			}
 		}
 	}
 	if (opCode == 10) {
@@ -74,6 +94,15 @@ void decodePackets(int opCode, Stream& stream) {
 			std::string callsign = user1->getCallsign();
 			CLIENT_TYPES type = user1->getIdentity()->type;
 
+			if (type == CLIENT_TYPES::PILOT_CLIENT)
+			{
+
+			}
+			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
+			{
+				check_del_ctrl_list(*((Controller*)user1));
+			}
+
 			delete user1;
 			userStorage1[index] = nullptr;
 
@@ -86,6 +115,7 @@ void decodePackets(int opCode, Stream& stream) {
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
 				controller_map.erase(callsign);
+
 			}
 
 			users_map.erase(callsign);
@@ -119,7 +149,7 @@ void decodePackets(int opCode, Stream& stream) {
 			cur->lock();
 			cur->setHeavy(false);
 			cur->setSpeed((double)groundSpeed);
-			cur->setHeading(heading);
+			cur->setThreeFactor(heading, pitch, roll);
 			cur->unlock();
 		}
 		user1->handleMovement(_latitude, _longitude);

@@ -94,76 +94,64 @@ void CalcDepartures() {
 }
 
 void CalcControllerList() {
-	if (controller_map.size() > 0) 
+	if (controller_map.size() > 0)
 	{
 		for (int i = 0; i < 9; i++)
 		{
-			for (auto iter = controller_map.begin(); iter != controller_map.end(); iter++)
-			{
-				Controller* ctlr = iter->second;
-				if (ctlr) 
-				{
-					std::string callsign = ctlr->getCallsign();
 
-					if (dist(USER->getLatitude(), USER->getLongitude(), ctlr->getLatitude(), ctlr->getLongitude()) <= USER->getVisibility())
-					{
-						if (i == 0)
-						{
-							if (!obs_list.count(callsign) && ctlr->getIdentity()->controller_position == 0)
-							{
-
-								std::vector<std::string> data;
-
-								data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
-								data.push_back("1A");
-								data.push_back(frequency_to_string(ctlr->frequency[0]));
-								data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
-
-								add_to_ctrl_list(callsign, data, obs_list);
-
-								if (obs_list.empty())
-									controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
-
-								renderDrawings = true;
-
-							}
-						}
-						else if (i == 1)
-						{
-							if (!del_list.count(callsign) && ctlr->getIdentity()->controller_position == 1)
-							{
-								//if (del_list.empty())
-								//	controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
-
-								/*std::vector<std::string> data;
-
-								data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
-								data.push_back("1A");
-								data.push_back(frequency_to_string(ctlr->frequency[0]));
-								data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
-
-								add_to_ctrl_list(callsign, data, del_list);*/
-
-								renderDrawings = true;
-
-							}
-						}
-					}
-					else
-					{
-						//check for removal
-					}
-				}
-			}
-			//for (auto &iter : ctrl_list)
-			//{
-
-			//}
 		}
 	}
 }
 
-void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data, 
+void check_add_ctrl_list(Controller& controller)
+{
+	std::string callsign = controller.getCallsign();
+
+	if (dist(USER->getLatitude(), USER->getLongitude(), controller.getLatitude(), controller.getLongitude()) <= USER->getVisibility())
+	{
+			if (!obs_list.count(callsign) && controller.getIdentity()->controller_position == 0)
+			{
+
+				std::vector<std::string> data;
+
+				data.push_back(std::to_string(controller.getIdentity()->controller_position));
+				data.push_back("1A");
+				data.push_back(frequency_to_string(controller.frequency[0]));
+				data.push_back(std::to_string(controller.getIdentity()->controller_rating));
+
+				add_to_ctrl_list(callsign, data, obs_list);
+
+				if (obs_list.empty())
+					controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
+
+				renderDrawings = true;
+
+			}
+			else if (!del_list.count(callsign) && controller.getIdentity()->controller_position == 1)
+			{
+				//if (del_list.empty())
+				//	controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
+
+				/*std::vector<std::string> data;
+
+				data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
+				data.push_back("1A");
+				data.push_back(frequency_to_string(ctlr->frequency[0]));
+				data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
+
+				add_to_ctrl_list(callsign, data, del_list);*/
+
+				renderDrawings = true;
+
+			}
+	}
+	else
+	{
+		//check for removal
+	}
+}
+
+void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
 	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
@@ -193,6 +181,42 @@ void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
 		c->setType(CHAT_TYPE::SUP_POS);
 
 	controller_list_box->addLineTop(c);
+	controller_list_box->prepare();
 
 	store.emplace(callsign, c);
+}
+
+void check_del_ctrl_list(Controller& controller)
+{
+	std::string callsign = controller.getCallsign();
+	switch (controller.getIdentity()->controller_position)
+	{
+		case 0:
+		{
+			ChatLine* c = obs_list[callsign];
+			if (c)
+			{
+				remove_ctrl_list(c);
+			}
+			obs_list.erase(callsign);
+		}
+		break;
+		case 1:
+		{
+			ChatLine* c = del_list[callsign];
+			if (c)
+			{
+				remove_ctrl_list(c);
+			}
+			del_list.erase(callsign);
+		}
+		break;
+
+	}
+}
+
+void remove_ctrl_list(ChatLine* c)
+{
+	controller_list_box->removeLine(c);
+	renderDrawings = true;
 }

@@ -824,22 +824,15 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines,
 	DisplayBox::child_interfaces.push_back(comboBounds);
 }
 
-void DisplayBox::doDrawing() {
+void DisplayBox::prepare()
+{
 	BasicInterface& param = *DisplayBox::border;
-	double x;
+
 	double aW = param.getActualWidth();
-	if (DisplayBox::centered) {
-		x = (param.getStartX() + (aW / 2));
-	}
-	else {
-		x = param.getStartX();
-	}
-	int dbox_padding = 0;
-	double y_height = ((param.getActualHeight() - dbox_padding) / DisplayBox::numBlocks);
-	double last_end_y = -1;
 	SelectObject(hDC, topBtnFont);
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
+
 	long ave = tm.tmAveCharWidth;
 	int maxChars = aW / ave;
 
@@ -944,10 +937,34 @@ void DisplayBox::doDrawing() {
 		resetReaderIdx();
 		reset_idx = false;
 	}
+}
+
+void DisplayBox::doDrawing() {
+	BasicInterface& param = *DisplayBox::border;
+	double x;
+	double aW = param.getActualWidth();
+	if (DisplayBox::centered) {
+		x = (param.getStartX() + (aW / 2));
+	}
+	else {
+		x = param.getStartX();
+	}
+	int dbox_padding = 0;
+	double y_height = ((param.getActualHeight() - dbox_padding) / DisplayBox::numBlocks);
+	double last_end_y = -1;
+	//SelectObject(hDC, topBtnFont);
+	//TEXTMETRIC tm;
+	//GetTextMetrics(hDC, &tm);
+	//long ave = tm.tmAveCharWidth;
+	//int maxChars = aW / ave;
+
+	prepare();
+
 
 	//draw Text to screen
 	displayed_lines.clear();
-	for (size_t i = read_index; i < read_index + numBlocks; i++) {
+	for (size_t i = read_index; i < read_index + numBlocks; i++)
+	{
 		ChatLine* line = DisplayBox::chat_lines[i];
 		std::string text = line->getText();
 		CHAT_TYPE type = line->getType();
@@ -964,7 +981,8 @@ void DisplayBox::doDrawing() {
 		SIZE size = getTextExtent(text);
 		//int tH = tm.tmAscent - tm.tmInternalLeading;
 		double textXPos;
-		if (DisplayBox::centered) {
+		if (DisplayBox::centered)
+		{
 			textXPos = x - (size.cx / 2.0);
 		}
 		else {
@@ -1135,14 +1153,14 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 										if (controller_selected)
 										{
 											controller_info_box->addLineTop(new ChatLine(
-												"Vis Range: " + std::to_string(controller_selected->getVisibility()), 
+												"Vis Range: " + std::to_string(controller_selected->getVisibility()),
 												CHAT_TYPE::MAIN));
 											controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
 											controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
 											controller_info_box->addLineTop(new ChatLine(controller_selected->getIdentity()->login_name
-												+ " ("+ CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")", 
+												+ " (" + CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")",
 												CHAT_TYPE::MAIN));
-											
+
 											controller_info_box->addLineTop(new ChatLine(controller_selected->getCallsign(),
 												CHAT_TYPE::MAIN));
 										}
@@ -1184,13 +1202,39 @@ void DisplayBox::addLineTop(ChatLine* c) {
 
 void DisplayBox::removeLine(ChatLine* c)
 {
-	auto it = std::find(std::begin(DisplayBox::chat_lines), std::end(DisplayBox::chat_lines), c);
-
-	if (it != std::end(DisplayBox::chat_lines)) {
-		DisplayBox::chat_lines.erase(it);
+	//std::cout << DisplayBox::chat_lines.size() << ", " << numBlocks << std::endl;
+	if (DisplayBox::chat_lines.size() <= numBlocks)
+	{
+		c->setText("");
+		c->setType(CHAT_TYPE::MAIN);
 	}
+	else
+	{
+		auto it = std::find(std::begin(DisplayBox::chat_lines), std::end(DisplayBox::chat_lines), c);
 
-	delete c;
+		if (it != std::end(DisplayBox::chat_lines))
+		{
+			it = DisplayBox::chat_lines.erase(it);
+			delete c;
+		}
+	}
+}
+
+void DisplayBox::clearLines()
+{
+	resetReaderIdxTop();
+	for (size_t i = read_index; i < read_index + numBlocks; i++)
+	{
+		ChatLine* line = DisplayBox::chat_lines[i];
+		line->setText("");
+	}
+	auto p_it = DisplayBox::chat_lines.begin() + (read_index + numBlocks);
+	while (p_it != DisplayBox::chat_lines.end())
+	{
+		ChatLine* line = *p_it;
+		p_it = DisplayBox::chat_lines.erase(p_it);
+		delete line;
+	}
 }
 
 void DisplayBox::updatePos(double x, double width, double y, double height)
@@ -1271,23 +1315,6 @@ void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 		}
 		break;
-	}
-}
-
-void DisplayBox::clearLines()
-{
-	resetReaderIdxTop();
-	for (size_t i = read_index; i < read_index + numBlocks; i++)
-	{
-		ChatLine* line = DisplayBox::chat_lines[i];
-		line->setText("");
-	}
-	auto p_it = DisplayBox::chat_lines.begin() + (read_index + numBlocks);
-	while (p_it != DisplayBox::chat_lines.end())
-	{
-		ChatLine* line = *p_it;
-		p_it = DisplayBox::chat_lines.erase(p_it);
-		delete line;
 	}
 }
 

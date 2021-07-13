@@ -42,7 +42,7 @@ private:
 	std::string callsign, textTag1, textTag2, squawkCode;
 	std::string collText, collTag1, collTag2;
 	double speed;
-	double heading;
+	double heading, pitch, roll;
 	std::vector<History*> historyCount;
 	FlightPlan *flight_plan;
 public:
@@ -77,6 +77,7 @@ public:
 	void setSpeed(double);
 	double getHeading();
 	void setHeading(double);
+	void setThreeFactor(double hdg, double pit, double roll);
 	void lock();
 	void unlock();
 	//void setUser1(User*);
