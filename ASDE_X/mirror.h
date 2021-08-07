@@ -16,12 +16,14 @@ private:
 	int x_, y_, width, height;
 	double zoom_, lat_, lon_;
 	double rotation = 0;
+	double minX = 0, maxX = 0, minY = 0, maxY = 0;
 public:
 	Mirror();
 	~Mirror();
 	std::string id_;
 	std::unordered_map<Aircraft*, std::vector<unsigned int>> g_flags;
 	std::unordered_map<Collision*, std::vector<unsigned int>> c_flags;
+	std::unordered_map<Aircraft*, double*> wndc;
 	POINT* s_pt = nullptr, * cur_pt = nullptr, * end_pt = nullptr;
 	int startX = -1, startY = -1;
 	int borderDl = 0;
@@ -43,6 +45,8 @@ public:
 	double getLat() { return lat_; }
 	double getLon() { return lon_; }
 	double getRotation() { return this->rotation; }
+	void setBoundaries(double minX, double maxX, double minY, double maxY);
+	bool within_boundary(Aircraft& aircraft);
 };
 #endif
 

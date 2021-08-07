@@ -472,6 +472,8 @@ int TopButton::handleScroll(bool hi_scroll)
 			this->setOption2(std::to_string(range = this->value));//range is set in 100's of feet so 100 = 10,000 feet
 			mZoom = zoom_from_range();
 			updateFlags[GBL_COLLISION_LINE] = true;
+			convert_closures = true;
+			renderClosures = true;
 		}
 		return 1;
 	}
@@ -495,6 +497,9 @@ int TopButton::handleScroll(bool hi_scroll)
 		rotation = this->value;
 		if (this->value != change) {
 			this->setOption2(std::to_string((int) (rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
+
+			convert_closures = true;
+			renderClosures = true;
 		}
 		rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
 		return 1;

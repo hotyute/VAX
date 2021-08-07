@@ -284,6 +284,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				mZoom = zoom_from_range();
 
 			updateFlags[GBL_COLLISION_LINE] = true;
+			updateFlags[GBL_CALLSIGN] = true;
 
 			resize = true;
 			renderButtons = true;
@@ -295,6 +296,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			renderDepartures = true;
 			renderInputTextFocus = true;
 			renderAllInputText = true;
+			convert_closures = true;
+			renderClosures = true;
 			//renderAircraft = true;
 		}
 		break;
@@ -399,6 +402,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							renderDate = true;
 							renderDepartures = true;
 							updateFlags[GBL_COLLISION_LINE] = true;
+							convert_closures = true;
+							renderClosures = true;
 							zoom_phase = 2;
 							rangeb->refreshOption2();
 						}
@@ -1281,12 +1286,25 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		ResizeGLScene();
 		DrawGLScene();
 
+		//Draw Aircraft Data like Callsigns vectors
+		ResizeDataGLScene();
+		DrawData();
+
 		//Draw Sub Scenes
 		for (Mirror* mirror : mirrors) {
 			if (mirror)
 			{
 				ResizeMirrorGLScene(*mirror);
 				DrawMirrorScenes(*mirror);
+			}
+		}
+
+		//Draw Subscene Aircraft Data like Callsigns vectors
+		for (Mirror* mirror : mirrors) {
+			if (mirror)
+			{
+				ResizeMirrorDataGLScene(*mirror);
+				DrawMirrorData(*mirror);
 			}
 		}
 

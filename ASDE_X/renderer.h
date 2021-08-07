@@ -16,20 +16,26 @@
 extern std::unordered_map<std::string, Mirror*> mirrors_storage;
 extern std::vector<Mirror*> mirrors;
 
+extern std::vector<double*> closures, wnd_closures;
+
 extern std::string heavy_text, regular_text;
 
 extern bool renderAircraft, renderSector, renderSectorColours, renderButtons, renderLegend, renderInterfaces, renderInputTextFocus,
-renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText;
+renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderClosures;
+
+extern bool convert_closures;
 
 extern bool updateFlags[NUM_FLAGS];
 extern bool renderFlags[NUM_FLAGS];
 
 extern bool resize;
 
-extern int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl;
+extern int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl, closuresDl;
 
 extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont, errorFont;
+
+extern double minX, maxX, minY, maxY;
 
 static const int scale[] = {4, 60};
 static const int LOCKED_FPS = 60;
@@ -73,9 +79,13 @@ void ResizeMirrorGLScene(Mirror& mirror);
 void ResizeGLScene();
 void ResizeInterfaceGLScene();
 void ResizeMirrorGLScene(Mirror*);
+void ResizeDataGLScene();
+void ResizeMirrorDataGLScene(Mirror& mirror);
 void SetView(double, double);
 void DrawGLScene();
 void DrawInterfaces();
+void DrawData();
+void DrawMirrorData(Mirror& mirror);
 void DrawMirrorScenes(Mirror&);
 void SetPixelFormat(HDC);
 int CreateSectorColours();
@@ -88,6 +98,7 @@ void RenderConf();
 void RenderDate();
 void RenderDepartures();
 void GetOGLPos(int, int, double*);
+void GetWndPos(double latitude, double longitude, double* output);
 void BuildFont(LPCWSTR, int, bool, unsigned int*, HFONT*);
 void glPrint(const char*, unsigned int*, ...);
 void deleteTess();

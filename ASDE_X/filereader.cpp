@@ -21,6 +21,13 @@ int FileReader::LoadADX(std::string path) {
 		p_it = ALL.erase(p_it);
 		delete p;
 	}
+	auto cl_it = closures.begin();
+	while (cl_it != closures.end())
+	{
+		double* c = *cl_it;
+		cl_it = closures.erase(cl_it);
+		delete[] c;
+	}
 	auto m_it = mirrors_storage.begin();
 	while (m_it != mirrors_storage.end()) {
 		Mirror* m = (*m_it).second;
@@ -137,7 +144,8 @@ int FileReader::LoadADX(std::string path) {
 						}
 						else
 						{
-							if (header == "CENTER" || header == "HOLE" || header == "MIRROR") {
+							if (header == "CENTER" || header == "HOLE" || header == "MIRROR" || header == "CLOSURES") 
+							{
 
 							}
 							else
@@ -176,7 +184,7 @@ int FileReader::LoadADX(std::string path) {
 				{
 					std::string slatitude, slongitude;
 					if (header == "HOLE" || header == "RUNWAY" || "RUNWAY LINE" || header == "PARKING" || header == "APRON"
-						|| header == "TAXIWAY" || header == "CENTER" || header == "MIRROR") {
+						|| header == "TAXIWAY" || header == "CENTER" || header == "MIRROR" || header == "CLOSURES") {
 						if (header == "RUNWAY LINE") {
 							//std::cout << whole_line << std::endl;
 							std::vector<std::string> args = split(line, " ");
@@ -214,6 +222,15 @@ int FileReader::LoadADX(std::string path) {
 							mir->setLon(lon);
 							mirrors_storage.emplace(id, mir);
 							mir->id_ = id;
+						}
+						else if (header == "CLOSURES")
+						{
+							std::vector<std::string> args = split(line, " ");
+							double lon = atodd(args[1].c_str()), lat = atodd(args[0].c_str());
+
+							double* c = new double[]{ lat, lon };
+
+							closures.push_back(c);
 						}
 						else
 						{
@@ -262,7 +279,6 @@ int FileReader::LoadADX(std::string path) {
 								}
 								else
 								{
-
 									if (header == "HOLE")
 									{
 										point2d->add_holes(seg);

@@ -505,6 +505,7 @@ void addAircraftToMirrors(Aircraft* acf)
 
 		if (mir) {
 			mir->g_flags.emplace(acf, std::vector<unsigned int>(ACF_FLAG_COUNT)); // initialized to 0 by default
+			mir->wndc.emplace(acf, new double[3]);
 		}
 	}
 }
@@ -686,6 +687,13 @@ Point2* intersect(double $p1_lat, double $p1_lon, double $brng1, double $p2_lat,
 	return new Point2(degrees(lon3), degrees(lat3));
 }
 
-bool are_equal(double a, double b) {
-	return std::fabs(a - b) < std::numeric_limits<double>::epsilon();
+bool within_boundary(Aircraft& aircraft)
+{
+	if (aircraft.getLatitude() < minY || aircraft.getLatitude() > maxY)
+		return false;
+	if (aircraft.getLongitude() < minX || aircraft.getLongitude() > maxX)
+		return false;
+	return true;
 }
+
+

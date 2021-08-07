@@ -13,6 +13,12 @@ Mirror::Mirror()
 Mirror::~Mirror()
 {
 	g_flags.clear();
+	c_flags.clear();
+	for (auto& coord : wndc)
+	{
+		delete coord.second;
+	}
+	wndc.clear();
 }
 
 int Mirror::getWidth()
@@ -30,7 +36,24 @@ double Mirror::getZoom()
 	return Mirror::zoom_;
 }
 
-std::vector<Mirror*>::iterator get_mir(std::vector<Mirror*> &vec, std::string search)
+void Mirror::setBoundaries(double minX, double maxX, double minY, double maxY)
+{
+	this->minX = minX;
+	this->minY = minY;
+	this->maxX = maxX;
+	this->maxY = maxY;
+}
+
+bool Mirror::within_boundary(Aircraft& aircraft)
+{
+	if (aircraft.getLatitude() < minY || aircraft.getLatitude() > maxY)
+		return false;
+	if (aircraft.getLongitude() < minX || aircraft.getLongitude() > maxX)
+		return false;
+	return true;
+}
+
+std::vector<Mirror*>::iterator get_mir(std::vector<Mirror*>& vec, std::string search)
 {
 	auto it = std::find_if(
 		std::begin(vec),

@@ -24,6 +24,11 @@ Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating)
 	Aircraft::collText = "#CALLSIGN";
 	Aircraft::collTag1 = "No Alert";
 	Aircraft::collTag2 = "DISPLAY#0000";
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		wndc.push_back(new double[3]{ 0, 0, 0 });
+	}
 }
 
 void Aircraft::handleModeChange(int new_mode)

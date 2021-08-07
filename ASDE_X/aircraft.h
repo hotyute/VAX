@@ -46,6 +46,8 @@ private:
 	std::vector<History*> historyCount;
 	FlightPlan *flight_plan;
 public:
+	double wnd_loc[3] { 0, 0, 0 };
+	std::vector<double*> wndc;
 	Aircraft *collisionAcf;
 	Aircraft(std::string, int, int);
 	void handleModeChange(int new_mode);

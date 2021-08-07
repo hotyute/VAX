@@ -109,7 +109,7 @@ std::string frequency_to_string(int frequency);
 
 Point2* intersect(double $p1_lat, double $p1_lon, double $brng1, double $p2_lat, double $p2_lon, double $brng2);
 
-bool are_equal(double a, double b);
+bool within_boundary(Aircraft& aircraft);
 
 template<typename T>
 T pop_front(std::vector<T>& vec)

@@ -175,8 +175,6 @@ void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
 
 	controller_list_box->resetReaderIdx();
 
-	std::cout << atodd(data[3]) << std::endl;
-
 	if (atodd(data[3]) == 10 || atodd(data[3]) == 11)
 		c->setType(CHAT_TYPE::SUP_POS);
 
