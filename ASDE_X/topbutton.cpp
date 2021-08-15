@@ -400,43 +400,43 @@ int TopButton::handle()
 {
 	switch (this->type)
 	{
-	case TOP_TYPE::ROTATE_BTN:
-	{
-		rotation = this->value = 0;
-		if (rotation != 0) 
-		{ 
-			rotateb->setDualOption(true);
-			renderButtons = true;
-		}
-		else 
+		case TOP_TYPE::ROTATE_BTN:
 		{
-			rotateb->setDualOption(false);
-			renderButtons = true;
+			rotation = this->value = 0;
+			if (rotation != 0)
+			{
+				rotateb->setDualOption(true);
+				renderButtons = true;
+			}
+			else
+			{
+				rotateb->setDualOption(false);
+				renderButtons = true;
+			}
+			return 0;
 		}
-		return 0;
-	}
-	case TOP_TYPE::DB_BTN:
-	{
-		DB_BLOCK = !DB_BLOCK;
-		return 1;
-	}
-	case TOP_TYPE::DAY_NITE_BTN:
-	{
-		DAY = !DAY;
-		renderSectorColours = true;
-		return 1;
-	}
-	case TOP_TYPE::VECTOR_BTN:
-	{
-		SHOW_VECTORS = !SHOW_VECTORS;
-		if (SHOW_VECTORS)
+		case TOP_TYPE::DB_BTN:
 		{
-			updateFlags[GBL_VECTOR] = true;
+			DB_BLOCK = !DB_BLOCK;
+			return 1;
 		}
-		return 1;
-	}
-	default:
-		break;
+		case TOP_TYPE::DAY_NITE_BTN:
+		{
+			DAY = !DAY;
+			renderSectorColours = true;
+			return 1;
+		}
+		case TOP_TYPE::VECTOR_BTN:
+		{
+			SHOW_VECTORS = !SHOW_VECTORS;
+			if (SHOW_VECTORS)
+			{
+				updateFlags[GBL_VECTOR] = true;
+			}
+			return 1;
+		}
+		default:
+			break;
 	}
 	return 0;
 }
@@ -445,87 +445,87 @@ int TopButton::handleScroll(bool hi_scroll)
 {
 	switch (this->type)
 	{
-	case TOP_TYPE::RANGE_BTN:
-	{
-		int change = this->value;
-		if (zoom_phase < 2)
-			return 0;
-		if (hi_scroll)
+		case TOP_TYPE::RANGE_BTN:
 		{
-			if (!((this->value + 1) > 600)) {
-				this->value += 1;
+			int change = this->value;
+			if (zoom_phase < 2)
+				return 0;
+			if (hi_scroll)
+			{
+				if (!((this->value + 1) > 600)) {
+					this->value += 1;
+				}
 			}
-		}
-		else
-		{
-			if (!((this->value - 1) < 3)) {
-				this->value -= 1;
+			else
+			{
+				if (!((this->value - 1) < 3)) {
+					this->value -= 1;
+				}
 			}
-		}
 
-		if (zoom_phase == 2) {
-			//hi_scroll ? r_aircraft_size -= (r_aircraft_size * 0.1) : r_aircraft_size += (r_aircraft_size * 0.1);
-			//hi_scroll ? h_aircraft_size -= (h_aircraft_size * 0.1) : h_aircraft_size += (h_aircraft_size * 0.1);
-		}
+			if (zoom_phase == 2) {
+				//hi_scroll ? r_aircraft_size -= (r_aircraft_size * 0.1) : r_aircraft_size += (r_aircraft_size * 0.1);
+				//hi_scroll ? h_aircraft_size -= (h_aircraft_size * 0.1) : h_aircraft_size += (h_aircraft_size * 0.1);
+			}
 
-		if (this->value != change) {
-			this->setOption2(std::to_string(range = this->value));//range is set in 100's of feet so 100 = 10,000 feet
-			mZoom = zoom_from_range();
-			updateFlags[GBL_COLLISION_LINE] = true;
-			convert_closures = true;
-			renderClosures = true;
+			if (this->value != change) {
+				this->setOption2(std::to_string(range = this->value));//range is set in 100's of feet so 100 = 10,000 feet
+				mZoom = zoom_from_range();
+				updateFlags[GBL_COLLISION_LINE] = true;
+				convert_closures = true;
+				renderClosures = true;
+			}
+			return 1;
 		}
-		return 1;
-	}
-	case TOP_TYPE::ROTATE_BTN:
-	{
-		int change = this->value;
-		if (hi_scroll)
+		case TOP_TYPE::ROTATE_BTN:
 		{
-			if ((this->value) + 1 >= 360)
-				this->value = 0;
+			int change = this->value;
+			if (hi_scroll)
+			{
+				if ((this->value) + 1 >= 360)
+					this->value = 0;
+				else
+					this->value += 1;
+			}
 			else
-				this->value += 1;
-		}
-		else
-		{
-			if ((this->value - 1) < 0)
-				this->value = 359;
-			else
-				this->value -= 1;
-		}
-		rotation = this->value;
-		if (this->value != change) {
-			this->setOption2(std::to_string((int) (rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
+			{
+				if ((this->value - 1) < 0)
+					this->value = 359;
+				else
+					this->value -= 1;
+			}
+			rotation = this->value;
+			if (this->value != change) {
+				this->setOption2(std::to_string((int)(rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
 
-			convert_closures = true;
-			renderClosures = true;
+				convert_closures = true;
+				renderClosures = true;
+			}
+			rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
+			return 1;
 		}
-		rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
-		return 1;
-	}
-	case TOP_TYPE::VECTOR2_BTN:
-	{
-		if (hi_scroll)
+		case TOP_TYPE::VECTOR2_BTN:
 		{
-			if (!((this->value + 1) > 20))
-				this->value += 1;
+			if (hi_scroll)
+			{
+				if (!((this->value + 1) > 20))
+					this->value += 1;
+			}
+			else
+			{
+				if (!((this->value - 1) < 1))
+					this->value -= 1;
+			}
+			this->setOption2(std::to_string(this->value));
+			vector_length = this->value;
+			if (SHOW_VECTORS)
+			{
+				updateFlags[GBL_VECTOR] = true;
+			}
+			return 1;
 		}
-		else
-		{
-			if (!((this->value - 1) < 1))
-				this->value -= 1;
-		}
-		this->setOption2(std::to_string(this->value));
-		vector_length = this->value;
-		if (SHOW_VECTORS)
-		{
-			updateFlags[GBL_VECTOR] = true;
-		}
-		return 1;
-	}
-	default:
-		break;
+		default:
+			break;
 	}
 	return 0;
 }
@@ -534,19 +534,52 @@ void TopButton::refreshOption2()
 {
 	switch (this->type)
 	{
-	case TOP_TYPE::RANGE_BTN:
-	{
-		if (zoom_phase < 2)
-			this->setOption2("NSET");
-		else
-			this->setOption2(std::to_string(this->value = range));
-		break;
+		case TOP_TYPE::RANGE_BTN:
+		{
+			if (zoom_phase < 2)
+				this->setOption2("NSET");
+			else
+				this->setOption2(std::to_string(this->value = range));
+			break;
+		}
+		default:
+		{
+			this->setOption2(std::to_string(this->value));
+			break;
+		}
 	}
-	default:
-	{
-		this->setOption2(std::to_string(this->value));
-		break;
+	renderButtons = true;
+}
+
+void TopButton::set_range(int val, int min, int max, int &var)
+{
+	int change = this->value;
+
+	val > max ? this->value = max : val < min ? this->value = min : this->value = val;
+
+	if (this->value != change) {
+		this->setOption2(std::to_string(var = this->value));//range is set in 100's of feet so 100 = 10,000 feet
+		mZoom = zoom_from_range();
+		updateFlags[GBL_COLLISION_LINE] = true;
+		convert_closures = true;
+		renderClosures = true;
 	}
+	renderButtons = true;
+}
+
+void TopButton::set_rotation(int val, int min, int max)
+{
+	int change = this->value;
+
+	val > max ? this->value = max : val < min ? this->value = min : this->value = val;
+
+	rotation = this->value;
+	if (this->value != change) {
+		this->setOption2(std::to_string((int)(rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
+
+		convert_closures = true;
+		renderClosures = true;
 	}
+	rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
 	renderButtons = true;
 }

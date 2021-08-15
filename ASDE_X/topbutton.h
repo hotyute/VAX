@@ -33,7 +33,7 @@ private:
 	TOP_TYPE type;
 public:
 	bool on;
-	int value;
+	int value = 0;
 	TopButton(TOP_TYPE type);
 	int getIndex();
 	void setIndex(int);
@@ -65,6 +65,8 @@ public:
 	int handle();
 	int handleScroll(bool hi_scroll);// boolean high scroll for if scrolling "up"
 	void refreshOption2();
+	void set_range(int value, int min, int max, int& var);
+	void set_rotation(int val, int min, int max);
 };
 
 extern std::vector<TopButton*> BUTTONS;

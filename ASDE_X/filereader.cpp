@@ -8,6 +8,7 @@
 #include "projection.h"
 #include "dxfdrawing.h"
 #include "tools.h"
+#include "topbutton.h"
 
 
 int FileReader::LoadADX(std::string path) {
@@ -44,6 +45,8 @@ int FileReader::LoadADX(std::string path) {
 		std::string string5 = "uaircraftsize=";
 		std::string string6 = "ICAO=";
 		std::string string7 = "elevation=";
+		std::string string8 = "range=";
+		std::string string9 = "rotation=";
 		std::string commentStart = ";";
 		int line_number = 1;
 		while (myfile.good()) {
@@ -60,6 +63,8 @@ int FileReader::LoadADX(std::string path) {
 			size_t found5 = line.find(string5);
 			size_t found6 = line.find(string6);
 			size_t found7 = line.find(string7);
+			size_t found8 = line.find(string8);
+			size_t found9 = line.find(string9);
 			try
 			{
 				if (found2 != std::string::npos)
@@ -129,6 +134,28 @@ int FileReader::LoadADX(std::string path) {
 						elevation = atodd(elevation.c_str());
 					}
 				}
+				else if (found8 != std::string::npos)
+				{
+					int start = (found8 + string8.length());
+					std::string ra = line.substr(start);
+					if (ra.length() == 0) {
+						//error handling
+					}
+					else {
+						rangeb->set_range((int)atodd(ra.c_str()), 3, 600, range);
+					}
+				}
+				else if (found9 != std::string::npos)
+				{
+					int start = (found9 + string9.length());
+					std::string ro = line.substr(start);
+					if (ro.length() == 0) {
+						//error handling
+					}
+					else {
+						rotateb->set_rotation(hdg((int)atodd(ro.c_str())), 0, 359);
+					}
+				}
 				else if (found1 != std::string::npos)
 				{
 					size_t end = line.find(">>");
@@ -144,7 +171,7 @@ int FileReader::LoadADX(std::string path) {
 						}
 						else
 						{
-							if (header == "CENTER" || header == "HOLE" || header == "MIRROR" || header == "CLOSURES") 
+							if (header == "CENTER" || header == "HOLE" || header == "MIRROR" || header == "CLOSURES")
 							{
 
 							}
@@ -228,7 +255,7 @@ int FileReader::LoadADX(std::string path) {
 							std::vector<std::string> args = split(line, " ");
 							double lon = atodd(args[1].c_str()), lat = atodd(args[0].c_str());
 
-							double* c = new double[]{ lat, lon };
+							double* c = new double[] { lat, lon };
 
 							closures.push_back(c);
 						}
@@ -244,18 +271,18 @@ int FileReader::LoadADX(std::string path) {
 
 								switch (loop_type)
 								{
-								case 'L':
-									seg->loop_type = LOOP_TYPE::LOOP;
-									break;
-								case 'C':
-									seg->loop_type = LOOP_TYPE::CLOSE;
-									break;
-								case 'E':
-									seg->loop_type = LOOP_TYPE::END;
-									break;
-								default:
-									seg->loop_type = LOOP_TYPE::LOOP;
-									break;
+									case 'L':
+										seg->loop_type = LOOP_TYPE::LOOP;
+										break;
+									case 'C':
+										seg->loop_type = LOOP_TYPE::CLOSE;
+										break;
+									case 'E':
+										seg->loop_type = LOOP_TYPE::END;
+										break;
+									default:
+										seg->loop_type = LOOP_TYPE::LOOP;
+										break;
 								}
 
 								seg->pt = Point2(lon, lat);
@@ -293,7 +320,8 @@ int FileReader::LoadADX(std::string path) {
 						}
 					}
 				}
-			} catch (...) 
+			}
+			catch (...)
 			{
 				std::stringstream box_message;
 				box_message << "Error in adx file at line: " << line_number;
