@@ -51,7 +51,6 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		arrive = strings[6], alternate = strings[7], cruise = strings[8],
 		scratch = strings[9], a_squawk = strings[10], route = strings[11],
 		remarks = strings[12];
-	InterfaceFrame* fp_frame = frames_def[FP_INTERFACE];
 	if (!fp_frame || refresh) {
 		fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
@@ -176,6 +175,43 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 	else {
 		if (!fp_frame->render) {
 			fp_frame->doOpen(false, true);
+		}
+	}
+}
+
+void PullFPData(Aircraft* user)
+{
+	if (acf_map[user->getCallsign()] == user)
+	{
+		std::vector<ChatLine*> fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX])->chat_lines;
+		std::vector<ChatLine*> fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX])->chat_lines;
+
+		std::string route, remarks;
+		for (auto it = fp_route.begin(); it != fp_route.end(); it++)
+		{
+			route += (*it)->getText();
+		}
+
+		for (auto it = fp_remarks.begin(); it != fp_remarks.end(); it++)
+		{
+			remarks += (*it)->getText();
+		}
+
+		FlightPlan& fp = *user->getFlightPlan();
+		bool update_required = false;
+		if (fp.route != route || fp.remarks != remarks)
+		{
+			update_required = true;
+		}
+
+		fp.route = route;
+		fp.remarks = remarks;
+
+		if (update_required)
+		{
+			fp.cycle++;
+			if (connected)
+				sendFlightPlan(*user);
 		}
 	}
 }

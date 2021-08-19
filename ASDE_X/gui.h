@@ -192,6 +192,7 @@ private:
 	int noncp = 2;
 public:
 	DisplayBox(InterfaceFrame*, std::vector<ChatLine*>, int, double, double, double, double, double, double, bool);
+	~DisplayBox();
 public:
 	int numBlocks;
 	int read_index = 0, max_history = 100;

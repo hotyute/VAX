@@ -39,7 +39,7 @@ int single_opened_frames = 0;
 
 #define PROTO_VERSION 32698
 
-InterfaceFrame* connectFrame = NULL, * dragged = nullptr;
+InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
@@ -1147,7 +1147,8 @@ void moveInterfacesOnSize()
 }
 
 void connect() {
-	if (intter->connectNew(hWnd, "34.142.27.168", 4403)) {
+	//34.142.27.168
+	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);

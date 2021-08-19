@@ -56,3 +56,22 @@ void sendDisconnect() {
 	out.writeByte(0);
 	intter->sendMessage(&out);
 }
+
+void sendFlightPlan(Aircraft& user) {
+	Stream& out = Stream(256);
+	FlightPlan& fp = *user.getFlightPlan();
+	out.createFrameVarSizeWord(_SEND_FLIGHT_PLAN);
+	out.writeWord(fp.cycle);
+	out.writeByte(fp.flightRules);
+	out.writeString((char*)fp.squawkCode.c_str());
+	out.writeString((char*)fp.departure.c_str());
+	out.writeString((char*)fp.arrival.c_str());
+	out.writeString((char*)fp.alternate.c_str());
+	out.writeString((char*)fp.cruise.c_str());
+	out.writeString((char*)fp.acType.c_str());
+	out.writeString((char*)fp.scratchPad.c_str());
+	out.writeString((char*)fp.route.c_str());
+	out.writeString((char*)fp.remarks.c_str());
+	out.endFrameVarSizeWord();
+	intter->sendMessage(&out);
+}

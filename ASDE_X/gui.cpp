@@ -486,6 +486,17 @@ void InputField::handleBox()
 {
 	ChatLine* c = line_ptr;
 	c->setText(input);
+	switch (this->index)
+	{
+		case FP_ROUTE_EDIT:
+		{
+			if (opened_fp)
+			{
+				PullFPData((Aircraft*)opened_fp);
+			}
+			break;
+		}
+	}
 	clearInput();
 	setCursor();
 	line_ptr = nullptr;
@@ -824,6 +835,17 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines,
 	DisplayBox::child_interfaces.push_back(comboBounds);
 }
 
+DisplayBox::~DisplayBox()
+{
+	auto it = chat_lines.begin();
+	while (it != chat_lines.end())
+	{
+		ChatLine* _r = *it;
+		it = chat_lines.erase(it);
+		delete _r;
+	}
+}
+
 void DisplayBox::prepare()
 {
 	BasicInterface& param = *DisplayBox::border;
@@ -840,7 +862,8 @@ void DisplayBox::prepare()
 
 	//split line
 	auto it = DisplayBox::chat_lines.end();
-	while (it != DisplayBox::chat_lines.begin()) {
+	while (it != DisplayBox::chat_lines.begin()) 
+	{
 		--it;
 		ChatLine* m = *it;
 		m->reset_p();

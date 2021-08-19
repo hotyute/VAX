@@ -27,4 +27,6 @@ void Load_FlightPlan_Interface(double x, double y, Aircraft&, bool);
 
 void Load_FlightPlan_Interface(double x, double y, std::string*, bool);
 
+void PullFPData(Aircraft* to);
+
 #endif
