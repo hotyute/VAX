@@ -267,6 +267,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			int width = LOWORD(lParam);
 			int height = HIWORD(lParam);
 
+			int msg_size = wParam;
+
 			RECT rect;
 			if (GetWindowRect(hwnd, &rect))
 			{
@@ -278,7 +280,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			CLIENT_WIDTH = width;
 			CLIENT_HEIGHT = height;
 			LoadMainChatInterface(true);
-			moveInterfacesOnSize();
+
+			if (msg_size != SIZE_MINIMIZED && msg_size != SIZE_MAXIMIZED)
+				moveInterfacesOnSize();
 
 			if (zoom_phase >= 2)
 				mZoom = zoom_from_range();
@@ -363,7 +367,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						//TODO save X and Y positions when moved
 						RenderControllerList(true, -1, -1);
 					}
-					else if (!controller_list->render) 
+					else if (!controller_list->render)
 					{
 						controller_list->doOpen(true, true);
 					}
@@ -1148,7 +1152,7 @@ void moveInterfacesOnSize()
 
 void connect() {
 	//34.142.27.168
-	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
+	if (intter->connectNew(hWnd, "34.142.27.168", 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
@@ -1216,7 +1220,7 @@ void conn_clean()
 			userStorage1[i] = nullptr;
 		}
 	}
-	for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) 
+	for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it)
 	{
 		Collision* collision = it->second;
 		if (collision != nullptr) {

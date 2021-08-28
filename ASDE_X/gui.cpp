@@ -247,6 +247,8 @@ bool InterfaceFrame::withinClient()
 		dy = CLIENT_HEIGHT - e_y;
 	}
 
+	printf("%d, %d\n", dx, dy);
+
 	if (dx != 0 || dy != 0)
 	{
 		move(dx, dy);
