@@ -282,7 +282,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			LoadMainChatInterface(true);
 
 			if (msg_size != SIZE_MINIMIZED && msg_size != SIZE_MAXIMIZED)
+			{
 				moveInterfacesOnSize();
+			}
 
 			if (zoom_phase >= 2)
 				mZoom = zoom_from_range();
