@@ -234,8 +234,8 @@ void LoadMainChatInterface(bool refresh) {
 
 		//controller list
 		std::vector<ChatLine*> list;
-		list.push_back(new ChatLine("--Delivery--", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("1A - MIA_DEL", CHAT_TYPE::MAIN));
+		//--Delivery--
+		//1A - MIA_DEL
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
@@ -244,8 +244,10 @@ void LoadMainChatInterface(bool refresh) {
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-		DisplayBox* displayBox = new DisplayBox(main_chat, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
-		main_chat->children[displayBox->index = MAIN_CONTROLLERS_BOX] = displayBox;
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		qlc_list_box = new DisplayBox(main_chat, list, 10, x, controller_list_width, 5, 5, 114, 5, true);
+		main_chat->children[qlc_list_box->index = MAIN_CONTROLLERS_BOX] = qlc_list_box;
 
 		//chatbox
 		std::vector<ChatLine*> list2;

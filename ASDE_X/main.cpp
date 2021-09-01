@@ -46,7 +46,7 @@ InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_userna
 ComboBox* connect_rating = NULL, * connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
-DisplayBox* main_chat_box = NULL, * controller_list_box = NULL, * controller_info_box = NULL;
+DisplayBox* main_chat_box = NULL, * controller_list_box = NULL, * controller_info_box = NULL, *qlc_list_box = NULL;
 
 void handleConnect();
 void handleDisconnect();

@@ -5,7 +5,7 @@
 User* opened_fp = NULL;
 
 std::unordered_map<std::string, std::vector<std::string>> departures;
-std::unordered_map<std::string, ChatLine*> obs_list, del_list;
+std::unordered_map<std::string, ChatLine*> obs_list, ql_obs_list, del_list, ql_del_list;
 
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
 {

@@ -15,7 +15,7 @@
 #include "aircraft.h"
 
 extern std::unordered_map<std::string, std::vector<std::string>> departures;
-extern std::unordered_map<std::string, ChatLine*> obs_list, del_list;
+extern std::unordered_map<std::string, ChatLine*> obs_list, ql_obs_list, del_list, ql_del_list;
 
 extern User* opened_fp;
 

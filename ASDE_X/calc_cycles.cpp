@@ -120,6 +120,7 @@ void check_add_ctrl_list(Controller& controller)
 				data.push_back(std::to_string(controller.getIdentity()->controller_rating));
 
 				add_to_ctrl_list(callsign, data, obs_list);
+				add_to_qlctrl_list(callsign, data, ql_obs_list);
 
 				if (obs_list.empty())
 					controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
@@ -184,6 +185,38 @@ void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
 	store.emplace(callsign, c);
 }
 
+void add_to_qlctrl_list(std::string& callsign, std::vector<std::string>& data,
+	std::unordered_map<std::string, ChatLine*>& store)
+{
+	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
+	std::string controller_user = "";
+	for (size_t i = 0; i < 6; i++)
+	{
+		if (i < data[1].length())
+			controller_user += data[1][i];
+		else
+			controller_user += " ";
+	}
+	for (size_t i = 0; i < 10; i++)
+	{
+		if (i < callsign.length())
+			controller_user += callsign[i];
+		else
+			controller_user += " ";
+	}
+	c->setText(controller_user);
+
+	qlc_list_box->resetReaderIdx();
+
+	if (atodd(data[3]) == 10 || atodd(data[3]) == 11)
+		c->setType(CHAT_TYPE::SUP_POS);
+
+	qlc_list_box->addLineTop(c);
+	qlc_list_box->prepare();
+
+	store.emplace(callsign, c);
+}
+
 void check_del_ctrl_list(Controller& controller)
 {
 	std::string callsign = controller.getCallsign();
@@ -191,22 +224,32 @@ void check_del_ctrl_list(Controller& controller)
 	{
 		case 0:
 		{
-			ChatLine* c = obs_list[callsign];
+			ChatLine* c = obs_list[callsign], * c2 = ql_obs_list[callsign];
 			if (c)
 			{
 				remove_ctrl_list(c);
+				obs_list.erase(callsign);
 			}
-			obs_list.erase(callsign);
+			if (c2)
+			{
+				remove_qlctrl_list(c2);
+				ql_obs_list.erase(callsign);
+			}
 		}
 		break;
 		case 1:
 		{
-			ChatLine* c = del_list[callsign];
+			ChatLine* c = del_list[callsign], * c2 = ql_del_list[callsign];
 			if (c)
 			{
 				remove_ctrl_list(c);
+				del_list.erase(callsign);
 			}
-			del_list.erase(callsign);
+			if (c2)
+			{
+				remove_qlctrl_list(c2);
+				ql_del_list.erase(callsign);
+			}
 		}
 		break;
 
@@ -216,5 +259,11 @@ void check_del_ctrl_list(Controller& controller)
 void remove_ctrl_list(ChatLine* c)
 {
 	controller_list_box->removeLine(c);
+	renderDrawings = true;
+}
+
+void remove_qlctrl_list(ChatLine* c)
+{
+	qlc_list_box->removeLine(c);
 	renderDrawings = true;
 }
