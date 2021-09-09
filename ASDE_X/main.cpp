@@ -793,7 +793,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			else if (wParam == VK_RETURN) {
 				if (focusChild != NULL) {
 					CHILD_TYPE type = focusChild->type;
-					if (type == CHILD_TYPE::INPUT_FIELD) {
+					if (type == CHILD_TYPE::INPUT_FIELD) 
+					{
 						InputField* focusField = (InputField*)focusChild;
 						InterfaceFrame& frame = *focusField->getFrame();
 						int frame_id = frame.id;

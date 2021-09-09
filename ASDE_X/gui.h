@@ -114,6 +114,7 @@ public:
 	int cursor_pos = 0, last_cursor_pos = 0;
 	int inputTextDl = 0;
 	int inputCursorDl = 0;
+	int max_chars = 0;
 
 	int offset_x = 3, offset_y = 6;
 

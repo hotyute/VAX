@@ -348,8 +348,14 @@ int InputField::handleClick(ChildFrame* clicked, int x, int y)
 }
 
 void InputField::pushInput(bool uni, char c) {
+	if (max_chars != 0)
+	{
+		if ((input.size() + 1) > max_chars)
+			return;
+	}
 	bool ins = cursor_pos < input.size() ? true : false;
-	if (InputField::p_protected) {
+	if (InputField::p_protected) 
+	{
 		if (uni) {
 			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, c) : InputField::pp_input.push_back(c);
 		}
@@ -491,6 +497,14 @@ void InputField::handleBox()
 	switch (this->index)
 	{
 		case FP_ROUTE_EDIT:
+		{
+			if (opened_fp)
+			{
+				PullFPData((Aircraft*)opened_fp);
+			}
+			break;
+		}
+		case FP_ARRIVE_INPUT:
 		{
 			if (opened_fp)
 			{

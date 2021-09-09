@@ -214,6 +214,8 @@ void add_to_qlctrl_list(std::string& callsign, std::vector<std::string>& data,
 	qlc_list_box->addLineTop(c);
 	qlc_list_box->prepare();
 
+	printf("%s:%s", callsign.c_str(), c->getText().c_str());
+
 	store.emplace(callsign, c);
 }
 
