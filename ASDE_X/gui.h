@@ -139,6 +139,7 @@ public:
 	void pass_characters(char* chars);
 	bool can_type();
 	void handleBox();
+	void handleEntry();
 };
 
 class CloseButton : public ChildFrame {

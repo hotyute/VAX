@@ -10,10 +10,10 @@
 
 std::vector<InterfaceFrame*> frames_def(700);
 std::vector<InterfaceFrame*> rendered_frames;
-ChildFrame* focusChild = NULL, * lastFocus = NULL;
+ChildFrame* focusChild = nullptr, * lastFocus = nullptr;
 std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 bool updateLastFocus = false;
-InterfaceFrame* _openedframe = NULL;
+InterfaceFrame* _openedframe = nullptr;
 
 InterfaceFrame::InterfaceFrame(int id) {
 	InterfaceFrame::children.resize(256);
@@ -134,29 +134,29 @@ void InterfaceFrame::doClose()
 {
 	switch (this->id)
 	{
-		case FP_INTERFACE:
-		{
-			opened_fp = NULL;
-			main_chat_input->setFocus();
-			break;
-		}
-		case CONNECT_INTERFACE:
-		{
-			main_chat_input->setFocus();
-			break;
-		}
-		case CONTROLLER_INTERFACE:
-		{
-			main_chat_input->setFocus();
-			break;
-		}
+	case FP_INTERFACE:
+	{
+		opened_fp = nullptr;
+		main_chat_input->setFocus();
+		break;
+	}
+	case CONNECT_INTERFACE:
+	{
+		main_chat_input->setFocus();
+		break;
+	}
+	case CONTROLLER_INTERFACE:
+	{
+		main_chat_input->setFocus();
+		break;
+	}
 	}
 	InterfaceFrame::render = false;
 	renderInterfaces = true;
 	renderInputTextFocus = true;
 	renderDrawings = true;
 	renderFocus = true;
-	_openedframe = NULL;
+	_openedframe = nullptr;
 	if (!multi_open)
 		single_opened_frames--;
 }
@@ -311,7 +311,7 @@ void InputField::doDrawing() {
 
 void InputField::setFocus() {
 	if (!InputField::focus) {
-		if (focusChild != NULL) {
+		if (focusChild) {
 			focusChild->removeFocus();
 			updateLastFocus = true;
 		}
@@ -323,11 +323,12 @@ void InputField::setFocus() {
 }
 
 void InputField::removeFocus() {
-	if (InputField::focus) {
+	if (InputField::focus) 
+	{
 		removeCursor();
 		InputField::focus = false;
 		lastFocus = this;
-		focusChild = NULL;
+		focusChild = nullptr;
 		renderInputTextFocus = true;
 		if (line_ptr)
 		{
@@ -354,7 +355,7 @@ void InputField::pushInput(bool uni, char c) {
 			return;
 	}
 	bool ins = cursor_pos < input.size() ? true : false;
-	if (InputField::p_protected) 
+	if (InputField::p_protected)
 	{
 		if (uni) {
 			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, c) : InputField::pp_input.push_back(c);
@@ -496,22 +497,14 @@ void InputField::handleBox()
 	c->setText(input);
 	switch (this->index)
 	{
-		case FP_ROUTE_EDIT:
+	case FP_ROUTE_EDIT:
+	{
+		if (opened_fp)
 		{
-			if (opened_fp)
-			{
-				PullFPData((Aircraft*)opened_fp);
-			}
-			break;
+			PullFPData((Aircraft*)opened_fp);
 		}
-		case FP_ARRIVE_INPUT:
-		{
-			if (opened_fp)
-			{
-				PullFPData((Aircraft*)opened_fp);
-			}
-			break;
-		}
+		break;
+	}
 	}
 	clearInput();
 	setCursor();
@@ -522,6 +515,28 @@ void InputField::handleBox()
 	renderInputTextFocus = true;
 	renderDrawings = true;
 	delete this;
+}
+
+void InputField::handleEntry()
+{
+	switch (this->index)
+	{
+	case FP_ARRIVE_INPUT:
+	case FP_DEPART_INPUT:
+	{
+		if (opened_fp)
+		{
+			PullFPData((Aircraft*)opened_fp);
+		}
+		break;
+	}
+	}
+	if (focusChild == this)
+	{
+		removeFocus();
+	}
+	renderAllInputText = true;
+	renderDrawings = true;
 }
 
 
@@ -566,7 +581,7 @@ void CloseButton::doDrawing() {
 
 void CloseButton::setFocus() {
 	if (!CloseButton::focus) {
-		if (focusChild != NULL) {
+		if (focusChild) {
 			focusChild->removeFocus();
 			updateLastFocus = true;
 		}
@@ -580,7 +595,7 @@ void CloseButton::removeFocus() {
 	if (CloseButton::focus) {
 		CloseButton::focus = false;
 		lastFocus = this;
-		focusChild = NULL;
+		focusChild = nullptr;
 		renderFocus = true;
 	}
 }
@@ -655,7 +670,7 @@ void ClickButton::doDrawing() {
 
 void ClickButton::setFocus() {
 	if (!ClickButton::focus) {
-		if (focusChild != NULL) {
+		if (focusChild) {
 			focusChild->removeFocus();
 			updateLastFocus = true;
 		}
@@ -671,42 +686,42 @@ void ClickButton::removeFocus() {
 
 		ClickButton::focus = false;
 		lastFocus = this;
-		focusChild = NULL;
+		focusChild = nullptr;
 		renderFocus = true;
 	}
 }
 void ClickButton::doAction() {
 	switch (frame->id)
 	{
-		case CONNECT_INTERFACE://connect frame
+	case CONNECT_INTERFACE://connect frame
+	{
+		switch (ClickButton::index)
 		{
-			switch (ClickButton::index)
-			{
-				case CONN_OKAY_BUTTON:
-				{
-					Identity& id = *USER->getIdentity();
-					id.callsign = connect_callsign->input.c_str();
-					id.login_name = connect_fullname->input.c_str();
-					id.username = connect_username->input.c_str();
-					id.password = connect_password->input.c_str();
-					id.controller_rating = connect_rating->pos;
-					id.controller_position = connect_position->pos;
-					connect_closeb->doAction();
-					connect();
-				}
-				break;
-				case CONN_CANCEL_BUTTON:
-				{
-					connect_callsign->clearInput();
-					connect_fullname->clearInput();
-					connect_username->clearInput();
-					connect_password->clearInput();
-					connect_closeb->doAction();
-				}
-				break;
-			}
+		case CONN_OKAY_BUTTON:
+		{
+			Identity& id = *USER->getIdentity();
+			id.callsign = connect_callsign->input.c_str();
+			id.login_name = connect_fullname->input.c_str();
+			id.username = connect_username->input.c_str();
+			id.password = connect_password->input.c_str();
+			id.controller_rating = connect_rating->pos;
+			id.controller_position = connect_position->pos;
+			connect_closeb->doAction();
+			connect();
 		}
 		break;
+		case CONN_CANCEL_BUTTON:
+		{
+			connect_callsign->clearInput();
+			connect_fullname->clearInput();
+			connect_username->clearInput();
+			connect_password->clearInput();
+			connect_closeb->doAction();
+		}
+		break;
+		}
+	}
+	break;
 	}
 }
 
@@ -792,7 +807,8 @@ void ComboBox::doDrawing() {
 
 void ComboBox::setFocus() {
 	if (!ComboBox::focus) {
-		if (focusChild != NULL) {
+		if (focusChild)
+		{
 			focusChild->removeFocus();
 			updateLastFocus = true;
 		}
@@ -808,7 +824,7 @@ void ComboBox::removeFocus() {
 
 		ComboBox::focus = false;
 		lastFocus = this;
-		focusChild = NULL;
+		focusChild = nullptr;
 		renderFocus = true;
 	}
 }
@@ -878,7 +894,7 @@ void DisplayBox::prepare()
 
 	//split line
 	auto it = DisplayBox::chat_lines.end();
-	while (it != DisplayBox::chat_lines.begin()) 
+	while (it != DisplayBox::chat_lines.begin())
 	{
 		--it;
 		ChatLine* m = *it;
@@ -1056,7 +1072,7 @@ void DisplayBox::doDrawing() {
 
 void DisplayBox::setFocus() {
 	if (!DisplayBox::focus) {
-		if (focusChild != NULL) {
+		if (focusChild) {
 			focusChild->removeFocus();
 			updateLastFocus = true;
 		}
@@ -1072,7 +1088,7 @@ void DisplayBox::removeFocus() {
 
 		DisplayBox::focus = false;
 		lastFocus = this;
-		focusChild = NULL;
+		focusChild = nullptr;
 		renderFocus = true;
 	}
 }
@@ -1114,9 +1130,9 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 		std::string str = line->getText();
 		if (line->in_bounds(x, y))
 		{
-		#ifdef _DEBUG
+#ifdef _DEBUG
 			std::cout << "Line: " << str << ", " << line->size_y() << std::endl;
-		#endif
+#endif
 			if (editable)
 			{
 				std::string temp;
@@ -1171,49 +1187,49 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 			{
 				switch (this->frame->id)
 				{
-					case CONTROLLER_INTERFACE:
-						switch (this->index)
+				case CONTROLLER_INTERFACE:
+					switch (this->index)
+					{
+					case CONTROLLER_LIST_BOX:
+						std::cout << "hello there!!" << std::endl;
+						//handle controller click
+						controller_info_box->clearLines();
+
+						if (!str.empty())
 						{
-							case CONTROLLER_LIST_BOX:
-								std::cout << "hello there!!" << std::endl;
-								//handle controller click
-								controller_info_box->clearLines();
 
-								if (!str.empty())
+							std::string callsign = trim(str.substr(6, 16));
+
+							if (!callsign.empty())
+							{
+
+								Controller* controller_selected = controller_map[callsign];
+
+								if (controller_selected)
 								{
+									controller_info_box->addLineTop(new ChatLine(
+										"Vis Range: " + std::to_string(controller_selected->getVisibility()),
+										CHAT_TYPE::MAIN));
+									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
+									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
+									controller_info_box->addLineTop(new ChatLine(controller_selected->getIdentity()->login_name
+										+ " (" + CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")",
+										CHAT_TYPE::MAIN));
 
-									std::string callsign = trim(str.substr(6, 16));
-
-									if (!callsign.empty())
-									{
-
-										Controller* controller_selected = controller_map[callsign];
-
-										if (controller_selected)
-										{
-											controller_info_box->addLineTop(new ChatLine(
-												"Vis Range: " + std::to_string(controller_selected->getVisibility()),
-												CHAT_TYPE::MAIN));
-											controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
-											controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
-											controller_info_box->addLineTop(new ChatLine(controller_selected->getIdentity()->login_name
-												+ " (" + CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")",
-												CHAT_TYPE::MAIN));
-
-											controller_info_box->addLineTop(new ChatLine(controller_selected->getCallsign(),
-												CHAT_TYPE::MAIN));
-										}
-									}
+									controller_info_box->addLineTop(new ChatLine(controller_selected->getCallsign(),
+										CHAT_TYPE::MAIN));
 								}
-								else
-								{
-
-								}
-
-								renderDrawings = true;
-								break;
+							}
 						}
+						else
+						{
+
+						}
+
+						renderDrawings = true;
 						break;
+					}
+					break;
 				}
 			}
 			clicked = this;
@@ -1324,36 +1340,36 @@ void DisplayBox::resetReaderIdxTop()
 
 void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 	switch (t) {
-		case CHAT_TYPE::MAIN:
-		{
-			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::ERRORS:
-		{
-			glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::SYSTEM:
-		{
-			glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::ATC:
-		{
-			glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
-		}
-		break;
-		case CHAT_TYPE::SUP_POS:
-		{
-			glColor4f(text_suppos_clr[0], text_suppos_clr[1], text_suppos_clr[2], 1.0f);
-		}
-		break;
-		default:
-		{
-			glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-		}
-		break;
+	case CHAT_TYPE::MAIN:
+	{
+		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::ERRORS:
+	{
+		glColor4f(text_error_clr[0], text_error_clr[1], text_error_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::SYSTEM:
+	{
+		glColor4f(text_system_clr[0], text_system_clr[1], text_system_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::ATC:
+	{
+		glColor4f(text_atc_clr[0], text_atc_clr[1], text_atc_clr[2], 1.0f);
+	}
+	break;
+	case CHAT_TYPE::SUP_POS:
+	{
+		glColor4f(text_suppos_clr[0], text_suppos_clr[1], text_suppos_clr[2], 1.0f);
+	}
+	break;
+	default:
+	{
+		glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
+	}
+	break;
 	}
 }
 
@@ -1487,29 +1503,29 @@ std::string ChatLine::getText()
 void ChatLine::playChatSound()
 {
 	switch (ChatLine::type) {
-		case CHAT_TYPE::MAIN:
-		{
-		}
-		break;
-		case CHAT_TYPE::ERRORS:
-		{
-			PlaySound(MAKEINTRESOURCE(IDW_SOUND2), NULL, SND_RESOURCE | SND_ASYNC);
-		}
-		break;
-		case CHAT_TYPE::SYSTEM:
-		{
+	case CHAT_TYPE::MAIN:
+	{
+	}
+	break;
+	case CHAT_TYPE::ERRORS:
+	{
+		PlaySound(MAKEINTRESOURCE(IDW_SOUND2), NULL, SND_RESOURCE | SND_ASYNC);
+	}
+	break;
+	case CHAT_TYPE::SYSTEM:
+	{
 
-		}
-		break;
-		case CHAT_TYPE::ATC:
-		{
-			PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
-		}
-		break;
-		default:
-		{
-		}
-		break;
+	}
+	break;
+	case CHAT_TYPE::ATC:
+	{
+		PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
+	}
+	break;
+	default:
+	{
+	}
+	break;
 	}
 }
 

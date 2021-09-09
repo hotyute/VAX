@@ -433,7 +433,7 @@ void DrawInterfaces() {
 			RenderInputCursor(*lastFocusField, lastFocusField->inputCursorDl, lastFocusField->cursor_input, lastFocusField->centered);
 			updateLastFocus = false;
 		}
-		if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
+		if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 			InputField* focusField = (InputField*)focusChild;
 			glDeleteLists(focusField->inputTextDl, 1);
 			glDeleteLists(focusField->inputCursorDl, 1);

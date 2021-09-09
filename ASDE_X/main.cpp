@@ -803,7 +803,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							focusField->handleBox();
 							main_chat_input->setFocus();
 						}
-						else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input) {// main chat
+						else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input) 
+						{// main chat
 							if (focusField->input.size() > 0) {
 								if (processCommands(focusField->input)) {
 									focusField->clearInput();
@@ -845,6 +846,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								}
 							}
 						}
+						else
+						{
+							//handle regular input field
+							focusField->handleEntry();
+							main_chat_input->setFocus();
+						}
 					}
 				}
 			}
@@ -885,7 +892,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			else if (wParam == VK_DOWN) {
 			}
 			else if (wParam == VK_BACK) {
-				if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
+				if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 					InputField* focusField = (InputField*)focusChild;
 					if (focusField->editable) {
 						if (focusField->input.size() > 0) {
@@ -948,7 +955,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					else
 						c2 = c;
 				}
-				if (focusChild != NULL && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
+				if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 					InputField& focusField = *(InputField*)focusChild;
 					InterfaceFrame& frame = *focusField.getFrame();
 					if (focusField.editable) {

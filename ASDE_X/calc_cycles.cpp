@@ -109,42 +109,42 @@ void check_add_ctrl_list(Controller& controller)
 
 	if (dist(USER->getLatitude(), USER->getLongitude(), controller.getLatitude(), controller.getLongitude()) <= USER->getVisibility())
 	{
-			if (!obs_list.count(callsign) && controller.getIdentity()->controller_position == 0)
-			{
+		if (!obs_list.count(callsign) && controller.getIdentity()->controller_position == 0)
+		{
 
-				std::vector<std::string> data;
+			std::vector<std::string> data;
 
-				data.push_back(std::to_string(controller.getIdentity()->controller_position));
-				data.push_back("1A");
-				data.push_back(frequency_to_string(controller.frequency[0]));
-				data.push_back(std::to_string(controller.getIdentity()->controller_rating));
+			data.push_back(std::to_string(controller.getIdentity()->controller_position));
+			data.push_back("1A");
+			data.push_back(frequency_to_string(controller.frequency[0]));
+			data.push_back(std::to_string(controller.getIdentity()->controller_rating));
 
-				add_to_ctrl_list(callsign, data, obs_list);
-				add_to_qlctrl_list(callsign, data, ql_obs_list);
+			add_to_ctrl_list(callsign, data, obs_list);
+			add_to_qlctrl_list(callsign, data, ql_obs_list);
 
-				if (obs_list.empty())
-					controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
+			if (obs_list.empty())
+				controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
 
-				renderDrawings = true;
+			renderDrawings = true;
 
-			}
-			else if (!del_list.count(callsign) && controller.getIdentity()->controller_position == 1)
-			{
-				//if (del_list.empty())
-				//	controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
+		}
+		else if (!del_list.count(callsign) && controller.getIdentity()->controller_position == 1)
+		{
+			//if (del_list.empty())
+			//	controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
 
-				/*std::vector<std::string> data;
+			/*std::vector<std::string> data;
 
-				data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
-				data.push_back("1A");
-				data.push_back(frequency_to_string(ctlr->frequency[0]));
-				data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
+			data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
+			data.push_back("1A");
+			data.push_back(frequency_to_string(ctlr->frequency[0]));
+			data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
 
-				add_to_ctrl_list(callsign, data, del_list);*/
+			add_to_ctrl_list(callsign, data, del_list);*/
 
-				renderDrawings = true;
+			renderDrawings = true;
 
-			}
+		}
 	}
 	else
 	{
@@ -152,7 +152,7 @@ void check_add_ctrl_list(Controller& controller)
 	}
 }
 
-void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
+void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
 	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
@@ -185,7 +185,7 @@ void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
 	store.emplace(callsign, c);
 }
 
-void add_to_qlctrl_list(std::string& callsign, std::vector<std::string>& data,
+void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
 	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
@@ -214,8 +214,6 @@ void add_to_qlctrl_list(std::string& callsign, std::vector<std::string>& data,
 	qlc_list_box->addLineTop(c);
 	qlc_list_box->prepare();
 
-	printf("%s:%s", callsign.c_str(), c->getText().c_str());
-
 	store.emplace(callsign, c);
 }
 
@@ -224,36 +222,36 @@ void check_del_ctrl_list(Controller& controller)
 	std::string callsign = controller.getCallsign();
 	switch (controller.getIdentity()->controller_position)
 	{
-		case 0:
+	case 0:
+	{
+		ChatLine* c = obs_list[callsign], * c2 = ql_obs_list[callsign];
+		if (c)
 		{
-			ChatLine* c = obs_list[callsign], * c2 = ql_obs_list[callsign];
-			if (c)
-			{
-				remove_ctrl_list(c);
-				obs_list.erase(callsign);
-			}
-			if (c2)
-			{
-				remove_qlctrl_list(c2);
-				ql_obs_list.erase(callsign);
-			}
+			remove_ctrl_list(c);
+			obs_list.erase(callsign);
 		}
-		break;
-		case 1:
+		if (c2)
 		{
-			ChatLine* c = del_list[callsign], * c2 = ql_del_list[callsign];
-			if (c)
-			{
-				remove_ctrl_list(c);
-				del_list.erase(callsign);
-			}
-			if (c2)
-			{
-				remove_qlctrl_list(c2);
-				ql_del_list.erase(callsign);
-			}
+			remove_qlctrl_list(c2);
+			ql_obs_list.erase(callsign);
 		}
-		break;
+	}
+	break;
+	case 1:
+	{
+		ChatLine* c = del_list[callsign], * c2 = ql_del_list[callsign];
+		if (c)
+		{
+			remove_ctrl_list(c);
+			del_list.erase(callsign);
+		}
+		if (c2)
+		{
+			remove_qlctrl_list(c2);
+			ql_del_list.erase(callsign);
+		}
+	}
+	break;
 
 	}
 }

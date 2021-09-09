@@ -27,10 +27,10 @@ void CalcControllerList();
 
 void check_add_ctrl_list(Controller& controller);
 
-void add_to_ctrl_list(std::string& callsign, std::vector<std::string>& data,
+void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store);
 
-void add_to_qlctrl_list(std::string& callsign, std::vector<std::string>& data, std::unordered_map<std::string, ChatLine*>& store);
+void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data, std::unordered_map<std::string, ChatLine*>& store);
 
 void check_del_ctrl_list(Controller &controller);
 
