@@ -15,7 +15,14 @@ void PositionUpdates::execute() {
 	sendPositionUpdates(*USER);
 }
 
-void PositionUpdates::stop() {
+void PositionUpdates::toggle_pause()
+{
+	this->eAction.paused = !this->eAction.paused;
+}
+
+
+void PositionUpdates::stop() 
+{
 }
 
 
@@ -25,7 +32,7 @@ void ConfigUpdates::execute() {
 		ConfigUpdates::eAction.setTicks(1000);
 	}
 	/*Aircraft* acf = acf_map["EGF4427"];
-	
+
 	if ((acf->getHeading() + 3) > 360)
 		acf->setHeading((acf->getHeading() + 3) - 360);
 	else
@@ -34,5 +41,12 @@ void ConfigUpdates::execute() {
 	renderDate = true;
 }
 
-void ConfigUpdates::stop() {
+void ConfigUpdates::toggle_pause()
+{
+	this->eAction.paused = !this->eAction.paused;
+}
+
+void ConfigUpdates::stop() 
+{
+
 }

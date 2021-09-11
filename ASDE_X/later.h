@@ -11,6 +11,8 @@ private:
 	long long ticks;
 	boost::posix_time::ptime lastEvent;
 public:
+	bool paused = false;
+
 	EventAction() {
 		running = true;
 		lastEvent = boost::posix_time::microsec_clock::local_time();
@@ -44,6 +46,7 @@ class Event {
 public:
 	EventAction eAction;
 	virtual void execute() = 0;
+	virtual void toggle_pause() = 0;
 	virtual void stop() = 0;
 };
 #endif

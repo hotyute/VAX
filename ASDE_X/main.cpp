@@ -1212,8 +1212,8 @@ void disconnect()
 	sendSystemMessage("Disconnected.");
 	intter->queue_clean = true;
 	intter->disconnect_socket();
-	if (intter->position_updates)
-		intter->position_updates->stop();
+	if (intter->position_updates && !intter->position_updates->eAction.paused)
+		intter->position_updates->toggle_pause();
 	conn_clean();
 	connected = false;
 	EnableMenuItem(hFile, ID_FILE_CONNECT, MF_ENABLED);
