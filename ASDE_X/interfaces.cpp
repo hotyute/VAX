@@ -85,6 +85,7 @@ void RenderConnect(double x_, double y_)
 	pass_label = new Label(connectFrame, "Password:", (x + 150.0), 120.0, 10.0, y + (height - 75.0), 20, -10.0);
 	connectFrame->children[pass_label->index = PASSWORD_LABEL] = pass_label;
 	connect_callsign = new InputField(connectFrame, x, 120.0, 10.0, y + (height - 50.0), 20, -10.0);
+	connect_callsign->max_chars = 10;
 	connectFrame->children[connect_callsign->index = CALLSIGN_INPUT] = connect_callsign;
 	connect_fullname = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 50.0), 20, -10.0);
 	connectFrame->children[connect_fullname->index = FULLNAME_INPUT] = connect_fullname;
@@ -187,7 +188,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 void LoadMainChatInterface(bool refresh) {
 
 	//set main pane
-	const int controller_list_width = 86;
+	const int controller_list_width = 95;
 	const int arrow_offset = 15;//arrows that come with display box
 
 	int x = (CLIENT_WIDTH / 3);
@@ -234,7 +235,7 @@ void LoadMainChatInterface(bool refresh) {
 
 		//controller list
 		std::vector<ChatLine*> list;
-		//--Delivery--
+		//---Delivery---
 		//1A - MIA_DEL
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));

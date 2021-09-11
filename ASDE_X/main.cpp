@@ -210,7 +210,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
 			userStorage1.resize(MAX_USER_SIZE);
 
-			Aircraft* cur = new Aircraft("AAL2", 0, 0);
+			/*Aircraft* cur = new Aircraft("AAL2", 0, 0);
 			if (cur != NULL) {
 				cur->lock();
 				cur->setHeavy(true);
@@ -258,7 +258,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->collisionAcf = cur2;
 
 			Collision* collision = new Collision(cur, cur2);
-			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
+			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);*/
 
 			break;
 		}
@@ -412,6 +412,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							renderClosures = true;
 							zoom_phase = 2;
 							rangeb->refreshOption2();
+							refresh_ctrl_list();
 						}
 					}
 				}
@@ -1221,6 +1222,7 @@ void disconnect()
 
 void conn_clean()
 {
+	clear_ctrl_list();
 	for (int i = 1; i < MAX_USER_SIZE; i++)
 	{
 		User* user = userStorage1[i];

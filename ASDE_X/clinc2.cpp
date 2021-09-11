@@ -11,7 +11,7 @@ using namespace std::chrono_literals;
 
 tcpinterface* intter = new tcpinterface();
 
-static int packetSizes[256][2] = 
+static int packetSizes[256][2] =
 {
 	{10, 8},
 	{13, 0},
@@ -65,7 +65,6 @@ DWORD tcpinterface::run() {
 			{
 				in_stream->clearBuf();
 				memset(tcpinterface::message, 0, 5000);
-				//disconnect();
 				closed = true;
 				printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
 				queue_clean = false;
@@ -104,6 +103,19 @@ DWORD tcpinterface::run() {
 							event_manager1->addEvent(position_updates);
 							tcpinterface::hand_shake = false;
 							in.deleteReaderBlock();
+						}
+						else
+						{
+							switch (loginCode)
+							{
+							case 2:
+							{
+								sendErrorMessage("Invalid protocol Version.");
+								if (connected)
+									disconnect();
+								break;
+							}
+							}
 						}
 					}
 					else
@@ -176,15 +188,15 @@ void decode(Stream& in)
 			}
 			else if (length == -3)
 			{
-			#ifdef _DEBUG
+#ifdef _DEBUG
 				std::cout << "Unhandled Packet_Id!! : [" << (int)opCode << ", Packet_Size: "
 					<< length << ", Bytes_Ava: " << in.remaining() << "] ... Skipping" << std::endl;
-			#endif
+#endif
 				length = in.remaining();
 			}
-		#ifdef _DEBUG
+#ifdef _DEBUG
 			std::cout << "Packet_Id: " << (int)opCode << ", Packet_Size: " << length << ", Bytes_Ava: " << in.remaining() << std::endl;
-		#endif
+#endif
 			if (in.remaining() >= length)
 			{
 				//handle
@@ -218,7 +230,6 @@ void tcpinterface::startT(HWND hWnd) {
 
 int tcpinterface::disconnect_socket() {
 	int iResult = shutdown(tcpinterface::sConnect, 0x01);
-	closed = true;
 	if (iResult == SOCKET_ERROR) {
 		printf("shutdown failed: %d\n", WSAGetLastError());
 		closesocket(tcpinterface::sConnect);
@@ -260,9 +271,9 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 		int iError = WSAGetLastError();
 		if (iError == WSAEWOULDBLOCK)
 		{
-		#ifdef _DEBUG
+#ifdef _DEBUG
 			std::cout << "Attempting to connect.\n";
-		#endif
+#endif
 			fd_set Write, Err;
 			TIMEVAL Timeout;
 			int TimeoutSec = 5; // timeout after 5 seconds
@@ -311,6 +322,7 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 		}
 	}
 	closed = false;
+	queue_clean = false;
 	std::cout << "Connected!\n";
 	return 1;
 }

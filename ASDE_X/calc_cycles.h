@@ -34,6 +34,12 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data, st
 
 void check_del_ctrl_list(Controller &controller);
 
+void refresh_ctrl_list();
+
+void clear_ctrl_list(std::unordered_map<std::string, ChatLine*>& store);
+
+void clear_ctrl_list();
+
 void remove_ctrl_list(ChatLine* c);
 
 void remove_qlctrl_list(ChatLine* c);

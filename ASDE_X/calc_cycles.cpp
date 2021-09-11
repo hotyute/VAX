@@ -190,7 +190,7 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 {
 	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
 	std::string controller_user = "";
-	for (size_t i = 0; i < 6; i++)
+	for (size_t i = 0; i < 4; i++)
 	{
 		if (i < data[1].length())
 			controller_user += data[1][i];
@@ -214,6 +214,7 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	qlc_list_box->addLineTop(c);
 	qlc_list_box->prepare();
 
+	printf("%s", c->getText().c_str());
 	store.emplace(callsign, c);
 }
 
@@ -224,14 +225,17 @@ void check_del_ctrl_list(Controller& controller)
 	{
 	case 0:
 	{
-		ChatLine* c = obs_list[callsign], * c2 = ql_obs_list[callsign];
+		ChatLine* c = obs_list[callsign];
 		if (c)
 		{
 			remove_ctrl_list(c);
 			obs_list.erase(callsign);
 		}
+
+		ChatLine* c2 = ql_obs_list[callsign];
 		if (c2)
 		{
+			//printf("%s", c2->getText().c_str());
 			remove_qlctrl_list(c2);
 			ql_obs_list.erase(callsign);
 		}
@@ -256,6 +260,49 @@ void check_del_ctrl_list(Controller& controller)
 	}
 }
 
+void refresh_ctrl_list()
+{
+	if (controller_map.size() > 0)
+	{
+		for (auto iter = controller_map.begin(); iter != controller_map.end(); iter++)
+		{
+			Controller& controller = *iter->second;
+			if (dist(USER->getLatitude(), USER->getLongitude(), controller.getLatitude(), controller.getLongitude()) > USER->getVisibility())
+			{
+				check_del_ctrl_list(controller);
+			}
+		}
+	}
+}
+
+void clear_ctrl_list(std::unordered_map<std::string, ChatLine*>& store)
+{
+	auto it = store.begin();
+	while (it != store.end())
+	{
+		remove_ctrl_list((*it).second);
+		it = store.erase(it);
+	}
+}
+
+void clear_qlctrl_list(std::unordered_map<std::string, ChatLine*>& store)
+{
+	auto it = store.begin();
+	while (it != store.end())
+	{
+		remove_qlctrl_list((*it).second);
+		it = store.erase(it);
+	}
+}
+
+void clear_ctrl_list()
+{
+	clear_ctrl_list(obs_list);
+	clear_ctrl_list(del_list);
+	clear_qlctrl_list(ql_obs_list);
+	clear_qlctrl_list(ql_del_list);
+}
+
 void remove_ctrl_list(ChatLine* c)
 {
 	controller_list_box->removeLine(c);
@@ -264,6 +311,7 @@ void remove_ctrl_list(ChatLine* c)
 
 void remove_qlctrl_list(ChatLine* c)
 {
+	printf("%s", c->getText().c_str());
 	qlc_list_box->removeLine(c);
 	renderDrawings = true;
 }

@@ -73,8 +73,8 @@ public:
 
 class ChatLine {
 private:
-	CHAT_TYPE type;
 	std::string line;
+	CHAT_TYPE type;
 	int _x = -1, _y = -1, _s_x = -1, _s_y = -1, _p_x = -1, _p_y = -1;
 public:
 	ChatLine* split = nullptr;
