@@ -210,7 +210,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
 			userStorage1.resize(MAX_USER_SIZE);
 
-			/*Aircraft* cur = new Aircraft("AAL2", 0, 0);
+			Aircraft* cur = new Aircraft("AAL2", 0, 0);
 			if (cur != NULL) {
 				cur->lock();
 				cur->setHeavy(true);
@@ -258,7 +258,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->collisionAcf = cur2;
 
 			Collision* collision = new Collision(cur, cur2);
-			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);*/
+			Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
 
 			break;
 		}
@@ -1163,7 +1163,7 @@ void moveInterfacesOnSize()
 
 void connect() {
 	//34.142.27.168
-	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
+	if (intter->connectNew(hWnd, "34.142.27.168", 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
