@@ -1162,7 +1162,7 @@ void moveInterfacesOnSize()
 
 void connect() {
 	//34.142.27.168
-	if (intter->connectNew(hWnd, "34.142.27.168", 4403)) {
+	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);

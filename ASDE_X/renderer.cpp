@@ -416,7 +416,7 @@ void DrawInterfaces() {
 
 	//all input text from all frames
 	if (renderInputTextFocus) {
-		if (updateLastFocus && lastFocus != NULL && lastFocus->type == CHILD_TYPE::INPUT_FIELD) {
+		if (updateLastFocus && lastFocus != nullptr && lastFocus->type == CHILD_TYPE::INPUT_FIELD) {
 			InputField* lastFocusField = (InputField*)lastFocus;
 			glDeleteLists(lastFocusField->inputTextDl, 1);
 			glDeleteLists(lastFocusField->inputCursorDl, 1);

@@ -330,6 +330,7 @@ void InputField::removeFocus() {
 		lastFocus = this;
 		focusChild = nullptr;
 		renderInputTextFocus = true;
+		updateLastFocus = true;
 		if (line_ptr)
 		{
 			handleBox();//this has to come last as it deletes the inputfield
@@ -535,7 +536,6 @@ void InputField::handleEntry()
 	{
 		removeFocus();
 	}
-	renderAllInputText = true;
 	renderDrawings = true;
 }
 

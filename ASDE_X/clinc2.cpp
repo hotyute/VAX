@@ -64,6 +64,7 @@ DWORD tcpinterface::run() {
 			if (queue_clean)
 			{
 				in_stream->clearBuf();
+				memset(tcpinterface::message, 0, 5000);
 				//disconnect();
 				closed = true;
 				printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
