@@ -1028,7 +1028,7 @@ void handleDisconnect() {
 	if (!connected) {
 		return;
 	}
-	disconnect();
+	disconnect(true);
 }
 
 bool processCommands(std::string command)
@@ -1206,11 +1206,11 @@ void connect() {
 	}
 }
 
-void disconnect()
+void disconnect(bool queue)
 {
 	sendDisconnect();
 	sendSystemMessage("Disconnected.");
-	intter->queue_clean = true;
+	intter->queue_clean = queue;
 	intter->disconnect_socket();
 	if (intter->position_updates && !intter->position_updates->eAction.paused)
 		intter->position_updates->toggle_pause();

@@ -32,7 +32,7 @@ public:
 
 	int nBytesReceived = 0;
 	TIMEVAL timeout1;
-	int TimeoutSec1 = 30; //
+	int TimeoutSec1 = 15; //
 	fd_set rfds;
 	int retval;
 	bool closed = true;

@@ -72,7 +72,22 @@ DWORD tcpinterface::run() {
 			}
 
 			if (nBytesReceived == SOCKET_ERROR)
+			{
+				int error = WSAGetLastError();
+				if (error == WSAECONNABORTED
+					|| error == WSAECONNRESET || error == WSAETIMEDOUT)
+				{
+					disconnect(false);
+					in_stream->clearBuf();
+					memset(tcpinterface::message, 0, 5000);
+					closed = true;
+					if (error == WSAETIMEDOUT)
+						printf("Connection timeout exceeded 11 seconds\n");
+					else
+						printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
+				}
 				break;
+			}
 
 			if (nBytesReceived == 0)
 				continue;
@@ -121,7 +136,7 @@ DWORD tcpinterface::run() {
 							{
 								sendErrorMessage("Invalid protocol Version.");
 								if (connected)
-									disconnect();
+									disconnect(true);
 								break;
 							}
 							}
@@ -148,8 +163,10 @@ DWORD tcpinterface::run() {
 	}
 	if (retval == SOCKET_ERROR)
 	{
+		disconnect(false);
 		in_stream->clearBuf();
-		disconnect();
+		memset(tcpinterface::message, 0, 5000);
+		closed = true;
 		//do somethin
 	}
 	return 0;

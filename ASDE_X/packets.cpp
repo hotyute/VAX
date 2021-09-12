@@ -16,8 +16,8 @@ void sendPositionUpdates(User &user) {
 	intter->sendMessage(&out);
 }
 
-void sendPingPacket(User &user) {
-	Stream &out = Stream(20);
+void sendPingPacket() {
+	Stream &out = Stream(2);
 	out.createFrame(_PING);
 	intter->sendMessage(&out);
 }

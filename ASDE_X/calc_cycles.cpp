@@ -6,9 +6,19 @@ DWORD __stdcall CalcThread1(LPVOID)
 	boost::posix_time::ptime end;
 	boost::posix_time::time_duration time;
 
+	boost::posix_time::ptime curTime1 = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::ptime curTime2 = boost::posix_time::microsec_clock::local_time();
+
 	while (true)
 	{
 		start = boost::posix_time::microsec_clock::local_time();
+
+		if (boost::posix_time::time_duration(boost::posix_time::microsec_clock::local_time()
+			- curTime1).total_milliseconds() >= 10000)
+		{
+			sendPingPacket();
+			curTime1 = boost::posix_time::microsec_clock::local_time();
+		}
 
 		//code here
 		update();
@@ -214,7 +224,6 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	qlc_list_box->addLineTop(c);
 	qlc_list_box->prepare();
 
-	printf("%s", c->getText().c_str());
 	store.emplace(callsign, c);
 }
 
