@@ -207,13 +207,16 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 		else
 			controller_user += " ";
 	}
-	for (size_t i = 0; i < 10; i++)
+	int white_space = 10 - callsign.size();
+
+	while (white_space > 0)
 	{
-		if (i < callsign.length())
-			controller_user += callsign[i];
-		else
-			controller_user += " ";
+		controller_user += " ";
+		--white_space;
 	}
+
+	controller_user += callsign;
+
 	c->setText(controller_user);
 
 	qlc_list_box->resetReaderIdx();
