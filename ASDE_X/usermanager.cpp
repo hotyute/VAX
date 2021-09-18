@@ -238,7 +238,7 @@ void decodePackets(int opCode, Stream& stream) {
 	#endif
 		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			int fr = stream.readUnsignedByte();
-			char assigned_squawk[5], departure[5], arrival[5], alternate[5], cruise[6], ac_type[8], scratch[6], route[128], remarks[128];
+			char assigned_squawk[5], departure[5], arrival[5], alternate[5], cruise[6], ac_type[9], scratch[6], route[128], remarks[128];
 			stream.readString(assigned_squawk);
 			stream.readString(departure);
 			stream.readString(arrival);
