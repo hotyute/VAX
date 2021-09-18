@@ -3,6 +3,8 @@
 #include <bitset>
 #include <iostream>
 
+const int TRANSITION = 18000;
+
 #define N_SEG 20 // num points
 
 void quad_bezier(Point2& p1, Point2& p2, Point2& p3, std::vector<LinearSegment*>& add_to) {
@@ -696,4 +698,12 @@ bool within_boundary(Aircraft& aircraft)
 	return true;
 }
 
-
+std::string FormatAltitude(std::string altitude)
+{
+	double alt = atodd(altitude);
+	if (alt >= TRANSITION)
+	{
+		return "FL" + altitude.substr(0, 3);
+	}
+	return altitude;
+}

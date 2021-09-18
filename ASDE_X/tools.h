@@ -111,6 +111,8 @@ Point2* intersect(double $p1_lat, double $p1_lon, double $brng1, double $p2_lat,
 
 bool within_boundary(Aircraft& aircraft);
 
+std::string FormatAltitude(std::string altitude);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {
