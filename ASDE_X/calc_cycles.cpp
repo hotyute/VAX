@@ -126,7 +126,7 @@ void check_add_ctrl_list(Controller& controller)
 
 			data.push_back(std::to_string(controller.getIdentity()->controller_position));
 			data.push_back("1A");
-			data.push_back(frequency_to_string(controller.frequency[0]));
+			data.push_back(frequency_to_string(controller.userdata.frequency[0]));
 			data.push_back(std::to_string(controller.getIdentity()->controller_rating));
 
 			add_to_ctrl_list(callsign, data, obs_list);

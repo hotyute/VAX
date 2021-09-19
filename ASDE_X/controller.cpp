@@ -29,6 +29,26 @@ void Controller::setLongitude(double value) {
 	Controller::longitude = value;
 }
 
+void Controller::WindowMove(InterfaceFrame* window, int x, int y)
+{
+	int wind = -1;
+
+	switch (window->id)
+	{
+	case FP_INTERFACE:
+	{
+		wind = _WINPOS_FLIGHTPLAN;
+		break;
+	}
+	}
+
+	if (wind != -1)
+	{
+		userdata.window_positions[wind][0] = x;
+		userdata.window_positions[wind][1] = y;
+	}
+}
+
 void Controller::lock() {
 	WaitForSingleObject(Controller::aMutex, INFINITE);
 }

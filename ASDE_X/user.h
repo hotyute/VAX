@@ -34,11 +34,18 @@ struct Identity {
 };
 #endif
 
+#ifndef __UserData_user_h
+#define __UserData_user_h
+struct UserData {
+	int frequency[2], window_positions[2][2];
+	UserData();
+};
+#endif
+
 #ifndef __User_user_h
 #define __User_user_h
 class User {
 public:
-	int frequency[2];
 	User(std::string, int, int);
 	virtual ~User();
 	virtual void setLatitude(double value) = 0;
@@ -51,6 +58,7 @@ public:
 	int getVisibility() { return visibility; }
 	void setVisibility(int vis) { this->visibility = vis; }
 	void setCallsign(std::string new_callsign) { identity->callsign = new_callsign; }
+	UserData userdata;
 	Identity* getIdentity() {
 		return this->identity;
 	}

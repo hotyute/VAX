@@ -10,10 +10,6 @@ User::User(std::string callSign, int controllerRating, int pilotRating) {
 	User::identity->callsign = callSign;
 	User::identity->controller_rating = controllerRating;
 	User::identity->pilot_rating = pilotRating;
-	for (int i = 0; i < sizeof(frequency) / sizeof(frequency[0]); ++i)
-	{
-		frequency[i] = 99998;
-	}
 }
 
 User::~User() {
@@ -36,4 +32,18 @@ void User::handleMovement(double n_lat, double n_lon)
 	}
 	latitude = n_lat;
 	longitude = n_lon;
+}
+
+UserData::UserData()
+{
+	for (int i = 0; i < sizeof(frequency) / sizeof(frequency[0]); ++i)
+	{
+		frequency[i] = 99998;
+	}
+
+	for (int i = 0; i < sizeof(window_positions) / sizeof(window_positions[0]); ++i)
+	{
+		window_positions[i][0] = -1;
+		window_positions[i][1] = -1;
+	}
 }

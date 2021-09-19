@@ -132,5 +132,8 @@ extern const char* PILOT_RATINGS[], * CONTROLLER_RATINGS[];
 
 const double EARTH_RADIUS_NM = 3437.670013352;
 
+//BEGIN LOCAL VARIABLES
+#define _WINPOS_FLIGHTPLAN 0;
+
 #endif
 

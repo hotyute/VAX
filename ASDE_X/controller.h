@@ -16,6 +16,7 @@ public:
 	double getLongitude();
 	void setOnBreak(bool value) { on_break = value; }
 	bool isBreak() { return on_break; }
+	void WindowMove(InterfaceFrame *window, int x, int y);
 	void lock();
 	void unlock();
 private:
