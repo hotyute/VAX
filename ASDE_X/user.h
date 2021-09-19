@@ -37,7 +37,7 @@ struct Identity {
 #ifndef __UserData_user_h
 #define __UserData_user_h
 struct UserData {
-	int frequency[2], window_positions[2][2];
+	int frequency[2], window_positions[3][2];
 	UserData();
 };
 #endif

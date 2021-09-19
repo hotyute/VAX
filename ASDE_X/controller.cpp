@@ -40,6 +40,16 @@ void Controller::WindowMove(InterfaceFrame* window, int x, int y)
 		wind = _WINPOS_FLIGHTPLAN;
 		break;
 	}
+	case CONTROLLER_INTERFACE:
+	{
+		wind = _WINPOS_CTRLLIST;
+		break;
+	}
+	case CONNECT_INTERFACE:
+	{
+		wind = _WINPOS_CONNECT;
+		break;
+	}
 	}
 
 	if (wind != -1)

@@ -367,7 +367,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		{
 			if (controller_list == NULL) {
 				//TODO save X and Y positions when moved
-				RenderControllerList(true, -1, -1);
+				int* wdata = USER->userdata.window_positions[_WINPOS_CTRLLIST];
+				RenderControllerList(true, wdata[0], wdata[1]);
 			}
 			else if (!controller_list->render)
 			{
@@ -1015,7 +1016,8 @@ void handleConnect() {
 	}
 	if (connectFrame == NULL) {
 		//TODO save X and Y positions when moved
-		RenderConnect(-1, -1);
+		int* wdata = USER->userdata.window_positions[_WINPOS_CONNECT];
+		RenderConnect(wdata[0], wdata[1]);
 		connect_callsign->setFocus();
 	}
 	else {
@@ -1038,7 +1040,7 @@ bool processCommands(std::string command)
 	if (boost::istarts_with(command, ".SS")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
-			int* wdata = USER->userdata.window_positions[0];
+			int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
 			capitalize(array3[1]);
 			std::string call_sign = array3[1];
 			auto got = acf_map.find(call_sign);

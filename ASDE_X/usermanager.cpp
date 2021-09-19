@@ -271,7 +271,7 @@ void decodePackets(int opCode, Stream& stream) {
 
 					//TODO open Flight Plan
 					if (opened_fp == user1 && cur_cycle) {
-						int* wdata = USER->userdata.window_positions[0];
+						int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
 						Load_FlightPlan_Interface(wdata[0], wdata[1], acf, true);
 					}
 				}
