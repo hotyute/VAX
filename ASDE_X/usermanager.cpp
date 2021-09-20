@@ -185,7 +185,9 @@ void decodePackets(int opCode, Stream& stream) {
 		if (user1 != NULL) 
 		{
 			main_chat_box->resetReaderIdx();
-			main_chat_box->addLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+			ChatLine* c = new ChatLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+			main_chat_box->addLine(c);
+			c->playChatSound();
 			renderDrawings = true;
 		}
 	}

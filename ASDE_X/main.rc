@@ -5,6 +5,7 @@
 //Define the files as IDW_SOUND! (resource name) and of type WAVE then filepath
 IDW_SOUND1 WAVE "../Sounds/atcmessage.wav"
 IDW_SOUND2 WAVE "../Sounds/error.wav"
+IDW_SOUND3 WAVE "../Sounds/radiomessage.wav"
 
 MyIcon ICON "favicon.ico"
 

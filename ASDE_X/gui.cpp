@@ -1505,6 +1505,7 @@ void ChatLine::playChatSound()
 	switch (ChatLine::type) {
 	case CHAT_TYPE::MAIN:
 	{
+		PlaySound(MAKEINTRESOURCE(IDW_SOUND3), NULL, SND_RESOURCE | SND_ASYNC);
 	}
 	break;
 	case CHAT_TYPE::ERRORS:

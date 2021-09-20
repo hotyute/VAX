@@ -205,23 +205,23 @@ void LoadMainChatInterface(bool refresh) {
 			for (ChildFrame* child : main_chat->children) {
 				if (child) {
 					switch (child->index) {
-						case MAIN_CONTROLLERS_BOX:
-						{
-							((DisplayBox*)child)->updatePos(x, controller_list_width, 5, 114);
-						}
-						break;
-						case MAIN_CHAT_MESSAGES:
-						{
-							((DisplayBox*)child)->updatePos(x + (controller_list_width + arrow_offset),
-								(CLIENT_WIDTH * width) - width_offset, 27, 87);
-						}
-						break;
-						case MAIN_CHAT_INPUT:
-						{
-							((InputField*)child)->updatePos(x + (controller_list_width + arrow_offset),
-								(CLIENT_WIDTH * width) - width_offset, 5, 20);
-						}
-						break;
+					case MAIN_CONTROLLERS_BOX:
+					{
+						((DisplayBox*)child)->updatePos(x, controller_list_width, 5, 114);
+					}
+					break;
+					case MAIN_CHAT_MESSAGES:
+					{
+						((DisplayBox*)child)->updatePos(x + (controller_list_width + arrow_offset),
+							(CLIENT_WIDTH * width) - width_offset, 27, 87);
+					}
+					break;
+					case MAIN_CHAT_INPUT:
+					{
+						((InputField*)child)->updatePos(x + (controller_list_width + arrow_offset),
+							(CLIENT_WIDTH * width) - width_offset, 5, 20);
+					}
+					break;
 					}
 				}
 			}

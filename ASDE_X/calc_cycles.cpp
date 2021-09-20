@@ -95,7 +95,34 @@ void CalcDepartures() {
 					}
 				}
 				else
-				{
+				{					
+
+					if (!boost::iequals(fp.departure, icao) || icao.empty())
+					{
+					}
+					else
+					{
+						std::vector<std::string> _points = departures[callsign];
+
+						std::vector<std::string> points = split(fp.route, " .");
+
+						std::vector<std::string> new_points;
+
+						int max_points = 2;
+						while (max_points > 0 && points.size() > 0) {
+							new_points.push_back(pop_front(points));
+							max_points--;
+						}
+
+						if (!boost::iequals(new_points[0], _points[0]) 
+							|| !boost::iequals(new_points[1], _points[1]))
+						{
+							departures[callsign] = new_points;
+							renderDepartures = true;
+						}
+					}
+
+
 					//check for removal
 				}
 			}

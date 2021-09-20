@@ -32,6 +32,7 @@
 #ifdef RC_INVOKED
 IDW_SOUND1 WAVE "../Sounds/atcmessage.wav"
 IDW_SOUND2 WAVE "../Sounds/error.wav"
+IDW_SOUND3 WAVE "../Sounds/radiomessage.wav"
 #endif
 
 static const int CLIENT_PORT = 6809;
