@@ -918,7 +918,8 @@ void DisplayBox::prepare()
 				remaining++;
 			}
 
-			if (remaining > 0) {
+			if (remaining > 0) 
+			{
 				m->setText(rtrim(ltrim(store[s_size - 1])));
 
 				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type);
@@ -931,7 +932,8 @@ void DisplayBox::prepare()
 
 	//unsplit lines
 	auto i = DisplayBox::chat_lines.begin();
-	while (i != DisplayBox::chat_lines.end()) {
+	while (i != DisplayBox::chat_lines.end()) 
+	{
 		ChatLine* c = *i;
 
 		bool set_pos = false;
@@ -994,6 +996,58 @@ void DisplayBox::prepare()
 	}
 }
 
+void DisplayBox::editText(ChatLine* line, int x, int y)
+{
+	InputField* input_field = nullptr;
+	std::string str = line->getText();
+
+	std::string temp;
+	int str_size = str.size();
+	while (str_size > 0) {
+		temp += " ";
+		--str_size;
+	}
+
+	if (empty(str))
+	{
+		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
+		input_field->line_ptr = line;
+		input_field->show_border = false;
+		input_field->offset_x = 0;
+		input_field->offset_y = 0;
+	}
+	else if ((x != -1 && y != -1) && line->in_bounds_text(x, y))
+	{
+		//TODO set cursor exactly 
+		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
+		input_field->line_ptr = line;
+		input_field->show_border = false;
+		input_field->setInput(str);
+		line->setText(temp);
+		input_field->offset_x = 0;
+		input_field->offset_y = 0;
+	}
+	else
+	{
+		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
+		input_field->line_ptr = line;
+		input_field->show_border = false;
+		input_field->setInput(str);
+		line->setText(temp);
+		input_field->offset_x = 0;
+		input_field->offset_y = 0;
+	}
+
+	if (input_field)
+	{
+		frame->children[input_field->index = (index + 1)] = input_field;
+		input_field->setFocus();
+		renderInputTextFocus = true;
+		renderInterfaces = true;
+		renderDrawings = true;
+	}
+}
+
 void DisplayBox::doDrawing() {
 	BasicInterface& param = *DisplayBox::border;
 	double x;
@@ -1025,7 +1079,8 @@ void DisplayBox::doDrawing() {
 		CHAT_TYPE type = line->getType();
 		//std::cout << text << ", " << i << std::endl;
 		double y, endY;
-		if (last_end_y != -1) {
+		if (last_end_y != -1) 
+		{
 			y = (last_end_y - (y_height / 2));
 			endY = (last_end_y - y_height);
 		}
@@ -1128,60 +1183,17 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 	for (auto d_it = displayed_lines.begin(); d_it != displayed_lines.end(); ++d_it) {
 		ChatLine* line = *d_it;
 		std::string str = line->getText();
+
 		if (line->in_bounds(x, y))
 		{
-#ifdef _DEBUG
-			std::cout << "Line: " << str << ", " << line->size_y() << std::endl;
-#endif
 			if (editable)
 			{
-				std::string temp;
-				int str_size = str.size();
-				while (str_size > 0) {
-					temp += " ";
-					--str_size;
-				}
+				
 				if (frame->children[index + 1])
 				{
 					((InputField*)frame->children[index + 1])->handleBox();
 				}
-				InputField* input_field = nullptr;
-				if (empty(str))
-				{
-					input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
-					input_field->line_ptr = line;
-					input_field->show_border = false;
-					input_field->offset_x = 0;
-					input_field->offset_y = 0;
-				}
-				else if (line->in_bounds_text(x, y))
-				{
-					//TODO set cursor exactly 
-					input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
-					input_field->line_ptr = line;
-					input_field->show_border = false;
-					input_field->setInput(str);
-					line->setText(temp);
-					input_field->offset_x = 0;
-					input_field->offset_y = 0;
-				}
-				else
-				{
-					input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
-					input_field->line_ptr = line;
-					input_field->show_border = false;
-					input_field->setInput(str);
-					line->setText(temp);
-					input_field->offset_x = 0;
-					input_field->offset_y = 0;
-				}
-				if (input_field) {
-					frame->children[input_field->index = (index + 1)] = input_field;
-					input_field->setFocus();
-					renderInputTextFocus = true;
-					renderInterfaces = true;
-					renderDrawings = true;
-				}
+				editText(line, x, y);
 			}
 			else
 			{

@@ -39,7 +39,7 @@ private:
 	int mode;
 	bool render_flags[ACF_FLAG_COUNT];
 	bool update_flags[ACF_FLAG_COUNT];
-	std::string callsign, textTag1, textTag2, squawkCode;
+	std::string callsign, textTag, squawkCode;
 	std::string collText, collTag1, collTag2;
 	double speed;
 	double heading, pitch, roll;
@@ -62,11 +62,8 @@ public:
 	double getLatitude();
 	void setLongitude(double value);
 	double getLongitude();
-	void setAvailableTag(std::string value);
-	std::string getTextTag1();
-	void setTextTag1(std::string value);
-	std::string getTextTag2();
-	void setTextTag2(std::string value);
+	std::string getTextTag();
+	void setTextTag(std::string value);
 	std::string getCollText();
 	void setCollText(std::string value);
 	std::string getCollTag1();

@@ -1534,32 +1534,24 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 
 	glColor4f(callsign_clr[0], callsign_clr[1], callsign_clr[2], 1.0f);
 
-	if (show_squawks)
-	{
-		aircraft.setTextTag1(aircraft.getSquawkCode());
-	}
-	else
-	{
-		aircraft.setTextTag1("");
-	}
-
-	std::string textTag1 = aircraft.getTextTag1();
-	std::string textTag2 = aircraft.getTextTag2();
+	std::string textTag = aircraft.getTextTag();
 
 	double linesX = 0, linesY = 0;
-	if (!empty(textTag1)) {
+	if (!show_squawks) 
+	{
 		SelectObject(hDC, callSignFont);
-		SIZE size = getTextExtent(textTag1);
+		SIZE size = getTextExtent(aircraft.getSquawkCode());
 		glRasterPos2f(vMaxX, vMaxY); // set position
-		glPrint(textTag1.c_str(), &callSignBase);
+		glPrint(aircraft.getSquawkCode().c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
 
-	if (!empty(textTag2)) {
+	if (!empty(textTag)) 
+	{
 		SelectObject(hDC, callSignFont);
-		SIZE size = getTextExtent(textTag2);
+		SIZE size = getTextExtent(textTag);
 		glRasterPos2f(vMaxX + linesX, vMaxY + linesY); // set position
-		glPrint(textTag2.c_str(), &callSignBase);
+		glPrint(textTag.c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
 

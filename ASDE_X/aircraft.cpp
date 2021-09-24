@@ -19,8 +19,7 @@ Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating)
 		render_flags[i] = false;
 	}
 	update_flags[ACF_COLLISION_TAG] = true;
-	Aircraft::textTag1 = "";
-	Aircraft::textTag2 = "";
+	Aircraft::textTag = "";
 	Aircraft::collText = "#CALLSIGN";
 	Aircraft::collTag1 = "No Alert";
 	Aircraft::collTag2 = "DISPLAY#0000";
@@ -65,31 +64,12 @@ FlightPlan* Aircraft::getFlightPlan()
 	return Aircraft::flight_plan;
 }
 
-void Aircraft::setAvailableTag(std::string value)
-{
-	if (empty(Aircraft::textTag1)) {
-		Aircraft::textTag1 = value;
-	}
-	else if (empty(Aircraft::textTag2)) 
-	{
-		Aircraft::textTag2 = value;
-	}
+std::string Aircraft::getTextTag() {
+	return Aircraft::textTag;
 }
 
-std::string Aircraft::getTextTag1() {
-	return Aircraft::textTag1;
-}
-
-void Aircraft::setTextTag1(std::string value) {
-	Aircraft::textTag1 = value;
-}
-
-std::string Aircraft::getTextTag2() {
-	return Aircraft::textTag2;
-}
-
-void Aircraft::setTextTag2(std::string value) {
-	Aircraft::textTag2 = value;
+void Aircraft::setTextTag(std::string value) {
+	Aircraft::textTag = value;
 }
 
 std::string Aircraft::getCollText() {

@@ -222,6 +222,7 @@ public:
 	void SetChatTextColour(CHAT_TYPE t);
 	void clearLines();
 	void prepare();
+	void editText(ChatLine* line, int x, int y);
 
 	bool click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset);
 	bool click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset);

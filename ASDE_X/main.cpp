@@ -896,13 +896,48 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_DOWN) {
 		}
 		else if (wParam == VK_BACK) {
-			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
+			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
+			{
 				InputField* focusField = (InputField*)focusChild;
+				InterfaceFrame& frame = *focusField->getFrame();
 				if (focusField->editable) {
-					if (focusField->input.size() > 0) {
+					if (focusField->input.size() > 0)
+					{
 						focusField->popInput();
 						focusField->setCursor();
 						renderInputTextFocus = true;
+					}
+					else if (focusField->line_ptr)
+					{
+						ChatLine* c = focusField->line_ptr;
+						if (frame.id == FP_INTERFACE)
+						{
+							ChatLine* nf = nullptr;
+							DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
+							auto i = displayBox->chat_lines.begin();
+							while (i != displayBox->chat_lines.end())
+							{
+								ChatLine* c2 = *i;
+								if (c2->split == c)
+								{
+									printf("split: %s\n", c2->getText().c_str());
+									nf = c2;
+									break;
+								}
+								++i;
+							}
+							focusField->handleBox();
+							//displayBox->prepare();
+							if (nf)
+								displayBox->editText(nf, -1, -1);
+							else
+								main_chat_box->setFocus();
+						}
+						else
+						{
+							focusField->handleBox();
+							main_chat_input->setFocus();
+						}
 					}
 				}
 			}
@@ -1168,7 +1203,7 @@ void moveInterfacesOnSize()
 
 void connect() {
 	//34.142.27.168
-	if (intter->connectNew(hWnd, "34.142.27.168", 4403)) {
+	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
