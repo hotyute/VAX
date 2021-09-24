@@ -496,17 +496,6 @@ void InputField::handleBox()
 {
 	ChatLine* c = line_ptr;
 	c->setText(input);
-	switch (this->index)
-	{
-	case FP_ROUTE_EDIT:
-	{
-		if (opened_fp)
-		{
-			PullFPData((Aircraft*)opened_fp);
-		}
-		break;
-	}
-	}
 	clearInput();
 	setCursor();
 	line_ptr = nullptr;

@@ -183,46 +183,49 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 
 void PullFPData(Aircraft* user)
 {
-	if (acf_map[user->getCallsign()] == user)
+	if (user)
 	{
-		InputField* fp_depart = ((InputField*)fp_frame->children[FP_DEPART_INPUT]);
-		InputField* fp_arrival = ((InputField*)fp_frame->children[FP_ARRIVE_INPUT]);
-		std::vector<ChatLine*> fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX])->chat_lines;
-		std::vector<ChatLine*> fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX])->chat_lines;
-
-		std::string depart, arrival, route, remarks;
-		depart = fp_depart->input.c_str();
-		arrival = fp_arrival->input.c_str();
-
-		for (auto it = fp_route.begin(); it != fp_route.end(); it++)
+		if (acf_map[user->getCallsign()] == user)
 		{
-			route += (*it)->getText();
-		}
+			InputField* fp_depart = ((InputField*)fp_frame->children[FP_DEPART_INPUT]);
+			InputField* fp_arrival = ((InputField*)fp_frame->children[FP_ARRIVE_INPUT]);
+			std::vector<ChatLine*> fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX])->chat_lines;
+			std::vector<ChatLine*> fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX])->chat_lines;
 
-		for (auto it = fp_remarks.begin(); it != fp_remarks.end(); it++)
-		{
-			remarks += (*it)->getText();
-		}
+			std::string depart, arrival, route, remarks;
+			depart = fp_depart->input.c_str();
+			arrival = fp_arrival->input.c_str();
 
-		FlightPlan& fp = *user->getFlightPlan();
-		bool update_required = false;
-		if (fp.route != route || fp.remarks != remarks || fp.departure != depart 
-			|| fp.arrival != arrival)
-		{
-			update_required = true;
-		}
-
-		fp.departure = depart;
-		fp.arrival = arrival;
-		fp.route = route;
-		fp.remarks = remarks;
-
-		if (update_required)
-		{
-			fp.cycle++;
-			if (connected) 
+			for (auto it = fp_route.begin(); it != fp_route.end(); it++)
 			{
-				sendFlightPlan(*user);
+				route += (*it)->getText();
+			}
+
+			for (auto it = fp_remarks.begin(); it != fp_remarks.end(); it++)
+			{
+				remarks += (*it)->getText();
+			}
+
+			FlightPlan& fp = *user->getFlightPlan();
+			bool update_required = false;
+			if (fp.route != route || fp.remarks != remarks || fp.departure != depart
+				|| fp.arrival != arrival)
+			{
+				update_required = true;
+			}
+
+			fp.departure = depart;
+			fp.arrival = arrival;
+			fp.route = route;
+			fp.remarks = remarks;
+
+			if (update_required)
+			{
+				fp.cycle++;
+				if (connected)
+				{
+					sendFlightPlan(*user);
+				}
 			}
 		}
 	}

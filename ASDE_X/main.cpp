@@ -53,6 +53,7 @@ void handleDisconnect();
 bool processCommands(std::string);
 void moveInterfacesOnSize();
 void conn_clean();
+void pull_data(InterfaceFrame& _f, ChildFrame* _fc);
 
 /* Components */
 
@@ -805,6 +806,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					if (focusField->line_ptr)
 					{
 						focusField->handleBox();
+						pull_data(frame, focusField);
 						main_chat_input->setFocus();
 					}
 					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input)
@@ -931,7 +933,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (nf)
 								displayBox->editText(nf, -1, -1);
 							else
+							{
+								pull_data(frame, focusField);
 								main_chat_box->setFocus();
+							}
 						}
 						else
 						{
@@ -1509,5 +1514,15 @@ void resetFlags() {
 		if (renderFlags[i]) {
 			renderFlags[i] = false;
 		}
+	}
+}
+
+void pull_data(InterfaceFrame& _f, ChildFrame* _fc)
+{
+	if (_f.id == FP_INTERFACE
+		&& _fc->index == FP_ROUTE_EDIT)
+	{
+		if (opened_fp)
+			PullFPData((Aircraft*)opened_fp);
 	}
 }
