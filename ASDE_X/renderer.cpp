@@ -1537,7 +1537,7 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 	std::string textTag = aircraft.getTextTag();
 
 	double linesX = 0, linesY = 0;
-	if (!show_squawks) 
+	if (show_squawks) 
 	{
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(aircraft.getSquawkCode());

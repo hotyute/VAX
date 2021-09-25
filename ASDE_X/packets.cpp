@@ -5,7 +5,6 @@
 void sendPositionUpdates(User &user) {
 	Stream &out = Stream(20);
 	out.createFrameVarSize(CONTROLLER_POS_UPDATE);
-	out.writeWord(user.getUserIndex());
 	double lat = user.getLatitude();
 	double lon = user.getLongitude();
 	long long latitude = *(long long *)&lat;

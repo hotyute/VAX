@@ -41,7 +41,8 @@ DWORD WINAPI tcpinterface::staticStart(void* param) {
 }
 
 DWORD tcpinterface::run() {
-	while (!quit) {
+	while (!quit)
+	{
 		if (closed)
 		{
 			auto start = std::chrono::high_resolution_clock::now();
@@ -101,32 +102,40 @@ DWORD tcpinterface::run() {
 				if (tcpinterface::current_op == 45)
 				{
 					in.markReaderIndex();
-					if (nBytesReceived >= 11)
+					if (nBytesReceived >= 1)
 					{
 						int loginCode = in.readUnsignedByte();
-						int index = in.readUnsignedWord();
-						long long updateTimeInMillis = in.readQWord();
+
 						if (loginCode == 1)
 						{
-							//setIndex
-							//setUpdateTimeinMillis
-							//sendUpdates
-							USER->setUserIndex(index);
-							USER->setUpdateTime(updateTimeInMillis);
-							if (!this->position_updates)
+							if (in.remaining() >= 10)
 							{
-								this->position_updates = new PositionUpdates();
-								position_updates->eAction.setTicks(0);
+								//setIndex
+								//setUpdateTimeinMillis
+								//sendUpdates
+								int index = in.readUnsignedWord();
+								long long updateTimeInMillis = in.readQWord();
+								USER->setUserIndex(index);
+								USER->setUpdateTime(updateTimeInMillis);
+								if (!this->position_updates)
+								{
+									this->position_updates = new PositionUpdates();
+									position_updates->eAction.setTicks(0);
+									event_manager1->addEvent(position_updates);
+								}
+								else if (this->position_updates->eAction.paused)
+								{
+									position_updates->eAction.setTicks(0);
+									this->position_updates->toggle_pause();
+								}
 								event_manager1->addEvent(position_updates);
+								tcpinterface::hand_shake = false;
+								in.deleteReaderBlock();
 							}
-							else if (this->position_updates->eAction.paused)
+							else
 							{
-								position_updates->eAction.setTicks(0);
-								this->position_updates->toggle_pause();
+								in.resetReaderIndex();
 							}
-							event_manager1->addEvent(position_updates);
-							tcpinterface::hand_shake = false;
-							in.deleteReaderBlock();
 						}
 						else
 						{
@@ -137,6 +146,12 @@ DWORD tcpinterface::run() {
 								sendErrorMessage("Invalid protocol Version.");
 								if (connected)
 									disconnect(true);
+								in.deleteReaderBlock();
+								break;
+							}
+							default:
+							{
+								in.deleteReaderBlock();
 								break;
 							}
 							}
@@ -149,7 +164,8 @@ DWORD tcpinterface::run() {
 				}
 			}
 
-			if (!hand_shake) {
+			if (!hand_shake)
+			{
 				if (in.remaining() > 0)
 				{
 					decode(in);
