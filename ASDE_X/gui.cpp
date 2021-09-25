@@ -409,10 +409,10 @@ void InputField::cursorRight()
 	}
 }
 
-void InputField::popInput() {
+bool InputField::popInput() {
 	bool ins = cursor_pos < input.size() ? true : false;
 	if (ins && (cursor_pos - 1) < 0)
-		return;
+		return false;
 	if (InputField::p_protected) {
 		ins ? InputField::pp_input.erase(InputField::pp_input.begin() + (cursor_pos - 1)) : InputField::pp_input.pop_back();
 	}
@@ -420,6 +420,7 @@ void InputField::popInput() {
 	InputField::cursor_input.pop_back();
 	last_cursor_pos = cursor_pos;
 	cursor_pos--;
+	return true;
 }
 
 void InputField::clearInput() {

@@ -53,7 +53,9 @@ void handleDisconnect();
 bool processCommands(std::string);
 void moveInterfacesOnSize();
 void conn_clean();
-void pull_data(InterfaceFrame& _f, ChildFrame* _fc);
+void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc);
+
+void back_split_line(InterfaceFrame& frame, InputField* focusField);
 
 /* Components */
 
@@ -795,7 +797,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == 0xFF) {//FN Key
 
 		}
-		else if (wParam == VK_RETURN) {
+		else if (wParam == VK_RETURN) 
+		{
 			if (focusChild != NULL) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD)
@@ -806,7 +809,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					if (focusField->line_ptr)
 					{
 						focusField->handleBox();
-						pull_data(frame, focusField);
+						pull_data(frame, type);
 						main_chat_input->setFocus();
 					}
 					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input)
@@ -902,47 +905,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			{
 				InputField* focusField = (InputField*)focusChild;
 				InterfaceFrame& frame = *focusField->getFrame();
+				CHILD_TYPE type = focusField->type;
 				if (focusField->editable) {
 					if (focusField->input.size() > 0)
 					{
-						focusField->popInput();
+						bool popped = focusField->popInput();
 						focusField->setCursor();
+						if (!popped)
+							back_split_line(frame, focusField);
 						renderInputTextFocus = true;
 					}
-					else if (focusField->line_ptr)
+					else
 					{
-						ChatLine* c = focusField->line_ptr;
-						if (frame.id == FP_INTERFACE)
-						{
-							ChatLine* nf = nullptr;
-							DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
-							auto i = displayBox->chat_lines.begin();
-							while (i != displayBox->chat_lines.end())
-							{
-								ChatLine* c2 = *i;
-								if (c2->split == c)
-								{
-									printf("split: %s\n", c2->getText().c_str());
-									nf = c2;
-									break;
-								}
-								++i;
-							}
-							focusField->handleBox();
-							//displayBox->prepare();
-							if (nf)
-								displayBox->editText(nf, -1, -1);
-							else
-							{
-								pull_data(frame, focusField);
-								main_chat_box->setFocus();
-							}
-						}
-						else
-						{
-							focusField->handleBox();
-							main_chat_input->setFocus();
-						}
+						back_split_line(frame, focusField);
 					}
 				}
 			}
@@ -1517,12 +1492,52 @@ void resetFlags() {
 	}
 }
 
-void pull_data(InterfaceFrame& _f, ChildFrame* _fc)
+void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc)
 {
 	if (_f.id == FP_INTERFACE
-		&& _fc->index == FP_ROUTE_EDIT)
+		&& _fc == CHILD_TYPE::INPUT_FIELD)
 	{
 		if (opened_fp)
 			PullFPData((Aircraft*)opened_fp);
+	}
+}
+
+void back_split_line(InterfaceFrame& frame, InputField* focusField)
+{
+	CHILD_TYPE type = focusField->type;
+	if (focusField->line_ptr)
+	{
+		ChatLine* c = focusField->line_ptr;
+		if (frame.id == FP_INTERFACE)
+		{
+			ChatLine* nf = nullptr;
+			DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
+			auto i = displayBox->chat_lines.begin();
+			while (i != displayBox->chat_lines.end())
+			{
+				ChatLine* c2 = *i;
+				if (c2->split == c)
+				{
+					printf("split: %s\n", c2->getText().c_str());
+					nf = c2;
+					break;
+				}
+				++i;
+			}
+			focusField->handleBox();
+			//displayBox->prepare();
+			if (nf)
+				displayBox->editText(nf, -1, -1);
+			else
+			{
+				pull_data(frame, type);
+				main_chat_box->setFocus();
+			}
+		}
+		else
+		{
+			focusField->handleBox();
+			main_chat_input->setFocus();
+		}
 	}
 }

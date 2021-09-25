@@ -132,7 +132,7 @@ public:
 	void cursorLeft();
 	void cursorRight();
 	void removeCursor();
-	void popInput();
+	bool popInput();
 	void clearInput();
 	void setInput(std::string);
 	void setUneditable(std::string);
