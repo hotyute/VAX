@@ -22,7 +22,7 @@ void decodePackets(int opCode, Stream& stream) {
 		long long lat = stream.readQWord();
 		long long lon = stream.readQWord();
 		User* user1 = nullptr;
-		if (type == CLIENT_TYPES::CONTROLLER_CLIENT) 
+		if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 		{
 			Controller* controller1 = new Controller(callSign1, 0, 0);
 			controller1->getIdentity()->controller_rating = stream.readUnsignedByte();
@@ -34,7 +34,7 @@ void decodePackets(int opCode, Stream& stream) {
 			controller_map[callSign1] = controller1;
 			check_add_ctrl_list(*controller1);
 		}
-		else if (type == CLIENT_TYPES::PILOT_CLIENT) 
+		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{
 			char acfTitle[1024];
 			stream.readString(acfTitle);
@@ -63,7 +63,7 @@ void decodePackets(int opCode, Stream& stream) {
 			acf_map[callSign1] = aircraft1;
 		}
 
-		if (user1) 
+		if (user1)
 		{
 			user1->getIdentity()->login_name = full_name;
 			user1->getIdentity()->username = username;
@@ -86,11 +86,12 @@ void decodePackets(int opCode, Stream& stream) {
 		//update Cycle Change
 		USER->setUpdateTime(stream.readQWord());
 	}
-	if (opCode == 12) 
+	if (opCode == 12)
 	{//delete user packet
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
-		if (user1 != NULL) {
+		if (user1) 
+		{
 			std::string callsign = user1->getCallsign();
 			CLIENT_TYPES type = user1->getIdentity()->type;
 
@@ -124,7 +125,7 @@ void decodePackets(int opCode, Stream& stream) {
 	if (opCode == 13) {
 		//ping packet
 	}
-	if (opCode == 14) 
+	if (opCode == 14)
 	{
 		//Pilot  Update Packet
 		int index = stream.readUnsignedWord();
@@ -143,7 +144,7 @@ void decodePackets(int opCode, Stream& stream) {
 		int groundSpeed = stream.readUnsignedWord();
 		long long alt = stream.readQWord();
 		double altitude = *(double*)&alt;
-		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) 
+		if (user1 && user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT)
 		{
 			Aircraft* cur = (Aircraft*)user1;
 			cur->lock();
@@ -165,7 +166,7 @@ void decodePackets(int opCode, Stream& stream) {
 		double _latitude = *(double*)&lat;
 		double _longitude = *(double*)&lon;
 		int flags = stream.readUnsignedByte();
-		if (user1 != NULL && user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT) 
+		if (user1 && user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT)
 		{
 			Controller* cur = (Controller*)user1;
 			cur->lock();
@@ -175,14 +176,14 @@ void decodePackets(int opCode, Stream& stream) {
 		user1->handleMovement(_latitude, _longitude);
 	}
 
-	if (opCode == 15) 
+	if (opCode == 15)
 	{
 		int index = stream.readUnsignedWord();
 		int frequency = stream.readDWord();
 		char msg[2048];
 		stream.readString(msg);
 		User* user1 = userStorage1.at(index);
-		if (user1 != NULL) 
+		if (user1)
 		{
 			main_chat_box->resetReaderIdx();
 			ChatLine* c = new ChatLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
@@ -196,11 +197,14 @@ void decodePackets(int opCode, Stream& stream) {
 		int index = stream.readUnsignedWord();
 		int mode = stream.readUnsignedByte();
 		User* user1 = userStorage1.at(index);
-		if (user1 != NULL) {
+		if (user1) 
+		{
 			CLIENT_TYPES type = user1->getIdentity()->type;
-			if (type == CLIENT_TYPES::PILOT_CLIENT) {
+			if (type == CLIENT_TYPES::PILOT_CLIENT) 
+			{
 				Aircraft* acf = (Aircraft*)user1;
-				if (acf != NULL) {
+				if (acf) 
+				{
 					acf->handleModeChange(mode);
 					acf->setMode(mode);
 				}
@@ -213,18 +217,15 @@ void decodePackets(int opCode, Stream& stream) {
 		stream.readString(callsign);
 		char msg[2048];
 		stream.readString(msg);
-		User* user1 = users_map[callsign];
-		if (user1) 
-		{
-			auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
 
-			InterfaceFrame &frame = *frames_def[it - pm_callsigns.begin()];
+		auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
 
-			DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
-			box.resetReaderIdx();
-			box.addLine(callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
-			renderDrawings = true;
-		}
+		InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
+
+		DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
+		box.resetReaderIdx();
+		box.addLine(callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+		renderDrawings = true;
 	}
 
 	if (opCode == 19)
@@ -232,7 +233,7 @@ void decodePackets(int opCode, Stream& stream) {
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
 		int vis_range = stream.readUnsignedWord();
-		if (user1 != NULL)
+		if (user1)
 		{
 			user1->setVisibility(vis_range);
 		}
@@ -243,9 +244,9 @@ void decodePackets(int opCode, Stream& stream) {
 		User* user1 = userStorage1.at(index);
 		int cur_cycle = stream.readUnsignedWord();
 		CLIENT_TYPES type = static_cast<CLIENT_TYPES>(stream.readUnsignedByte());
-	#ifdef _DEBUG
-		std::cout << "cycle: " << cur_cycle << '\n' << std::endl;
-	#endif
+#ifdef _DEBUG
+		printf("cycle: %d\n", cur_cycle);
+#endif
 		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			int fr = stream.readUnsignedByte();
 			char assigned_squawk[5], departure[5], arrival[5], alternate[5], cruise[6], ac_type[9], scratch[6], route[128], remarks[128];
@@ -259,7 +260,8 @@ void decodePackets(int opCode, Stream& stream) {
 			stream.readString(route);
 			stream.readString(remarks);
 
-			if (user1 != NULL) {
+			if (user1) 
+			{
 				CLIENT_TYPES type = user1->getIdentity()->type;
 				if (type == CLIENT_TYPES::PILOT_CLIENT) {
 					Aircraft& acf = *((Aircraft*)user1);
