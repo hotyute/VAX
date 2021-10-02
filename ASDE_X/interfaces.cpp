@@ -1,5 +1,7 @@
 #include "interfaces.h"
 
+std::vector<std::string> pm_callsigns(10);
+
 InterfaceFrame* controller_list = nullptr, * main_chat = nullptr;
 
 void RenderControllerList(bool open, double x_, double y_)
@@ -148,6 +150,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 
 		pm_frame = new InterfaceFrame(id);
 		pm_frame->title = "PRIVATE CHAT: " + callsign;
+		pm_callsigns[id] = callsign;
 		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
 		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 		pm_frame->Pane1(x, width, y, height);
@@ -299,6 +302,23 @@ void sendMainChatMessage(InputField* focusField)
 	}
 	main_chat_box->resetReaderIdx();
 	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
+	renderDrawings = true;
+	focusField->clearInput();
+	focusField->setCursor();
+	renderInputTextFocus = true;
+}
+
+void sendPrivateChatMessage(InterfaceFrame& frame, InputField* focusField)
+{
+	if (connected)
+	{
+		std::string call_sign = pm_callsigns[frame.id];
+		if (!call_sign.empty() && call_sign.find_first_not_of(' ') != std::string::npos)
+			sendPrivateMessage(call_sign, focusField->input);
+	}
+	DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
+	box.resetReaderIdx();
+	box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
 	renderDrawings = true;
 	focusField->clearInput();
 	focusField->setCursor();

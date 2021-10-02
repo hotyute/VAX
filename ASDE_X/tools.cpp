@@ -3,6 +3,8 @@
 #include <bitset>
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
+
 const int TRANSITION = 18000;
 
 #define N_SEG 20 // num points
@@ -520,6 +522,17 @@ void addCollisionToMirrors(Collision* collision)
 
 		if (mir) {
 			mir->c_flags.emplace(collision, std::vector<unsigned int>(COL_FLAG_COUNT)); // initialized to 0 by default
+		}
+	}
+}
+
+int get_frameid(std::string callsign)
+{
+	for (size_t i = 0; i < pm_callsigns.size(); i++)
+	{
+		if (boost::iequals(pm_callsigns[i], callsign))
+		{
+			return i;
 		}
 	}
 }

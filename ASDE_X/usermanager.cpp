@@ -209,12 +209,22 @@ void decodePackets(int opCode, Stream& stream) {
 	}
 
 	if (opCode == 11) {// recieve private message
-		int index = stream.readUnsignedWord();
+		char callsign[25];
+		stream.readString(callsign);
 		char msg[2048];
 		stream.readString(msg);
-		User* user1 = userStorage1.at(index);
-		if (user1 != NULL) {
-			main_chat_box->addLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+		User* user1 = users_map[callsign];
+		if (user1) 
+		{
+			printf("username: %s\n", user1->getCallsign().c_str());
+
+			auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
+
+			InterfaceFrame &frame = *frames_def[it - pm_callsigns.begin()];
+
+			DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
+			box.resetReaderIdx();
+			box.addLine(callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
 			renderDrawings = true;
 		}
 	}

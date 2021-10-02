@@ -8,6 +8,8 @@ void sendPositionUpdates(User &user);
 void sendPingPacket();
 void sendUserMessage(int frequency, std::string message);
 
+void sendPrivateMessage(std::string to, std::string message);
+
 void sendFlightPlanRequest(Aircraft& user_for);
 
 void sendDisconnect();

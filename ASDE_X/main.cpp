@@ -828,8 +828,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else if (is_privateinterface(frame_id))
 					{
-						if (focusField->index == PRIVATE_MESSAGE_INPUT) {
-							if (focusField->input.size() > 0) {
+						if (focusField->index == PRIVATE_MESSAGE_INPUT) 
+						{
+							if (focusField->input.size() > 0) 
+							{
 								if (processCommands(focusField->input))
 								{
 									focusField->clearInput();
@@ -838,19 +840,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								}
 								else
 								{
-									for (size_t i = 0; i < userStorage1.size(); i++) {
-										User* curUsr = userStorage1[i];
-										if (curUsr != NULL && curUsr != USER) {
-											//sendPrivateMessage(*curUsr, focusField->input);
-										}
-									}
-									DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
-									box.resetReaderIdx();
-									box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
-									renderDrawings = true;
-									focusField->clearInput();
-									focusField->setCursor();
-									renderInputTextFocus = true;
+									sendPrivateChatMessage(frame, focusField);								
 								}
 							}
 						}

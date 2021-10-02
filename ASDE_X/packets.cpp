@@ -31,11 +31,10 @@ void sendUserMessage(int frequency, std::string message) {
 	intter->sendMessage(&out);
 }
 
-void sendPrivateMessage(User& to, std::string message) {
+void sendPrivateMessage(std::string to, std::string message) {
 	Stream& out = Stream(512);
 	out.createFrameVarSizeWord(_PRIVATE_MESSAGE);
-	out.writeWord(USER->getUserIndex());
-	out.writeWord(to.getUserIndex());
+	out.writeString((char*)to.c_str());
 	out.writeString((char*)message.c_str());
 	out.endFrameVarSizeWord();
 	intter->sendMessage(&out);

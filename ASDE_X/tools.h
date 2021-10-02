@@ -87,6 +87,8 @@ void addAircraftToMirrors(Aircraft*);
 
 void addCollisionToMirrors(Collision* collision);
 
+int get_frameid(std::string callsign);
+
 bool is_privateinterface(int frame_index);
 
 void capitalize(std::string& str);

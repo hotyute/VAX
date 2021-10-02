@@ -4,6 +4,8 @@
 #include "main.h"
 #include "packets.h"
 
+extern std::vector<std::string> pm_callsigns;
+
 void RenderControllerList(bool open, double x_, double y_);
 
 void RenderConnect(double x, double y);
@@ -17,6 +19,8 @@ void sendSystemMessage(std::string message);
 void sendErrorMessage(std::string message);
 
 void sendMainChatMessage(InputField* focusField);
+
+void sendPrivateChatMessage(InterfaceFrame& frame, InputField* focusField);
 
 void sendATCMessage(std::string message);
 
