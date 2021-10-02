@@ -216,7 +216,6 @@ void decodePackets(int opCode, Stream& stream) {
 		User* user1 = users_map[callsign];
 		if (user1) 
 		{
-			printf("username: %s\n", user1->getCallsign().c_str());
 
 			auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
 
