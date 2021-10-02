@@ -216,7 +216,6 @@ void decodePackets(int opCode, Stream& stream) {
 		User* user1 = users_map[callsign];
 		if (user1) 
 		{
-
 			auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
 
 			InterfaceFrame &frame = *frames_def[it - pm_callsigns.begin()];
