@@ -57,6 +57,8 @@ void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc);
 
 void back_split_line(InterfaceFrame& frame, InputField* focusField);
 
+void open_chat(std::string call_sign);
+
 /* Components */
 
 int WINAPI WinMain(HINSTANCE hThisInstance,
@@ -1080,28 +1082,7 @@ bool processCommands(std::string command)
 			capitalize(array3[1]);
 			std::string call_sign = array3[1];
 
-			//TODO, make Private Chat User* (Pointer) oriented specific.
-			InterfaceFrame* pm_frame = nullptr;
-			int id = 0, items_opened = 0, c_id = -1;
-			const int max = 10;
-			while (items_opened < max) {
-				if (is_privateinterface(id)) {
-					pm_frame = frames_def[id];
-					if (!pm_frame || !pm_frame->render) {
-						c_id = id;
-						break;
-					}
-					else {
-						++items_opened;
-					}
-				}
-				++id;
-			}
-
-			if (items_opened >= max || c_id == -1)
-				sendErrorMessage("Too many private chat interfaces");
-			else
-				LoadPrivateChat(-1, -1, call_sign, true, c_id);
+			open_chat(call_sign);
 		}
 		return true;
 	}
@@ -1299,6 +1280,16 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	InitOpenGL();
 	LoadMainChatInterface(false);
 	RenderControllerList(false, -1, -1);
+	int id = 0, items_opened = 0, c_id = -1;
+	while (items_opened < MAX_PMCHATS) 
+	{
+		if (is_privateinterface(id))
+		{
+			LoadPrivateChat(-1, -1, "NOT_LOGGED", true, false, id);
+			++items_opened;
+		}
+		++id;
+	}
 	((InputField*)frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	renderAircraft = true;
 	std::cout.precision(10);
@@ -1530,4 +1521,56 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			main_chat_input->setFocus();
 		}
 	}
+}
+
+void open_chat(std::string call_sign)
+{
+	auto it = find(pm_callsigns.begin(), pm_callsigns.end(), call_sign);
+	bool unset = false;
+	if (it == pm_callsigns.end())
+	{
+		it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");
+		unset = true;
+	}
+
+	if (it != pm_callsigns.end())
+	{
+		InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
+		if (unset)
+		{
+			frame.title = "PRIVATE CHAT: " + call_sign;
+			pm_callsigns[it - pm_callsigns.begin()] = call_sign;
+		}
+		if (!frame.render)
+		{
+			frame.doOpen(false, true);
+		}
+	}
+	else
+	{
+		//TODO, make Private Chat User* (Pointer) oriented specific.
+		InterfaceFrame* pm_frame = nullptr;
+		int id = 0, items_opened = 0, c_id = -1;
+		while (items_opened < MAX_PMCHATS) {
+			if (is_privateinterface(id))
+			{
+				pm_frame = frames_def[id];
+				if (!pm_frame || !pm_frame->render)
+				{
+					c_id = id;
+					break;
+				}
+				else {
+					++items_opened;
+				}
+			}
+			++id;
+		}
+
+		if (items_opened >= MAX_PMCHATS || c_id == -1)
+			sendErrorMessage("Too many private chat interfaces");
+		else
+			LoadPrivateChat(-1, -1, call_sign, true, true, c_id);
+	}
+
 }

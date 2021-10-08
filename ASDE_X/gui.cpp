@@ -323,7 +323,7 @@ void InputField::setFocus() {
 }
 
 void InputField::removeFocus() {
-	if (InputField::focus) 
+	if (InputField::focus)
 	{
 		removeCursor();
 		InputField::focus = false;
@@ -908,7 +908,7 @@ void DisplayBox::prepare()
 				remaining++;
 			}
 
-			if (remaining > 0) 
+			if (remaining > 0)
 			{
 				m->setText(rtrim(ltrim(store[s_size - 1])));
 
@@ -922,7 +922,7 @@ void DisplayBox::prepare()
 
 	//unsplit lines
 	auto i = DisplayBox::chat_lines.begin();
-	while (i != DisplayBox::chat_lines.end()) 
+	while (i != DisplayBox::chat_lines.end())
 	{
 		ChatLine* c = *i;
 
@@ -1069,7 +1069,7 @@ void DisplayBox::doDrawing() {
 		CHAT_TYPE type = line->getType();
 		//std::cout << text << ", " << i << std::endl;
 		double y, endY;
-		if (last_end_y != -1) 
+		if (last_end_y != -1)
 		{
 			y = (last_end_y - (y_height / 2));
 			endY = (last_end_y - y_height);
@@ -1178,7 +1178,7 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 		{
 			if (editable)
 			{
-				
+
 				if (frame->children[index + 1])
 				{
 					((InputField*)frame->children[index + 1])->handleBox();
@@ -1523,6 +1523,11 @@ void ChatLine::playChatSound()
 	case CHAT_TYPE::ATC:
 	{
 		PlaySound(MAKEINTRESOURCE(IDW_SOUND1), NULL, SND_RESOURCE | SND_ASYNC);
+	}
+	break;
+	case CHAT_TYPE::CHAT:
+	{
+		PlaySound(MAKEINTRESOURCE(IDW_SOUND4), NULL, SND_RESOURCE | SND_ASYNC);
 	}
 	break;
 	default:

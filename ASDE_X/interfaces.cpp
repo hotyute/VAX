@@ -1,6 +1,6 @@
 #include "interfaces.h"
 
-std::vector<std::string> pm_callsigns(10);
+std::vector<std::string> pm_callsigns(20);
 
 InterfaceFrame* controller_list = nullptr, * main_chat = nullptr;
 
@@ -144,9 +144,10 @@ void RenderConnect(double x_, double y_)
 	connectFrame->doInsert();
 }
 
-void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, int id) {
+void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, bool open, int id) {
 	InterfaceFrame* pm_frame = frames_def[id];
-	if (!pm_frame || refresh) {
+	if (!pm_frame || refresh) 
+	{
 
 		pm_frame = new InterfaceFrame(id);
 		pm_frame->title = "PRIVATE CHAT: " + callsign;
@@ -164,7 +165,7 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine(callsign + ": Hello There!", CHAT_TYPE::MAIN));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		double route_box_size = 90.0;
 		DisplayBox* displayBox = new DisplayBox(pm_frame, list, 7, x + (width - (width * (start_x - spacing))), width * 0.93, 5, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
@@ -177,12 +178,21 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, i
 		CloseButton* pm_closeb = new CloseButton(pm_frame, 15, 15);
 		pm_frame->children[pm_closeb->index = PM_CLOSE_BOX] = pm_closeb;
 
-		pm_frame->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
+		if (open)
+		{
+			pm_frame->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
+		}
+		else
+		{
+			pm_frame->doClose();
+		}
 
 		pm_frame->doInsert();
 	}
-	else {
-		if (!pm_frame->render) {
+	else 
+	{
+		if (!pm_frame->render) 
+		{
 			pm_frame->doOpen(false, true);
 		}
 	}

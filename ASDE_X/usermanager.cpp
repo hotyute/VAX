@@ -90,7 +90,7 @@ void decodePackets(int opCode, Stream& stream) {
 	{//delete user packet
 		int index = stream.readUnsignedWord();
 		User* user1 = userStorage1.at(index);
-		if (user1) 
+		if (user1)
 		{
 			std::string callsign = user1->getCallsign();
 			CLIENT_TYPES type = user1->getIdentity()->type;
@@ -197,13 +197,13 @@ void decodePackets(int opCode, Stream& stream) {
 		int index = stream.readUnsignedWord();
 		int mode = stream.readUnsignedByte();
 		User* user1 = userStorage1.at(index);
-		if (user1) 
+		if (user1)
 		{
 			CLIENT_TYPES type = user1->getIdentity()->type;
-			if (type == CLIENT_TYPES::PILOT_CLIENT) 
+			if (type == CLIENT_TYPES::PILOT_CLIENT)
 			{
 				Aircraft* acf = (Aircraft*)user1;
-				if (acf) 
+				if (acf)
 				{
 					acf->handleModeChange(mode);
 					acf->setMode(mode);
@@ -213,18 +213,39 @@ void decodePackets(int opCode, Stream& stream) {
 	}
 
 	if (opCode == 11) {// recieve private message
-		char callsign[25];
-		stream.readString(callsign);
+		char _callsign[25];
+		stream.readString(_callsign);
 		char msg[2048];
 		stream.readString(msg);
+		std::string callsign = std::string(_callsign);
+		capitalize(callsign);
 
 		auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
+		bool unset = false;
+		if (it == pm_callsigns.end())
+		{
+			it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");		
+			unset = true;
+		}
 
-		InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
+		if (it != pm_callsigns.end())
+		{
+			InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
+			if (unset)
+			{
+				frame.title = "PRIVATE CHAT: " + callsign;
+				pm_callsigns[it - pm_callsigns.begin()] = callsign;
+			}
+			DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
+			box.resetReaderIdx();
+			ChatLine* c = new ChatLine(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT);
+			box.addLine(c);
+			c->playChatSound();
+		}
+		else
+		{
 
-		DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
-		box.resetReaderIdx();
-		box.addLine(callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+		}
 		renderDrawings = true;
 	}
 
@@ -260,7 +281,7 @@ void decodePackets(int opCode, Stream& stream) {
 			stream.readString(route);
 			stream.readString(remarks);
 
-			if (user1) 
+			if (user1)
 			{
 				CLIENT_TYPES type = user1->getIdentity()->type;
 				if (type == CLIENT_TYPES::PILOT_CLIENT) {

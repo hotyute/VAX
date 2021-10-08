@@ -10,7 +10,7 @@ void RenderControllerList(bool open, double x_, double y_);
 
 void RenderConnect(double x, double y);
 
-void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, int id);
+void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, bool open, int id);
 
 void LoadMainChatInterface(bool refresh);
 
