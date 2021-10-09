@@ -16,6 +16,7 @@ extern int HEIGHT;
 
 extern int CLIENT_WIDTH;
 extern int CLIENT_HEIGHT;
+extern int CONF_Y;
 
 extern double mZoom;
 extern int range;

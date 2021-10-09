@@ -10,7 +10,7 @@ double CENTER_LON = 0.000000;
 
 int WIDTH = 1280, HEIGHT = 768;
 
-int CLIENT_WIDTH, CLIENT_HEIGHT;
+int CLIENT_WIDTH, CLIENT_HEIGHT, CONF_Y;
 
 double mZoom = 30.000;
 int range = 2304060;

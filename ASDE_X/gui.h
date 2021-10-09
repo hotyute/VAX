@@ -29,10 +29,10 @@ private:
 public:
 	int id = -1;
 	unsigned int interfaceDl = 0, drawingDl = 0, focusDl = 0;
-	POINT *s_pt = nullptr, *cur_pt = nullptr, *end_pt = nullptr;
+	POINT* s_pt = nullptr, * cur_pt = nullptr, * end_pt = nullptr;
 	BasicInterface* border = nullptr;
 	BasicInterface* move_bound = nullptr;
-	bool render, renderAllInputText, renderAllLabels, multi_open = true, pannable = false;
+	bool render, renderAllInputText, renderAllLabels, multi_open = true, pannable = false, stripped = false;
 	int index = -1;
 	std::string title;
 	std::vector<BasicInterface*> interfaces;
@@ -58,7 +58,7 @@ protected:
 public:
 	virtual ~ChildFrame();
 	std::vector<BasicInterface*> child_interfaces;
-	BasicInterface *border = nullptr;
+	BasicInterface* border = nullptr;
 	CHILD_TYPE type;
 	int index;
 	bool focus, show_border = true;
@@ -86,7 +86,7 @@ public:
 	void setText(std::string text);
 	std::string getText();
 	void playChatSound();
-	void set_p(int x, int y, int t_x, int t_y, int e_x, int e_y) 
+	void set_p(int x, int y, int t_x, int t_y, int e_x, int e_y)
 	{
 		this->_x = x; this->_y = y; this->_s_x = t_x; this->_s_y = t_y; this->_p_x = e_x; this->_p_y = e_y;
 	}
@@ -104,9 +104,11 @@ class InputField : public ChildFrame {
 public:
 	virtual ~InputField();
 	InputField(InterfaceFrame*, double, double);
-	InputField(InterfaceFrame*, double, double, double, double, double, double);
+	InputField(InterfaceFrame* frame, double x, double width, double padding_x, double, double, double);
 public:
 	bool centered, editable;
+	HFONT* font = nullptr;
+	unsigned int* base = nullptr;
 	ChatLine* line_ptr = nullptr;
 	std::string pp_input;
 	bool p_protected; // password protection
@@ -116,6 +118,7 @@ public:
 	int inputTextDl = 0;
 	int inputCursorDl = 0;
 	int max_chars = 0;
+	float rgb[3] = { 1.0f, 1.0f, 1.0f };
 
 	int offset_x = 3, offset_y = 6;
 
@@ -250,7 +253,7 @@ public:
 
 extern std::vector<InterfaceFrame*> frames_def;
 extern std::vector<InterfaceFrame*> rendered_frames;
-extern ChildFrame *focusChild, *lastFocus;
+extern ChildFrame* focusChild, * lastFocus;
 extern std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 extern bool updateLastFocus;
 extern InterfaceFrame* _openedframe;

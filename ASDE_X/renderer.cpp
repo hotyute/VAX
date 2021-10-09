@@ -487,6 +487,7 @@ void DrawInterfaces() {
 	if (renderConf) {
 		glDeleteLists(confDl, 1);
 		RenderConf();
+		RenderTerminalCommands(true);
 		renderConf = false;
 	}
 	glPushMatrix();
@@ -947,30 +948,33 @@ void RenderInterface(InterfaceFrame* frame) {
 	glNewList(frame->interfaceDl, GL_COMPILE);
 
 	if (frame && frame->render) {
-		for (BasicInterface* inter1 : frame->interfaces) {
-			if (inter1) {
-				RenderChatInterface(*inter1);
-				if (inter1->index == CONTENT_PANE) {
-					if (frame->title.size() > 0) {
-						std::string title = frame->title;
-						int title_height = 25;
-						double x = inter1->getStartX() + (inter1->getWidth() / 2);
-						double y = (inter1->getEndY() - title_height) + (title_height / 2);
-						SelectObject(hDC, titleFont);
-						SIZE extent = getTextExtent(title);
-						double textXPos = x - (extent.cx / 2);
-						double textYPos = y - ((extent.cy / 2) / 2);
-						glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], 1.0f);
-						glRasterPos2f(textXPos, textYPos);
-						glPrint(title.c_str(), &titleBase);
+		if (!frame->stripped)
+		{
+			for (BasicInterface* inter1 : frame->interfaces) {
+				if (inter1) {
+					RenderChatInterface(*inter1);
+					if (inter1->index == CONTENT_PANE) {
+						if (frame->title.size() > 0) {
+							std::string title = frame->title;
+							int title_height = 25;
+							double x = inter1->getStartX() + (inter1->getWidth() / 2);
+							double y = (inter1->getEndY() - title_height) + (title_height / 2);
+							SelectObject(hDC, titleFont);
+							SIZE extent = getTextExtent(title);
+							double textXPos = x - (extent.cx / 2);
+							double textYPos = y - ((extent.cy / 2) / 2);
+							glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], 1.0f);
+							glRasterPos2f(textXPos, textYPos);
+							glPrint(title.c_str(), &titleBase);
 
-						//title border line
-						glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
-						int b_offset_Y = 25;
-						glBegin(GL_LINES);
-						glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-						glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-						glEnd();
+							//title border line
+							glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+							int b_offset_Y = 25;
+							glBegin(GL_LINES);
+							glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+							glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+							glEnd();
+						}
 					}
 				}
 			}
@@ -1229,8 +1233,8 @@ void RenderInputText(InputField& input, int& inputTextDl, std::string& text, boo
 
 	glNewList(inputTextDl, GL_COMPILE);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	SelectObject(hDC, topBtnFont);
+	glColor4f(input.rgb[0], input.rgb[1], input.rgb[2], 1.0f);
+	SelectObject(hDC, input.font);
 	SIZE size = getTextExtent(text);
 	if (centered) {
 		x -= (size.cx / 2);
@@ -1242,7 +1246,7 @@ void RenderInputText(InputField& input, int& inputTextDl, std::string& text, boo
 		finalTxt.insert(pos, "%");
 		pos = finalTxt.find("%", pos + 2);
 	}
-	glPrint(finalTxt.c_str(), &topButtonBase);
+	glPrint(finalTxt.c_str(), input.base);
 
 	glEndList();
 }
@@ -1262,8 +1266,8 @@ void RenderInputCursor(InputField& input, int& inputCursorDl, std::string& text,
 
 	glNewList(inputCursorDl, GL_COMPILE);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	SelectObject(hDC, topBtnFont);
+	glColor4f(input.rgb[0], input.rgb[1], input.rgb[2], 1.0f);
+	SelectObject(hDC, input.font);
 	SIZE size = getTextExtent(text);
 	if (centered) {
 		x -= (size.cx / 2);
@@ -1275,7 +1279,7 @@ void RenderInputCursor(InputField& input, int& inputCursorDl, std::string& text,
 		finalTxt.insert(pos, "%");
 		pos = finalTxt.find("%", pos + 2);
 	}
-	glPrint(finalTxt.c_str(), &topButtonBase);
+	glPrint(finalTxt.c_str(), input.base);
 
 	glEndList();
 }
@@ -1346,6 +1350,8 @@ void RenderConf() {
 	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
 	glPrint(config3.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
+
+	CONF_Y = linesY;
 
 	glEndList();
 }

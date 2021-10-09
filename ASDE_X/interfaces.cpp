@@ -2,7 +2,7 @@
 
 std::vector<std::string> pm_callsigns(20);
 
-InterfaceFrame* controller_list = nullptr, * main_chat = nullptr;
+InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr;
 
 void RenderControllerList(bool open, double x_, double y_)
 {
@@ -198,6 +198,30 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, b
 	}
 }
 
+void RenderTerminalCommands(bool refresh)
+{
+	terminal_cmd = new InterfaceFrame(TERMINAL_COMMAND);
+	terminal_cmd->title = "CONNECT";
+	terminal_cmd->stripped = true;
+	int x = 30, y = (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - 50;
+	double width = 150.0, height = 30;
+	terminal_cmd->Pane1(x, width, y, height);
+
+	terminal_input = new InputField(terminal_cmd, x - 3, width, 0, y, height, 0);
+	terminal_cmd->children[terminal_input->index = TERMINAL_INPUT] = terminal_input;
+	terminal_input->show_border = false;
+	terminal_input->rgb[0] = conf_clr[0];
+	terminal_input->rgb[1] = conf_clr[1];
+	terminal_input->rgb[2] = conf_clr[2];
+
+	terminal_input->font = &confFont;
+	terminal_input->base = &confBase;
+
+	terminal_cmd->doOpen(true, false);
+
+	terminal_cmd->doInsert();
+}
+
 void LoadMainChatInterface(bool refresh) {
 
 	//set main pane
@@ -212,10 +236,13 @@ void LoadMainChatInterface(bool refresh) {
 	// if you want to make input box longer, remove an arrow offset
 	const int width_offset = (controller_list_width + (arrow_offset + arrow_offset) + c_padding + m_padding);
 
-	if (refresh) {
-		if (main_chat) {
+	if (refresh) 
+	{
+		if (main_chat) 
+		{
 			main_chat->UpdatePane1(x, width, 0, 125);
-			for (ChildFrame* child : main_chat->children) {
+			for (ChildFrame* child : main_chat->children) 
+			{
 				if (child) {
 					switch (child->index) {
 					case MAIN_CONTROLLERS_BOX:

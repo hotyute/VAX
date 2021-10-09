@@ -12,6 +12,8 @@ void RenderConnect(double x, double y);
 
 void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, bool open, int id);
 
+void RenderTerminalCommands(bool refresh);
+
 void LoadMainChatInterface(bool refresh);
 
 void sendSystemMessage(std::string message);
@@ -24,6 +26,6 @@ void sendPrivateChatMessage(InterfaceFrame& frame, InputField* focusField);
 
 void sendATCMessage(std::string message);
 
-extern InterfaceFrame* controller_list, *main_chat;
+extern InterfaceFrame* controller_list, *main_chat, *terminal_cmd;
 
 #endif

@@ -42,7 +42,7 @@ int single_opened_frames = 0;
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
-InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = NULL;
+InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = nullptr, *terminal_input = nullptr;
 ComboBox* connect_rating = NULL, * connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
@@ -813,6 +813,22 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						focusField->handleBox();
 						pull_data(frame, type);
 						main_chat_input->setFocus();
+					}
+					else if (frame_id == TERMINAL_COMMAND && focusField == terminal_input)
+					{// terminal commands
+						if (focusField->input.size() > 0) {
+							if (processCommands(focusField->input)) {
+								focusField->clearInput();
+								focusField->setCursor();
+								renderInputTextFocus = true;
+							}
+							else
+							{
+								focusField->clearInput();
+								focusField->setCursor();
+								renderInputTextFocus = true;
+							}
+						}
 					}
 					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input)
 					{// main chat

@@ -267,6 +267,8 @@ return InterfaceFrame::inputFields;
 
 InputField::InputField(InterfaceFrame* frame, double width, double height) {
 	InputField::frame = frame;
+	font = &topBtnFont;
+	base = &topButtonBase;
 	InputField::p_protected = false;
 	InputField::editable = true;
 	InputField::centered = false;
@@ -282,6 +284,8 @@ InputField::InputField(InterfaceFrame* frame, double width, double height) {
 
 InputField::InputField(InterfaceFrame* frame, double x, double width, double padding_x, double y, double height, double padding_y) {
 	InputField::frame = frame;
+	font = &topBtnFont;
+	base = &topButtonBase;
 	InputField::p_protected = false;
 	InputField::editable = true;
 	InputField::centered = false;
