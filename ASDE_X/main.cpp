@@ -42,7 +42,7 @@ int single_opened_frames = 0;
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
-InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = nullptr, *terminal_input = nullptr;
+InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = nullptr, * terminal_input = nullptr;
 ComboBox* connect_rating = NULL, * connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
@@ -799,7 +799,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == 0xFF) {//FN Key
 
 		}
-		else if (wParam == VK_RETURN) 
+		else if (wParam == VK_RETURN)
 		{
 			if (focusChild != NULL) {
 				CHILD_TYPE type = focusChild->type;
@@ -846,9 +846,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else if (is_privateinterface(frame_id))
 					{
-						if (focusField->index == PRIVATE_MESSAGE_INPUT) 
+						if (focusField->index == PRIVATE_MESSAGE_INPUT)
 						{
-							if (focusField->input.size() > 0) 
+							if (focusField->input.size() > 0)
 							{
 								if (processCommands(focusField->input))
 								{
@@ -858,7 +858,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								}
 								else
 								{
-									sendPrivateChatMessage(frame, focusField);								
+									sendPrivateChatMessage(frame, focusField);
 								}
 							}
 						}
@@ -919,8 +919,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						bool popped = focusField->popInput();
 						focusField->setCursor();
-						if (!popped)
-							back_split_line(frame, focusField);
+						//if (!popped)
+						back_split_line(frame, focusField);
 						renderInputTextFocus = true;
 					}
 					else
@@ -1297,7 +1297,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	LoadMainChatInterface(false);
 	RenderControllerList(false, -1, -1);
 	int id = 0, items_opened = 0, c_id = -1;
-	while (items_opened < MAX_PMCHATS) 
+	while (items_opened < MAX_PMCHATS)
 	{
 		if (is_privateinterface(id))
 		{
@@ -1521,14 +1521,13 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 				}
 				++i;
 			}
-			focusField->handleBox();
-			//displayBox->prepare();
-			if (nf)
-				displayBox->editText(nf, -1, -1);
-			else
+			focusField->updateLine();
+			displayBox->prepare();
+			ChatLine* c = focusField->line_ptr;
+			if (c)
 			{
-				pull_data(frame, type);
-				main_chat_box->setFocus();
+				focusField->input = c->getText();
+				focusField->setCursor();
 			}
 		}
 		else

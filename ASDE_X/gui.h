@@ -143,6 +143,7 @@ public:
 	void pass_characters(char* chars);
 	bool can_type();
 	void handleBox();
+	void updateLine();
 	void handleEntry();
 };
 

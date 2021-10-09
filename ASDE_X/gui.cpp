@@ -512,6 +512,15 @@ void InputField::handleBox()
 	delete this;
 }
 
+void InputField::updateLine()
+{
+	ChatLine* c = line_ptr;
+	if (c)
+		c->setText(input);
+	renderInputTextFocus = true;
+	renderDrawings = true;
+}
+
 void InputField::handleEntry()
 {
 	switch (this->index)
@@ -994,6 +1003,11 @@ void DisplayBox::editText(ChatLine* line, int x, int y)
 {
 	InputField* input_field = nullptr;
 	std::string str = line->getText();
+
+	if (frame->children[(index + 1)])
+	{
+		((InputField*)frame->children[index + 1])->handleBox();
+	}
 
 	std::string temp;
 	int str_size = str.size();
