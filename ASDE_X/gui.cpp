@@ -636,8 +636,8 @@ void ClickButton::doDrawing() {
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	int tH = tm.tmAscent - tm.tmInternalLeading;
-	double textXPos = x - (extent.cx / 2);
-	double textYPos = y - ((extent.cy / 2) / 2);
+	double textXPos = x - (extent.cx / 2.0);
+	double textYPos = y - ((extent.cy / 2.0) / 2.0);
 	glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
 	glRasterPos2f(textXPos, textYPos);
 	glPrint(ClickButton::text.c_str(), &topButtonBase);

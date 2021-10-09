@@ -304,7 +304,8 @@ void DrawData()
 		}
 	}
 
-	if (renderClosures) {
+	if (renderClosures) 
+	{
 		glDeleteLists(closuresDl, 1);
 
 		closuresDl = glGenLists(1);
@@ -958,11 +959,11 @@ void RenderInterface(InterfaceFrame* frame) {
 							std::string title = frame->title;
 							int title_height = 25;
 							double x = inter1->getStartX() + (inter1->getWidth() / 2);
-							double y = (inter1->getEndY() - title_height) + (title_height / 2);
+							double y = (inter1->getEndY() - title_height) + (title_height / 2.0);
 							SelectObject(hDC, titleFont);
 							SIZE extent = getTextExtent(title);
-							double textXPos = x - (extent.cx / 2);
-							double textYPos = y - ((extent.cy / 2) / 2);
+							double textXPos = x - (extent.cx / 2.0);
+							double textYPos = y - ((extent.cy / 2.0) / 2.0);
 							glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], 1.0f);
 							glRasterPos2f(textXPos, textYPos);
 							glPrint(title.c_str(), &titleBase);
@@ -1335,19 +1336,19 @@ void RenderConf() {
 
 	std::string config = "RWY CONFIG: 08R09-00";
 	SIZE size = getTextExtent(config);
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
 	std::string config2 = "OVERLOAD END";
 	size = getTextExtent(config2);
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config2.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
 	std::string config3 = "ACID";
 	size = getTextExtent(config3);
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config3.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
@@ -1366,11 +1367,11 @@ void RenderDate() {
 	SelectObject(hDC, confFont);
 
 	const std::string* date1 = currentDateTime();
-	glRasterPos2f(50, (CLIENT_HEIGHT / 6));
+	glRasterPos2f(50, (CLIENT_HEIGHT / 6.0));
 	glPrint(date1[0].c_str(), &confBase);
 
 	//std::string date2 = "1645/22";
-	glRasterPos2f(53, (CLIENT_HEIGHT / 6) - 12);
+	glRasterPos2f(53, (CLIENT_HEIGHT / 6.0) - 12);
 	glPrint(date1[1].c_str(), &confBase);
 	glEndList();
 }
@@ -1392,12 +1393,12 @@ void RenderDepartures() {
 	std::string config2 = "---------------------";
 	SIZE size2 = getTextExtent(config2);
 
-	glRasterPos2f((start_x - (size1.cx * 0.5)) - (size2.cx * 0.5), (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glRasterPos2f((start_x - (size1.cx * 0.5)) - (size2.cx * 0.5), (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config.c_str(), &confBase);
 	linesY += (size1.cy - (size1.cy * dep_line_sep));
 
 
-	glRasterPos2f(start_x - size2.cx, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+	glRasterPos2f(start_x - size2.cx, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config2.c_str(), &confBase);
 	linesY += (size2.cy - (size2.cy * dep_line_sep));
 
@@ -1422,13 +1423,13 @@ void RenderDepartures() {
 
 		float callsign_x = start_x - size2.cx, fix1_x = (start_x - (size4.cx * 0.5)) - (size2.cx * 0.5), fix2_x = start_x - size5.cx;
 
-		glRasterPos2f(callsign_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+		glRasterPos2f(callsign_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 		glPrint(config3.c_str(), &confBase);
 
-		glRasterPos2f(fix1_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+		glRasterPos2f(fix1_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 		glPrint(config4.c_str(), &confBase);
 
-		glRasterPos2f(fix2_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6)) - linesY);
+		glRasterPos2f(fix2_x, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 		glPrint(config5.c_str(), &confBase);
 		linesY += (size5.cy - (size5.cy * dep_line_sep));
 	}
@@ -2374,9 +2375,9 @@ void RenderInterfaceInputText(bool do_all) {
 
 void draw_point(double x, double y)
 {
-	int size = 10;
-	int startX = x - size, startY = y - size;
-	int endX = x + size, endY = y + size;
+	double size = 10.0;
+	double startX = x - size, startY = y - size;
+	double endX = x + size, endY = y + size;
 
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 	int line_width = 2;

@@ -57,6 +57,8 @@ void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc);
 
 void back_split_line(InterfaceFrame& frame, InputField* focusField);
 
+void forward_split_line(InterfaceFrame& frame, InputField* focusField);
+
 void open_chat(std::string call_sign);
 
 /* Components */
@@ -335,8 +337,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			dragged_mir->cur_pt->x = (int)(short)LOWORD(lParam);
 			dragged_mir->cur_pt->y = (int)(short)HIWORD(lParam);
 
-			double dx = dragged_mir->cur_pt->x - dragged_mir->s_pt->x;
-			double dy = dragged_mir->cur_pt->y - dragged_mir->s_pt->y;
+			LONG dx = dragged_mir->cur_pt->x - dragged_mir->s_pt->x;
+			LONG dy = dragged_mir->cur_pt->y - dragged_mir->s_pt->y;
 
 			dragged_mir->setX(dragged_mir->startX + dx);
 			dragged_mir->setY(dragged_mir->startY + -dy);
@@ -995,6 +997,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (focusField.can_type()) {
 								focusField.pushInput(false, c2);
 								focusField.setCursor();
+								forward_split_line(frame, (InputField*)focusChild);
 								renderInputTextFocus = true;
 							}
 						}
@@ -1534,6 +1537,27 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 		{
 			focusField->handleBox();
 			main_chat_input->setFocus();
+		}
+	}
+}
+
+void forward_split_line(InterfaceFrame& frame, InputField* focusField)
+{
+	CHILD_TYPE type = focusField->type;
+	if (focusField->line_ptr)
+	{
+		ChatLine* c = focusField->line_ptr;
+		if (frame.id == FP_INTERFACE)
+		{
+			DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
+			focusField->updateLine();
+			displayBox->prepare();
+			ChatLine* c = focusField->line_ptr;
+			if (c)
+			{
+				focusField->input = c->getText();
+				focusField->setCursor();
+			}
 		}
 	}
 }

@@ -10,8 +10,8 @@ void RenderControllerList(bool open, double x_, double y_)
 
 	controller_list->title = "CONTROLLERS";
 
-	int width = 210, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
-	int height = 300, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
+	int width = 210, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	int height = 300, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 	controller_list->Pane1(x, width, y, height);
 	double spacing_x = 0.15, spacing_y = 0.07;
 	double start_x = 1.135, start_y = 0.10;
@@ -75,8 +75,8 @@ void RenderConnect(double x_, double y_)
 {
 	connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
 	connectFrame->title = "CONNECT";
-	int width = 300, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
-	int height = 200, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
+	int width = 300, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	int height = 200, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 	connectFrame->Pane1(x, width, y, height);
 	callsign_label = new Label(connectFrame, "Callsign:", x, 120.0, 10.0, y + (height - 30.0), 20, -10.0);
 	connectFrame->children[callsign_label->index = CONN_CALLSIGN_LABEL] = callsign_label;
@@ -152,8 +152,8 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, b
 		pm_frame = new InterfaceFrame(id);
 		pm_frame->title = "PRIVATE CHAT: " + callsign;
 		pm_callsigns[id] = callsign;
-		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
-		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
+		int width = 400, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+		int height = 155, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 		pm_frame->Pane1(x, width, y, height);
 		const double spacing = 0.15, spacing_y = 0.13;
 		double start_x = 1.15, start_y = 0.15;
