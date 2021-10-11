@@ -790,8 +790,8 @@ void RenderButtons() {
 		bool tripleOption = curButton.isTripleOption();
 		int x;
 		int y = 0;
-		int width = BUTTON_WIDTH > (curButton.getWidth() * w_width) ? BUTTON_WIDTH : (curButton.getWidth() * w_width);
-		int height = BUTTON_HEIGHT;
+		int width = BUTTON_WIDTH > (curButton.getWidth() * w_width) ? (int)BUTTON_WIDTH : (int)(curButton.getWidth() * w_width);
+		int height = (int)BUTTON_HEIGHT;
 		int padding = 4; // Change this to "BUTTON_PADDING" for variable padding
 		if (index == last_index) {
 			x = last_x;
@@ -864,14 +864,14 @@ void RenderButtons() {
 				std::string text2 = curButton.getOption2();
 				SIZE extent2 = getTextExtent(text2);
 				int textXPos2 = (x + (width / 2)) - (extent2.cx / 2);
-				glRasterPos2f(textXPos2, textYPos2);
+				glRasterPos2f((GLfloat)textXPos2, (GLfloat)textYPos2);
 				glPrint(text2.c_str(), &topButtonBase);
 
 				int textYPos3 = (textYPos - tH) - (padding + linePadding);
 				std::string text3 = curButton.getOption3();
 				SIZE extent3 = getTextExtent(text3);
 				int textXPos3 = (x + (width / 2)) - (extent3.cx / 2);
-				glRasterPos2f(textXPos3, textYPos3);
+				glRasterPos2f((GLfloat)textXPos3, (GLfloat)textYPos3);
 				glPrint(text3.c_str(), &topButtonBase);
 			}
 			else if (dualOption) {
@@ -893,19 +893,19 @@ void RenderButtons() {
 					SIZE center_e = getTextExtent(divider);
 					SIZE first_e = getTextExtent(first2);
 					curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-					glRasterPos2f(textXPos2, textYPos2);
+					glRasterPos2f((GLfloat)textXPos2, (GLfloat)textYPos2);
 					glPrint(first2.c_str(), &topButtonBase);
 
-					glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-					glRasterPos2f((textXPos2 + first_e.cx), textYPos2);
+					glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], (GLfloat)1.0f);
+					glRasterPos2f((GLfloat)(textXPos2 + first_e.cx), (GLfloat)textYPos2);
 					glPrint(divider.c_str(), &topButtonBase);
 
 					!curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-					glRasterPos2f((textXPos2 + first_e.cx + center_e.cx), textYPos2);
+					glRasterPos2f((GLfloat)(textXPos2 + first_e.cx + center_e.cx), (GLfloat)textYPos2);
 					glPrint(second2.c_str(), &topButtonBase);
 				}
 				else {
-					glRasterPos2f(textXPos2, textYPos2);
+					glRasterPos2f((GLfloat)textXPos2, (GLfloat)textYPos2);
 					glPrint(fullString2.c_str(), &topButtonBase);
 				}
 				textYPos += (padding + linePadding);
@@ -914,20 +914,20 @@ void RenderButtons() {
 				SIZE center_e = getTextExtent(divider);
 				SIZE first_e = getTextExtent(first);
 				curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-				glRasterPos2f(textXPos, textYPos);
+				glRasterPos2f((GLfloat)textXPos, (GLfloat)textYPos);
 				glPrint(first.c_str(), &topButtonBase);
 
 				glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-				glRasterPos2f((textXPos + first_e.cx), textYPos);
+				glRasterPos2f((GLfloat)(textXPos + first_e.cx), (GLfloat)textYPos);
 				glPrint(divider.c_str(), &topButtonBase);
 
 				!curButton.on ? glColor4f(0.87843137254f, 0.67450980392f, 0.05490196078f, 1.0f) : glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-				glRasterPos2f((textXPos + first_e.cx + center_e.cx), textYPos);
+				glRasterPos2f((GLfloat)(textXPos + first_e.cx + center_e.cx), (GLfloat)textYPos);
 				glPrint(second.c_str(), &topButtonBase);
 			}
 			else {
 				glColor4f(button_text_clr[0], button_text_clr[1], button_text_clr[2], 1.0f);
-				glRasterPos2f(textXPos, textYPos);
+				glRasterPos2f((GLfloat)textXPos, (GLfloat)textYPos);
 				glPrint(fullString.c_str(), &topButtonBase);
 			}
 		}
@@ -965,15 +965,15 @@ void RenderInterface(InterfaceFrame* frame) {
 							double textXPos = x - (extent.cx / 2.0);
 							double textYPos = y - ((extent.cy / 2.0) / 2.0);
 							glColor4f((GLfloat)button_text_clr[0], (GLfloat)button_text_clr[1], (GLfloat)button_text_clr[2], 1.0f);
-							glRasterPos2f(textXPos, textYPos);
+							glRasterPos2f((GLfloat)textXPos, (GLfloat)textYPos);
 							glPrint(title.c_str(), &titleBase);
 
 							//title border line
 							glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
 							int b_offset_Y = 25;
 							glBegin(GL_LINES);
-							glVertex2f(inter1->getStartX() + inter1->getWidth(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
-							glVertex2f(inter1->getStartX(), inter1->getStartY() + (inter1->getHeight() - b_offset_Y));
+							glVertex2f((GLfloat)(inter1->getStartX() + inter1->getWidth()), (GLfloat)(inter1->getStartY() + (inter1->getHeight() - b_offset_Y)));
+							glVertex2f((GLfloat)inter1->getStartX(), (GLfloat)(inter1->getStartY() + (GLfloat)(inter1->getHeight() - b_offset_Y)));
 							glEnd();
 						}
 					}
@@ -1257,10 +1257,10 @@ void RenderInputCursor(InputField& input, int& inputCursorDl, std::string& text,
 	int x, y = border.getStartY() + input.offset_y;
 	double aW = border.getActualWidth();
 	if (centered) {
-		x = (border.getStartX() + (aW / 2));
+		x = (int)(border.getStartX() + (aW / 2));
 	}
 	else {
-		x = border.getStartX() + input.offset_x;
+		x = (int)(border.getStartX() + input.offset_x);
 	}
 
 	inputCursorDl = glGenLists(1);
@@ -1273,7 +1273,7 @@ void RenderInputCursor(InputField& input, int& inputCursorDl, std::string& text,
 	if (centered) {
 		x -= (size.cx / 2);
 	}
-	glRasterPos2f(x, y);
+	glRasterPos2f((GLfloat)x, (GLfloat)y);
 	std::string finalTxt = text.c_str();
 	size_t pos = finalTxt.find("%");
 	while (pos != std::string::npos) {
@@ -1336,19 +1336,19 @@ void RenderConf() {
 
 	std::string config = "RWY CONFIG: 08R09-00";
 	SIZE size = getTextExtent(config);
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
+	glRasterPos2f(30.0f, (GLfloat)(CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
 	std::string config2 = "OVERLOAD END";
 	size = getTextExtent(config2);
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
+	glRasterPos2f(30.0f, (GLfloat)(CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config2.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
 	std::string config3 = "ACID";
 	size = getTextExtent(config3);
-	glRasterPos2f(30, (CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
+	glRasterPos2f(30.0f, (GLfloat)(CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config3.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
@@ -1539,7 +1539,7 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 	//Draw Callsign
 	glNewList(aircraft.Ccallsign, GL_COMPILE);
 
-	glColor4f(callsign_clr[0], callsign_clr[1], callsign_clr[2], 1.0f);
+	glColor4f((GLfloat)callsign_clr[0], (GLfloat)callsign_clr[1], (GLfloat)callsign_clr[2], 1.0f);
 
 	std::string textTag = aircraft.getTextTag();
 
@@ -1548,7 +1548,7 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 	{
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(aircraft.getSquawkCode());
-		glRasterPos2f(vMaxX, vMaxY); // set position
+		glRasterPos2f((GLfloat)vMaxX, (GLfloat)vMaxY); // set position
 		glPrint(aircraft.getSquawkCode().c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
@@ -1557,12 +1557,12 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 	{
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(textTag);
-		glRasterPos2f(vMaxX + linesX, vMaxY + linesY); // set position
+		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY + linesY)); // set position
 		glPrint(textTag.c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
 
-	glRasterPos2f(vMaxX + linesX, vMaxY + linesY); // set position
+	glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY + linesY)); // set position
 	glPrint(aircraft.getCallsign().c_str(), &callSignBase);
 
 	glEndList();
@@ -1589,7 +1589,7 @@ int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float lon
 	//Draw Callsign
 	glNewList(aircraft.Ccolltext, GL_COMPILE);
 
-	glColor4f(collision_clr[0], collision_clr[1], collision_clr[2], 1.0f);
+	glColor4f((GLfloat)collision_clr[0], (GLfloat)collision_clr[1], (GLfloat)collision_clr[2], 1.0f);
 
 	std::string collTag1 = aircraft.getCollTag1();
 	std::string collTag2 = aircraft.getCollTag2();
@@ -1599,7 +1599,7 @@ int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float lon
 	if (collTag1.size() >= 1) {
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(collTag1);
-		glRasterPos2f(vMaxX + linesX, vMaxY - linesY); // set position
+		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY)); // set position
 		glPrint(collTag1.c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
@@ -1607,12 +1607,12 @@ int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float lon
 	if (collTag2.size() >= 1) {
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(collTag2);
-		glRasterPos2f(vMaxX + linesX, vMaxY - linesY); // set position
+		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY)); // set position
 		glPrint(collTag2.c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
 
-	glRasterPos2f(vMaxX + linesX, vMaxY - linesY); // set position
+	glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY)); // set position
 	glPrint(aircraft.getCollText().c_str(), &callSignBase);
 
 	glEndList();
@@ -1820,8 +1820,8 @@ int DrawCollisionLine(Collision& collision, unsigned int& line_dl, double zoom) 
 
 	glBegin(GL_LINES);
 
-	glVertex2f(p.x_, p.y_);//output vertex 
-	glVertex2f(p2.x_, p2.y_);//output vertex 
+	glVertex2f((GLfloat)p.x_, (GLfloat)p.y_);//output vertex 
+	glVertex2f((GLfloat)p2.x_, (GLfloat)p2.y_);//output vertex 
 
 	glEnd();
 
@@ -1867,8 +1867,8 @@ int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
 
 	glBegin(GL_LINES);
 
-	glVertex2f(x, y);//output vertex 
-	glVertex2f(p.x_, p.y_);//output vertex 
+	glVertex2f((GLfloat)x, (GLfloat)y);//output vertex 
+	glVertex2f((GLfloat)p.x_, (GLfloat)p.y_);//output vertex 
 
 	glEnd();
 
@@ -2383,6 +2383,6 @@ void draw_point(double x, double y)
 	int line_width = 2;
 	startX += line_width, startY += line_width;
 	endX -= line_width, endY -= line_width;
-	DrawVarLine(startX, endY, endX, startY, line_width, line_width);
-	DrawVarLine(startX, startY, endX, endY, line_width, line_width);
+	DrawVarLine((float)startX, (float)endY, (float)endX, (float)startY, (float)line_width, (float)line_width);
+	DrawVarLine((float)startX, (float)startY, (float)endX, (float)endY, (float)line_width, (float)line_width);
 }

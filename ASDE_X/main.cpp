@@ -704,7 +704,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		//std::cout << wParam << std::endl;
 		if (wParam == VK_ESCAPE) {
-			if (focusChild != NULL) {
+			if (focusChild) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD) {
 					InputField& focusField = (InputField&)*focusChild;
@@ -760,7 +760,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_TAB) {
-			if (focusChild != NULL) {
+			if (focusChild) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD || type == CHILD_TYPE::COMBO_BOX) {
 					InterfaceFrame& frame = *focusChild->getFrame();
@@ -803,7 +803,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == VK_RETURN)
 		{
-			if (focusChild != NULL) {
+			if (focusChild) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD)
 				{
@@ -875,7 +875,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_LEFT) {
-			if (focusChild != NULL) {
+			if (focusChild) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::COMBO_BOX) {
 					ComboBox* box = (ComboBox*)focusChild;
@@ -891,7 +891,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_RIGHT) {
-			if (focusChild != NULL) {
+			if (focusChild) {
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::COMBO_BOX) {
 					ComboBox* box = (ComboBox*)focusChild;

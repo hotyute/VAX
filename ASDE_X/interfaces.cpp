@@ -200,6 +200,12 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, b
 
 void RenderTerminalCommands(bool refresh)
 {
+	if (focusChild == terminal_input)
+	{
+		terminal_input->removeFocus();
+		main_chat_input->setFocus();
+	}
+
 	terminal_cmd = new InterfaceFrame(TERMINAL_COMMAND);
 	terminal_cmd->title = "CONNECT";
 	terminal_cmd->stripped = true;

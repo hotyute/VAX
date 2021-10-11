@@ -34,7 +34,7 @@ void loadButtons() {
 	rotateb->setDualOption(false);
 	rotateb->setTripleOption(false);
 	rotateb->setOption1("ROTATE");
-	rotateb->value = rotation;
+	rotateb->value = (int)rotation;
 	BUTTONS.push_back(rotateb);
 	TopButton* map = new TopButton(TOP_TYPE::MAP_BTN);
 	map->setIndex(1);
@@ -155,7 +155,7 @@ void loadButtons() {
 	vector2->setDualOption(true);
 	vector2->setTripleOption(false);
 	vector2->setOption1("VECTOR");
-	vector2->setOption2(std::to_string(vector2->value = vector_length));
+	vector2->setOption2(std::to_string(vector2->value = (int)vector_length));
 	BUTTONS.push_back(vector2);
 	TopButton* tmpdata = new TopButton(TOP_TYPE::TEMP_BTN);
 	tmpdata->setIndex(8);

@@ -204,7 +204,7 @@ int wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlengt
 {
 	bool has_space = false;
 
-	for (int i = 0; i < maxlength; i++) {
+	for (size_t i = 0; i < maxlength; i++) {
 		if (isspace(buffer[i])) {
 			has_space = true;
 			break;
@@ -535,6 +535,7 @@ int get_frameid(std::string callsign)
 			return i;
 		}
 	}
+	return -1;
 }
 
 bool is_privateinterface(int frame_index) {
