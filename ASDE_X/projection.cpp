@@ -14,13 +14,13 @@ int CLIENT_WIDTH, CLIENT_HEIGHT, CONF_Y;
 
 double mZoom = 30.000;
 int range = 2304060;
-double rotation = 0, vector_length = 1, ldr_length = 10;
+double rotation = 0, vector_length = 1, ldr_length = 1;
 int zoom_phase = 1;
 double DEFAULT_ZOOM = 30.0;
 
-double r_aircraft_size = 0.1, default_r_size = 0.003;
-double h_aircraft_size = 0.12, default_h_size = 0.0031;
-double u_aircraft_size = 0.1, default_u_size = 0.003;
+double r_aircraft_size = 0.52;
+double h_aircraft_size = 0.57;
+double u_aircraft_size = 0.52;
 double elevation;
 std::string icao;
 

@@ -71,13 +71,7 @@ LinearSegment* get_prev(std::vector<LinearSegment*>::iterator it, std::vector<Li
 
 LinearSegment* get_next(std::vector<LinearSegment*>::iterator it, std::vector<LinearSegment*>& segs);
 
-extern double get_asize(bool heavy, bool standby, double zoom);
-
-double get_asize_no_zoom(bool heavy, bool standby);
-
-double get_default_asize(bool heavy, bool standby);
-
-double get_def_asize_no_zoom(bool heavy, bool standby);
+double get_asize(bool heavy, bool standby);
 
 Point2 getLocFromBearing(double latitude, double longitude, double distance, double bearing);
 

@@ -1185,14 +1185,10 @@ void connect() {
 		intter->current_op = 45;
 		stream.createFrameVarSizeWord(45);
 		stream.writeDWord(PROTO_VERSION);
-		char* callsign = s2ca1(USER->getIdentity()->callsign);
-		char* fullname = s2ca1(USER->getIdentity()->login_name);
-		char* username = s2ca1(USER->getIdentity()->username);
-		char* pass = s2ca1(USER->getIdentity()->password);
-		stream.writeString(callsign);
-		stream.writeString(fullname);
-		stream.writeString(username);
-		stream.writeString(pass);
+		stream.writeString((char*)USER->getCallsign().c_str());
+		stream.writeString((char*)USER->getIdentity()->login_name.c_str());
+		stream.writeString((char*)USER->getIdentity()->username.c_str());
+		stream.writeString((char*)USER->getIdentity()->password.c_str());
 		stream.writeQWord(1000);//request time
 		stream.writeQWord(doubleToRawBits(USER->getLatitude()));
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
@@ -1311,7 +1307,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		++id;
 	}
 	((InputField*)frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
-	renderAircraft = true;
+	updateFlags[GBL_AIRCRAFT] = true;
 	std::cout.precision(10);
 	Event& position_updates = ConfigUpdates();
 	position_updates.eAction.setTicks(0);

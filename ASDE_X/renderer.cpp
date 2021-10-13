@@ -19,7 +19,7 @@ std::vector<Mirror*> mirrors;
 
 std::vector<double*> closures, wnd_closures;
 
-bool renderAircraft = false, renderSector = false, renderSectorColours = false,
+bool renderSector = false, renderSectorColours = false,
 renderButtons = false, renderLegend = false, renderInterfaces = false, renderInputTextFocus = false, renderConf = false,
 renderDate = false, renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
 renderAllInputText = false, renderClosures = false;
@@ -78,7 +78,7 @@ float latitude = 0, longitude = 0;
 double heading = 0;
 double normMapScaleX, normMapScaleY;
 double minX = 0, maxX = 0, minY = 0, maxY = 0;
-double collision_size = 0.5, tag_line_sep = 0.4, tag_line_sep2 = 0.7, config_line_sep = 0.1, dep_line_sep = 0.3;
+double circle_size = 7, collision_size = 1.0, tag_line_sep = 0.4, tag_line_sep2 = 0.7, config_line_sep = 0.1, dep_line_sep = 0.3;
 
 void CALLBACK beginCallback(GLenum);
 void CALLBACK endCallback(void);
@@ -251,16 +251,6 @@ void DrawGLScene() {
 
 	glCallList(sectorDl);
 
-	if (renderAircraft) {
-		//We use default zoom because they all get downsized by glScale anyway
-		glDeleteLists(aircraftDl, 1);
-		RenderAircraft(false, aircraftDl);
-		glDeleteLists(heavyDl, 1);
-		RenderAircraft(true, heavyDl);
-		glDeleteLists(unkTarDl, 1);
-		RenderUnknown(false, unkTarDl);
-		renderAircraft = false;
-	}
 	if (acf_map.size() > 0) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
@@ -280,7 +270,7 @@ void DrawGLScene() {
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
 			if (collision != NULL) {
-				collision_graphics(*collision, nullptr);
+				//collision_graphics(*collision, nullptr);
 			}
 		}
 	}
@@ -542,7 +532,7 @@ void DrawMirrorScenes(Mirror& mirror)
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
 			if (collision != NULL) {
-				collision_graphics(*collision, &mirror);
+				//collision_graphics(*collision, &mirror);
 			}
 		}
 	}
@@ -1438,7 +1428,6 @@ void RenderDepartures() {
 }
 
 int RenderAircraft(bool heavy, int& acf_base) {
-	double aircraft_size = get_default_asize(heavy, false);
 	acf_base = glGenLists(1);
 	GLUtesselator* tess = gluNewTess(); // create a tessellator
 	if (tess == NULL)
@@ -1459,10 +1448,8 @@ int RenderAircraft(bool heavy, int& acf_base) {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	glTranslatef(+longitude, +latitude, 0.0f);
-	glRotatef(((float)heading), 0.0f, 0.0f, -1.0f);
-	glTranslatef(-longitude, -latitude, 0.0f);
-	glScaled(aircraft_size, aircraft_size, 1);
+	glRotatef(((float)0.0), 0.0f, 0.0f, -1.0f);
+	glScalef(1.0f, 1.0f, 1);
 	gluTessBeginPolygon(tess, 0);
 	gluTessBeginContour(tess);
 	std::vector<double*> coords = aircraftBlip->getCoordinates();
@@ -1479,7 +1466,6 @@ int RenderAircraft(bool heavy, int& acf_base) {
 }
 
 int RenderUnknown(bool heavy, int& acf_base) {
-	double aircraft_size = get_default_asize(heavy, false);
 	acf_base = glGenLists(1);
 	GLUtesselator* tess = gluNewTess(); // create a tessellator
 	if (tess == NULL)
@@ -1500,10 +1486,8 @@ int RenderUnknown(bool heavy, int& acf_base) {
 		glColor4f(unknown_clr[0], unknown_clr[1], unknown_clr[2], 1.0f);
 	}
 
-	glTranslatef(+longitude, +latitude, 0.0f);
-	glRotatef(((float)heading), 0.0f, 0.0f, -1.0f);
-	glTranslatef(-longitude, -latitude, 0.0f);
-	glScaled(aircraft_size, aircraft_size, 1);
+	glRotatef(((float)0.0), 0.0f, 0.0f, -1.0f);
+	glScalef(1.0f, 1.0f, 1);
 	gluTessBeginPolygon(tess, 0);
 	gluTessBeginContour(tess);
 	std::vector<double*> coords = unknownBlip->getCoordinates();
@@ -1521,20 +1505,18 @@ int RenderUnknown(bool heavy, int& acf_base) {
 
 int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitude) {
 	aircraft.Ccallsign = glGenLists(1);
-	double aircraft_size = get_default_asize(heavy, false);
+	double a_size = get_asize(heavy, false);
 	double minX = aircraftBlip->getMinX();
 	double minY = aircraftBlip->getMinY();
 	double maxX = aircraftBlip->getMaxX();
 	double maxY = aircraftBlip->getMaxY();
 
-	double offsetX = maxX;
-	double offsetY = maxY;
+	double r = (maxX > maxY ? maxX : maxY);
 	//if (aircraft.isCollision()) {
-	offsetX += maxX * (collision_size / 2.0);
-	offsetY += maxY * (collision_size / 2.0);
+	r += (maxX + circle_size);
 	//}
-	double vMaxX = (longitude + (3 + ldr_length));// (offsetX * (aircraft_size + ldr_length)));
-	double vMaxY = (latitude + (3 + ldr_length)); // (offsetY * (aircraft_size + ldr_length)));
+	double vMaxX = (0 + ((r * a_size) / 2.0) + (ldr_length - 1));
+	double vMaxY = (0 + ((r * a_size) / 2.0) + (ldr_length - 1));
 
 	//Draw Callsign
 	glNewList(aircraft.Ccallsign, GL_COMPILE);
@@ -1562,6 +1544,8 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 		linesY += size.cy * tag_line_sep2;
 	}
 
+	SelectObject(hDC, callSignFont);
+	SIZE size = getTextExtent(aircraft.getCallsign());
 	glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY + linesY)); // set position
 	glPrint(aircraft.getCallsign().c_str(), &callSignBase);
 
@@ -1571,20 +1555,18 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 
 int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float longitude) {
 	aircraft.Ccolltext = glGenLists(1);
-	double aircraft_size = get_default_asize(heavy, false);
+	double a_size = get_asize(heavy, false);
 	double minX = aircraftBlip->getMinX();
 	double minY = aircraftBlip->getMinY();
 	double maxX = aircraftBlip->getMaxX();
 	double maxY = aircraftBlip->getMaxY();
 
-	double offsetX = maxX;
-	double offsetY = (maxY + (maxY * 0.8));
+	double r = (maxX > maxY ? maxX : maxY);
 	//if (aircraft.isCollision()) {
-	offsetX += maxX * (collision_size / 2.0);
-	offsetY += maxY * (collision_size / 2.0);
+	r += (maxX + circle_size);
 	//}
-	double vMaxX = (longitude + (5 + ldr_length));// (offsetX * (aircraft_size + ldr_length)));
-	double vMaxY = (latitude - (5 + ldr_length));//(offsetY * (aircraft_size + ldr_length)));
+	double vMaxX = (0 + ((r * a_size) / 2.0) + (ldr_length - 1));
+	double vMaxY = -(0 + ((r * a_size) / 2.0) + (ldr_length - 1));
 
 	//Draw Callsign
 	glNewList(aircraft.Ccolltext, GL_COMPILE);
@@ -1599,7 +1581,7 @@ int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float lon
 	if (collTag1.size() >= 1) {
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(collTag1);
-		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY)); // set position
+		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY) - (size.cy / 2.0)); // set position
 		glPrint(collTag1.c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
@@ -1607,12 +1589,14 @@ int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float lon
 	if (collTag2.size() >= 1) {
 		SelectObject(hDC, callSignFont);
 		SIZE size = getTextExtent(collTag2);
-		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY)); // set position
+		glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY) - (size.cy / 2.0)); // set position
 		glPrint(collTag2.c_str(), &callSignBase);
 		linesY += size.cy * tag_line_sep2;
 	}
 
-	glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY)); // set position
+	SelectObject(hDC, callSignFont);
+	SIZE size = getTextExtent(aircraft.getCollText());
+	glRasterPos2f((GLfloat)(vMaxX + linesX), (GLfloat)(vMaxY - linesY) - (size.cy / 2.0)); // set position
 	glPrint(aircraft.getCollText().c_str(), &callSignBase);
 
 	glEndList();
@@ -1726,18 +1710,16 @@ void set_projection(Mirror* mirror, int clientWidth, int clientHeight, double c_
 }
 
 int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_segments) {
-	double aircraft_size = get_default_asize(heavy, false);
+	double aircraft_size = get_asize(heavy, false);
 	double maxX = aircraftBlip->getMaxX();
 	double maxY = aircraftBlip->getMaxY();
 
 	double r = (maxX > maxY ? maxX : maxY);
-	r += r * collision_size;
+	r += circle_size;
 
 	aircraft.collisionDl = glGenLists(1);
 
 	glNewList(aircraft.collisionDl, GL_COMPILE);
-
-	glScaled(aircraft_size, aircraft_size, 1);
 
 	glColor4f(collision_clr[0], collision_clr[1], collision_clr[2], 0.6f);
 
@@ -1778,10 +1760,8 @@ int DrawCollisionLine(Collision& collision, unsigned int& line_dl, double zoom) 
 
 	bool heavy_from = from.isHeavy(), heavy_to = to.isHeavy();
 
-	double default_size = get_default_asize(heavy_from, false);
-	double _aircraft_size = get_asize(heavy_from, false, zoom);
-	double default_size2 = get_default_asize(heavy_to, false);
-	double _aircraft_size2 = get_asize(heavy_to, false, zoom);
+	double _aircraft_size = get_asize(heavy_from, false);
+	double _aircraft_size2 = get_asize(heavy_to, false);
 	double maxX = aircraftBlip->getMaxX();
 	double maxY = aircraftBlip->getMaxY();
 
@@ -1795,13 +1775,9 @@ int DrawCollisionLine(Collision& collision, unsigned int& line_dl, double zoom) 
 
 	//std::cout << (offset + (offset * collision_size)) << std::endl;
 
-	double z_factor = default_size;
-	if (zoom_phase == 2)
-		z_factor *= _aircraft_size;
+	double z_factor = _aircraft_size;
 
-	double z_factor2 = default_size2;
-	if (zoom_phase == 2)
-		z_factor2 *= _aircraft_size2;
+	double z_factor2 = _aircraft_size2;
 
 	offset += (offset * collision_size);
 
@@ -1835,8 +1811,7 @@ int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
 	bool heavy = aircraft.isHeavy();
 	bool standby = aircraft.getMode() == 0 ? true : false;
 
-	double default_size = get_default_asize(heavy, false);
-	double _aircraft_size = get_asize(heavy, false, zoom);
+	double _aircraft_size = get_asize(heavy, false);
 
 	double maxX = aircraftBlip->getMaxX();
 	double maxY = aircraftBlip->getMaxY();
@@ -1845,9 +1820,7 @@ int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
 
 	double x = aircraft.getLongitude(), y = aircraft.getLatitude();
 
-	double z_factor = default_size;
-	if (zoom_phase == 2)
-		z_factor *= _aircraft_size;
+	double z_factor = _aircraft_size;
 
 	double length = 0;
 
@@ -1891,12 +1864,18 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 	bool standby = aircraft.getMode() == 0 ? true : false;
 	aircraft.unlock();
 
-	if (renderCallsign || renderFlags[GBL_CALLSIGN]) {
-		if (aircraft.Ccallsign != 0) {
-			glDeleteLists(aircraft.Ccallsign, 1);
-			aircraft.Ccallsign = 0;
+	double zo = is_mirror ? mirror->getZoom() : mZoom;
+	double a_size = get_asize(heavy, standby);
+
+	if (!is_mirror)
+	{
+		if (renderCallsign || renderFlags[GBL_CALLSIGN]) {
+			if (aircraft.Ccallsign != 0) {
+				glDeleteLists(aircraft.Ccallsign, 1);
+				aircraft.Ccallsign = 0;
+			}
+			RenderCallsign(aircraft, heavy, 0, 0);
 		}
-		RenderCallsign(aircraft, heavy, 0, 0);
 	}
 
 	//Begin Callsign Drawing
@@ -1920,13 +1899,16 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 	}
 	glPopMatrix();
 
-	if (renderCollTag || renderFlags[GBL_COLLISION_TAG]) {
-		if (aircraft.Ccolltext != 0)
-		{
-			glDeleteLists(aircraft.Ccolltext, 1);
-			aircraft.Ccolltext = 0;
+	if (!is_mirror)
+	{
+		if (renderCollTag || renderFlags[GBL_COLLISION_TAG]) {
+			if (aircraft.Ccolltext != 0)
+			{
+				glDeleteLists(aircraft.Ccolltext, 1);
+				aircraft.Ccolltext = 0;
+			}
+			RenderCollisionTag(aircraft, heavy, 0, 0);
 		}
-		RenderCollisionTag(aircraft, heavy, 0, 0);
 	}
 
 	if (aircraft.isCollision()) {
@@ -1949,6 +1931,79 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 
 		glPopMatrix();
 	}
+
+	if (!is_mirror) {
+		if (renderCollision || renderFlags[GBL_COLLISION]) {
+			if (aircraft.collisionDl != 0) {
+				glDeleteLists(aircraft.collisionDl, 1);
+				aircraft.collisionDl = 0;
+			}
+			DrawCircle(aircraft, heavy, longitude, latitude, 100);
+		}
+	}
+
+	//begin Collision drawing
+	glPushMatrix();
+
+	glTranslated(is_mirror ? mirror->wndc[&aircraft][1] : aircraft.wnd_loc[1],
+		is_mirror ? mirror->wndc[&aircraft][0] : aircraft.wnd_loc[0], 0.0f);
+
+	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+	glTranslated(+longitude, +latitude, 0.0f);
+	glScaled(a_size, a_size, 1.0);
+	glTranslated(-longitude, -latitude, 0.0f);
+
+	if (!standby && aircraft.isCollision())
+	{
+		glCallList(aircraft.collisionDl);
+	}
+
+	glPopMatrix();
+
+	if (!is_mirror)
+	{
+		if (renderFlags[GBL_AIRCRAFT]) {
+			//We use default zoom because they all get downsized by glScale anyway
+			glDeleteLists(aircraftDl, 1);
+			RenderAircraft(false, aircraftDl);
+			glDeleteLists(heavyDl, 1);
+			RenderAircraft(true, heavyDl);
+			glDeleteLists(unkTarDl, 1);
+			RenderUnknown(false, unkTarDl);
+		}
+	}
+
+	//move the aircraft first so we have proper movement along the map scale
+	glPushMatrix();
+	glTranslated(is_mirror ? mirror->wndc[&aircraft][1] : aircraft.wnd_loc[1],
+		is_mirror ? mirror->wndc[&aircraft][0] : aircraft.wnd_loc[0], 0.0f);
+
+	//keep the aircraft drawing in correct aspect ratio
+	//std::cout << normMapScaleX << std::endl;
+	//glTranslated(+longitude, +latitude, 0.0f);
+	//glScaled(normMapScaleX, normMapScaleY, 1.0f);
+	//glTranslated(-longitude, -latitude, 0.0f);
+
+	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
+	glScaled(a_size, a_size, 1.0);
+
+	//set the aircraft heading - this needs to come after scaling aspect for proper rotation
+	glRotatef(((float)hdg(acf_heading + (is_mirror ? mirror->getRotation() : rotation))), 0.0f, 0.0f, -1.0f);
+	if (standby) {
+		glCallList(unkTarDl);
+	}
+	else
+	{
+		if (!heavy)
+		{
+			glCallList(aircraftDl);
+		}
+		else
+		{
+			glCallList(heavyDl);
+		}
+	}
+	glPopMatrix();
 }
 
 void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
@@ -1966,7 +2021,7 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	aircraft.unlock();
 
 	double zo = is_mirror ? mirror->getZoom() : mZoom;
-	double a_size = get_asize(heavy, standby, zo);
+	double a_size = get_asize(heavy, standby);
 
 	//convert latitude longitude to window coords
 	if (is_mirror)
@@ -2003,37 +2058,6 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 	}
 
 	if (!is_mirror) {
-		if (renderCollision || renderFlags[GBL_COLLISION]) {
-			if (aircraft.collisionDl != 0) {
-				glDeleteLists(aircraft.collisionDl, 1);
-				aircraft.collisionDl = 0;
-			}
-			DrawCircle(aircraft, heavy, longitude, latitude, 100);
-		}
-	}
-
-	//begin Collision drawing
-	glPushMatrix();
-
-	glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
-
-	//keep the drawing in correct aspect ratio
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(normMapScaleX, normMapScaleY, 1.0);
-	glTranslated(-longitude, -latitude, 0.0f);
-
-	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(a_size, a_size, 1.0);
-	glTranslated(-longitude, -latitude, 0.0f);
-
-	if (!standby && aircraft.isCollision()) {
-		glCallList(aircraft.collisionDl);
-	}
-
-	glPopMatrix();
-
-	if (!is_mirror) {
 		if (renderVector || renderFlags[GBL_VECTOR]) {
 			if (aircraft.vectorDl != 0) {
 				glDeleteLists(aircraft.vectorDl, 1);
@@ -2049,41 +2073,6 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 		glCallList(aircraft.vectorDl);
 	}
 
-	glPopMatrix();
-
-	//move the aircraft first so we have proper movement along the map scale
-	glPushMatrix();
-	glTranslated((acf_lon - longitude), (acf_lat - latitude), 0.0f);
-
-	//keep the aircraft drawing in correct aspect ratio
-	//std::cout << normMapScaleX << std::endl;
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(normMapScaleX, normMapScaleY, 1.0f);
-	glTranslated(-longitude, -latitude, 0.0f);
-
-	//scale to what ever zoom we are using (DONT UPDATE GL COMPILE LIST WHILE DOING THIS, otherwise, it will go smaller)
-	glTranslated(+longitude, +latitude, 0.0f);
-	glScaled(a_size, a_size, 1.0);
-	glTranslated(-longitude, -latitude, 0.0f);
-
-	//set the aircraft heading - this needs to come after scaling aspect for proper rotation
-	glTranslated(+longitude, +latitude, 0.0f);
-	glRotatef(((float)acf_heading), 0.0f, 0.0f, -1.0f);
-	glTranslated(-longitude, -latitude, 0.0f);
-	if (standby) {
-		glCallList(unkTarDl);
-	}
-	else
-	{
-		if (!heavy)
-		{
-			glCallList(aircraftDl);
-		}
-		else
-		{
-			glCallList(heavyDl);
-		}
-	}
 	glPopMatrix();
 
 	//if (renderCallsign || renderFlags[GBL_CALLSIGN]) {
@@ -2179,7 +2168,7 @@ void preFileRender() {
 
 
 				double zo = mZoom;
-				double a_size = get_asize(heavy, standby, zo);
+				double a_size = get_asize(heavy, standby);
 
 				addAircraftToMirrors(acf);
 			}
