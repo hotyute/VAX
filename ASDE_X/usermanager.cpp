@@ -328,6 +328,7 @@ void decodePackets(int opCode, Stream& stream) {
 				{
 					((Aircraft*)user1)->setSquawkCode(code);
 					((Aircraft*)user1)->setUpdateFlag(ACF_CALLSIGN, true);
+					printf("code: %s\n", code);
 				}
 			}
 		}
