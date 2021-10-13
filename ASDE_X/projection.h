@@ -20,7 +20,7 @@ extern int CONF_Y;
 
 extern double mZoom;
 extern int range;
-extern double rotation, vector_length;
+extern double rotation, vector_length, ldr_length;
 extern int zoom_phase;
 extern double DEFAULT_ZOOM;
 

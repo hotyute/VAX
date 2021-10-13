@@ -14,7 +14,7 @@ int CLIENT_WIDTH, CLIENT_HEIGHT, CONF_Y;
 
 double mZoom = 30.000;
 int range = 2304060;
-double rotation = 0, vector_length = 1;
+double rotation = 0, vector_length = 1, ldr_length = 10;
 int zoom_phase = 1;
 double DEFAULT_ZOOM = 30.0;
 

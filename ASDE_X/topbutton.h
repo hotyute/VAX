@@ -71,7 +71,7 @@ public:
 
 extern std::vector<TopButton*> BUTTONS;
 
-extern TopButton* rangeb, * rotateb;
+extern TopButton* rangeb, * rotateb, * leaderlb;
 
 extern void loadButtons();
 

@@ -1533,8 +1533,8 @@ int RenderCallsign(Aircraft& aircraft, bool heavy, float latitude, float longitu
 	offsetX += maxX * (collision_size / 2.0);
 	offsetY += maxY * (collision_size / 2.0);
 	//}
-	double vMaxX = (longitude + 13);// (offsetX * aircraft_size));
-	double vMaxY = (latitude + 13); // (offsetY * aircraft_size));
+	double vMaxX = (longitude + (3 + ldr_length));// (offsetX * (aircraft_size + ldr_length)));
+	double vMaxY = (latitude + (3 + ldr_length)); // (offsetY * (aircraft_size + ldr_length)));
 
 	//Draw Callsign
 	glNewList(aircraft.Ccallsign, GL_COMPILE);
@@ -1583,8 +1583,8 @@ int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float lon
 	offsetX += maxX * (collision_size / 2.0);
 	offsetY += maxY * (collision_size / 2.0);
 	//}
-	double vMaxX = (longitude + 15);// (offsetX * aircraft_size));
-	double vMaxY = (latitude - 15);//(offsetY * aircraft_size));
+	double vMaxX = (longitude + (5 + ldr_length));// (offsetX * (aircraft_size + ldr_length)));
+	double vMaxY = (latitude - (5 + ldr_length));//(offsetY * (aircraft_size + ldr_length)));
 
 	//Draw Callsign
 	glNewList(aircraft.Ccolltext, GL_COMPILE);

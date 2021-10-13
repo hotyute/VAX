@@ -1,7 +1,8 @@
 zoom=170
-raircraftsize=0.1
-haircraftsize=0.105
-uaircraftsize=0.1
+raircraftsize=0.09
+haircraftsize=0.0905
+uaircraftsize=0.09
+leaderlength=9
 ICAO=KMIA
 elevation=9.3
 range=200

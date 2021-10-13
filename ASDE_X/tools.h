@@ -115,6 +115,8 @@ bool within_boundary(Aircraft& aircraft);
 
 std::string FormatAltitude(std::string altitude);
 
+bool is_digits(const std::string& str);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {

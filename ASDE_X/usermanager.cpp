@@ -224,7 +224,7 @@ void decodePackets(int opCode, Stream& stream) {
 		bool unset = false;
 		if (it == pm_callsigns.end())
 		{
-			it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");		
+			it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");
 			unset = true;
 		}
 
@@ -307,6 +307,27 @@ void decodePackets(int opCode, Stream& stream) {
 						int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
 						Load_FlightPlan_Interface(wdata[0], wdata[1], acf, true);
 					}
+				}
+			}
+		}
+	}
+
+	if (opCode == 20)
+	{
+		int index = stream.readUnsignedWord();
+		char code[20];
+		stream.readString(code);
+		User* user1 = userStorage1.at(index);
+		if (user1)
+		{
+			if (is_digits(code))
+			{
+				CLIENT_TYPES type = user1->getIdentity()->type;
+
+				if (type == CLIENT_TYPES::PILOT_CLIENT)
+				{
+					((Aircraft*)user1)->setSquawkCode(code);
+					((Aircraft*)user1)->setUpdateFlag(ACF_CALLSIGN, true);
 				}
 			}
 		}

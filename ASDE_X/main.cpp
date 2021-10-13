@@ -409,6 +409,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					renderSectorColours = true;
 					renderButtons = true;
 					updateFlags[GBL_CALLSIGN] = true;
+					updateFlags[GBL_COLLISION_TAG] = true;
 					renderLegend = true;
 					renderInterfaces = true;
 					renderDrawings = true;

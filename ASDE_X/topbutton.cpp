@@ -4,7 +4,7 @@
 
 std::vector<TopButton*> BUTTONS;
 
-TopButton* rangeb = nullptr, * rotateb = nullptr;
+TopButton* rangeb = nullptr, * rotateb = nullptr, * leaderlb = nullptr;
 
 std::string text;
 
@@ -168,17 +168,17 @@ void loadButtons() {
 	tmpdata->setOption1("TEMP");
 	tmpdata->setOption2("DATA");
 	BUTTONS.push_back(tmpdata);
-	TopButton* ldr = new TopButton(TOP_TYPE::LDR_BTN);
-	ldr->setIndex(8);
-	ldr->setWidth(0.069259012016);
-	ldr->setHalf(true);
-	ldr->setTop(false);
-	ldr->setDark(true);
-	ldr->setDualOption(true);
-	ldr->setTripleOption(false);
-	ldr->setOption1("LDR LNG");
-	ldr->setOption2("1");
-	BUTTONS.push_back(ldr);
+	leaderlb = new TopButton(TOP_TYPE::LDR_BTN);
+	leaderlb->setIndex(8);
+	leaderlb->setWidth(0.069259012016);
+	leaderlb->setHalf(true);
+	leaderlb->setTop(false);
+	leaderlb->setDark(true);
+	leaderlb->setDualOption(true);
+	leaderlb->setTripleOption(false);
+	leaderlb->setOption1("LDR LNG");
+	leaderlb->setOption2(std::to_string(leaderlb->value = (int)ldr_length));
+	BUTTONS.push_back(leaderlb);
 	TopButton* local = new TopButton(TOP_TYPE::LOCAL_BTN);
 	local->setIndex(9);
 	local->setWidth(0.069259012016);
@@ -522,6 +522,27 @@ int TopButton::handleScroll(bool hi_scroll)
 			{
 				updateFlags[GBL_VECTOR] = true;
 			}
+			return 1;
+		}
+		case TOP_TYPE::LDR_BTN:
+		{
+			if (hi_scroll)
+			{
+				if (!((this->value + 1) > 20))
+					this->value += 1;
+			}
+			else
+			{
+				if (!((this->value - 1) < 1))
+					this->value -= 1;
+			}
+			this->setOption2(std::to_string(this->value));
+			ldr_length = this->value;
+			if (DB_BLOCK)
+			{
+				updateFlags[GBL_CALLSIGN] = true;
+			}
+			updateFlags[GBL_COLLISION_TAG] = true;
 			return 1;
 		}
 		default:

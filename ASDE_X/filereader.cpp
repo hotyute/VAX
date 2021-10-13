@@ -47,6 +47,7 @@ int FileReader::LoadADX(std::string path) {
 		std::string string7 = "elevation=";
 		std::string string8 = "range=";
 		std::string string9 = "rotation=";
+		std::string string10 = "leaderlength=";
 		std::string commentStart = ";";
 		int line_number = 1;
 		while (myfile.good()) {
@@ -65,6 +66,7 @@ int FileReader::LoadADX(std::string path) {
 			size_t found7 = line.find(string7);
 			size_t found8 = line.find(string8);
 			size_t found9 = line.find(string9);
+			size_t found10 = line.find(string10);
 			try
 			{
 				if (found2 != std::string::npos)
@@ -154,6 +156,16 @@ int FileReader::LoadADX(std::string path) {
 					}
 					else {
 						rotateb->set_rotation(hdg((int)atodd(ro.c_str())), 0, 359);
+					}
+				}
+				else if (found10 != std::string::npos)
+				{
+					int start = (found10 + string10.length());
+					std::string ll = line.substr(start);
+					if (ll.length() != 0)
+					{
+						ldr_length = atodd(ll.c_str());
+						leaderlb->setOption2(std::to_string(leaderlb->value = (int)ldr_length));
 					}
 				}
 				else if (found1 != std::string::npos)
