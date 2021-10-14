@@ -75,6 +75,8 @@ double get_asize(bool heavy, bool standby);
 
 Point2 getLocFromBearing(double latitude, double longitude, double distance, double bearing);
 
+Point2 GetVector(double latitude, double longitude, double distance, double bearing, double scaleFactor = 1.0, double magVar = 0.0);
+
 double getBearing(double lat1, double lng1, double lat2, double lng2);
 
 void addAircraftToMirrors(Aircraft*);

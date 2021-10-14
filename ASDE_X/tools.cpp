@@ -416,6 +416,19 @@ Point2 getLocFromBearing(double latitude, double longitude, double distance, dou
 	return Point2(long2, lat2);
 }
 
+Point2 GetVector(double latitude, double longitude, double distance, double bearing, double scaleFactor, double magVar)
+{
+	double trueBearing = hdg(bearing - magVar);
+	double angle = 360.0 - trueBearing + 90.0;
+	if (angle >= 360.0) {
+		angle -= 360.0;
+	}
+	double rads = radians(angle);
+	double deltaLon = distance * cos(rads) * (1.0 / scaleFactor);
+	double deltaLat = distance * sin(rads);
+	return Point2(longitude + deltaLon, latitude + deltaLat);
+}
+
 double getBearing(double lat1, double lng1, double lat2, double lng2) {
 	lat1 = radians(lat1);
 	lng1 = radians(lng1);
