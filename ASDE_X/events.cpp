@@ -15,11 +15,6 @@ void PositionUpdates::execute() {
 	sendPositionUpdates(*USER);
 }
 
-void PositionUpdates::toggle_pause()
-{
-	this->eAction.paused = !this->eAction.paused;
-}
-
 
 void PositionUpdates::stop() 
 {
@@ -39,11 +34,6 @@ void ConfigUpdates::execute() {
 	acf->setHeading(acf->getHeading() + 3);*/
 
 	renderDate = true;
-}
-
-void ConfigUpdates::toggle_pause()
-{
-	this->eAction.paused = !this->eAction.paused;
 }
 
 void ConfigUpdates::stop() 

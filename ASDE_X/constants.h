@@ -5,6 +5,7 @@ enum class CLIENT_TYPES { CONTROLLER_CLIENT = 0, PILOT_CLIENT = 1 };
 
 extern const char* PILOT_RATINGS[], * CONTROLLER_RATINGS[];
 
+#define MAX_EVENTS 1536
 #define MAX_PMCHATS 10
 
 // if a display box is editable you need to leave the next slot free for the inputfield
