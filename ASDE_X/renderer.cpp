@@ -289,7 +289,7 @@ void DrawData()
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
 			if (collision != NULL) {
-				collision_graphics(*collision, nullptr);
+				//collision_graphics(*collision, nullptr);
 			}
 		}
 	}
@@ -372,7 +372,7 @@ void DrawMirrorData(Mirror& mirror)
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
 			if (collision != NULL) {
-				collision_graphics(*collision, &mirror);
+				//collision_graphics(*collision, &mirror);
 			}
 		}
 	}
