@@ -63,30 +63,25 @@ DWORD tcpinterface::run() {
 		if (FD_ISSET(tcpinterface::sConnect, &rfds))
 		{
 			nBytesReceived = recv(tcpinterface::sConnect, message, 5000, 0);
-			if (queue_clean)
-			{
-				in_stream->clearBuf();
-				memset(tcpinterface::message, 0, 5000);
-				closed = true;
-				printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
-				queue_clean = false;
-				break;
-			}
 
 			if (nBytesReceived == SOCKET_ERROR)
 			{
 				int error = WSAGetLastError();
-				if (error == WSAECONNABORTED
+				if (error == WSAECONNABORTED || error == WSAENOTSOCK
 					|| error == WSAECONNRESET || error == WSAETIMEDOUT)
 				{
-					disconnect(false);
+					disconnect();
 					in_stream->clearBuf();
 					memset(tcpinterface::message, 0, 5000);
 					closed = true;
 					if (error == WSAETIMEDOUT)
 						printf("Connection timeout exceeded 11 seconds\n");
-					else
+					else if (error != WSAENOTSOCK)
 						printf("Connection was closed by remote person or timeout exceeded 60 seconds\n");
+				} 
+				else
+				{
+					printf("Unhandled_Error: %d\n", error);
 				}
 				break;
 			}
@@ -146,7 +141,7 @@ DWORD tcpinterface::run() {
 							{
 								sendErrorMessage("Invalid protocol Version.");
 								if (connected)
-									disconnect(true);
+									closesocket(sConnect);
 								in.deleteReaderBlock();
 								break;
 							}
@@ -180,7 +175,7 @@ DWORD tcpinterface::run() {
 	}
 	if (retval == SOCKET_ERROR)
 	{
-		disconnect(false);
+		//disconnect();
 		in_stream->clearBuf();
 		memset(tcpinterface::message, 0, 5000);
 		closed = true;
@@ -365,7 +360,6 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 		}
 	}
 	closed = false;
-	queue_clean = false;
 	std::cout << "Connected!\n";
 	return 1;
 }

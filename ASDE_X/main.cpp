@@ -1059,7 +1059,7 @@ void handleDisconnect() {
 	if (!connected) {
 		return;
 	}
-	disconnect(true);
+	send_disconnect();
 }
 
 bool processCommands(std::string command)
@@ -1178,7 +1178,7 @@ void connect() {
 #ifdef _DEBUG
 	ip = "127.0.0.1";
 #endif
-	if (intter->connectNew(hWnd, "127.0.0.1", 4403)) {
+	if (intter->connectNew(hWnd, ip, 4403)) {
 		connected = true;
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
@@ -1217,12 +1217,15 @@ void connect() {
 	}
 }
 
-void disconnect(bool queue)
+void send_disconnect()
 {
 	sendDisconnect();
+	closesocket(intter->sConnect);
+}
+
+void disconnect()
+{
 	sendSystemMessage("Disconnected.");
-	intter->queue_clean = queue;
-	intter->disconnect_socket();
 	if (intter->position_updates && !intter->position_updates->eAction.paused)
 		intter->position_updates->toggle_pause();
 	conn_clean();
@@ -1237,7 +1240,7 @@ void conn_clean()
 	for (int i = 1; i < MAX_USER_SIZE; i++)
 	{
 		User* user = userStorage1[i];
-		if (user)
+		if (user && user != USER)
 		{
 			delete user;
 			userStorage1[i] = nullptr;

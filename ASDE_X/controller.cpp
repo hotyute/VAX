@@ -5,7 +5,7 @@ std::unordered_map<std::string, Controller*>controller_map;
 Controller::Controller(std::string callSign, int controllerRating, int pilotRating)
 	: User::User(callSign, controllerRating, pilotRating)
 {
-	this->identity->type = CLIENT_TYPES::CONTROLLER_CLIENT;
+	this->identity.type = CLIENT_TYPES::CONTROLLER_CLIENT;
 }
 
 Controller::~Controller()

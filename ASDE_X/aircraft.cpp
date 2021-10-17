@@ -7,7 +7,7 @@ std::unordered_map<std::string, Aircraft*>acf_map;
 Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating) 
 	: User::User(callSign, controllerRating, pilotRating) 
 {
-	identity->type = CLIENT_TYPES::PILOT_CLIENT;
+	identity.type = CLIENT_TYPES::PILOT_CLIENT;
 	Aircraft::aMutex = CreateMutex(NULL, FALSE, L"Aircraft Mutex");
 	Aircraft::mode = 0;
 	Aircraft::squawkCode = "0000";

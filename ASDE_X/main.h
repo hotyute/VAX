@@ -44,7 +44,8 @@ extern HWND hWnd;		// Holds Our Window Handle
 extern PAINTSTRUCT ps;
 
 void connect();
-void disconnect(bool queue);
+void send_disconnect();
+void disconnect();
 DWORD WINAPI OpenGLThread(LPVOID lpParameter);
 DWORD WINAPI EventThread1(LPVOID lpParameter);
 

@@ -54,15 +54,14 @@ public:
 	virtual double getLongitude() = 0;
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
-	std::string getCallsign() { return identity->callsign; }
+	std::string getCallsign() { return identity.callsign; }
 	int getVisibility() { return visibility; }
 	void setVisibility(int vis) { this->visibility = vis; }
-	void setCallsign(std::string new_callsign) { identity->callsign = new_callsign; }
+	void setCallsign(std::string new_callsign) { identity.callsign = new_callsign; }
 	UserData userdata;
 	Identity* getIdentity() {
-		return this->identity;
+		return &this->identity;
 	}
-	void setIdentity(Identity* userIdentity) { this->identity = userIdentity; }
 	int getUserIndex() {
 		return userIndex;
 	}
@@ -85,7 +84,7 @@ private:
 	int visibility = 300;
 protected:
 	int userIndex;
-	Identity* identity;
+	Identity identity;
 	double latitude;
 	double longitude;
 	HANDLE aMutex;
