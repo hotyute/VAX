@@ -47,6 +47,7 @@ public:
 	double getRotation() { return this->rotation; }
 	void setBoundaries(double minX, double maxX, double minY, double maxY);
 	bool within_boundary(Aircraft& aircraft);
+	void handleMovement(double n_x, double n_y);
 };
 #endif
 

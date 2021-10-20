@@ -1954,7 +1954,8 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 
 	glPopMatrix();
 
-	if (renderVector || renderFlags[GBL_VECTOR]) {
+	if (renderVector || renderFlags[GBL_VECTOR] 
+		|| (is_mirror && mirror->render_flags[MIR_VECTOR])) {
 		if (aircraft.vectorDl != 0) {
 			glDeleteLists(aircraft.vectorDl, 1);
 			aircraft.vectorDl = 0;

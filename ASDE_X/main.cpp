@@ -338,8 +338,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			LONG dx = dragged_mir->cur_pt->x - dragged_mir->s_pt->x;
 			LONG dy = dragged_mir->cur_pt->y - dragged_mir->s_pt->y;
 
-			dragged_mir->setX(dragged_mir->startX + dx);
-			dragged_mir->setY(dragged_mir->startY + -dy);
+			dragged_mir->handleMovement(dragged_mir->startX + dx, dragged_mir->startY + -dy);
 		}
 	}
 	break;

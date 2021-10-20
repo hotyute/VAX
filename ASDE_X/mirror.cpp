@@ -53,6 +53,18 @@ bool Mirror::within_boundary(Aircraft& aircraft)
 	return true;
 }
 
+void Mirror::handleMovement(double n_x, double n_y)
+{
+	double c_x = x_, c_y = y_;
+	if (c_x != n_x || c_y != n_y)
+	{// if moved
+		update_flags[MIR_COLLISION_LINE] = true;
+		update_flags[MIR_VECTOR] = true;
+	}
+	x_ = n_x;
+	y_ = n_y;
+}
+
 std::vector<Mirror*>::iterator get_mir(std::vector<Mirror*>& vec, std::string search)
 {
 	auto it = std::find_if(
