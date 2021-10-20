@@ -87,6 +87,15 @@ void CalculateCollisions() {
 										aircraft2.setCollision(true);
 									}
 									aircraft2.collisionAircraft.push_back(acf1);
+
+
+									if (Collision_Map.find(acf1->getCallsign() + acf2->getCallsign()) == Collision_Map.end())
+									{
+										Collision* collision = new Collision(acf1, acf2);
+										Collision_Map.emplace(acf1->getCallsign() + acf2->getCallsign(), collision);
+										aircraft1.collisionCount.push_back(collision);
+										aircraft2.collisionCount.push_back(collision);
+									}
 								}
 
 								//Check What Runway Aircraft1

@@ -1947,19 +1947,20 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 	glScaled(a_size, a_size, 1.0);
 	glTranslated(-longitude, -latitude, 0.0f);
 
-	if (!standby && aircraft.isCollision())
+	if (aircraft.isCollision())
 	{
 		glCallList(aircraft.collisionDl);
 	}
 
 	glPopMatrix();
 
-	if (renderVector || renderFlags[GBL_VECTOR] 
+	if (renderVector || renderFlags[GBL_VECTOR]
 		|| (is_mirror && mirror->render_flags[MIR_VECTOR])) {
 		if (is_mirror && mirror->g_flags[&aircraft][ACF_VECTOR] != 0) {
 			glDeleteLists(mirror->g_flags[&aircraft][ACF_VECTOR], 1);
 			mirror->g_flags[&aircraft][ACF_VECTOR] = 0;
-		} else if (aircraft.vectorDl != 0) {
+		}
+		else if (aircraft.vectorDl != 0) {
 			glDeleteLists(aircraft.vectorDl, 1);
 			aircraft.vectorDl = 0;
 		}
@@ -2121,11 +2122,9 @@ void collision_graphics(Collision& collision, Mirror* mirror) {
 			updateCollisionLine(mirror, collision, mirror->c_flags[&collision][0], zo);
 		}
 
-		if (collision.getAircraft1()->isCollision()) {
-			glPushMatrix();
-			glCallList(mirror->c_flags[&collision][0]);
-			glPopMatrix();
-		}
+		glPushMatrix();
+		glCallList(mirror->c_flags[&collision][0]);
+		glPopMatrix();
 	}
 	else
 	{
@@ -2133,11 +2132,9 @@ void collision_graphics(Collision& collision, Mirror* mirror) {
 			updateCollisionLine(mirror, collision, collision.collLineDL, zo);
 		}
 
-		if (collision.getAircraft1()->isCollision()) {
-			glPushMatrix();
-			glCallList(collision.collLineDL);
-			glPopMatrix();
-		}
+		glPushMatrix();
+		glCallList(collision.collLineDL);
+		glPopMatrix();
 	}
 }
 

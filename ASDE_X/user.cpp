@@ -20,7 +20,7 @@ void User::handleMovement(double n_lat, double n_lon)
 	if (c_lat != n_lat || c_lon != n_lon)
 	{// if moved
 		CLIENT_TYPES type = identity.type;
-		if (type == CLIENT_TYPES::PILOT_CLIENT) 
+		if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{
 			if (SHOW_VECTORS)
 			{
@@ -31,7 +31,8 @@ void User::handleMovement(double n_lat, double n_lon)
 			{
 				for (auto& i : acf->collisionCount)
 				{
-					i->setUpdateFlag(COL_COLLISION_LINE, true);
+					if (!i->getUpdateFlag(COL_COLLISION_LINE))
+						i->setUpdateFlag(COL_COLLISION_LINE, true);
 				}
 			}
 		}

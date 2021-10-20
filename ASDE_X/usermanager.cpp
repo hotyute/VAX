@@ -144,16 +144,19 @@ void decodePackets(int opCode, Stream& stream) {
 		int groundSpeed = stream.readUnsignedWord();
 		long long alt = stream.readQWord();
 		double altitude = *(double*)&alt;
-		if (user1 && user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT)
+		if (user1)
 		{
-			Aircraft* cur = (Aircraft*)user1;
-			cur->lock();
-			cur->setHeavy(false);
-			cur->setSpeed((double)groundSpeed);
-			cur->setThreeFactor(heading, pitch, roll);
-			cur->unlock();
+			if (user1->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT)
+			{
+				Aircraft* cur = (Aircraft*)user1;
+				cur->lock();
+				cur->setHeavy(false);
+				cur->setSpeed((double)groundSpeed);
+				cur->setThreeFactor(heading, pitch, roll);
+				cur->unlock();
+			}
+			user1->handleMovement(_latitude, _longitude);
 		}
-		user1->handleMovement(_latitude, _longitude);
 	}
 
 	if (opCode == 18)
@@ -166,14 +169,17 @@ void decodePackets(int opCode, Stream& stream) {
 		double _latitude = *(double*)&lat;
 		double _longitude = *(double*)&lon;
 		int flags = stream.readUnsignedByte();
-		if (user1 && user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT)
+		if (user1)
 		{
-			Controller* cur = (Controller*)user1;
-			cur->lock();
-			cur->setOnBreak(false);
-			cur->unlock();
+			if (user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT)
+			{
+				Controller* cur = (Controller*)user1;
+				cur->lock();
+				cur->setOnBreak(false);
+				cur->unlock();
+			}
+			user1->handleMovement(_latitude, _longitude);
 		}
-		user1->handleMovement(_latitude, _longitude);
 	}
 
 	if (opCode == 15)

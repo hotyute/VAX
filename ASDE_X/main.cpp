@@ -261,9 +261,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		userStorage1[1] = cur2;
 
-		Collision* collision = new Collision(cur, cur2);
-		Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
-
 		break;
 	}
 	case WM_SIZE:
