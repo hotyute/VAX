@@ -217,7 +217,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
 		userStorage1.resize(MAX_USER_SIZE);
 
-		logic.push_back("8R");
+		logic.push_back("08R");
 		logic.push_back("09");
 
 		Aircraft* cur = new Aircraft("AAL2", 0, 0);
