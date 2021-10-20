@@ -95,6 +95,7 @@ void CalculateCollisions() {
 										Collision_Map.emplace(acf1->getCallsign() + acf2->getCallsign(), collision);
 										aircraft1.collisionCount.push_back(collision);
 										aircraft2.collisionCount.push_back(collision);
+										addCollisionToMirrors(collision);
 									}
 								}
 

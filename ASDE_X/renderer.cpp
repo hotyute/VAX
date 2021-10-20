@@ -2172,10 +2172,17 @@ void preFileRender() {
 		}
 	}
 
+	collisions_to_mirrors();
+}
+
+void collisions_to_mirrors()
+{
 	if (Collision_Map.size() > 0) {
-		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
+		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) 
+		{
 			Collision* collision = it->second;
-			if (collision != NULL) {
+			if (collision != NULL) 
+			{
 				glDeleteLists(collision->collLineDL, 1);
 
 				addCollisionToMirrors(collision);

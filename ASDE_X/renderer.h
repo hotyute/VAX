@@ -96,6 +96,7 @@ void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
 void RenderDate();
 void RenderDepartures();
+void collisions_to_mirrors();
 void GetOGLPos(int, int, double*);
 void GetWndPos(double latitude, double longitude, double* output);
 void BuildFont(LPCWSTR, int, bool, unsigned int*, HFONT*);

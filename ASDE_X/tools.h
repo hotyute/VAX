@@ -83,6 +83,10 @@ void addAircraftToMirrors(Aircraft*);
 
 void addCollisionToMirrors(Collision* collision);
 
+void addCollisionsToMirror(Mirror* mir);
+
+void addCollisionToMirror(Collision* collision, Mirror* mir);
+
 int get_frameid(std::string callsign);
 
 bool is_privateinterface(int frame_index);

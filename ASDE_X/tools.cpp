@@ -466,10 +466,33 @@ void addCollisionToMirrors(Collision* collision)
 	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
 	{
 		Mirror* mir = (*it).second;
-
-		if (mir) {
+		if (mir && mir->c_flags.find(collision) == mir->c_flags.end())
+		{
 			mir->c_flags.emplace(collision, std::vector<unsigned int>(COL_FLAG_COUNT)); // initialized to 0 by default
 		}
+	}
+}
+
+void addCollisionsToMirror(Mirror* mir)
+{
+	if (Collision_Map.size() > 0) 
+	{
+		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) 
+		{
+			Collision* collision = it->second;
+			if (mir && mir->c_flags.find(collision) == mir->c_flags.end())
+			{
+				mir->c_flags.emplace(collision, std::vector<unsigned int>(COL_FLAG_COUNT)); // initialized to 0 by default
+			}
+		}
+	}
+}
+
+void addCollisionToMirror(Collision* collision, Mirror* mir)
+{
+	if (mir && mir->c_flags.find(collision) == mir->c_flags.end())
+	{
+		mir->c_flags.emplace(collision, std::vector<unsigned int>(COL_FLAG_COUNT)); // initialized to 0 by default
 	}
 }
 

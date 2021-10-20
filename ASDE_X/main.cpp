@@ -1119,6 +1119,7 @@ bool processCommands(std::string command)
 				mir->renderBorder = true;
 				mir->update_flags[MIR_COLLISION_LINE] = true;
 				mirrors.push_back(mir);
+				addCollisionsToMirror(mir);
 			}
 		}
 		return true;
