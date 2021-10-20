@@ -1956,17 +1956,20 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 
 	if (renderVector || renderFlags[GBL_VECTOR] 
 		|| (is_mirror && mirror->render_flags[MIR_VECTOR])) {
-		if (aircraft.vectorDl != 0) {
+		if (is_mirror && mirror->g_flags[&aircraft][ACF_VECTOR] != 0) {
+			glDeleteLists(mirror->g_flags[&aircraft][ACF_VECTOR], 1);
+			mirror->g_flags[&aircraft][ACF_VECTOR] = 0;
+		} else if (aircraft.vectorDl != 0) {
 			glDeleteLists(aircraft.vectorDl, 1);
 			aircraft.vectorDl = 0;
 		}
-		DrawVectorLines(aircraft, aircraft.vectorDl, mirror, zo);
+		DrawVectorLines(aircraft, is_mirror ? mirror->g_flags[&aircraft][ACF_VECTOR] : aircraft.vectorDl, mirror, zo);
 	}
 
 	glPushMatrix();
 
 	if (!standby && SHOW_VECTORS) {
-		glCallList(aircraft.vectorDl);
+		glCallList(is_mirror ? mirror->g_flags[&aircraft][ACF_VECTOR] : aircraft.vectorDl);
 	}
 
 	glPopMatrix();
@@ -2119,7 +2122,9 @@ void collision_graphics(Collision& collision, Mirror* mirror) {
 		}
 
 		if (collision.getAircraft1()->isCollision()) {
+			glPushMatrix();
 			glCallList(mirror->c_flags[&collision][0]);
+			glPopMatrix();
 		}
 	}
 	else
