@@ -26,6 +26,14 @@ void User::handleMovement(double n_lat, double n_lon)
 			{
 				((Aircraft*)this)->setUpdateFlag(ACF_VECTOR, true);
 			}
+			Aircraft* acf = ((Aircraft*)this);
+			if (acf->isCollision())
+			{
+				for (auto& i : acf->collisionCount)
+				{
+					i->setUpdateFlag(COL_COLLISION_LINE, true);
+				}
+			}
 		}
 	}
 	latitude = n_lat;

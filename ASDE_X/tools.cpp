@@ -182,7 +182,7 @@ int binarySearch(double sortedArray[], int length, double key) {
 	return binarySearch1(sortedArray, 0, length, key);
 }
 
-bool pnpoly(int nvert, int* vertx, int* verty, int testx, int testy) {
+bool pnpoly(int nvert, double* vertx, double* verty, double testx, double testy) {
 	bool c = false;
 	int i, j;
 	for (i = 0, j = nvert - 1; i < nvert; j = i++) {
@@ -402,8 +402,8 @@ Point2 getLocFromBearing(double latitude, double longitude, double distance, dou
 	double longitude1 = radians(longitude);
 	double brng = radians(bearing);
 
-	double latitude2 = asin(sin(latitude1) * cos(distance / R) + cos(latitude1) * sin(distance / R) * cos(brng));
-	double longitude2 = longitude1 + atan2(sin(brng) * sin(distance / R) * cos(latitude1), cos(distance / R) - sin(latitude1) * sin(latitude2));
+	double latitude2 = asin(sin(latitude1) * cos(distance / EARTH_RADIUS_NM) + cos(latitude1) * sin(distance / EARTH_RADIUS_NM) * cos(brng));
+	double longitude2 = longitude1 + atan2(sin(brng) * sin(distance / EARTH_RADIUS_NM) * cos(latitude1), cos(distance / EARTH_RADIUS_NM) - sin(latitude1) * sin(latitude2));
 
 	// back to degrees
 	latitude2 = degrees(latitude2);
@@ -620,12 +620,12 @@ Point2* intersect(double $p1_lat, double $p1_lon, double $brng1, double $p2_lat,
 
 	double brng12, brng21;
 
-	if (sin(lon2 - lon1) > 0) 
+	if (sin(lon2 - lon1) > 0)
 	{
 		brng12 = brngA;
 		brng21 = 2 * M_PI - brngB;
 	}
-	else 
+	else
 	{
 		brng12 = 2 * M_PI - brngA;
 		brng21 = brngB;
@@ -672,4 +672,28 @@ std::string FormatAltitude(std::string altitude)
 bool is_digits(const std::string& str)
 {
 	return std::all_of(str.begin(), str.end(), ::isdigit); // C++11
+}
+
+double GetDecelerationDistance(double initialSpeed, double finalSpeed, double decelRate)
+{
+	return ((initialSpeed * initialSpeed) - (finalSpeed * finalSpeed)) / (2.0 * decelRate * 3600.0) * DEG_PER_NM;
+}
+
+bool intersects(Point2& p1, Point2& p2, Point2& c, double r)
+{
+	double width = p2.x_ - p1.x_;
+	double height = p2.x_ - p1.x_;
+	double x = c.x_ - p1.x_;
+	double y = c.y_ - p1.y_;
+
+	if (x > (width / 2 + r)) { return false; }
+	if (y > (height / 2 + r)) { return false; }
+
+	if (x <= (width / 2)) { return true; }
+	if (y <= (height / 2)) { return true; }
+
+	double cornerDistance_sq = ((x - width / 2) * (x - width / 2)) +
+		((y - height / 2) * (y - height / 2));
+
+	return (cornerDistance_sq <= (r * r));
 }

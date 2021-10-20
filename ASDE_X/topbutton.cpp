@@ -407,11 +407,15 @@ int TopButton::handle()
 			{
 				rotateb->setDualOption(true);
 				renderButtons = true;
+				updateFlags[GBL_COLLISION_LINE] = true;
+				updateFlags[GBL_VECTOR] = true;
 			}
 			else
 			{
 				rotateb->setDualOption(false);
 				renderButtons = true;
+				updateFlags[GBL_COLLISION_LINE] = true;
+				updateFlags[GBL_VECTOR] = true;
 			}
 			return 0;
 		}
@@ -472,6 +476,7 @@ int TopButton::handleScroll(bool hi_scroll)
 				this->setOption2(std::to_string(range = this->value));//range is set in 100's of feet so 100 = 10,000 feet
 				mZoom = zoom_from_range();
 				updateFlags[GBL_COLLISION_LINE] = true;
+				updateFlags[GBL_VECTOR] = true;
 				convert_closures = true;
 				renderClosures = true;
 			}
@@ -500,6 +505,8 @@ int TopButton::handleScroll(bool hi_scroll)
 
 				convert_closures = true;
 				renderClosures = true;
+				updateFlags[GBL_COLLISION_LINE] = true;
+				updateFlags[GBL_VECTOR] = true;
 			}
 			rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
 			return 1;
@@ -582,6 +589,7 @@ void TopButton::set_range(int val, int min, int max, int &var)
 		this->setOption2(std::to_string(var = this->value));//range is set in 100's of feet so 100 = 10,000 feet
 		mZoom = zoom_from_range();
 		updateFlags[GBL_COLLISION_LINE] = true;
+		updateFlags[GBL_VECTOR] = true;
 		convert_closures = true;
 		renderClosures = true;
 	}
@@ -600,6 +608,8 @@ void TopButton::set_rotation(int val, int min, int max)
 
 		convert_closures = true;
 		renderClosures = true;
+		updateFlags[GBL_COLLISION_LINE] = true;
+		updateFlags[GBL_VECTOR] = true;
 	}
 	rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
 	renderButtons = true;

@@ -43,7 +43,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delim);
 
 extern int binarySearch(double a[], int length, double key);
 
-extern bool pnpoly(int nvert, int *vertx, int *verty, int testx, int testy);
+extern bool pnpoly(int nvert, double *vertx, double *verty, double testx, double testy);
 
 extern long long doubleToRawBits(double x);
 
@@ -112,6 +112,10 @@ bool within_boundary(Aircraft& aircraft);
 std::string FormatAltitude(std::string altitude);
 
 bool is_digits(const std::string& str);
+
+double GetDecelerationDistance(double initialSpeed, double finalSpeed, double decelRate);
+
+bool intersects(Point2& p1, Point2& p2, Point2& c, double r);
 
 template<typename T>
 T pop_front(std::vector<T>& vec)

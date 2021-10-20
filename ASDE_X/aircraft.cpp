@@ -1,11 +1,12 @@
 #include "aircraft.h"
 
 #include "projection.h"
+#include "tools.h"
 
 std::unordered_map<std::string, Aircraft*>acf_map;
 
-Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating) 
-	: User::User(callSign, controllerRating, pilotRating) 
+Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating)
+	: User::User(callSign, controllerRating, pilotRating)
 {
 	identity.type = CLIENT_TYPES::PILOT_CLIENT;
 	Aircraft::aMutex = CreateMutex(NULL, FALSE, L"Aircraft Mutex");
@@ -13,7 +14,6 @@ Aircraft::Aircraft(std::string callSign, int controllerRating, int pilotRating)
 	Aircraft::squawkCode = "0000";
 	Aircraft::flight_plan = new FlightPlan();
 	collision = false;
-	collisionAcf = nullptr;
 	for (size_t i = 0; i < ACF_FLAG_COUNT; i++) {
 		update_flags[i] = false;
 		render_flags[i] = false;
@@ -42,6 +42,35 @@ void Aircraft::handleModeChange(int new_mode)
 			setUpdateFlag(ACF_VECTOR, true);
 		}
 	}
+}
+
+bool Aircraft::on_logic(std::string logic_id)
+{
+	auto it = runway_polygons.find(logic_id);
+	if (it != runway_polygons.end())
+	{
+		double** coodinates = it->second;
+
+		double vertx[4] = { coodinates[0][0], coodinates[2][0], coodinates[3][0], coodinates[1][0] };
+		double verty[4] = { coodinates[0][1], coodinates[2][1], coodinates[3][1], coodinates[1][1] };
+
+		if (pnpoly(4, vertx, verty, longitude, latitude))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Aircraft::near_logic(std::string logic_id)
+{
+	auto it = runway_polygons.find(logic_id);
+	if (it != runway_polygons.end())
+	{
+		double decel1 = GetDecelerationDistance(speed, 0, 5);
+		Point2 decel_point1 = getLocFromBearing(latitude, longitude, decel1, heading);
+	}
+	return true;
 }
 
 Aircraft::~Aircraft()
@@ -151,7 +180,7 @@ void Aircraft::unlock() {
 	ReleaseMutex(Aircraft::aMutex);
 }
 
-Aircraft *getAircraftByIndex(int index) {
+Aircraft* getAircraftByIndex(int index) {
 	return NULL;
 }
 

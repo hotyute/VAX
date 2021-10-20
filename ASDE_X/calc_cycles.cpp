@@ -50,12 +50,48 @@ void CalculateCollisions() {
 			Aircraft* acf1 = iter->second;
 			if (acf1) {
 				Aircraft& aircraft1 = *acf1;
-				for (auto iter2 = acf_map.begin(); iter2 != acf_map.end(); iter2++) {
-					Aircraft* acf2 = iter2->second;
-					if (acf2 && acf2 != acf1) {
-						Aircraft& aircraft2 = *acf2;
 
-						//Check What Runway Aircraft1
+				std::string log = "";
+				for (auto& s : logic)
+				{
+					if (aircraft1.on_logic(s))
+					{
+						log = s;
+						break;
+					}
+				}
+
+				if (!log.empty())
+				{
+					for (auto iter2 = acf_map.begin(); iter2 != acf_map.end(); iter2++)
+					{
+
+						Aircraft* acf2 = iter2->second;
+						if (acf2 && acf2 != acf1) {
+							if (std::find(aircraft1.collisionAircraft.begin(), aircraft1.collisionAircraft.end(), acf2)
+								== aircraft1.collisionAircraft.end())
+							{
+								Aircraft& aircraft2 = *acf2;
+
+								if (aircraft2.near_logic(log))
+								{
+									if (acf1 && !aircraft1.isCollision())
+									{
+										aircraft1.setUpdateFlag(ACF_COLLISION, true);
+										aircraft1.setCollision(true);
+									}
+									aircraft1.collisionAircraft.push_back(acf2);
+									if (acf2 && !aircraft2.isCollision())
+									{
+										aircraft2.setUpdateFlag(ACF_COLLISION, true);
+										aircraft2.setCollision(true);
+									}
+									aircraft2.collisionAircraft.push_back(acf1);
+								}
+
+								//Check What Runway Aircraft1
+							}
+						}
 					}
 				}
 			}
@@ -95,7 +131,7 @@ void CalcDepartures() {
 					}
 				}
 				else
-				{					
+				{
 
 					if (!boost::iequals(fp.departure, icao) || icao.empty())
 					{
@@ -114,7 +150,7 @@ void CalcDepartures() {
 							max_points--;
 						}
 
-						if (!boost::iequals(new_points[0], _points[0]) 
+						if (!boost::iequals(new_points[0], _points[0])
 							|| !boost::iequals(new_points[1], _points[1]))
 						{
 							departures[callsign] = new_points;

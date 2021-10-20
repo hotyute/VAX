@@ -7,8 +7,11 @@
 #include <map>
 #include <unordered_map>
 
+class Collision;
+
 #include "constants.h"
 #include "user.h"
+#include "collision.h"
 
 #ifndef History_aircraft_h
 #define History_aircraft_h
@@ -34,8 +37,7 @@ public:
 class Aircraft;
 class Aircraft : public User {
 private:
-	bool collision;
-	bool heavy;
+	bool collision, heavy;
 	int mode;
 	bool render_flags[ACF_FLAG_COUNT];
 	bool update_flags[ACF_FLAG_COUNT];
@@ -48,9 +50,12 @@ private:
 public:
 	double wnd_loc[3] { 0, 0, 0 };
 	std::vector<double*> wndc;
-	Aircraft *collisionAcf;
+	std::vector<Collision*> collisionCount;
+	std::vector<Aircraft*> collisionAircraft;
 	Aircraft(std::string, int, int);
 	void handleModeChange(int new_mode);
+	bool on_logic(std::string logic_id);
+	bool near_logic(std::string logic_id);
 	virtual ~Aircraft();
 	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0, vectorDl = 0;
 	bool getRenderFlag(int flag);

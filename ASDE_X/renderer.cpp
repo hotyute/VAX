@@ -59,7 +59,7 @@ int DrawCircle(Aircraft& aircraft, bool heavy, double cx, double cy, int num_seg
 
 int DrawCollisionLine(Mirror* mirror, Collision& collision, unsigned int& line_dl, double zoom);
 
-int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom);
+int DrawVectorLines(Aircraft& aircraft, unsigned int& base, Mirror* mirror, double zoom);
 
 void aircraft_window_data(Aircraft& aircraft, Mirror* mirror);
 
@@ -289,7 +289,7 @@ void DrawData()
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
 			if (collision != NULL) {
-				//collision_graphics(*collision, nullptr);
+				collision_graphics(*collision, nullptr);
 			}
 		}
 	}
@@ -372,7 +372,7 @@ void DrawMirrorData(Mirror& mirror)
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
 			if (collision != NULL) {
-				//collision_graphics(*collision, &mirror);
+				collision_graphics(*collision, &mirror);
 			}
 		}
 	}
@@ -1324,7 +1324,14 @@ void RenderConf() {
 
 	double linesX = 0, linesY = 0;
 
-	std::string config = "RWY CONFIG: 08R09-00";
+	std::string config = "RWY CONFIG: ";
+	for (auto& s : logic)
+	{
+		config += s;
+	}
+	if (logic.size() > 0)
+		config += "-00";
+
 	SIZE size = getTextExtent(config);
 	glRasterPos2f(30.0f, (GLfloat)(CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config.c_str(), &confBase);
@@ -1770,20 +1777,15 @@ int DrawCollisionLine(Mirror* mirror, Collision& collision, unsigned int& line_d
 	double lon_f = is_mirror ? mirror->wndc[&from][1] : from.wnd_loc[1], lat_f = is_mirror ? mirror->wndc[&from][0] : from.wnd_loc[0];
 	double lon_t = is_mirror ? mirror->wndc[&to][1] : to.wnd_loc[1], lat_t = is_mirror ? mirror->wndc[&to][0] : to.wnd_loc[0];
 
-	double bearing_from = getBearing(lat_f, lon_f, lat_t, lon_t);
-	double bearing_to = getBearing(lat_t, lon_t, lat_f, lon_f);
+	double bearing_from = getBearing(from.getLatitude(), from.getLongitude(), to.getLatitude(), to.getLongitude());
+	double bearing_to = getBearing(to.getLatitude(), to.getLongitude(), from.getLatitude(), from.getLongitude());
 
 	double offset = (maxX > maxY ? maxX : maxY) + circle_size;
 
-	//std::cout << (offset + (offset * collision_size)) << std::endl;
+	Point2 p = GetVector(lat_f, lon_f, (offset * _aircraft_size), bearing_from + (float)hdg(is_mirror ? mirror->getRotation() : rotation));
+	Point2 p2 = GetVector(lat_t, lon_t, offset * _aircraft_size2, bearing_to + (float)hdg(is_mirror ? mirror->getRotation() : rotation));
 
-	//Point2 p = getLocFromBearing(lat_f, lon_f, offset * _aircraft_size, bearing_from);
-	//Point2 p2 = getLocFromBearing(lat_t, lon_t, offset * _aircraft_size2, bearing_to);
-
-	Point2 p = GetVector(lat_f, lon_f, offset * _aircraft_size, bearing_from);
-	Point2 p2 = GetVector(lat_t, lon_t, offset * _aircraft_size2, bearing_to);
-
-	printf("coords [%f, %f]\n", lon_f, lon_t);
+	//printf("coords [%f, %f] [%f %f]\n", lon_f, lon_t, bearing_from, bearing_to);
 
 	line_dl = glGenLists(1);
 
@@ -1791,14 +1793,10 @@ int DrawCollisionLine(Mirror* mirror, Collision& collision, unsigned int& line_d
 
 	glColor4f(col_brdr_clr[0], col_brdr_clr[1], col_brdr_clr[2], 1.0f);
 
-	//glTranslatef(+longitude, +latitude, 0.0f);
-	//glRotatef(((float)heading), 0.0f, 0.0f, -1.0f);
-	//glTranslatef(-longitude, -latitude, 0.0f);
-
 	glBegin(GL_LINES);
 
-	glVertex2f((GLfloat)lon_f, (GLfloat)lat_f);//output vertex 
-	glVertex2f((GLfloat)lon_t, (GLfloat)lat_t);//output vertex 
+	glVertex2f((GLfloat)p.x_, (GLfloat)p.y_);//output vertex 
+	glVertex2f((GLfloat)p2.x_, (GLfloat)p2.y_);//output vertex 
 
 	glEnd();
 
@@ -1806,8 +1804,10 @@ int DrawCollisionLine(Mirror* mirror, Collision& collision, unsigned int& line_d
 	return 1;
 }
 
-int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
+int DrawVectorLines(Aircraft& aircraft, unsigned int& base, Mirror* mirror, double zoom)
+{
 
+	bool is_mirror = mirror ? true : false;
 	double heading = aircraft.getHeading();
 	bool heavy = aircraft.isHeavy();
 	bool standby = aircraft.getMode() == 0 ? true : false;
@@ -1817,19 +1817,12 @@ int DrawVectorLines(Aircraft& aircraft, unsigned int& base, double zoom) {
 	double maxX = aircraftBlip->getMaxX();
 	double maxY = aircraftBlip->getMaxY();
 
-	double offset = (maxX > maxY ? maxX : maxY) * 111;
+	double offset = (maxX > maxY ? maxX : maxY);
 
-	double x = aircraft.getLongitude(), y = aircraft.getLatitude();
+	double x = is_mirror ? mirror->wndc[&aircraft][1] : aircraft.wnd_loc[1],
+		y = is_mirror ? mirror->wndc[&aircraft][0] : aircraft.wnd_loc[0];
 
-	double z_factor = _aircraft_size;
-
-	double length = 0;
-
-	length += offset * z_factor;
-
-	length += vector_length * 0.01;
-
-	Point2 p = getLocFromBearing(y, x, length, heading);
+	Point2 p = GetVector(y, x, (vector_length * 3) + (offset * _aircraft_size), heading + (float)hdg(is_mirror ? mirror->getRotation() : rotation));
 
 	base = glGenLists(1);
 
@@ -1961,6 +1954,22 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 
 	glPopMatrix();
 
+	if (renderVector || renderFlags[GBL_VECTOR]) {
+		if (aircraft.vectorDl != 0) {
+			glDeleteLists(aircraft.vectorDl, 1);
+			aircraft.vectorDl = 0;
+		}
+		DrawVectorLines(aircraft, aircraft.vectorDl, mirror, zo);
+	}
+
+	glPushMatrix();
+
+	if (!standby && SHOW_VECTORS) {
+		glCallList(aircraft.vectorDl);
+	}
+
+	glPopMatrix();
+
 	if (!is_mirror)
 	{
 		if (renderFlags[GBL_AIRCRAFT]) {
@@ -2058,24 +2067,6 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 		convert_closures = false;
 	}
 
-	if (!is_mirror) {
-		if (renderVector || renderFlags[GBL_VECTOR]) {
-			if (aircraft.vectorDl != 0) {
-				glDeleteLists(aircraft.vectorDl, 1);
-				aircraft.vectorDl = 0;
-			}
-			DrawVectorLines(aircraft, aircraft.vectorDl, zo);
-		}
-	}
-
-	glPushMatrix();
-
-	if (!standby && SHOW_VECTORS) {
-		glCallList(aircraft.vectorDl);
-	}
-
-	glPopMatrix();
-
 	//if (renderCallsign || renderFlags[GBL_CALLSIGN]) {
 	//	GetCallsignCoords(aircraft, mirror, heavy, latitude, longitude);
 	//}
@@ -2138,9 +2129,6 @@ void collision_graphics(Collision& collision, Mirror* mirror) {
 
 		if (collision.getAircraft1()->isCollision()) {
 			glPushMatrix();
-			glTranslated(+latitude, +longitude, 0.0f);
-			glRotatef(((float)hdg(is_mirror ? mirror->getRotation() : rotation)), 0.0f, 0.0f, -1.0f);
-			glTranslated(-latitude, -longitude, 0.0f);
 			glCallList(collision.collLineDL);
 			glPopMatrix();
 		}

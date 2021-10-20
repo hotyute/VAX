@@ -217,6 +217,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
 		userStorage1.resize(MAX_USER_SIZE);
 
+		logic.push_back("8R");
+		logic.push_back("09");
+
 		Aircraft* cur = new Aircraft("AAL2", 0, 0);
 		if (cur != NULL) {
 			cur->lock();
@@ -226,8 +229,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setSpeed(0.0);
 			cur->setHeading(85.0);
 			cur->setUpdateFlag(ACF_CALLSIGN, true);
-			cur->setUpdateFlag(ACF_COLLISION, true);
-			cur->setCollision(true);
 			cur->setMode(1);
 			acf_map[((User*)cur)->getCallsign()] = cur;
 			cur->unlock();
@@ -252,8 +253,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setSpeed(0.0);
 			cur2->setHeading(190.0);
 			cur2->setUpdateFlag(ACF_CALLSIGN, true);
-			cur2->setUpdateFlag(ACF_COLLISION, true);
-			cur2->setCollision(true);
 			cur2->setMode(1);
 			acf_map[cur2->getCallsign()] = cur2;
 			cur2->unlock();
@@ -261,8 +260,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur2->setSquawkCode(std::to_string(random(1000, 9999)));
 		}
 		userStorage1[1] = cur2;
-
-		cur->collisionAcf = cur2;
 
 		Collision* collision = new Collision(cur, cur2);
 		Collision_Map.emplace(cur->getCallsign() + cur2->getCallsign(), collision);
@@ -298,6 +295,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		updateFlags[GBL_COLLISION_LINE] = true;
 		updateFlags[GBL_CALLSIGN] = true;
+		updateFlags[GBL_VECTOR] = true;
 
 		resize = true;
 		renderButtons = true;
@@ -463,8 +461,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) {
 			TopButton* curButton = *btn;
 			int* params = curButton->getParams();
-			int vertx[4] = { params[0], params[0], params[2], params[2] };
-			int verty[4] = { params[1], params[3], params[3], params[1] };
+			double vertx[4] = { params[0], params[0], params[2], params[2] };
+			double verty[4] = { params[1], params[3], params[3], params[1] };
 			bool clicked = pnpoly(4, vertx, verty, x, y);
 			if (clicked) {
 				if (curButton->handle())
@@ -488,8 +486,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (children->handleClick(clicked1, x, y))
 								break;
 							if (!clicked1 && inter2->isBounds()) {
-								int vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
-								int verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
+								double vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
+								double verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
 								bool clicked = pnpoly(4, vertx, verty, x, y);
 								if (clicked) {
 									clicked1 = children;
@@ -518,8 +516,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					BasicInterface* clicked2 = nullptr, * inter1 = frame->border;
 					if (inter1 && inter1->isBounds() && frame->pannable) {
 						int b_offset_Y = 25;
-						int vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
-						int vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
+						double vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
+						double vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
 						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
 						if (clicked) {
 							clicked2 = inter1;
@@ -555,8 +553,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						Mirror& mirror = *mir;
 						int b_offset_Y = 25;
 						double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
-						int vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
-						int vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
+						double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
+						double vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
 						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
 						if (clicked) {
 							if (!mir->s_pt) {
@@ -629,8 +627,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		for (size_t i = 0; i < BUTTONS.size(); i++) {
 			TopButton* curButton = BUTTONS[i];
 			int* params = curButton->getParams();
-			int vertx[4] = { params[0], params[0], params[2], params[2] };
-			int verty[4] = { params[1], params[3], params[3], params[1] };
+			double vertx[4] = { params[0], params[0], params[2], params[2] };
+			double verty[4] = { params[1], params[3], params[3], params[1] };
 			bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
 			if (clicked) {
 				if (curButton->handleScroll(val > 0))
@@ -673,8 +671,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 								BasicInterface& border = *children->border;
 								if (border.isBounds()) {
-									int vertx[4] = { border.getStartX(), border.getStartX(), border.getEndX(), border.getEndX() };
-									int verty[4] = { border.getStartY(), border.getEndY(), border.getEndY(), border.getStartY() };
+									double vertx[4] = { border.getStartX(), border.getStartX(), border.getEndX(), border.getEndX() };
+									double verty[4] = { border.getStartY(), border.getEndY(), border.getEndY(), border.getStartY() };
 									bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
 									if (clicked) {
 										if (val < 0) {

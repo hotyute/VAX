@@ -1,18 +1,21 @@
 zoom=130
-raircraftsize=0.1
-haircraftsize=0.105
-uaircraftsize=0.1
+raircraftsize=0.48
+haircraftsize=0.53
+uaircraftsize=0.48
+leaderlength=1
 ICAO=KFLL
 elevation=65
+range=170
+rotation=0
 
 <<CENTER>>
 26.07264 -80.14976
 
 <<RUNWAY LINE>>;10:/28R
-10L 26.07696 -80.16655 28R 26.07679 -80.13911 46.10 2 ;lat lon (start), lat lon (end), runway width, shoulder width
+10L 26.07696 -80.16655 28R 26.07679 -80.13911 46.10 2 097;lat lon (start), lat lon (end), runway width, shoulder width
 
 <<RUNWAY LINE>>;10R/28L
-10R 26.06589 -80.15835 28L 26.06576 -80.13398 46.02 2
+10R 26.06589 -80.15835 28L 26.06576 -80.13398 46.02 2 097
 
 <<MIRROR>>
 10L 26.07687 -80.16327 200 600 400 250 0.001 ;lat, lon, pos x, pos y, width, height, zoom

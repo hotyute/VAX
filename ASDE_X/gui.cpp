@@ -1396,13 +1396,13 @@ void DisplayBox::SetChatTextColour(CHAT_TYPE t) {
 bool DisplayBox::click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset) {
 	bool clicked = false;
 	BasicInterface& inter2 = *this->border;
-	int vertxt[4] = {
+	double vertxt[4] = {
 		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
 	};
-	int vertyt[4] = {
+	double vertyt[4] = {
 		inter2.getStartY(),
 		inter2.getStartY() + arrow_bounds,
 		inter2.getStartY() + arrow_bounds,
@@ -1418,13 +1418,13 @@ bool DisplayBox::click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_of
 bool DisplayBox::click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset) {
 	bool clicked = false;
 	BasicInterface& inter2 = *this->border;
-	int vertx[4] = {
+	double vertx[4] = {
 		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset,
 		inter2.getStartX() + inter2.getActualWidth() + (arrow_bounds)+arrow_offset
 	};
-	int verty[4] = {
+	double verty[4] = {
 		inter2.getStartY() + inter2.getActualHeight(),
 		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
 		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
@@ -1557,15 +1557,15 @@ void ChatLine::playChatSound()
 
 bool ChatLine::in_bounds(int x, int y)
 {
-	int vertx[4] = { _x, _x, (_x + _p_x), (_x + _p_x) };
-	int verty[4] = { _y, (_y + _p_y), (_y + _p_y), _y };
+	double vertx[4] = { _x, _x, (_x + _p_x), (_x + _p_x) };
+	double verty[4] = { _y, (_y + _p_y), (_y + _p_y), _y };
 	return pnpoly(4, vertx, verty, x, y);
 }
 
 bool ChatLine::in_bounds_text(int x, int y)
 {
-	int vertx[4] = { _x, _x, (_x + _s_x), (_x + _s_x) };
-	int verty[4] = { _y, (_y + _s_y), (_y + _s_y), _y };
+	double vertx[4] = { _x, _x, (_x + _s_x), (_x + _s_x) };
+	double verty[4] = { _y, (_y + _s_y), (_y + _s_y), _y };
 	return pnpoly(4, vertx, verty, x, y);
 }
 

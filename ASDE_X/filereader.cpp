@@ -231,15 +231,19 @@ int FileReader::LoadADX(std::string path) {
 							double p1[2] = { atodd(args[1].c_str()),  atodd(args[2].c_str()) };
 							double p2[2] = { atodd(args[4].c_str()),  atodd(args[5].c_str()) };
 							double shoulder = atodd(args[7].c_str());
-							double* bounds[5];
+							double heading = atodd(args[8].c_str());
+							double** bounds = new double*[5];
 							for (int i = 0; i < 5; ++i)
 								bounds[i] = new double[2];
 							getRunwayBounds(p1, p2, atodd(args[6].c_str()) + shoulder, bounds);
 							for (int i = 0; i < 5; i++) {
 								point2d->add_coordinates(bounds[i][1], bounds[i][0], 0);
 							}
-							for (int i = 0; i < 5; ++i)
-								delete[] bounds[i];
+							runway_polygons.emplace(rw1, bounds);
+							//for (int i = 0; i < 5; ++i)
+							//{
+								//delete[] bounds[i];
+							//}
 						}
 						else if (header == "CENTER")
 						{
@@ -283,18 +287,18 @@ int FileReader::LoadADX(std::string path) {
 
 								switch (loop_type)
 								{
-									case 'L':
-										seg->loop_type = LOOP_TYPE::LOOP;
-										break;
-									case 'C':
-										seg->loop_type = LOOP_TYPE::CLOSE;
-										break;
-									case 'E':
-										seg->loop_type = LOOP_TYPE::END;
-										break;
-									default:
-										seg->loop_type = LOOP_TYPE::LOOP;
-										break;
+								case 'L':
+									seg->loop_type = LOOP_TYPE::LOOP;
+									break;
+								case 'C':
+									seg->loop_type = LOOP_TYPE::CLOSE;
+									break;
+								case 'E':
+									seg->loop_type = LOOP_TYPE::END;
+									break;
+								default:
+									seg->loop_type = LOOP_TYPE::LOOP;
+									break;
 								}
 
 								seg->pt = Point2(lon, lat);
