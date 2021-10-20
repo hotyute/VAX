@@ -2149,6 +2149,13 @@ void updateCollisionLine(Mirror* mirror, Collision& collision, unsigned int& bas
 }
 
 void preFileRender() {
+	aircrafts_to_mirrors();
+
+	collisions_to_mirrors();
+}
+
+void aircrafts_to_mirrors()
+{
 	if (acf_map.size() > 0) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
@@ -2171,8 +2178,6 @@ void preFileRender() {
 			}
 		}
 	}
-
-	collisions_to_mirrors();
 }
 
 void collisions_to_mirrors()

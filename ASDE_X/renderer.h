@@ -96,7 +96,6 @@ void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
 void RenderDate();
 void RenderDepartures();
-void collisions_to_mirrors();
 void GetOGLPos(int, int, double*);
 void GetWndPos(double latitude, double longitude, double* output);
 void BuildFont(LPCWSTR, int, bool, unsigned int*, HFONT*);
@@ -105,6 +104,8 @@ void deleteTess();
 SIZE getTextExtent(std::string &s);
 void DrawVarLine(float, float, float, float, float, float);
 void preFileRender();
+void aircrafts_to_mirrors();
+void collisions_to_mirrors();
 
 void CallInterfaces();
 
