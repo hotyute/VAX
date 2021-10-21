@@ -1082,12 +1082,32 @@ void handleConnect() {
 
 bool handle_asel(Mirror* mirror, Aircraft* aircraft)
 {
-	printf("callsign: %s\n", aircraft->getCallsign().c_str());
-	main_chat_input->clearInput();
-	main_chat_input->setInput(aircraft->getCallsign() + ", ");
-	main_chat_input->setCursor();
-	main_chat_input->setFocus();
-	renderAllInputText = true;
+	if (focusChild == main_chat_input && boost::istarts_with(main_chat_input->input, "."))
+	{
+		if (processCommands(main_chat_input->input + aircraft->getCallsign()))
+		{
+			main_chat_input->clearInput();
+			main_chat_input->setCursor();
+			renderInputTextFocus = true;
+		}
+	}
+	else if (focusChild == terminal_input && boost::istarts_with(terminal_input->input, "."))
+	{
+		if (processCommands(terminal_input->input + aircraft->getCallsign()))
+		{
+			terminal_input->clearInput();
+			terminal_input->setCursor();
+			renderInputTextFocus = true;
+		}
+	}
+	else
+	{
+		main_chat_input->clearInput();
+		main_chat_input->setInput(aircraft->getCallsign() + ", ");
+		main_chat_input->setCursor();
+		main_chat_input->setFocus();
+		renderAllInputText = true;
+	}
 	return true;
 }
 
