@@ -1108,6 +1108,7 @@ bool handle_asel(Mirror* mirror, Aircraft* aircraft)
 		main_chat_input->setFocus();
 		renderAllInputText = true;
 	}
+	ASEL = aircraft;
 	return true;
 }
 

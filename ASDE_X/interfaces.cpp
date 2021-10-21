@@ -341,7 +341,7 @@ void sendMainChatMessage(InputField* focusField)
 {
 	if (connected)
 	{
-		sendUserMessage(99998, focusField->input);
+		sendUserMessage(99998, ASEL ? ASEL->getCallsign() : "", focusField->input);
 	}
 	main_chat_box->resetReaderIdx();
 	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);

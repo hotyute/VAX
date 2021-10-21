@@ -6,7 +6,7 @@
 
 void sendPositionUpdates(User &user);
 void sendPingPacket();
-void sendUserMessage(int frequency, std::string message);
+void sendUserMessage(int frequency, std::string to, std::string message);
 
 void sendPrivateMessage(std::string to, std::string message);
 

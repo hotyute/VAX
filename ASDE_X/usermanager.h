@@ -16,5 +16,6 @@ extern std::unordered_map<std::string, User*> users_map;
 void decodePackets(int opCode, Stream &stream);
 
 extern Controller* USER;
+extern User* ASEL;
 
 #endif

@@ -8,6 +8,7 @@ std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
 
 Controller* USER = new Controller("(NOT_LOGGED)", 0, 0);
+User* ASEL = nullptr;
 
 void decodePackets(int opCode, Stream& stream) {
 	if (opCode == 9) {
