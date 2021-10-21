@@ -268,6 +268,12 @@ double degrees(double radians) {
 	return (radians * 180) / M_PI;
 }
 
+double plain_dist(double x1, double y1, double x2, double y2)
+{
+	// Calculating distance
+	return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
+}
+
 double dist(double lat1, double lon1, double lat2, double lon2) {
 	double dist, dlon = lon2 - lon1;
 	lat1 *= M_PI / 180.0;
@@ -475,9 +481,9 @@ void addCollisionToMirrors(Collision* collision)
 
 void addCollisionsToMirror(Mirror* mir)
 {
-	if (Collision_Map.size() > 0) 
+	if (Collision_Map.size() > 0)
 	{
-		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) 
+		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it)
 		{
 			Collision* collision = it->second;
 			if (mir && mir->c_flags.find(collision) == mir->c_flags.end())

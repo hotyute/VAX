@@ -53,6 +53,8 @@ extern double radians(double degrees);
 
 extern double degrees(double radians);
 
+double plain_dist(double x1, double y1, double x2, double y2);
+
 double dist(double lat1, double lon1, double lat2, double lon2);
 
 void getRunwayBounds(double* p1, double* p2, double w, double** l);

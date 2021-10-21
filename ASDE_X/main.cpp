@@ -49,6 +49,8 @@ CloseButton* connect_closeb = NULL;
 DisplayBox* main_chat_box = NULL, * controller_list_box = NULL, * controller_info_box = NULL, * qlc_list_box = NULL;
 
 void handleConnect();
+bool handle_asel(Mirror* mirror, Aircraft* aircraft);
+Aircraft* check_asel(Mirror* mirror, double x, double y);
 void handleDisconnect();
 bool processCommands(std::string);
 void moveInterfacesOnSize();
@@ -541,8 +543,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 			if (!clicked_interface)
 			{
+				bool clicked_mirror = false;
 				//check for mirrors
-				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3) {
+				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3) 
+				{
 					Mirror* mir = *it3;
 					if (mir)
 					{
@@ -551,8 +555,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
 						double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
 						double vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
-						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
-						if (clicked) {
+						bool clicked_bar = pnpoly(4, vert_x, vert_y, x, y);
+						if (clicked_bar) {
 							if (!mir->s_pt) {
 								mir->s_pt = new POINT();
 							}
@@ -564,8 +568,35 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 							if (mirrors.back() != *it3)
 								std::swap(*it3, mirrors.back());
+							clicked_mirror = true;
 							break;
 						}
+						else
+						{
+							//clicked anywhere else in the mirrror
+							double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
+							double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
+							double vert_y[4] = { mirror.getY(), end_y, end_y, mirror.getY(), };
+							bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+							if (clicked)
+							{
+								clicked_mirror = true;
+								Aircraft* asel = check_asel(mir, x, y);
+								if (asel)
+								{
+									handle_asel(mir, asel);
+								}
+								break;
+							}
+						}
+					}
+				}
+				if (!clicked_mirror)
+				{
+					Aircraft* asel = check_asel(nullptr, x, y);
+					if (asel)
+					{
+						handle_asel(nullptr, asel);
 					}
 				}
 			}
@@ -1047,6 +1078,52 @@ void handleConnect() {
 			connect_callsign->setFocus();
 		}
 	}
+}
+
+bool handle_asel(Mirror* mirror, Aircraft* aircraft)
+{
+	printf("callsign: %s\n", aircraft->getCallsign().c_str());
+	main_chat_input->clearInput();
+	main_chat_input->setInput(aircraft->getCallsign() + ", ");
+	main_chat_input->setCursor();
+	main_chat_input->setFocus();
+	renderAllInputText = true;
+	return true;
+}
+
+Aircraft* check_asel(Mirror* mirror, double x, double y)
+{
+	bool is_mirror = mirror ? true : false;
+	if (acf_map.size() > 0)
+	{
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++)
+		{
+			// iterator->first = key
+			Aircraft* acf_ptr = iter->second;
+			if (acf_ptr != nullptr)
+			{
+				Aircraft& aircraft = *acf_ptr;
+				aircraft.lock();
+				bool heavy = aircraft.isHeavy();
+				bool standby = aircraft.getMode() == 0 ? true : false;
+				double a_size = get_asize(heavy, standby);
+				aircraft.unlock();
+
+				double maxX = standby ? unknownBlip->getMaxX() : aircraftBlip->getMaxX();
+				double maxY = standby ? unknownBlip->getMaxX() : aircraftBlip->getMaxY();
+
+				double offset = (maxX > maxY ? maxX : maxY) * a_size;
+
+				double _ax = is_mirror ? mirror->wndc[&aircraft][1] : aircraft.wnd_loc[1],
+					_ay = is_mirror ? mirror->wndc[&aircraft][0] : aircraft.wnd_loc[0];
+				double _dist = plain_dist(_ax, _ay, x, y);
+
+				if (_dist <= offset)
+					return acf_ptr;
+			}
+		}
+	}
+	return nullptr;
 }
 
 void handleDisconnect() {
