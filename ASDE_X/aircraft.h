@@ -23,7 +23,7 @@ class History {
 #define FlightPlan_aircraft_h
 class FlightPlan {
 public:
-	std::string departure, arrival, alternate, squawkCode;
+	std::string departure, arrival, alternate, squawkCode = "0000";
 	std::string acType, scratchPad, cruise, route, remarks;
 	int flightRules = 0;
 	int cycle = 0;

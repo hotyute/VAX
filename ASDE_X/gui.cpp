@@ -165,6 +165,11 @@ void InterfaceFrame::doReplace()
 {
 	InterfaceFrame* frame = frames_def[this->id];
 	if (frame && frame != this) {
+		if (focusChild && focusChild->getFrame() == frame)
+		{
+			focusChild->removeFocus();
+			focusChild = nullptr;
+		}
 		frames_def[this->id] = this;
 		rendered_frames[this->index = frame->index] = this;
 		delete frame;
@@ -738,7 +743,12 @@ void ClickButton::doAction() {
 			squawk_input->setInput(std::to_string(squawk_range++));
 			renderAllInputText = true;
 			if (opened_fp)
-				PullFPData((Aircraft*)opened_fp);
+			{
+				Aircraft* aircraft = ((Aircraft*)opened_fp);
+				PullFPData(aircraft);
+				aircraft->setUpdateFlag(ACF_CALLSIGN, true);
+
+			}
 		}
 		break;
 		case FP_AMMEND_PLAN:

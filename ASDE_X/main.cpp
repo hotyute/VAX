@@ -33,6 +33,7 @@ TCHAR szClassName[] = TEXT("WindowsApp");
 HWND text123, text124, lblNone, strUsers, lblNumUsrs;
 
 HMENU hFile = NULL;
+HMENU hSettings = NULL;
 
 bool done = false, connected = false, show_departures = false, show_squawks = true;
 int single_opened_frames = 0;
@@ -186,7 +187,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_CREATE: {
 		HMENU hMenuBar = CreateMenu();
 		hFile = CreateMenu();
-		HMENU hSettings = CreateMenu();
+		hSettings = CreateMenu();
 		HMENU hHelp = CreateMenu();
 
 		AppendMenu(hMenuBar, MF_POPUP, (UINT_PTR)hFile, L"&File");
@@ -209,6 +210,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		//opengl stuff
 
 		hWnd = hwnd;
+
+		show_departures ? CheckMenuItem(hSettings, ID_SETTINGS_DEPARTS, MF_CHECKED) : CheckMenuItem(hSettings, ID_SETTINGS_DEPARTS, MF_UNCHECKED);
+		show_squawks ? CheckMenuItem(hSettings, ID_SETTINGS_SQUAWKS, MF_CHECKED) : CheckMenuItem(hSettings, ID_SETTINGS_SQUAWKS, MF_UNCHECKED);
 
 		if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
 			CAPS = true;
@@ -358,11 +362,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		case ID_SETTINGS_DEPARTS:
 		{
 			show_departures = !show_departures;
+			show_departures ? CheckMenuItem(hSettings, ID_SETTINGS_DEPARTS, MF_CHECKED) : CheckMenuItem(hSettings, ID_SETTINGS_DEPARTS, MF_UNCHECKED);
 		}
 		break;
 		case ID_SETTINGS_SQUAWKS:
 		{
 			show_squawks = !show_squawks;
+			show_squawks ? CheckMenuItem(hSettings, ID_SETTINGS_SQUAWKS, MF_CHECKED) : CheckMenuItem(hSettings, ID_SETTINGS_SQUAWKS, MF_UNCHECKED);
 			updateFlags[GBL_CALLSIGN] = true;
 
 		}

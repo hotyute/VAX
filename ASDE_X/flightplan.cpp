@@ -191,7 +191,7 @@ void PullFPData(Aircraft* user)
 		{
 			InputField* fp_depart = ((InputField*)fp_frame->children[FP_DEPART_INPUT]);
 			InputField* fp_arrival = ((InputField*)fp_frame->children[FP_ARRIVE_INPUT]);
-			InputField* fp_assigned_sq = ((InputField*)fp_frame->children[FP_ASSIGN_SQUAWK]);
+			InputField* fp_assigned_sq = ((InputField*)fp_frame->children[FP_SQUAWK_INPUT]);
 			std::vector<ChatLine*> fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX])->chat_lines;
 			std::vector<ChatLine*> fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX])->chat_lines;
 
