@@ -138,7 +138,7 @@ public:
 	void removeCursor();
 	bool popInput();
 	void clearInput();
-	void setInput(std::string);
+	void setInput(std::string, bool cursor);
 	void setUneditable(std::string);
 	void pass_characters(char* chars);
 	bool can_type();

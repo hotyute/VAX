@@ -446,7 +446,7 @@ void InputField::clearInput() {
 	cursor_pos = 0;
 }
 
-void InputField::setInput(std::string text) {
+void InputField::setInput(std::string text, bool cursor) {
 	InputField::clearInput();
 	if (InputField::p_protected)
 	{
@@ -457,10 +457,13 @@ void InputField::setInput(std::string text) {
 	}
 	InputField::input = text;
 
-	last_cursor_pos = cursor_pos;
-	for (int i = 0; i < text.size(); i++) {
-		InputField::cursor_input += ' ';
-		cursor_pos++;
+	if (cursor)
+	{
+		last_cursor_pos = cursor_pos;
+		for (int i = 0; i < text.size(); i++) {
+			InputField::cursor_input += ' ';
+			cursor_pos++;
+		}
 	}
 }
 
@@ -740,7 +743,7 @@ void ClickButton::doAction() {
 		{
 		case FP_ASSIGN_SQUAWK:
 		{
-			squawk_input->setInput(std::to_string(squawk_range++));
+			squawk_input->setInput(std::to_string(squawk_range++), false);
 			renderAllInputText = true;
 			if (opened_fp)
 			{
@@ -1065,7 +1068,7 @@ void DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
 		input_field->line_ptr = line;
 		input_field->show_border = false;
-		input_field->setInput(str);
+		input_field->setInput(str, true);
 		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
@@ -1075,7 +1078,7 @@ void DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
 		input_field->line_ptr = line;
 		input_field->show_border = false;
-		input_field->setInput(str);
+		input_field->setInput(str, true);
 		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;

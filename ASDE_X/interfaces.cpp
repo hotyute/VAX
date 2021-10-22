@@ -133,10 +133,10 @@ void RenderConnect(double x_, double y_)
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
 
 #ifdef _DEBUG
-	connect_callsign->setInput("SM_SUP");
-	connect_fullname->setInput("Samuel Mason");
-	connect_username->setInput("971202");
-	connect_password->setInput("583562");
+	connect_callsign->setInput("SM_SUP", true);
+	connect_fullname->setInput("Samuel Mason", true);
+	connect_username->setInput("971202", true);
+	connect_password->setInput("583562", true);
 	connect_rating->pos = 10;
 #endif
 

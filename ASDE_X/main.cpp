@@ -1484,7 +1484,7 @@ void pass_command(char* cmd) {
 		if (child && child->type == CHILD_TYPE::INPUT_FIELD && child->focus) {
 			InputField& input_box = *(InputField*)child;
 
-			input_box.setInput(cmd);
+			input_box.setInput(cmd, true);
 			input_box.setCursor();
 			renderInputTextFocus = true;
 		}
@@ -1639,7 +1639,8 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			ChatLine* c = focusField->line_ptr;
 			if (c)
 			{
-				focusField->setInput(c->getText());
+				//don't use setInput as it formats the text
+				focusField->input = c->getText();
 				focusField->setCursor();
 			}
 		}
@@ -1665,7 +1666,8 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 			ChatLine* c = focusField->line_ptr;
 			if (c)
 			{
-				focusField->setInput(c->getText());
+				//don't use setInput as it formats the text
+				focusField->input = c->getText();
 				focusField->setCursor();
 			}
 		}
