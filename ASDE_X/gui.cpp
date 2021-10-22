@@ -271,6 +271,7 @@ InputField::InputField(InterfaceFrame* frame, double width, double height) {
 	base = &topButtonBase;
 	InputField::p_protected = false;
 	InputField::editable = true;
+	InputField::numbers = false;
 	InputField::centered = false;
 	InputField::focus = false;
 	InputField::type = CHILD_TYPE::INPUT_FIELD;
@@ -288,6 +289,7 @@ InputField::InputField(InterfaceFrame* frame, double x, double width, double pad
 	base = &topButtonBase;
 	InputField::p_protected = false;
 	InputField::editable = true;
+	InputField::numbers = false;
 	InputField::centered = false;
 	InputField::focus = false;
 	InputField::type = CHILD_TYPE::INPUT_FIELD;
@@ -354,6 +356,8 @@ int InputField::handleClick(ChildFrame* clicked, int x, int y)
 }
 
 void InputField::pushInput(bool uni, char c) {
+	if (numbers && !isdigit(c))
+		return;
 	if (max_chars != 0)
 	{
 		if ((input.size() + 1) > max_chars)
@@ -731,8 +735,14 @@ void ClickButton::doAction() {
 		{
 		case FP_ASSIGN_SQUAWK:
 		{
-			squawk_input->input = std::to_string(squawk_range++);
+			squawk_input->setInput(std::to_string(squawk_range++));
 			renderAllInputText = true;
+			if (opened_fp)
+				PullFPData((Aircraft*)opened_fp);
+		}
+		break;
+		case FP_AMMEND_PLAN:
+		{
 			if (opened_fp)
 				PullFPData((Aircraft*)opened_fp);
 		}

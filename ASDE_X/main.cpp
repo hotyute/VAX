@@ -1633,7 +1633,7 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			ChatLine* c = focusField->line_ptr;
 			if (c)
 			{
-				focusField->input = c->getText();
+				focusField->setInput(c->getText());
 				focusField->setCursor();
 			}
 		}
@@ -1659,7 +1659,7 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 			ChatLine* c = focusField->line_ptr;
 			if (c)
 			{
-				focusField->input = c->getText();
+				focusField->setInput(c->getText());
 				focusField->setCursor();
 			}
 		}

@@ -106,7 +106,7 @@ public:
 	InputField(InterfaceFrame*, double, double);
 	InputField(InterfaceFrame* frame, double x, double width, double padding_x, double, double, double);
 public:
-	bool centered, editable;
+	bool centered, editable, numbers;
 	HFONT* font = nullptr;
 	unsigned int* base = nullptr;
 	ChatLine* line_ptr = nullptr;

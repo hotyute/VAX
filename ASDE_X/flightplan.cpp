@@ -131,6 +131,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		fp_frame->children[squawk_label->index = FP_SQUAWK_LABEL] = squawk_label;
 		squawk_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		squawk_input->setUneditable(a_squawk);
+		squawk_input->numbers = true;
 		fp_frame->children[squawk_input->index = FP_SQUAWK_INPUT] = squawk_input;
 
 		ClickButton* assignButton = new ClickButton(fp_frame, "ASSIGN SQUAWK", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))) - 2, 24.0);// set button from the left

@@ -93,6 +93,7 @@ void RenderConnect(double x_, double y_)
 	connectFrame->children[connect_fullname->index = FULLNAME_INPUT] = connect_fullname;
 	connect_username = new InputField(connectFrame, x, 120.0, 10.0, y + (height - 95.0), 20, -10.0);
 	connectFrame->children[connect_username->index = USERNAME_INPUT] = connect_username;
+	connect_username->numbers = true;
 	connect_password = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 95.0), 20, -10.0);
 	connect_password->p_protected = true;
 	connectFrame->children[connect_password->index = PASSWORD_INPUT] = connect_password;
