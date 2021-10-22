@@ -339,12 +339,14 @@ void sendErrorMessage(std::string message) {
 
 void sendMainChatMessage(InputField* focusField)
 {
+	std::string text = ASEL ? ASEL->getCallsign() + ", " + focusField->input : focusField->input;
 	if (connected)
 	{
-		sendUserMessage(99998, ASEL ? ASEL->getCallsign() : "", focusField->input);
+
+		sendUserMessage(99998, ASEL ? ASEL->getCallsign() : "", text);
 	}
 	main_chat_box->resetReaderIdx();
-	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
+	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + text, CHAT_TYPE::MAIN);
 	renderDrawings = true;
 	focusField->clearInput();
 	focusField->setCursor();

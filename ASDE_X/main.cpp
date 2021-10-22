@@ -734,9 +734,22 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD) {
 					InputField& focusField = (InputField&)*focusChild;
-					focusField.clearInput();
-					focusField.setCursor();
-					renderInputTextFocus = true;
+					if (focusField.input.size() > 0)
+					{
+						focusField.clearInput();
+						focusField.setCursor();
+						renderInputTextFocus = true;
+					}
+					else
+					{
+						ASEL = nullptr;
+						renderConf = true;
+					}
+				}
+				else
+				{
+					ASEL = nullptr;
+					renderConf = true;
 				}
 			}
 		}
@@ -1100,15 +1113,8 @@ bool handle_asel(Mirror* mirror, Aircraft* aircraft)
 			renderInputTextFocus = true;
 		}
 	}
-	else
-	{
-		main_chat_input->clearInput();
-		main_chat_input->setInput(aircraft->getCallsign() + ", ");
-		main_chat_input->setCursor();
-		main_chat_input->setFocus();
-		renderAllInputText = true;
-	}
 	ASEL = aircraft;
+	renderConf = true;
 	return true;
 }
 

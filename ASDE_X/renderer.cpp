@@ -1343,7 +1343,7 @@ void RenderConf() {
 	glPrint(config2.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
-	std::string config3 = "ACID";
+	std::string config3 = "ACID" + (ASEL ? " [" +ASEL->getCallsign() + "]" : "");
 	size = getTextExtent(config3);
 	glRasterPos2f(30.0f, (GLfloat)(CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config3.c_str(), &confBase);
