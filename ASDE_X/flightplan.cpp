@@ -3,6 +3,7 @@
 #include "constants.h"
 
 User* opened_fp = NULL;
+int squawk_range = 1000;
 
 std::unordered_map<std::string, std::vector<std::string>> departures;
 std::unordered_map<std::string, ChatLine*> obs_list, ql_obs_list, del_list, ql_del_list;
@@ -128,7 +129,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		Label* squawk_label = new Label(fp_frame, "Squawk:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		squawk_label->centered = 2;
 		fp_frame->children[squawk_label->index = FP_SQUAWK_LABEL] = squawk_label;
-		InputField* squawk_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
+		squawk_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		squawk_input->setUneditable(a_squawk);
 		fp_frame->children[squawk_input->index = FP_SQUAWK_INPUT] = squawk_input;
 
@@ -189,12 +190,14 @@ void PullFPData(Aircraft* user)
 		{
 			InputField* fp_depart = ((InputField*)fp_frame->children[FP_DEPART_INPUT]);
 			InputField* fp_arrival = ((InputField*)fp_frame->children[FP_ARRIVE_INPUT]);
+			InputField* fp_assigned_sq = ((InputField*)fp_frame->children[FP_ASSIGN_SQUAWK]);
 			std::vector<ChatLine*> fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX])->chat_lines;
 			std::vector<ChatLine*> fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX])->chat_lines;
 
-			std::string depart, arrival, route, remarks;
+			std::string depart, arrival, route, remarks, a_sq;
 			depart = fp_depart->input.c_str();
 			arrival = fp_arrival->input.c_str();
+			a_sq = fp_assigned_sq->input.c_str();
 
 			for (auto it = fp_route.begin(); it != fp_route.end(); it++)
 			{
@@ -209,7 +212,7 @@ void PullFPData(Aircraft* user)
 			FlightPlan& fp = *user->getFlightPlan();
 			bool update_required = false;
 			if (fp.route != route || fp.remarks != remarks || fp.departure != depart
-				|| fp.arrival != arrival)
+				|| fp.arrival != arrival || fp.squawkCode != a_sq)
 			{
 				update_required = true;
 			}
@@ -218,6 +221,7 @@ void PullFPData(Aircraft* user)
 			fp.arrival = arrival;
 			fp.route = route;
 			fp.remarks = remarks;
+			fp.squawkCode = a_sq;
 
 			if (update_required)
 			{

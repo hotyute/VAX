@@ -14,6 +14,8 @@
 #include "interfaces.h"
 #include "aircraft.h"
 
+extern int squawk_range;
+
 extern std::unordered_map<std::string, std::vector<std::string>> departures;
 extern std::unordered_map<std::string, ChatLine*> obs_list, ql_obs_list, del_list, ql_del_list;
 

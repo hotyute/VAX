@@ -725,6 +725,21 @@ void ClickButton::doAction() {
 		}
 	}
 	break;
+	case FP_INTERFACE://connect frame
+	{
+		switch (ClickButton::index)
+		{
+		case FP_ASSIGN_SQUAWK:
+		{
+			squawk_input->input = std::to_string(squawk_range++);
+			renderAllInputText = true;
+			if (opened_fp)
+				PullFPData((Aircraft*)opened_fp);
+		}
+		break;
+		}
+	}
+	break;
 	}
 }
 

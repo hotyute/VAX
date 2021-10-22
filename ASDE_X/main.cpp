@@ -42,7 +42,8 @@ int single_opened_frames = 0;
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
-InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, * connect_password = NULL, * main_chat_input = nullptr, * terminal_input = nullptr;
+InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, 
+* connect_password = nullptr, * main_chat_input = nullptr, * terminal_input = nullptr, * squawk_input = nullptr;
 ComboBox* connect_rating = NULL, * connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
 CloseButton* connect_closeb = NULL;
