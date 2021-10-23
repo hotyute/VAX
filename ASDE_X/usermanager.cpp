@@ -105,8 +105,7 @@ void decodePackets(int opCode, Stream& stream) {
 					{
 						Aircraft* ac2 = it->first;
 						Collision* col = it->second;
-						if (ac2)
-							ac2->collisions.erase(aircraft);
+						if (ac2) ac2->collisions.erase(aircraft);
 						Collision_Map.erase(ac2);
 						Collision_Map.erase(aircraft);
 						delete col;
