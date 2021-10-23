@@ -1,6 +1,6 @@
 #include "collision.h"
 
-std::unordered_map<std::string, Collision*> Collision_Map;
+std::unordered_map<Aircraft*, Collision*> Collision_Map;
 std::unordered_map<std::string, double**> runway_polygons;
 std::vector<std::string> logic;
 

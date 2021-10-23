@@ -50,8 +50,7 @@ private:
 public:
 	double wnd_loc[3] { 0, 0, 0 };
 	std::vector<double*> wndc;
-	std::vector<Collision*> collisionCount;
-	std::vector<Aircraft*> collisionAircraft;
+	std::unordered_map<Aircraft*, Collision*> collisions;
 	Aircraft(std::string, int, int);
 	void handleModeChange(int new_mode);
 	bool on_logic(std::string logic_id);

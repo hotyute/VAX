@@ -98,7 +98,21 @@ void decodePackets(int opCode, Stream& stream) {
 
 			if (type == CLIENT_TYPES::PILOT_CLIENT)
 			{
-
+				Aircraft* aircraft = (Aircraft*)user1;
+				if (aircraft->collisions.size() > 0)
+				{
+					for (auto it = aircraft->collisions.begin(); it != aircraft->collisions.end();)
+					{
+						Aircraft* ac2 = it->first;
+						Collision* col = it->second;
+						if (ac2)
+							ac2->collisions.erase(aircraft);
+						Collision_Map.erase(ac2);
+						Collision_Map.erase(aircraft);
+						delete col;
+						it = aircraft->collisions.erase(it);
+					}
+				}
 			}
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
@@ -340,4 +354,4 @@ void decodePackets(int opCode, Stream& stream) {
 			}
 		}
 	}
-}
+		}

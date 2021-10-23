@@ -68,41 +68,37 @@ void CalculateCollisions() {
 
 						Aircraft* acf2 = iter2->second;
 						if (acf2 && acf2 != acf1) {
-							if (std::find(aircraft1.collisionAircraft.begin(), aircraft1.collisionAircraft.end(), acf2)
-								== aircraft1.collisionAircraft.end())
+							if (aircraft1.collisions.find(acf2) == aircraft1.collisions.end())
 							{
 								Aircraft& aircraft2 = *acf2;
-
-								if (aircraft2.near_logic(log))
+								if (aircraft2.collisions.find(acf1) == aircraft2.collisions.end())
 								{
-									if (acf1 && !aircraft1.isCollision())
-									{
-										aircraft1.setUpdateFlag(ACF_COLLISION, true);
-										aircraft1.setCollision(true);
-									}
-									aircraft1.collisionAircraft.push_back(acf2);
-									if (acf2 && !aircraft2.isCollision())
-									{
-										aircraft2.setUpdateFlag(ACF_COLLISION, true);
-										aircraft2.setCollision(true);
-									}
-									aircraft2.collisionAircraft.push_back(acf1);
-
-
-									if (Collision_Map.find(acf1->getCallsign() + acf2->getCallsign()) == Collision_Map.end())
+									if (aircraft2.near_logic(log))
 									{
 										Collision* collision = new Collision(acf1, acf2);
-										Collision_Map.emplace(acf1->getCallsign() + acf2->getCallsign(), collision);
-										aircraft1.collisionCount.push_back(collision);
-										aircraft2.collisionCount.push_back(collision);
+										collision->setUpdateFlag(COL_COLLISION_LINE, true);
+										aircraft1.collisions.emplace(acf2, collision);
+										aircraft2.collisions.emplace(acf1, collision);
 										addCollisionToMirrors(collision);
+										Collision_Map.emplace(acf1, collision);
+										Collision_Map.emplace(acf2, collision);
 									}
 								}
-
 								//Check What Runway Aircraft1
 							}
 						}
 					}
+				}
+
+				if (aircraft1.collisions.size() > 0 && !aircraft1.isCollision())
+				{
+					aircraft1.setUpdateFlag(ACF_COLLISION, true);
+					aircraft1.setCollision(true);
+				}
+				else if (aircraft1.collisions.size() <= 0 && aircraft1.isCollision())
+				{
+					aircraft1.setUpdateFlag(ACF_COLLISION, true);
+					aircraft1.setCollision(false);
 				}
 			}
 		}

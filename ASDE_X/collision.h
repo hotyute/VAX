@@ -28,7 +28,7 @@ public:
 };
 #endif
 
-extern std::unordered_map<std::string, Collision*> Collision_Map;
+extern std::unordered_map<Aircraft*, Collision*> Collision_Map;
 extern std::unordered_map<std::string, double**> runway_polygons;
 extern std::vector<std::string> logic;
 

@@ -43,7 +43,7 @@ int single_opened_frames = 0;
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
 Mirror* dragged_mir = nullptr;
 BasicInterface* dragged_bounds = nullptr;
-InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL, 
+InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL,
 * connect_password = nullptr, * main_chat_input = nullptr, * terminal_input = nullptr, * squawk_input = nullptr;
 ComboBox* connect_rating = NULL, * connect_position = NULL;
 Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_label = NULL;
@@ -552,7 +552,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			{
 				bool clicked_mirror = false;
 				//check for mirrors
-				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3) 
+				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3)
 				{
 					Mirror* mir = *it3;
 					if (mir)
@@ -846,6 +846,35 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == 0xFF) {//FN Key
 
+		}
+		else if (wParam == VK_ADD)
+		{
+			if (ASEL && ASEL->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT)
+			{
+				Aircraft* aircraft = (Aircraft*)ASEL;
+				if (focusChild == main_chat_input && boost::istarts_with(main_chat_input->input, "."))
+				{
+					if (processCommands(main_chat_input->input + aircraft->getCallsign()))
+					{
+						main_chat_input->clearInput();
+						main_chat_input->setCursor();
+						renderInputTextFocus = true;
+					}
+				}
+				else if (focusChild == terminal_input && boost::istarts_with(terminal_input->input, "."))
+				{
+					if (processCommands(terminal_input->input + aircraft->getCallsign()))
+					{
+						terminal_input->clearInput();
+						terminal_input->setCursor();
+						renderInputTextFocus = true;
+					}
+				}
+			}
+			else
+			{
+				//look for aircraft
+			}
 		}
 		else if (wParam == VK_RETURN)
 		{

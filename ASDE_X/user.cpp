@@ -29,10 +29,11 @@ void User::handleMovement(double n_lat, double n_lon)
 			Aircraft* acf = ((Aircraft*)this);
 			if (acf->isCollision())
 			{
-				for (auto& i : acf->collisionCount)
+				for (auto& i : acf->collisions)
 				{
-					if (!i->getUpdateFlag(COL_COLLISION_LINE))
-						i->setUpdateFlag(COL_COLLISION_LINE, true);
+					Collision* col = i.second;
+					if (!col->getUpdateFlag(COL_COLLISION_LINE))
+						col->setUpdateFlag(COL_COLLISION_LINE, true);
 				}
 			}
 		}

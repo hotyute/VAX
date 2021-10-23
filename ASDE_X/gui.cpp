@@ -715,6 +715,12 @@ void ClickButton::doAction() {
 		case CONN_OKAY_BUTTON:
 		{
 			Identity& id = *USER->getIdentity();
+			if (connect_callsign->input.size() < 1 || connect_fullname->input.size() < 1
+				|| connect_username->input.size() < 1 || connect_password->input.size() < 1)
+			{
+				sendErrorMessage("Missing Connection Data.");
+				break;
+			}
 			id.callsign = connect_callsign->input.c_str();
 			id.login_name = connect_fullname->input.c_str();
 			id.username = connect_username->input.c_str();
