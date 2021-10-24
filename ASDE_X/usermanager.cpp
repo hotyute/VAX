@@ -209,7 +209,7 @@ void decodePackets(int opCode, Stream& stream) {
 		if (user1)
 		{
 			main_chat_box->resetReaderIdx();
-			ChatLine* c = new ChatLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN);
+			ChatLine* c = new ChatLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN, main_chat_box);
 			main_chat_box->addLine(c);
 			c->playChatSound();
 			renderDrawings = true;
@@ -261,7 +261,7 @@ void decodePackets(int opCode, Stream& stream) {
 			}
 			DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
 			box.resetReaderIdx();
-			ChatLine* c = new ChatLine(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT);
+			ChatLine* c = new ChatLine(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT, &box);
 			box.addLine(c);
 			c->playChatSound();
 		}

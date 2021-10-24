@@ -309,7 +309,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderConf = true;
 		renderDate = true;
 		renderDepartures = true;
-		renderInputTextFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderAllInputText = true;
 		convert_closures = true;
 		renderClosures = true;
@@ -745,7 +745,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						focusField.clearInput();
 						focusField.setCursor();
-						renderInputTextFocus = true;
+						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 					}
 					else
 					{
@@ -858,7 +858,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						main_chat_input->clearInput();
 						main_chat_input->setCursor();
-						renderInputTextFocus = true;
+						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 					}
 				}
 				else if (focusChild == terminal_input && boost::istarts_with(terminal_input->input, "."))
@@ -867,7 +867,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						terminal_input->clearInput();
 						terminal_input->setCursor();
-						renderInputTextFocus = true;
+						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 					}
 				}
 			}
@@ -897,13 +897,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
 								focusField->setCursor();
-								renderInputTextFocus = true;
+								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 							}
 							else
 							{
 								focusField->clearInput();
 								focusField->setCursor();
-								renderInputTextFocus = true;
+								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 							}
 						}
 					}
@@ -913,7 +913,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
 								focusField->setCursor();
-								renderInputTextFocus = true;
+								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 							}
 							else
 							{
@@ -931,7 +931,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								{
 									focusField->clearInput();
 									focusField->setCursor();
-									renderInputTextFocus = true;
+									RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 								}
 								else
 								{
@@ -998,7 +998,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						focusField->setCursor();
 						//if (!popped)
 						back_split_line(frame, focusField);
-						renderInputTextFocus = true;
+						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 					}
 					else
 					{
@@ -1073,7 +1073,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								focusField.pushInput(false, c2);
 								focusField.setCursor();
 								forward_split_line(frame, (InputField*)focusChild);
-								renderInputTextFocus = true;
+								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 							}
 						}
 					}
@@ -1137,7 +1137,7 @@ bool handle_asel(Mirror* mirror, Aircraft* aircraft)
 		{
 			main_chat_input->clearInput();
 			main_chat_input->setCursor();
-			renderInputTextFocus = true;
+			RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		}
 	}
 	else if (focusChild == terminal_input && boost::istarts_with(terminal_input->input, "."))
@@ -1146,7 +1146,7 @@ bool handle_asel(Mirror* mirror, Aircraft* aircraft)
 		{
 			terminal_input->clearInput();
 			terminal_input->setCursor();
-			renderInputTextFocus = true;
+			RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		}
 	}
 	ASEL = aircraft;
@@ -1515,7 +1515,7 @@ void pass_command(char* cmd) {
 
 			input_box.setInput(cmd, true);
 			input_box.setCursor();
-			renderInputTextFocus = true;
+			RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		}
 	}
 }
@@ -1651,6 +1651,7 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 		{
 			ChatLine* nf = nullptr;
 			DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
+			auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
 			auto i = displayBox->chat_lines.begin();
 			while (i != displayBox->chat_lines.end())
 			{
@@ -1663,14 +1664,12 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 				}
 				++i;
 			}
-			focusField->updateLine();
-			displayBox->prepare();
-			ChatLine* c = focusField->line_ptr;
-			if (c)
+			if (it != displayBox->chat_lines.end())
 			{
-				//don't use setInput as it formats the text
-				focusField->input = c->getText();
-				focusField->setCursor();
+				int pos = it - displayBox->chat_lines.begin();
+				focusField->updateLine();
+				displayBox->prepare();
+				focusField->updateInput(displayBox->chat_lines[pos]);
 			}
 		}
 		else
@@ -1690,14 +1689,28 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 		if (frame.id == FP_INTERFACE)
 		{
 			DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
-			focusField->updateLine();
-			displayBox->prepare();
-			ChatLine* c = focusField->line_ptr;
-			if (c)
+			auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
+			if (it != displayBox->chat_lines.end())
 			{
-				//don't use setInput as it formats the text
-				focusField->input = c->getText();
-				focusField->setCursor();
+				int pos = it - displayBox->chat_lines.begin();
+				focusField->updateLine();
+				displayBox->prepare();
+				ChatLine* c2 = focusField->line_ptr;
+				auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
+				int pos2 = it2 - displayBox->chat_lines.begin();
+				if (pos != pos2)
+				{
+					focusField->handleBox2();
+					InputField* new_input = displayBox->editText(c2, c2->get_x(), c2->get_y());
+					if (new_input)
+					{
+						new_input->setCursorAtStart();
+						new_input->setFocus();
+						printf("%d, %d\n", pos, pos2);
+						renderAllInputText = true;
+						renderDrawings = true;
+					}
+				}
 			}
 		}
 	}

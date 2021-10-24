@@ -12,7 +12,6 @@ std::vector<InterfaceFrame*> frames_def(700);
 std::vector<InterfaceFrame*> rendered_frames;
 ChildFrame* focusChild = nullptr, * lastFocus = nullptr;
 std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
-bool updateLastFocus = false;
 InterfaceFrame* _openedframe = nullptr;
 
 InterfaceFrame::InterfaceFrame(int id) {
@@ -116,7 +115,7 @@ void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 	InterfaceFrame::render = true;
 	InterfaceFrame::multi_open = multi_open;
 	InterfaceFrame::pannable = pannable;
-	renderInputTextFocus = true;
+	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	renderInterfaces = true;
 	renderDrawings = true;
 	renderAllLabels = true;
@@ -153,7 +152,7 @@ void InterfaceFrame::doClose()
 	}
 	InterfaceFrame::render = false;
 	renderInterfaces = true;
-	renderInputTextFocus = true;
+	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	renderDrawings = true;
 	renderFocus = true;
 	_openedframe = nullptr;
@@ -324,12 +323,12 @@ void InputField::setFocus() {
 	if (!InputField::focus) {
 		if (focusChild) {
 			focusChild->removeFocus();
-			updateLastFocus = true;
+			RenderChild(lastFocus);
 		}
 		InputField::setCursorAtEnd();
 		InputField::focus = true;
 		focusChild = this;
-		renderInputTextFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	}
 }
 
@@ -340,8 +339,8 @@ void InputField::removeFocus() {
 		InputField::focus = false;
 		lastFocus = this;
 		focusChild = nullptr;
-		renderInputTextFocus = true;
-		updateLastFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+		RenderChild(lastFocus);
 		if (line_ptr)
 		{
 			handleBox();//this has to come last as it deletes the inputfield
@@ -384,12 +383,22 @@ void InputField::pushInput(bool uni, char c) {
 	cursor_pos++;
 }
 
+void InputField::setCursorAtStart() {
+	last_cursor_pos = cursor_pos = 0;
+	setCursor();
+}
+
 void InputField::setCursorAtEnd() {
 	last_cursor_pos = cursor_pos = input.size();
 	setCursor();
 }
 
 void InputField::setCursor() {
+	if (last_cursor_pos > input.size())
+		last_cursor_pos = input.size();
+	if (cursor_pos > input.size())
+		cursor_pos = input.size();
+
 	if (cursor_input.size() != (input.size() + 1))
 		cursor_input.resize(input.size() + 1, ' ');
 	cursor_input[last_cursor_pos] = ' ';
@@ -408,7 +417,7 @@ void InputField::cursorLeft()
 		last_cursor_pos = cursor_pos;
 		cursor_pos--;
 		setCursor();
-		renderInputTextFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	}
 }
 
@@ -418,7 +427,7 @@ void InputField::cursorRight()
 		last_cursor_pos = cursor_pos;
 		cursor_pos++;
 		setCursor();
-		renderInputTextFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	}
 }
 
@@ -483,15 +492,41 @@ void InputField::pass_characters(char* chars) {
 			++chars;
 		}
 		InputField::setCursor();
-		renderInputTextFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	}
 }
 
 bool InputField::can_type()
 {
+	if (line_ptr)
+	{
+		ChatLine* c = line_ptr;
+		if (c->parent && c->parent->type == CHILD_TYPE::DISPLAY_BOX)
+		{
+			DisplayBox* displayBox = (DisplayBox*)c->parent;
+			bool can_type = false;
+			if (c->split)
+			{
+				auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
+				while (it != displayBox->chat_lines.end() && (*it)->split && *(it + 1) == (*it)->split)
+				{
+					ChatLine* split = *(it + 1);
+					if (split && !split->split)
+					{
+						if (split->can_type())
+						{
+							printf("hello\n");
+							return true;
+						}
+					}
+					it++;
+				}
+			}
+		}
+	}
 	BasicInterface& param = *InputField::border;
 	double aW = param.getActualWidth();
-	SelectObject(hDC, topBtnFont);
+	SelectObject(hDC, font);
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
@@ -519,7 +554,18 @@ void InputField::handleBox()
 	if (focusChild == this)
 		removeFocus();
 	frame->children[index] = nullptr;
-	renderInputTextFocus = true;
+	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+	renderDrawings = true;
+	delete this;
+}
+
+void InputField::handleBox2()
+{
+	line_ptr = nullptr;
+	if (focusChild == this)
+		removeFocus();
+	frame->children[index] = nullptr;
+	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 	renderDrawings = true;
 	delete this;
 }
@@ -528,9 +574,23 @@ void InputField::updateLine()
 {
 	ChatLine* c = line_ptr;
 	if (c)
+	{
 		c->setText(input);
-	renderInputTextFocus = true;
-	renderDrawings = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+		renderDrawings = true;
+	}
+}
+
+void InputField::updateInput(ChatLine* c)
+{
+	if (c)
+	{
+		line_ptr = c;
+		input = c->getText();
+		setCursor();
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+		renderDrawings = true;
+	}
 }
 
 void InputField::handleEntry()
@@ -598,7 +658,7 @@ void CloseButton::setFocus() {
 	if (!CloseButton::focus) {
 		if (focusChild) {
 			focusChild->removeFocus();
-			updateLastFocus = true;
+			RenderChild(lastFocus);
 		}
 		CloseButton::focus = true;
 		focusChild = this;
@@ -687,7 +747,7 @@ void ClickButton::setFocus() {
 	if (!ClickButton::focus) {
 		if (focusChild) {
 			focusChild->removeFocus();
-			updateLastFocus = true;
+			RenderChild(lastFocus);
 		}
 		ClickButton::focus = true;
 		focusChild = this;
@@ -857,7 +917,7 @@ void ComboBox::setFocus() {
 		if (focusChild)
 		{
 			focusChild->removeFocus();
-			updateLastFocus = true;
+			RenderChild(lastFocus);
 		}
 		ComboBox::focus = true;
 		focusChild = this;
@@ -899,11 +959,9 @@ int ComboBox::handleClick(ChildFrame* clicked, int x, int y)
 	return 0;
 }
 
-DisplayBox::DisplayBox(InterfaceFrame* frame, std::vector<ChatLine*> chat_lines, int numBlocks, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
+DisplayBox::DisplayBox(InterfaceFrame* frame, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
 	DisplayBox::frame = frame;
-	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::centered = centerText;
-	DisplayBox::numBlocks = numBlocks;
 	DisplayBox::focus = false;
 	DisplayBox::editable = false;
 	DisplayBox::type = CHILD_TYPE::DISPLAY_BOX;
@@ -969,7 +1027,7 @@ void DisplayBox::prepare()
 			{
 				m->setText(rtrim(ltrim(store[s_size - 1])));
 
-				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type);
+				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type, this);
 				it = DisplayBox::chat_lines.insert(it, c) + 1;
 
 				c->split = m;
@@ -1032,9 +1090,9 @@ void DisplayBox::prepare()
 
 	while (chat_lines.size() < numBlocks) {
 		if (prune_top)
-			chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN));
+			chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN, this));
 		else
-			chat_lines.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+			chat_lines.push_back(new ChatLine("", CHAT_TYPE::MAIN, this));
 	}
 
 	if (reset_idx) {
@@ -1043,7 +1101,7 @@ void DisplayBox::prepare()
 	}
 }
 
-void DisplayBox::editText(ChatLine* line, int x, int y)
+InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 {
 	InputField* input_field = nullptr;
 	std::string str = line->getText();
@@ -1078,6 +1136,7 @@ void DisplayBox::editText(ChatLine* line, int x, int y)
 		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
+
 	}
 	else
 	{
@@ -1094,10 +1153,18 @@ void DisplayBox::editText(ChatLine* line, int x, int y)
 	{
 		frame->children[input_field->index = (index + 1)] = input_field;
 		input_field->setFocus();
-		renderInputTextFocus = true;
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderInterfaces = true;
 		renderDrawings = true;
+		return input_field;
 	}
+	return nullptr;
+}
+
+void DisplayBox::setList(std::vector<ChatLine*> chat_lines, int numBlocks)
+{
+	DisplayBox::chat_lines = chat_lines;
+	DisplayBox::numBlocks = numBlocks;
 }
 
 void DisplayBox::doDrawing() {
@@ -1181,7 +1248,7 @@ void DisplayBox::setFocus() {
 	if (!DisplayBox::focus) {
 		if (focusChild) {
 			focusChild->removeFocus();
-			updateLastFocus = true;
+			RenderChild(lastFocus);
 		}
 		DisplayBox::focus = true;
 		focusChild = this;
@@ -1255,7 +1322,6 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 					switch (this->index)
 					{
 					case CONTROLLER_LIST_BOX:
-						std::cout << "hello there!!" << std::endl;
 						//handle controller click
 						controller_info_box->clearLines();
 
@@ -1273,15 +1339,15 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 								{
 									controller_info_box->addLineTop(new ChatLine(
 										"Vis Range: " + std::to_string(controller_selected->getVisibility()),
-										CHAT_TYPE::MAIN));
-									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
-									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN));
+										CHAT_TYPE::MAIN, controller_info_box));
+									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN, controller_info_box));
+									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN, controller_info_box));
 									controller_info_box->addLineTop(new ChatLine(controller_selected->getIdentity()->login_name
 										+ " (" + CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")",
-										CHAT_TYPE::MAIN));
+										CHAT_TYPE::MAIN, controller_info_box));
 
 									controller_info_box->addLineTop(new ChatLine(controller_selected->getCallsign(),
-										CHAT_TYPE::MAIN));
+										CHAT_TYPE::MAIN, controller_info_box));
 								}
 							}
 						}
@@ -1367,12 +1433,12 @@ void DisplayBox::updatePos(double x, double width, double y, double height)
 
 
 void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
-	ChatLine* c = new ChatLine(text, type);
+	ChatLine* c = new ChatLine(text, type, this);
 	addLine(c);
 }
 
 void DisplayBox::addLineTop(std::string text, CHAT_TYPE type) {
-	ChatLine* c = new ChatLine(text, type);
+	ChatLine* c = new ChatLine(text, type, this);
 	addLineTop(c);
 }
 
@@ -1534,10 +1600,13 @@ int Label::handleClick(ChildFrame* clicked, int x, int y)
 	return 0;
 }
 
-ChatLine::ChatLine(std::string line, CHAT_TYPE type)
+ChatLine::ChatLine(std::string line, CHAT_TYPE type, ChildFrame* parent)
 {
 	ChatLine::line = line;
 	ChatLine::type = type;
+	ChatLine::font = &topBtnFont;
+	ChatLine::base = &topButtonBase;
+	ChatLine::parent = parent;
 }
 
 ChatLine::~ChatLine()
@@ -1611,6 +1680,20 @@ bool ChatLine::in_bounds_text(int x, int y)
 	double vertx[4] = { _x, _x, (_x + _s_x), (_x + _s_x) };
 	double verty[4] = { _y, (_y + _s_y), (_y + _s_y), _y };
 	return pnpoly(4, vertx, verty, x, y);
+}
+
+bool ChatLine::can_type()
+{
+	BasicInterface& param = *ChatLine::parent->border;
+	double aW = param.getActualWidth();
+	SelectObject(hDC, font);
+	TEXTMETRIC tm;
+	GetTextMetrics(hDC, &tm);
+	long ave = tm.tmAveCharWidth;
+	int maxChars = aW / ave;
+	if (ChatLine::line.size() < (maxChars - 1))
+		return true;
+	return false;
 }
 
 ChildFrame::~ChildFrame()

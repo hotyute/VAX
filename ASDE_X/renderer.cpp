@@ -20,8 +20,8 @@ std::vector<Mirror*> mirrors;
 std::vector<double*> closures, wnd_closures;
 
 bool renderSector = false, renderSectorColours = false,
-renderButtons = false, renderLegend = false, renderInterfaces = false, renderInputTextFocus = false, renderConf = false,
-renderDate = false, renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
+renderButtons = false, renderLegend = false, renderInterfaces = false, renderConf = false, renderDate = false,
+renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
 renderAllInputText = false, renderClosures = false;
 
 bool convert_closures = false;
@@ -447,49 +447,8 @@ void DrawInterfaces() {
 	CallFocuses();
 
 	//all input text from all frames
-	if (renderInputTextFocus) {
-		if (updateLastFocus && lastFocus != nullptr && lastFocus->type == CHILD_TYPE::INPUT_FIELD) {
-			InputField* lastFocusField = (InputField*)lastFocus;
-			glDeleteLists(lastFocusField->inputTextDl, 1);
-			glDeleteLists(lastFocusField->inputCursorDl, 1);
-			std::string l_input;
-			if (lastFocusField->p_protected)
-			{
-				l_input = lastFocusField->pp_input;
-			}
-			else
-			{
-				l_input = lastFocusField->input;
-			}
-			RenderInputText(*lastFocusField, lastFocusField->inputTextDl, l_input, lastFocusField->centered);
-			RenderInputCursor(*lastFocusField, lastFocusField->inputCursorDl, lastFocusField->cursor_input, lastFocusField->centered);
-			updateLastFocus = false;
-		}
-		if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
-			InputField* focusField = (InputField*)focusChild;
-			glDeleteLists(focusField->inputTextDl, 1);
-			glDeleteLists(focusField->inputCursorDl, 1);
-			std::string f_input;
-			if (focusField->p_protected) {
-				f_input = focusField->pp_input;
-			}
-			else {
-				f_input = focusField->input;
-			}
-			RenderInputText(*focusField, focusField->inputTextDl, f_input, focusField->centered);
-			RenderInputCursor(*focusField, focusField->inputCursorDl, focusField->cursor_input, focusField->centered);
-		}
-		renderInputTextFocus = false;
-	}
-	if (renderAllInputText)
-	{
-		RenderInterfaceInputText(true);
-		renderAllInputText = false;
-	}
-	else
-	{
-		RenderInterfaceInputText(false);
-	}
+	RenderInterfaceInputText();
+
 	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render) {
 			if (frame->renderAllLabels) {
@@ -1343,7 +1302,7 @@ void RenderConf() {
 	glPrint(config2.c_str(), &confBase);
 	linesY += (size.cy - (size.cy * config_line_sep));
 
-	std::string config3 = "ACID" + (ASEL ? " [" +ASEL->getCallsign() + "]" : "");
+	std::string config3 = "ACID" + (ASEL ? " [" + ASEL->getCallsign() + "]" : "");
 	size = getTextExtent(config3);
 	glRasterPos2f(30.0f, (GLfloat)(CLIENT_HEIGHT - (CLIENT_HEIGHT / 6.0)) - linesY);
 	glPrint(config3.c_str(), &confBase);
@@ -2183,10 +2142,10 @@ void aircrafts_to_mirrors()
 void collisions_to_mirrors()
 {
 	if (Collision_Map.size() > 0) {
-		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) 
+		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it)
 		{
 			Collision* collision = it->second;
-			if (collision != NULL) 
+			if (collision != NULL)
 			{
 				glDeleteLists(collision->collLineDL, 1);
 
@@ -2308,6 +2267,46 @@ void CallInputTexts(InterfaceFrame* frame, InputField* field) {
 	}
 }
 
+bool RenderChild(ChildFrame* child)
+{
+	if (child)
+	{
+		child->render = true;
+		return true;
+	}
+	return false;
+}
+
+bool RenderChild()
+{
+	if (focusChild)
+	{
+		focusChild->render = true;
+		return true;
+	}
+	return false;
+}
+
+bool RenderChild(ChildFrame* child, CHILD_TYPE type)
+{
+	if (child && child->type == type)
+	{
+		child->render = true;
+		return true;
+	}
+	return false;
+}
+
+bool RenderFocusChild(CHILD_TYPE type)
+{
+	if (focusChild && focusChild->type == type)
+	{
+		focusChild->render = true;
+		return true;
+	}
+	return false;
+}
+
 void CallInputCursor(InterfaceFrame* frame, InputField* field) {
 	if (frame->render)
 	{
@@ -2329,13 +2328,16 @@ void CallInputCursor(InterfaceFrame* frame, InputField* field) {
 	}
 }
 
-void RenderInterfaceInputText(bool do_all) {
+void RenderInterfaceInputText() {
 	//frame specific input text
 	for (InterfaceFrame* frame : rendered_frames) {
 		if (frame && frame->render) {
-			if (frame->renderAllInputText || do_all) {
-				for (ChildFrame* child : frame->children) {
-					if (child != NULL && child->type == CHILD_TYPE::INPUT_FIELD) {
+			for (ChildFrame* child : frame->children)
+			{
+				if (child && (child->render || frame->renderAllInputText || renderAllInputText))
+				{
+					if (child->type == CHILD_TYPE::INPUT_FIELD)
+					{
 						InputField* field = (InputField*)child;
 						if (field->inputTextDl != 0) {
 							glDeleteLists(field->inputTextDl, 1);
@@ -2355,8 +2357,8 @@ void RenderInterfaceInputText(bool do_all) {
 						RenderInputText(*field, field->inputTextDl, f_input, field->centered);
 						RenderInputCursor(*field, field->inputCursorDl, field->cursor_input, field->centered);
 					}
+					child->render = false;
 				}
-				frame->renderAllInputText = false;
 			}
 			for (ChildFrame* child : frame->children) {
 				if (child) {
@@ -2367,8 +2369,11 @@ void RenderInterfaceInputText(bool do_all) {
 					}
 				}
 			}
+			frame->renderAllInputText = false;
 		}
 	}
+
+	renderAllInputText = false;
 }
 
 void draw_point(double x, double y)

@@ -234,7 +234,7 @@ void check_add_ctrl_list(Controller& controller)
 void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
-	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
+	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN, controller_list_box);
 	std::string controller_user = "";
 	for (size_t i = 0; i < 7; i++)
 	{
@@ -267,7 +267,7 @@ void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
-	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN);
+	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box);
 	std::string controller_user = "";
 	for (size_t i = 0; i < 4; i++)
 	{

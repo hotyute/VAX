@@ -145,13 +145,14 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		Label* route_label = new Label(fp_frame, "Route:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		route_label->centered = 2;
 		fp_frame->children[route_label->index = FP_ROUTE_LABEL] = route_label;
-		std::vector<ChatLine*> list;
-		list.push_back(new ChatLine(route, CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
 		double route_box_size = 50.0;
-		DisplayBox* displayBox = new DisplayBox(fp_frame, list, 3, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
+		DisplayBox* displayBox = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
+		std::vector<ChatLine*> list;
+		list.push_back(new ChatLine(route, CHAT_TYPE::MAIN, displayBox));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
+		displayBox->setList(list, 3);
 		displayBox->editable = true;
 		fp_frame->children[displayBox->index = FP_ROUTE_BOX] = displayBox;
 
@@ -161,13 +162,15 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		Label* remarks_label = new Label(fp_frame, "Remarks:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		remarks_label->centered = 2;
 		fp_frame->children[remarks_label->index = FP_REMARKS_LABEL] = remarks_label;
-		std::vector<ChatLine*> remarks_list;
-		remarks_list.push_back(new ChatLine(remarks, CHAT_TYPE::MAIN));
-		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN));
+		
 		route_box_size = 30.0;
-		DisplayBox* remarks_box = new DisplayBox(fp_frame, remarks_list, 2, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
+		DisplayBox* remarks_box = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
 		remarks_box->editable = true;
+		std::vector<ChatLine*> remarks_list;
+		remarks_list.push_back(new ChatLine(remarks, CHAT_TYPE::MAIN, remarks_box));
+		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN, remarks_box));
+		remarks_box->setList(remarks_list, 2);
 		fp_frame->children[remarks_box->index = FP_REMARKS_BOX] = remarks_box;
 
 		CloseButton* fp_closeb = new CloseButton(fp_frame, 15, 15);

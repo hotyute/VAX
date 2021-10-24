@@ -20,7 +20,7 @@ extern std::vector<double*> closures, wnd_closures;
 
 extern std::string heavy_text, regular_text;
 
-extern bool renderSector, renderSectorColours, renderButtons, renderLegend, renderInterfaces, renderInputTextFocus,
+extern bool renderSector, renderSectorColours, renderButtons, renderLegend, renderInterfaces,
 renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderClosures;
 
 extern bool convert_closures;
@@ -119,8 +119,16 @@ void CallInputTexts(InterfaceFrame* frame, InputField* field);
 
 void CallInputCursor(InterfaceFrame* frame, InputField* field);
 
-void RenderInterfaceInputText(bool do_all);
+void RenderInterfaceInputText();
 
 const std::string* currentDateTime();
+
+bool RenderChild(ChildFrame* child);
+
+bool RenderChild(ChildFrame* child, CHILD_TYPE type);
+
+bool RenderFocus();
+
+bool RenderFocusChild(CHILD_TYPE type);
 
 #endif

@@ -61,7 +61,7 @@ public:
 	BasicInterface* border = nullptr;
 	CHILD_TYPE type;
 	int index;
-	bool focus, show_border = true;
+	bool focus, show_border = true, render = false;
 	virtual void updatePos(double x, double width, double y, double height) = 0;
 	virtual void doDrawing() = 0;
 	virtual void setFocus() = 0;
@@ -78,8 +78,11 @@ private:
 	CHAT_TYPE type;
 	int _x = -1, _y = -1, _s_x = -1, _s_y = -1, _p_x = -1, _p_y = -1;
 public:
+	ChildFrame* parent = nullptr;
 	ChatLine* split = nullptr;
-	ChatLine(std::string, CHAT_TYPE);
+	HFONT* font = nullptr;
+	unsigned int* base = nullptr;
+	ChatLine(std::string, CHAT_TYPE, ChildFrame* parent = nullptr);
 	~ChatLine();
 	void setType(CHAT_TYPE type);
 	CHAT_TYPE getType();
@@ -96,6 +99,7 @@ public:
 	int size_y() { return _p_y; }
 	bool in_bounds(int x, int y);
 	bool in_bounds_text(int x, int y);
+	bool can_type();
 	void reset_p() { this->_x = -1; this->_y = -1; this->_s_x = -1; this->_s_y = -1; }
 	bool has_p() { this->_x != -1 && this->_y != -1; }
 };
@@ -131,6 +135,7 @@ public:
 	int handleClick(ChildFrame* clicked, int x, int y);
 
 	void pushInput(bool, char);
+	void setCursorAtStart();
 	void setCursorAtEnd();
 	void setCursor();
 	void cursorLeft();
@@ -143,7 +148,9 @@ public:
 	void pass_characters(char* chars);
 	bool can_type();
 	void handleBox();
+	void handleBox2();
 	void updateLine();
+	void updateInput(ChatLine* c);
 	void handleEntry();
 };
 
@@ -198,10 +205,10 @@ class DisplayBox : public ChildFrame {
 private:
 	int noncp = 2;
 public:
-	DisplayBox(InterfaceFrame*, std::vector<ChatLine*>, int, double, double, double, double, double, double, bool);
+	DisplayBox(InterfaceFrame* frame, double, double, double, double, double, double, bool);
 	~DisplayBox();
 public:
-	int numBlocks;
+	int numBlocks = 0;
 	int read_index = 0, max_history = 100;
 	bool centered, editable = false, prune_top = false;
 	std::vector<ChatLine*> chat_lines;
@@ -227,7 +234,8 @@ public:
 	void SetChatTextColour(CHAT_TYPE t);
 	void clearLines();
 	void prepare();
-	void editText(ChatLine* line, int x, int y);
+	InputField* editText(ChatLine* line, int x, int y);
+	void setList(std::vector<ChatLine*> chat_lines, int numBlocks);
 
 	bool click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset);
 	bool click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset);
@@ -256,7 +264,6 @@ extern std::vector<InterfaceFrame*> frames_def;
 extern std::vector<InterfaceFrame*> rendered_frames;
 extern ChildFrame* focusChild, * lastFocus;
 extern std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
-extern bool updateLastFocus;
 extern InterfaceFrame* _openedframe;
 
 
