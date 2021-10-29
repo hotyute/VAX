@@ -1024,7 +1024,7 @@ void DisplayBox::prepare()
 
 			if (remaining > 0)
 			{
-				m->setText(/*rtrim(ltrim(*/store[s_size - 1]/*))*/);
+				m->setText(rtrim(ltrim(store[s_size - 1])));
 
 				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type, this);
 				it = DisplayBox::chat_lines.insert(it, c) + 1;
@@ -1088,7 +1088,8 @@ void DisplayBox::prepare()
 		else ++i2;
 	}
 
-	while (chat_lines.size() < numBlocks) {
+	while (chat_lines.size() < numBlocks) 
+	{
 		if (prune_top)
 			chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN, this));
 		else
@@ -1108,14 +1109,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 
 	if (frame->children[(index + 1)])
 	{
-		((InputField*)frame->children[index + 1])->handleBox();
-	}
-
-	std::string temp;
-	int str_size = str.size();
-	while (str_size > 0) {
-		temp += " ";
-		--str_size;
+		((InputField*)frame->children[(index + 1)])->handleBox();
 	}
 
 	if (empty(str))
@@ -1134,7 +1128,6 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field->line_ptr = line;
 		input_field->show_border = false;
 		input_field->setInput(str, true);
-		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
 		input_field->caps = DisplayBox::caps;
@@ -1145,12 +1138,16 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field->line_ptr = line;
 		input_field->show_border = false;
 		input_field->setInput(str, true);
-		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
 		input_field->caps = DisplayBox::caps;
 	}
 
+	return input_field;
+}
+
+bool DisplayBox::placeEdit(InputField* input_field)
+{
 	if (input_field)
 	{
 		frame->children[input_field->index = (index + 1)] = input_field;
@@ -1158,15 +1155,67 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderInterfaces = true;
 		renderDrawings = true;
-		return input_field;
+		return true;
 	}
-	return nullptr;
+	return false;
 }
 
 void DisplayBox::setList(std::vector<ChatLine*> chat_lines, int numBlocks)
 {
 	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::numBlocks = numBlocks;
+}
+
+void DisplayBox::gen_points()
+{
+	BasicInterface& param = *DisplayBox::border;
+	double x;
+	double aW = param.getActualWidth();
+	if (DisplayBox::centered) {
+		x = (param.getStartX() + (aW / 2));
+	}
+	else {
+		x = param.getStartX();
+	}
+	int dbox_padding = 0;
+	double y_height = ((param.getActualHeight() - dbox_padding) / DisplayBox::numBlocks);
+
+	double last_end_y = -1;
+
+
+	for (size_t i = read_index; i < read_index + numBlocks; i++)
+	{
+		ChatLine* line = DisplayBox::chat_lines[i];
+		std::string text = line->getText();
+		//std::cout << text << ", " << i << std::endl;
+		double y, endY;
+		if (last_end_y != -1)
+		{
+			y = (last_end_y - (y_height / 2));
+			endY = (last_end_y - y_height);
+		}
+		else {
+			y = (param.getEndY() - (y_height / 2));
+			endY = (param.getEndY() - y_height);
+		}
+		SelectObject(hDC, *font);
+		TEXTMETRIC tm;
+		GetTextMetrics(hDC, &tm);
+		long ave = tm.tmAveCharWidth;
+		SIZE size = getTextExtent(text);
+		long long cx, cy;
+		if (text.size() == 0 || (size.cx == 0 && size.cy == 0))
+			cx = ave, cy = tm.tmHeight;
+		else
+			cx = size.cx, cy = size.cy;
+		//int tH = tm.tmAscent - tm.tmInternalLeading;
+		double textXPos;
+		DisplayBox::centered ? (textXPos = x - (cx / 2.0)) : (textXPos = x + noncp);
+		double textYPos = y - ((cy / 2.0) / 2.0);
+		last_end_y = endY;
+
+		line->set_p(textXPos, textYPos, cx, cy, param.getActualWidth(), y_height);
+	}
 }
 
 void DisplayBox::doDrawing() {
@@ -1215,9 +1264,9 @@ void DisplayBox::doDrawing() {
 		long ave = tm.tmAveCharWidth;
 		SIZE size = getTextExtent(text);
 		long long cx, cy;
-		if (text.size() == 0 || (size.cx == 0 && size.cy == 0)) 
+		if (text.size() == 0 || (size.cx == 0 && size.cy == 0))
 			cx = ave, cy = tm.tmHeight;
-		else 
+		else
 			cx = size.cx, cy = size.cy;
 		//int tH = tm.tmAscent - tm.tmInternalLeading;
 		double textXPos;
@@ -1318,7 +1367,8 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 				{
 					((InputField*)frame->children[index + 1])->handleBox();
 				}
-				editText(line, x, y);
+				InputField* input_field = editText(line, x, y);
+				placeEdit(input_field);
 			}
 			else
 			{

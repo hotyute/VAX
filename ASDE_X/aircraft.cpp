@@ -70,7 +70,7 @@ bool Aircraft::near_logic(std::string logic_id)
 		double decel1 = GetDecelerationDistance(speed, 0, 5);
 		Point2 decel_point1 = getLocFromBearing(latitude, longitude, decel1, heading);
 	}
-	return true;
+	return false;
 }
 
 Aircraft::~Aircraft()

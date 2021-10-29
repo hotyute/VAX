@@ -1670,6 +1670,7 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 				int pos = it - displayBox->chat_lines.begin();
 				focusField->updateLine();
 				displayBox->prepare();
+				displayBox->gen_points();
 				focusField->updateInput(displayBox->chat_lines[pos]);
 			}
 		}
@@ -1696,7 +1697,9 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 				int pos = it - displayBox->chat_lines.begin();
 				focusField->updateLine();
 				displayBox->prepare();
+				displayBox->gen_points();
 				ChatLine* c2 = focusField->line_ptr;
+				printf("%d, %d\n", c2->get_x(), c2->get_y());
 				auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
 				int pos2 = it2 - displayBox->chat_lines.begin();
 				if (pos != pos2)
@@ -1705,9 +1708,9 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 					InputField* new_input = displayBox->editText(c2, c2->get_x(), c2->get_y());
 					if (new_input)
 					{
+						displayBox->placeEdit(new_input);
 						new_input->setCursorAtStart();
 						new_input->setFocus();
-						printf("%d, %d\n", pos, pos2);
 						renderAllInputText = true;
 						renderDrawings = true;
 					}

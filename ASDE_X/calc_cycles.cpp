@@ -260,6 +260,7 @@ void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 
 	controller_list_box->addLineTop(c);
 	controller_list_box->prepare();
+	controller_list_box->gen_points();
 
 	store.emplace(callsign, c);
 }
@@ -295,6 +296,7 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 
 	qlc_list_box->addLineTop(c);
 	qlc_list_box->prepare();
+	qlc_list_box->gen_points();
 
 	store.emplace(callsign, c);
 }

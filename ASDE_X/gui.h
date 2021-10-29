@@ -235,7 +235,9 @@ public:
 	void clearLines();
 	void prepare();
 	InputField* editText(ChatLine* line, int x, int y);
+	bool placeEdit(InputField* input_field);
 	void setList(std::vector<ChatLine*> chat_lines, int numBlocks);
+	void gen_points();
 
 	bool click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset);
 	bool click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset);
