@@ -494,7 +494,7 @@ void InputField::pass_characters(char* chars) {
 
 bool InputField::can_type()
 {
-	/*if (line_ptr)
+	if (line_ptr)
 	{
 		ChatLine* c = line_ptr;
 		if (c->parent && c->parent->type == CHILD_TYPE::DISPLAY_BOX)
@@ -517,9 +517,10 @@ bool InputField::can_type()
 					}
 					it++;
 				}
+				return false;
 			}
 		}
-	}*/
+	}
 	BasicInterface& param = *InputField::border;
 	double aW = param.getActualWidth();
 	SelectObject(hDC, *InputField::font);

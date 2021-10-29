@@ -1072,7 +1072,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (focusField.can_type()) {
 								focusField.pushInput(false, c2);
 								focusField.setCursor();
-								//forward_split_line(frame, (InputField*)focusChild);
+								forward_split_line(frame, (InputField*)focusChild);
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 							}
 						}
