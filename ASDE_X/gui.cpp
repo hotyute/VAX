@@ -271,8 +271,8 @@ return InterfaceFrame::inputFields;
 
 InputField::InputField(InterfaceFrame* frame, double width, double height) {
 	InputField::frame = frame;
-	font = &topBtnFont;
-	base = &topButtonBase;
+	InputField::font = &topBtnFont;
+	InputField::base = &topButtonBase;
 	InputField::p_protected = false;
 	InputField::editable = true;
 	InputField::numbers = false;
@@ -289,12 +289,8 @@ InputField::InputField(InterfaceFrame* frame, double width, double height) {
 
 InputField::InputField(InterfaceFrame* frame, double x, double width, double padding_x, double y, double height, double padding_y) {
 	InputField::frame = frame;
-	font = &topBtnFont;
-	base = &topButtonBase;
-	InputField::p_protected = false;
-	InputField::editable = true;
-	InputField::numbers = false;
-	InputField::centered = false;
+	InputField::font = &topBtnFont;
+	InputField::base = &topButtonBase;
 	InputField::focus = false;
 	InputField::type = CHILD_TYPE::INPUT_FIELD;
 	InputField::inputTextDl = 0;
@@ -371,13 +367,13 @@ void InputField::pushInput(bool uni, char c) {
 	if (InputField::p_protected)
 	{
 		if (uni) {
-			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, c) : InputField::pp_input.push_back(c);
+			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, caps ? toupper(c) : c) : InputField::pp_input.push_back(caps ? toupper(c) : c);
 		}
 		else {
 			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, '*') : InputField::pp_input.push_back('*');
 		}
 	}
-	ins ? InputField::input.insert(InputField::input.begin() + cursor_pos, c) : InputField::input.push_back(c);
+	ins ? InputField::input.insert(InputField::input.begin() + cursor_pos, caps ? toupper(c) : c) : InputField::input.push_back(caps ? toupper(c) : c);
 	InputField::cursor_input.push_back(' ');
 	last_cursor_pos = cursor_pos;
 	cursor_pos++;
@@ -498,7 +494,7 @@ void InputField::pass_characters(char* chars) {
 
 bool InputField::can_type()
 {
-	if (line_ptr)
+	/*if (line_ptr)
 	{
 		ChatLine* c = line_ptr;
 		if (c->parent && c->parent->type == CHILD_TYPE::DISPLAY_BOX)
@@ -523,10 +519,10 @@ bool InputField::can_type()
 				}
 			}
 		}
-	}
+	}*/
 	BasicInterface& param = *InputField::border;
 	double aW = param.getActualWidth();
-	SelectObject(hDC, font);
+	SelectObject(hDC, *InputField::font);
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
@@ -970,6 +966,8 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, double x, double width, double x_p
 	comboBounds->updateCoordinates();
 	DisplayBox::border = comboBounds;
 	DisplayBox::child_interfaces.push_back(comboBounds);
+	DisplayBox::font = &topBtnFont;
+	DisplayBox::base = &topButtonBase;
 }
 
 DisplayBox::~DisplayBox()
@@ -988,7 +986,7 @@ void DisplayBox::prepare()
 	BasicInterface& param = *DisplayBox::border;
 
 	double aW = param.getActualWidth();
-	SelectObject(hDC, topBtnFont);
+	SelectObject(hDC, *font);
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 
@@ -1025,7 +1023,7 @@ void DisplayBox::prepare()
 
 			if (remaining > 0)
 			{
-				m->setText(rtrim(ltrim(store[s_size - 1])));
+				m->setText(/*rtrim(ltrim(*/store[s_size - 1]/*))*/);
 
 				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type, this);
 				it = DisplayBox::chat_lines.insert(it, c) + 1;
@@ -1058,7 +1056,7 @@ void DisplayBox::prepare()
 				if (pos != std::string::npos)
 					next_text.erase(pos, store[0].length());
 
-				next_text = rtrim(ltrim(next_text));
+				//next_text = rtrim(ltrim(next_text));
 				if (next_text.size() > 0) {
 					n->setText(next_text);
 					continue;
@@ -1075,7 +1073,8 @@ void DisplayBox::prepare()
 
 	//prune
 	auto i2 = chat_lines.begin();
-	while (i2 != chat_lines.end()) {
+	while (i2 != chat_lines.end())
+	{
 		if (chat_lines.size() <= numBlocks)
 			break;
 		ChatLine* c = *i2;
@@ -1125,6 +1124,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field->show_border = false;
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
+		input_field->caps = DisplayBox::caps;
 	}
 	else if ((x != -1 && y != -1) && line->in_bounds_text(x, y))
 	{
@@ -1136,7 +1136,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
-
+		input_field->caps = DisplayBox::caps;
 	}
 	else
 	{
@@ -1147,6 +1147,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		line->setText(temp);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
+		input_field->caps = DisplayBox::caps;
 	}
 
 	if (input_field)
@@ -1207,23 +1208,27 @@ void DisplayBox::doDrawing() {
 			y = (param.getEndY() - (y_height / 2));
 			endY = (param.getEndY() - y_height);
 		}
+		SelectObject(hDC, *font);
+		TEXTMETRIC tm;
+		GetTextMetrics(hDC, &tm);
+		long ave = tm.tmAveCharWidth;
 		SIZE size = getTextExtent(text);
+		long long cx, cy;
+		if (text.size() == 0 || (size.cx == 0 && size.cy == 0)) 
+			cx = ave, cy = tm.tmHeight;
+		else 
+			cx = size.cx, cy = size.cy;
 		//int tH = tm.tmAscent - tm.tmInternalLeading;
 		double textXPos;
-		if (DisplayBox::centered)
-		{
-			textXPos = x - (size.cx / 2.0);
-		}
-		else {
-			textXPos = x + noncp;
-		}
-		double textYPos = y - ((size.cy / 2.0) / 2.0);
+		DisplayBox::centered ? (textXPos = x - (cx / 2.0)) : (textXPos = x + noncp);
+		double textYPos = y - ((cy / 2.0) / 2.0);
 		DisplayBox::SetChatTextColour(type);
 		glRasterPos2f(textXPos, textYPos);
-		glPrint(text.c_str(), &topButtonBase);
+		glPrint(text.c_str(), base);
 		last_end_y = endY;
 
-		line->set_p(textXPos, textYPos, size.cx, size.cy, param.getActualWidth(), y_height);
+		line->set_p(textXPos, textYPos, cx, cy, param.getActualWidth(), y_height);
+
 		displayed_lines.push_back(line);
 	}
 
@@ -1604,8 +1609,6 @@ ChatLine::ChatLine(std::string line, CHAT_TYPE type, ChildFrame* parent)
 {
 	ChatLine::line = line;
 	ChatLine::type = type;
-	ChatLine::font = &topBtnFont;
-	ChatLine::base = &topButtonBase;
 	ChatLine::parent = parent;
 }
 
@@ -1684,15 +1687,18 @@ bool ChatLine::in_bounds_text(int x, int y)
 
 bool ChatLine::can_type()
 {
-	BasicInterface& param = *ChatLine::parent->border;
-	double aW = param.getActualWidth();
-	SelectObject(hDC, font);
-	TEXTMETRIC tm;
-	GetTextMetrics(hDC, &tm);
-	long ave = tm.tmAveCharWidth;
-	int maxChars = aW / ave;
-	if (ChatLine::line.size() < (maxChars - 1))
-		return true;
+	if (parent)
+	{
+		BasicInterface& param = *ChatLine::parent->border;
+		double aW = param.getActualWidth();
+		SelectObject(hDC, *parent->font);
+		TEXTMETRIC tm;
+		GetTextMetrics(hDC, &tm);
+		long ave = tm.tmAveCharWidth;
+		int maxChars = aW / ave;
+		if (ChatLine::line.size() < (maxChars - 1))
+			return true;
+	}
 	return false;
 }
 

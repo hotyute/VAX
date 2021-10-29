@@ -1072,7 +1072,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							if (focusField.can_type()) {
 								focusField.pushInput(false, c2);
 								focusField.setCursor();
-								forward_split_line(frame, (InputField*)focusChild);
+								//forward_split_line(frame, (InputField*)focusChild);
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 							}
 						}
@@ -1392,6 +1392,7 @@ void conn_clean()
 	controller_map.clear();
 	acf_map.clear();
 	users_map.clear();
+	ASEL = nullptr;
 }
 
 DWORD WINAPI EventThread1(LPVOID lpParameter) {

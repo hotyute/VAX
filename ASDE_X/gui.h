@@ -60,6 +60,8 @@ public:
 	std::vector<BasicInterface*> child_interfaces;
 	BasicInterface* border = nullptr;
 	CHILD_TYPE type;
+	HFONT* font = nullptr;
+	unsigned int* base = nullptr;
 	int index;
 	bool focus, show_border = true, render = false;
 	virtual void updatePos(double x, double width, double y, double height) = 0;
@@ -80,8 +82,6 @@ private:
 public:
 	ChildFrame* parent = nullptr;
 	ChatLine* split = nullptr;
-	HFONT* font = nullptr;
-	unsigned int* base = nullptr;
 	ChatLine(std::string, CHAT_TYPE, ChildFrame* parent = nullptr);
 	~ChatLine();
 	void setType(CHAT_TYPE type);
@@ -110,12 +110,12 @@ public:
 	InputField(InterfaceFrame*, double, double);
 	InputField(InterfaceFrame* frame, double x, double width, double padding_x, double, double, double);
 public:
-	bool centered, editable, numbers;
+	bool centered = false, editable = true, numbers = false, caps = false;
 	HFONT* font = nullptr;
 	unsigned int* base = nullptr;
 	ChatLine* line_ptr = nullptr;
 	std::string pp_input;
-	bool p_protected; // password protection
+	bool p_protected = false; // password protection
 	std::string input;
 	std::string cursor_input;
 	int cursor_pos = 0, last_cursor_pos = 0;
@@ -210,7 +210,7 @@ public:
 public:
 	int numBlocks = 0;
 	int read_index = 0, max_history = 100;
-	bool centered, editable = false, prune_top = false;
+	bool centered, editable = false, prune_top = false, caps = false;
 	std::vector<ChatLine*> chat_lines;
 	std::vector<ChatLine*> displayed_lines;
 

@@ -154,6 +154,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
 		displayBox->setList(list, 3);
 		displayBox->editable = true;
+		displayBox->caps = true;
 		fp_frame->children[displayBox->index = FP_ROUTE_BOX] = displayBox;
 
 		//5th Line
@@ -167,6 +168,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		DisplayBox* remarks_box = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
 		remarks_box->editable = true;
+		remarks_box->caps = true;
 		std::vector<ChatLine*> remarks_list;
 		remarks_list.push_back(new ChatLine(remarks, CHAT_TYPE::MAIN, remarks_box));
 		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN, remarks_box));

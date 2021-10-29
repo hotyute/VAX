@@ -121,6 +121,8 @@ void decodePackets(int opCode, Stream& stream) {
 				check_del_ctrl_list(*((Controller*)user1));
 			}
 
+			if (ASEL == user1)
+				ASEL = nullptr;
 			delete user1;
 			userStorage1[index] = nullptr;
 
