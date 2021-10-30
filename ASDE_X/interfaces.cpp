@@ -88,6 +88,7 @@ void RenderConnect(double x_, double y_)
 	pass_label = new Label(connectFrame, "Password:", (x + 150.0), 120.0, 10.0, y + (height - 75.0), 20, -10.0);
 	connectFrame->children[pass_label->index = PASSWORD_LABEL] = pass_label;
 	connect_callsign = new InputField(connectFrame, x, 120.0, 10.0, y + (height - 50.0), 20, -10.0);
+	connect_callsign->caps = true;
 	connect_callsign->max_chars = 10;
 	connectFrame->children[connect_callsign->index = CALLSIGN_INPUT] = connect_callsign;
 	connect_fullname = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 50.0), 20, -10.0);
@@ -347,7 +348,6 @@ void sendMainChatMessage(InputField* focusField)
 	std::string text = ASEL ? ASEL->getCallsign() + ", " + focusField->input : focusField->input;
 	if (connected)
 	{
-
 		sendUserMessage(99998, ASEL ? ASEL->getCallsign() : "", text);
 	}
 	main_chat_box->resetReaderIdx();
