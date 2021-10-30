@@ -157,7 +157,7 @@ const double EARTH_RADIUS_NM = 3437.670013352;
 #define _WINPOS_FLIGHTPLAN 0
 #define _WINPOS_CTRLLIST 1
 #define _WINPOS_CONNECT 2
-#define _WINPOS_COMMS 1
+#define _WINPOS_COMMS 3
 
 #endif
 
