@@ -19,9 +19,22 @@ void RenderCommunications(bool open, double x_, double y_)
 	double spacing_x = 0.15, spacing_y = 0.07;
 	double start_x = 1.135, start_y = 0.10;
 
-	Radio* alpha = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
+	double radio_sep = 0.0;
+	const double _radsep_x = 30.0;
+
+	Radio* radio1_0 = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
 		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
-	communications->children[alpha->index = RADIOLINE1_0] = alpha;
+	communications->children[radio1_0->index = RADIOLINE1_0] = radio1_0;
+
+	radio_sep += _radsep_x;
+	Radio* radio1_1 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
+		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
+	communications->children[radio1_1->index = RADIOLINE1_1] = radio1_1;
+
+	radio_sep += _radsep_x;
+	Radio* radio1_2 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
+		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
+	communications->children[radio1_2->index = RADIOLINE1_2] = radio1_2;
 
 	CloseButton* closeb = new CloseButton(communications, 15, 15);
 	communications->children[closeb->index = COMMS_CLOSE] = closeb;

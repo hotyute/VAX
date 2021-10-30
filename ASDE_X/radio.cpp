@@ -14,6 +14,9 @@ Radio::Radio(InterfaceFrame* frame, double x, double width, double y, double hei
 
 void Radio::updatePos(double x, double width, double y, double height)
 {
+	Radio::border->setPosX(x), Radio::border->setPosY(y);
+	Radio::border->setWidth(width), Radio::border->setHeight(height);
+	Radio::border->updateCoordinates();
 }
 
 void Radio::doDrawing()
