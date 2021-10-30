@@ -6,6 +6,7 @@
 #include "gui.h"
 #include "constants.h"
 #include "flightplan.h"
+#include "displaybox.h"
 
 #define IDC_STATIC -1
 #define IDR_MYMENU 101
@@ -22,6 +23,7 @@
 #define ID_SETTINGS_DEPARTS 40007
 #define ID_SETTINGS_SQUAWKS 40008
 #define ID_SETTINGS_CLIST 40009
+#define ID_SETTINGS_COMMS 40011
 
 #define IDW_SOUND1 1000
 #define IDW_SOUND2 1001

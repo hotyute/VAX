@@ -50,6 +50,11 @@ void Controller::WindowMove(InterfaceFrame* window, int x, int y)
 		wind = _WINPOS_CONNECT;
 		break;
 	}
+	case COMMS_INTERFACE:
+	{
+		wind = _WINPOS_COMMS;
+		break;
+	}
 	}
 
 	if (wind != -1)

@@ -1,8 +1,42 @@
 #include "interfaces.h"
+#include "radio.h"
+#include "displaybox.h"
 
 std::vector<std::string> pm_callsigns(20);
 
-InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr;
+InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr, * communications = nullptr;
+
+void RenderCommunications(bool open, double x_, double y_)
+{
+	communications = new InterfaceFrame(COMMS_INTERFACE);
+
+	communications->title = "COMMUNICATIONS";
+
+	int width = 310, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	int height = 500, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+	communications->Pane1(x, width, y, height);
+
+	double spacing_x = 0.15, spacing_y = 0.07;
+	double start_x = 1.135, start_y = 0.10;
+
+	Radio* alpha = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
+		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
+	communications->children[alpha->index = RADIOLINE1_0] = alpha;
+
+	CloseButton* closeb = new CloseButton(communications, 15, 15);
+	communications->children[closeb->index = COMMS_CLOSE] = closeb;
+
+	if (open)
+	{
+		communications->doOpen(true, true);//delete's old object while opening, thisshould be before setting frame vector
+	}
+	else
+	{
+		communications->doClose();
+	}
+
+	communications->doInsert();
+}
 
 void RenderControllerList(bool open, double x_, double y_)
 {

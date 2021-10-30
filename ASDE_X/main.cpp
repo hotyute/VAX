@@ -199,8 +199,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
-		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide Squawk Codes...");
+		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide All Squawk Codes...");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_CLIST, L"&Controller List...");
+		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_COMMS, L"&Communications Panel...");
 		AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
 
 		SetMenu(hwnd, hMenuBar);
@@ -383,6 +384,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			else if (!controller_list->render)
 			{
 				controller_list->doOpen(true, true);
+			}
+		}
+		break;
+		case ID_SETTINGS_COMMS:
+		{
+			if (communications == NULL) {
+				//TODO save X and Y positions when moved
+				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
+				RenderCommunications(true, wdata[0], wdata[1]);
+			}
+			else if (!communications->render)
+			{
+				communications->doOpen(true, true);
 			}
 		}
 		break;

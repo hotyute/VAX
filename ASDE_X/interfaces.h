@@ -6,6 +6,8 @@
 
 extern std::vector<std::string> pm_callsigns;
 
+void RenderCommunications(bool open, double x_, double y_);
+
 void RenderControllerList(bool open, double x_, double y_);
 
 void RenderConnect(double x, double y);
@@ -26,6 +28,6 @@ void sendPrivateChatMessage(InterfaceFrame& frame, InputField* focusField);
 
 void sendATCMessage(std::string message);
 
-extern InterfaceFrame* controller_list, *main_chat, *terminal_cmd;
+extern InterfaceFrame* controller_list, *main_chat, *terminal_cmd, *communications;
 
 #endif

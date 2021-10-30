@@ -105,6 +105,12 @@
     <ClCompile Include="controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="radio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="displaybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -198,6 +204,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="radio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="displaybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

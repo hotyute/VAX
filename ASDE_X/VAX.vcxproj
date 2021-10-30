@@ -97,6 +97,7 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="constants.cpp" />
     <ClCompile Include="controller.cpp" />
+    <ClCompile Include="displaybox.cpp" />
     <ClCompile Include="dxfdrawing.cpp" />
     <ClCompile Include="events.cpp" />
     <ClCompile Include="filereader.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="packets.cpp" />
     <ClCompile Include="point2d.cpp" />
     <ClCompile Include="projection.cpp" />
+    <ClCompile Include="radio.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="spline.cpp" />
     <ClCompile Include="spline2.cpp" />
@@ -129,6 +131,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="controller.h" />
+    <ClInclude Include="displaybox.h" />
     <ClInclude Include="dxfdrawing.h" />
     <ClInclude Include="events.h" />
     <ClInclude Include="filereader.h" />
@@ -142,6 +145,7 @@
     <ClInclude Include="packets.h" />
     <ClInclude Include="point2d.h" />
     <ClInclude Include="projection.h" />
+    <ClInclude Include="radio.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="spline.h" />
