@@ -291,13 +291,24 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 		return 0;
 	}
 
+	struct hostent* to;
+	/* generate address */
+	if ((to = gethostbyname(saddr.c_str())) == NULL)
+	{
+		printf("gethostbyname() error...\n");
+		MessageBox(hWnd, L"Host Name Error!", L"Notice",
+			MB_OK | MB_ICONINFORMATION);
+		return 0;
+	}
+
 	SOCKADDR_IN addr;
 
 	int addrlen = sizeof(addr);
 
 	sConnect = socket(AF_INET, SOCK_STREAM, NULL);
 
-	addr.sin_addr.s_addr = inet_addr(saddr.c_str());
+	//addr.sin_addr.s_addr = inet_addr(saddr.c_str());
+	memcpy(&addr.sin_addr, to->h_addr_list[0], to->h_length);
 
 	addr.sin_port = htons(port);
 

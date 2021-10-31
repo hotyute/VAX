@@ -1329,7 +1329,7 @@ void moveInterfacesOnSize()
 
 void connect() {
 	//34.142.27.168
-	std::string ip = "34.142.27.168";
+	std::string ip = "vax.ddns.net";
 #ifdef _DEBUG
 	ip = "127.0.0.1";
 #endif
