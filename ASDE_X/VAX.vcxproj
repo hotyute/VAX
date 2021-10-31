@@ -148,6 +148,7 @@
     <ClInclude Include="point2d.h" />
     <ClInclude Include="projection.h" />
     <ClInclude Include="radio.h" />
+    <ClInclude Include="raiiclipboard.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="spline.h" />

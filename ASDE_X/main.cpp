@@ -19,6 +19,7 @@
 #include "interfaces.h"
 #include "calc_cycles.h"
 #include "topbutton.h"
+#include "raiiclipboard.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -64,6 +65,8 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField);
 void forward_split_line(InterfaceFrame& frame, InputField* focusField);
 
 void open_chat(std::string call_sign);
+
+std::string GetClipboardText();
 
 /* Components */
 
@@ -816,12 +819,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == VK_SHIFT) {
 			if (!SHIFT_DOWN) {
-				if (!CAPS) {
-					CAPS = true;
-				}
-				else {
-					CAPS = false;
-				}
+				CAPS = !CAPS;
 				SHIFT_DOWN = true;
 			}
 		}
@@ -857,12 +855,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == 0x11) {//control (any)
-
+			CONTROL = true;
 		}
 		else if (wParam == VK_LCONTROL) {
-
+			CONTROL = true;
 		}
 		else if (wParam == VK_RCONTROL) {
+			CONTROL = true;
 		}
 		else if (wParam == 0xFF) {//FN Key
 
@@ -1082,18 +1081,36 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 				InputField& focusField = *(InputField*)focusChild;
 				InterfaceFrame& frame = *focusField.getFrame();
-				if (focusField.editable) {
-					if (frame.interfaces[FRAME_BOUNDS]) {
-						BYTE keyboardState[256];
-						BOOL ks = GetKeyboardState(keyboardState);
-						WORD ascii;
-						int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
-						if (len == 1) {
-							if (focusField.can_type()) {
-								focusField.pushInput(false, c2);
+				if (focusField.editable)
+				{
+					if (frame.interfaces[FRAME_BOUNDS])
+					{
+						if (CONTROL && (c2 == 'v' || c2 == 'V'))
+						{
+							std::string clip = GetClipboardText();
+							for (auto& s : clip)
+							{
+								if (!focusField.can_type())
+									break;
+								focusField.pushInput(false, s);
 								focusField.setCursor();
 								forward_split_line(frame, (InputField*)focusChild);
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+							}
+						}
+						else
+						{
+							BYTE keyboardState[256];
+							BOOL ks = GetKeyboardState(keyboardState);
+							WORD ascii;
+							int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
+							if (len == 1) {
+								if (focusField.can_type()) {
+									focusField.pushInput(false, c2);
+									focusField.setCursor();
+									forward_split_line(frame, (InputField*)focusChild);
+									RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+								}
 							}
 						}
 					}
@@ -1104,19 +1121,31 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	break;
 	case WM_KEYUP:
 	{
-		if (wParam == VK_CAPITAL) {
+		switch (wParam)
+		{
+		case VK_CAPITAL:
+		{
 			if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
 				CAPS = true;
 			else
 				CAPS = false;
+			break;
 		}
-		if (wParam == VK_SHIFT) {
+		case VK_SHIFT:
+		{
 			if (SHIFT_DOWN) {
 				if (CAPS) {
 					CAPS = false;
 				}
 				SHIFT_DOWN = false;
 			}
+			break;
+		}
+		case VK_LCONTROL:
+		{
+			CONTROL = false;
+			break;
+		}
 		}
 	}
 	break;
@@ -1790,4 +1819,18 @@ void open_chat(std::string call_sign)
 			LoadPrivateChat(-1, -1, call_sign, true, true, c_id);
 	}
 
+}
+
+std::string GetClipboardText()
+{
+	RaiiClipboard clipboard;
+
+	HANDLE hData = GetClipboardData(CF_TEXT);
+	if (hData == nullptr)
+		throw std::runtime_error("Can't get clipboard text.");
+
+	RaiiTextGlobalLock textGlobalLock(hData);
+	std::string text(textGlobalLock.Get());
+
+	return text;
 }

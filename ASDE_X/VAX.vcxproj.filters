@@ -218,6 +218,9 @@
     <ClInclude Include="inputfield.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="raiiclipboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="main.rc">
