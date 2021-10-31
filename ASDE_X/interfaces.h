@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "packets.h"
+#include "inputfield.h"
 
 extern std::vector<std::string> pm_callsigns;
 

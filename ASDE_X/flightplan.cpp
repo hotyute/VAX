@@ -1,6 +1,7 @@
 #include "flightplan.h"
 
 #include "constants.h"
+#include "inputfield.h"
 
 User* opened_fp = NULL;
 int squawk_range = 1000;

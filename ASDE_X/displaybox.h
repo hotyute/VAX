@@ -2,6 +2,7 @@
 #define DISPLAYBOX_H
 
 #include "gui.h"
+#include "inputfield.h"
 
 class DisplayBox : public ChildFrame {
 private:

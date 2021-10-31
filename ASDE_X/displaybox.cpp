@@ -158,6 +158,8 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		((InputField*)frame->children[(index + 1)])->handleBox();
 	}
 
+	
+
 	if (empty(str))
 	{
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
@@ -170,6 +172,9 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 	else if ((x != -1 && y != -1) && line->in_bounds_text(x, y))
 	{
 		//TODO set cursor exactly 
+		SelectObject(hDC, *font);
+		SIZE extent = getTextExtent(line->getText());
+		double x_pos = ((((double)x) - line->get_x()) / extent.cx) * line->getText().size();
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
 		input_field->line_ptr = line;
 		input_field->show_border = false;
@@ -177,6 +182,8 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
 		input_field->caps = DisplayBox::caps;
+		input_field->cursor_default = false;
+		input_field->setCursor(x_pos);
 	}
 	else
 	{

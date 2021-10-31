@@ -104,6 +104,7 @@
     <ClCompile Include="flightplan.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="guicon.cpp" />
+    <ClCompile Include="inputfield.cpp" />
     <ClCompile Include="interfaces.cpp" />
     <ClCompile Include="later.cpp" />
     <ClCompile Include="main.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="flightplan.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="guicon.h" />
+    <ClInclude Include="inputfield.h" />
     <ClInclude Include="interfaces.h" />
     <ClInclude Include="later.h" />
     <ClInclude Include="main.h" />

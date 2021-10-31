@@ -526,6 +526,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							}
 							if (focusChild == clicked1) {
 								clicked1->doAction();
+								if (clicked1->type == CHILD_TYPE::INPUT_FIELD)
+								{
+									InputField* field = (InputField*)clicked1;
+									field->calcCursorPos(x, y);
+									RenderChild(field, CHILD_TYPE::INPUT_FIELD);
+								}
 							}
 						}
 						clicked_interface = true;
