@@ -27,7 +27,7 @@ rotation=2
 8R 25.80070055 -080.30143039 600 100 400 250 0.003 ;lat, lon, pos x, pos y, width, height, zoom
 
 <<MIRROR>>
-09 25.78609700 -080.31481700 600 100 400 250 0.003 ;lat, lon, pos x, pos y, width, height, zoom
+9 25.78609700 -080.31481700 600 100 400 250 0.003 ;lat, lon, pos x, pos y, width, height, zoom
 
 <<CLOSURES>>
 ;;JJ

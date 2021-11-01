@@ -156,11 +156,14 @@ void CalcDepartures() {
 							max_points--;
 						}
 
-						if (!boost::iequals(new_points[0], _points[0])
-							|| !boost::iequals(new_points[1], _points[1]))
+						if (new_points.size() > 0) 
 						{
-							departures[callsign] = new_points;
-							renderDepartures = true;
+							if (!boost::iequals(new_points[0], _points[0])
+								|| (new_points.size() > 1 && !boost::iequals(new_points[1], _points[1])))
+							{
+								departures[callsign] = new_points;
+								renderDepartures = true;
+							}
 						}
 					}
 

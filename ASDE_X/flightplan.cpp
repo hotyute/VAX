@@ -92,7 +92,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		depart_label->centered = 2;
 		fp_frame->children[depart_label->index = FP_DEPART_LABEL] = depart_label;
 		InputField* depart_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		depart_input->setInput(depart, true);
+		depart_input->setInput(depart);
 		depart_input->max_chars = 4;
 		depart_input->centered = 2;
 		fp_frame->children[depart_input->index = FP_DEPART_INPUT] = depart_input;
@@ -100,7 +100,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		arrive_label->centered = 2;
 		fp_frame->children[arrive_label->index = FP_ARRIVE_LABEL] = arrive_label;
 		InputField* arrive_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		arrive_input->setInput(arrive, true);
+		arrive_input->setInput(arrive);
 		arrive_input->max_chars = 4;
 		arrive_input->centered = 2;
 		fp_frame->children[arrive_input->index = FP_ARRIVE_INPUT] = arrive_input;
@@ -121,7 +121,10 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		cruise_label->centered = 2;
 		fp_frame->children[cruise_label->index = FP_CRUISE_LABEL] = cruise_label;
 		InputField* cruise_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		cruise_input->setUneditable(cruise);
+		cruise_input->numbers = true;
+		cruise_input->max_chars = 5;
+		cruise_input->centered = true;
+		cruise_input->setInput(cruise);
 		fp_frame->children[cruise_input->index = FP_CRUISE_INPUT] = cruise_input;
 		Label* scratch_label = new Label(fp_frame, "Scratch:", x + (width - (width * (start_x -= spacing_x))), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		scratch_label->centered = 2;
@@ -164,7 +167,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		Label* remarks_label = new Label(fp_frame, "Remarks:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		remarks_label->centered = 2;
 		fp_frame->children[remarks_label->index = FP_REMARKS_LABEL] = remarks_label;
-		
+
 		route_box_size = 30.0;
 		DisplayBox* remarks_box = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);

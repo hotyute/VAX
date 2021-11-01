@@ -465,7 +465,7 @@ void ClickButton::doAction() {
 		{
 		case FP_ASSIGN_SQUAWK:
 		{
-			squawk_input->setInput(std::to_string(squawk_range++), false);
+			squawk_input->setInput(std::to_string(squawk_range++));
 			renderAllInputText = true;
 			if (opened_fp)
 			{

@@ -178,7 +178,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
 		input_field->line_ptr = line;
 		input_field->show_border = false;
-		input_field->setInput(str, true);
+		input_field->setInput(str);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
 		input_field->caps = DisplayBox::caps;
@@ -190,7 +190,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
 		input_field->line_ptr = line;
 		input_field->show_border = false;
-		input_field->setInput(str, true);
+		input_field->setInput(str);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
 		input_field->caps = DisplayBox::caps;

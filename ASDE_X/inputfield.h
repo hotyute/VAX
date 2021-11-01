@@ -33,7 +33,7 @@ public:
 	void focusDrawing();
 	int handleClick(ChildFrame* clicked, int x, int y);
 
-	void pushInput(bool, char);
+	void pushInput(bool uni, char);
 	void setCursorAtStart();
 	void setCursorAtEnd();
 	void setCursor();
@@ -44,7 +44,7 @@ public:
 	void removeCursor();
 	bool popInput();
 	void clearInput();
-	void setInput(std::string, bool cursor);
+	void setInput(std::string);
 	void setUneditable(std::string);
 	void pass_characters(char* chars);
 	bool can_type();

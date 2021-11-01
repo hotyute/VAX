@@ -1088,7 +1088,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						if (CONTROL && (c2 == 'v' || c2 == 'V'))
 						{
 							std::string clip = GetClipboardText();
-							for (auto& s : clip)
+							for (char& s : clip)
 							{
 								if (!focusField.can_type())
 									break;
@@ -1141,7 +1141,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 			break;
 		}
-		case VK_LCONTROL:
+		case 0x11: case VK_LCONTROL: case VK_RCONTROL:
 		{
 			CONTROL = false;
 			break;
@@ -1563,7 +1563,7 @@ void pass_command(char* cmd) {
 		if (child && child->type == CHILD_TYPE::INPUT_FIELD && child->focus) {
 			InputField& input_box = *(InputField*)child;
 
-			input_box.setInput(cmd, true);
+			input_box.setInput(cmd);
 			input_box.setCursor();
 			RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		}

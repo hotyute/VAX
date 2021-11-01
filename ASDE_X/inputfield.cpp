@@ -210,25 +210,10 @@ void InputField::clearInput() {
 	cursor_pos = 0;
 }
 
-void InputField::setInput(std::string text, bool cursor) {
+void InputField::setInput(std::string text) {
 	InputField::clearInput();
-	if (InputField::p_protected)
-	{
-		for (int i = 0; i < text.size(); i++)
-		{
-			InputField::pp_input += '*';
-		}
-	}
-	InputField::input = text;
-
-	if (cursor)
-	{
-		last_cursor_pos = cursor_pos;
-		for (int i = 0; i < text.size(); i++) {
-			InputField::cursor_input += ' ';
-			cursor_pos++;
-		}
-	}
+	for (char& s : text)
+		pushInput(false, s);
 }
 
 void InputField::setUneditable(std::string line)
