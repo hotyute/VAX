@@ -381,7 +381,8 @@ void sendSystemMessage(std::string message)
 {
 	main_chat_box->resetReaderIdx();
 	const std::string* date1 = currentDateTime();
-	const std::string r = std::regex_replace(date1[0], std::regex("/"), ":");
+	std::string r = std::regex_replace(date1[1], std::regex("/"), ":");
+	r.insert(2, ":");
 	ChatLine* c = new ChatLine(std::string("[" + r + "] ") + message, CHAT_TYPE::SYSTEM, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
