@@ -442,7 +442,7 @@ void ClickButton::doAction() {
 			id.username = connect_username->input.c_str();
 			id.password = connect_password->input.c_str();
 			id.controller_rating = connect_rating->pos;
-			id.controller_position = connect_position->pos;
+			id.controller_position = static_cast<POSITIONS>(connect_position->pos);
 			connect_closeb->doAction();
 			connect();
 		}

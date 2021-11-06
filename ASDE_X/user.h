@@ -28,7 +28,7 @@ struct Identity {
 	std::string username;
 	int id;
 	int controller_rating = 0;
-	int controller_position = 0;
+	POSITIONS controller_position = POSITIONS::OBSERVER;
 	int pilot_rating = 0;
 	CLIENT_TYPES type;
 };

@@ -193,6 +193,7 @@ void refresh_ctrl_list()
 	qlc_list_box->clearLines();
 	for (int i = 0; i < 9; i++)
 	{
+		POSITIONS pos = static_cast<POSITIONS>(i);
 		for (auto& s : controller_map)
 		{
 			Controller& c = *s.second;
@@ -200,15 +201,15 @@ void refresh_ctrl_list()
 
 			if (dist(USER->getLatitude(), USER->getLongitude(), c.getLatitude(), c.getLongitude()) <= USER->getVisibility())
 			{
-				switch (i)
+				switch (pos)
 				{
-				case 0:
+				case POSITIONS::OBSERVER:
 				{
-					if (!obs_list.count(callsign) && c.getIdentity()->controller_position == 0)
+					if (!obs_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::OBSERVER)
 					{
 						std::vector<std::string> data;
 
-						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
 						data.push_back("1A");
 						data.push_back(frequency_to_string(c.userdata.frequency[0]));
 						data.push_back(std::to_string(c.getIdentity()->controller_rating));
@@ -219,13 +220,13 @@ void refresh_ctrl_list()
 					}
 					break;
 				}
-				case 1:
+				case POSITIONS::DELIVERY:
 				{
-					if (!del_list.count(callsign) && c.getIdentity()->controller_position == 1)
+					if (!del_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::DELIVERY)
 					{
 						std::vector<std::string> data;
 
-						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
 						data.push_back("1A");
 						data.push_back(frequency_to_string(c.userdata.frequency[0]));
 						data.push_back(std::to_string(c.getIdentity()->controller_rating));
@@ -236,13 +237,13 @@ void refresh_ctrl_list()
 					}
 					break;
 				}
-				case 2:
+				case POSITIONS::GROUND:
 				{
-					if (!gnd_list.count(callsign) && c.getIdentity()->controller_position == 2)
+					if (!gnd_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::GROUND)
 					{
 						std::vector<std::string> data;
 
-						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
 						data.push_back("1A");
 						data.push_back(frequency_to_string(c.userdata.frequency[0]));
 						data.push_back(std::to_string(c.getIdentity()->controller_rating));
@@ -253,13 +254,13 @@ void refresh_ctrl_list()
 					}
 					break;
 				}
-				case 3:
+				case POSITIONS::TOWER:
 				{
-					if (!twr_list.count(callsign) && c.getIdentity()->controller_position == 3)
+					if (!twr_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::TOWER)
 					{
 						std::vector<std::string> data;
 
-						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
 						data.push_back("1A");
 						data.push_back(frequency_to_string(c.userdata.frequency[0]));
 						data.push_back(std::to_string(c.getIdentity()->controller_rating));
@@ -274,27 +275,27 @@ void refresh_ctrl_list()
 			}
 		}
 
-		switch (i)
+		switch (pos)
 		{
-		case 0:
+		case POSITIONS::OBSERVER:
 		{
 			if (!obs_list.empty())
 				controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
 			break;
 		}
-		case 1:
+		case POSITIONS::DELIVERY:
 		{
 			if (!del_list.empty())
 				controller_list_box->addLineTop("------------DELIVERY----------", CHAT_TYPE::MAIN);
 			break;
 		}
-		case 2:
+		case POSITIONS::GROUND:
 		{
 			if (!gnd_list.empty())
 				controller_list_box->addLineTop("-------------GROUND-----------", CHAT_TYPE::MAIN);
 			break;
 		}
-		case 3:
+		case POSITIONS::TOWER:
 		{
 			if (!twr_list.empty())
 				controller_list_box->addLineTop("-------------TOWER------------", CHAT_TYPE::MAIN);

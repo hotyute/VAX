@@ -1385,7 +1385,7 @@ void connect() {
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 		{
 			stream.writeByte(USER->getIdentity()->controller_rating);
-			stream.writeByte(USER->getIdentity()->controller_position);
+			stream.writeByte(static_cast<int>(USER->getIdentity()->controller_position));
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{
