@@ -33,7 +33,6 @@ void decodePackets(int opCode, Stream& stream) {
 			controller1->setCallsign(callSign1);
 			controller1->unlock();
 			controller_map[callSign1] = controller1;
-			check_add_ctrl_list(*controller1);
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{
@@ -83,7 +82,7 @@ void decodePackets(int opCode, Stream& stream) {
 
 			if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
-				check_add_ctrl_list(*(Controller*)user1);
+				refresh_ctrl_list();
 			}
 		}
 	}
@@ -122,7 +121,7 @@ void decodePackets(int opCode, Stream& stream) {
 			}
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
-				check_del_ctrl_list(*((Controller*)user1));
+				//do stuff before delete
 			}
 
 			if (ASEL == user1)
@@ -139,10 +138,14 @@ void decodePackets(int opCode, Stream& stream) {
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
 				controller_map.erase(callsign);
-
 			}
 
 			users_map.erase(callsign);
+
+			if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
+			{
+				refresh_ctrl_list();
+			}
 		}
 	}
 	if (opCode == 13) {

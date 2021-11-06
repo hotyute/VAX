@@ -1,4 +1,5 @@
 #include "calc_cycles.h"
+#include "controller.h"
 
 DWORD __stdcall CalcThread1(LPVOID)
 {
@@ -156,7 +157,7 @@ void CalcDepartures() {
 							max_points--;
 						}
 
-						if (new_points.size() > 0) 
+						if (new_points.size() > 0)
 						{
 							if (!boost::iequals(new_points[0], _points[0])
 								|| (new_points.size() > 1 && !boost::iequals(new_points[1], _points[1])))
@@ -185,53 +186,124 @@ void CalcControllerList() {
 	}
 }
 
-void check_add_ctrl_list(Controller& controller)
+void refresh_ctrl_list()
 {
-	std::string callsign = controller.getCallsign();
-
-	if (dist(USER->getLatitude(), USER->getLongitude(), controller.getLatitude(), controller.getLongitude()) <= USER->getVisibility())
+	clear_ctrl_list();
+	controller_list_box->clearLines();
+	qlc_list_box->clearLines();
+	for (int i = 0; i < 9; i++)
 	{
-		if (!obs_list.count(callsign) && controller.getIdentity()->controller_position == 0)
+		for (auto& s : controller_map)
 		{
+			Controller& c = *s.second;
+			std::string callsign = c.getCallsign();
 
-			std::vector<std::string> data;
+			if (dist(USER->getLatitude(), USER->getLongitude(), c.getLatitude(), c.getLongitude()) <= USER->getVisibility())
+			{
+				switch (i)
+				{
+				case 0:
+				{
+					if (!obs_list.count(callsign) && c.getIdentity()->controller_position == 0)
+					{
+						std::vector<std::string> data;
 
-			data.push_back(std::to_string(controller.getIdentity()->controller_position));
-			data.push_back("1A");
-			data.push_back(frequency_to_string(controller.userdata.frequency[0]));
-			data.push_back(std::to_string(controller.getIdentity()->controller_rating));
+						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back("1A");
+						data.push_back(frequency_to_string(c.userdata.frequency[0]));
+						data.push_back(std::to_string(c.getIdentity()->controller_rating));
 
-			add_to_ctrl_list(callsign, data, obs_list);
-			add_to_qlctrl_list(callsign, data, ql_obs_list);
+						add_to_ctrl_list(callsign, data, obs_list);
+						add_to_qlctrl_list(callsign, data, ql_obs_list);
 
-			if (obs_list.empty())
+					}
+					break;
+				}
+				case 1:
+				{
+					if (!del_list.count(callsign) && c.getIdentity()->controller_position == 1)
+					{
+						std::vector<std::string> data;
+
+						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back("1A");
+						data.push_back(frequency_to_string(c.userdata.frequency[0]));
+						data.push_back(std::to_string(c.getIdentity()->controller_rating));
+
+						add_to_ctrl_list(callsign, data, del_list);
+						add_to_qlctrl_list(callsign, data, ql_del_list);
+
+					}
+					break;
+				}
+				case 2:
+				{
+					if (!gnd_list.count(callsign) && c.getIdentity()->controller_position == 2)
+					{
+						std::vector<std::string> data;
+
+						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back("1A");
+						data.push_back(frequency_to_string(c.userdata.frequency[0]));
+						data.push_back(std::to_string(c.getIdentity()->controller_rating));
+
+						add_to_ctrl_list(callsign, data, gnd_list);
+						add_to_qlctrl_list(callsign, data, ql_gnd_list);
+
+					}
+					break;
+				}
+				case 3:
+				{
+					if (!twr_list.count(callsign) && c.getIdentity()->controller_position == 3)
+					{
+						std::vector<std::string> data;
+
+						data.push_back(std::to_string(c.getIdentity()->controller_position));
+						data.push_back("1A");
+						data.push_back(frequency_to_string(c.userdata.frequency[0]));
+						data.push_back(std::to_string(c.getIdentity()->controller_rating));
+
+						add_to_ctrl_list(callsign, data, twr_list);
+						add_to_qlctrl_list(callsign, data, ql_twr_list);
+
+					}
+					break;
+				}
+				}
+			}
+		}
+
+		switch (i)
+		{
+		case 0:
+		{
+			if (!obs_list.empty())
 				controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
-
-			renderDrawings = true;
-
+			break;
 		}
-		else if (!del_list.count(callsign) && controller.getIdentity()->controller_position == 1)
+		case 1:
 		{
-			//if (del_list.empty())
-			//	controller_list_box->addLine("------------DELIVERY----------", CHAT_TYPE::MAIN);
-
-			/*std::vector<std::string> data;
-
-			data.push_back(std::to_string(ctlr->getIdentity()->controller_position));
-			data.push_back("1A");
-			data.push_back(frequency_to_string(ctlr->frequency[0]));
-			data.push_back(std::to_string(ctlr->getIdentity()->controller_rating));
-
-			add_to_ctrl_list(callsign, data, del_list);*/
-
-			renderDrawings = true;
-
+			if (!del_list.empty())
+				controller_list_box->addLineTop("------------DELIVERY----------", CHAT_TYPE::MAIN);
+			break;
+		}
+		case 2:
+		{
+			if (!gnd_list.empty())
+				controller_list_box->addLineTop("-------------GROUND-----------", CHAT_TYPE::MAIN);
+			break;
+		}
+		case 3:
+		{
+			if (!twr_list.empty())
+				controller_list_box->addLineTop("-------------TOWER------------", CHAT_TYPE::MAIN);
+			break;
+		}
 		}
 	}
-	else
-	{
-		//check for removal
-	}
+
+	renderDrawings = true;
 }
 
 void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
@@ -304,7 +376,7 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	store.emplace(callsign, c);
 }
 
-void check_del_ctrl_list(Controller& controller)
+/*void check_del_ctrl_list(Controller& controller)
 {
 	std::string callsign = controller.getCallsign();
 	switch (controller.getIdentity()->controller_position)
@@ -344,9 +416,9 @@ void check_del_ctrl_list(Controller& controller)
 	break;
 
 	}
-}
+}*/
 
-void refresh_ctrl_list()
+/*void refresh_ctrl_list()
 {
 	if (controller_map.size() > 0)
 	{
@@ -359,7 +431,7 @@ void refresh_ctrl_list()
 			}
 		}
 	}
-}
+}*/
 
 void clear_ctrl_list(std::unordered_map<std::string, ChatLine*>& store)
 {
@@ -385,8 +457,12 @@ void clear_ctrl_list()
 {
 	clear_ctrl_list(obs_list);
 	clear_ctrl_list(del_list);
+	clear_ctrl_list(gnd_list);
+	clear_ctrl_list(twr_list);
 	clear_qlctrl_list(ql_obs_list);
 	clear_qlctrl_list(ql_del_list);
+	clear_qlctrl_list(ql_gnd_list);
+	clear_qlctrl_list(ql_twr_list);
 }
 
 void remove_ctrl_list(ChatLine* c)

@@ -1360,7 +1360,7 @@ void connect() {
 	//34.142.27.168
 	std::string ip = "vax.ddns.net";
 #ifdef _DEBUG
-	ip = "127.0.0.1";
+	//ip = "127.0.0.1";
 #endif
 	if (intter->connectNew(hWnd, ip, 4403)) {
 		connected = true;

@@ -25,16 +25,16 @@ void CalcDepartures();
 
 void CalcControllerList();
 
-void check_add_ctrl_list(Controller& controller);
+void refresh_ctrl_list();
 
 void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store);
 
 void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data, std::unordered_map<std::string, ChatLine*>& store);
 
-void check_del_ctrl_list(Controller &controller);
+//void check_del_ctrl_list(Controller &controller);
 
-void refresh_ctrl_list();
+//void refresh_ctrl_list();
 
 void clear_ctrl_list(std::unordered_map<std::string, ChatLine*>& store);
 
