@@ -2,6 +2,9 @@
 #include "radio.h"
 #include "displaybox.h"
 
+#include <regex>
+#include <string>
+
 std::vector<std::string> pm_callsigns(20);
 
 InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr, * communications = nullptr;
@@ -358,12 +361,13 @@ void LoadMainChatInterface(bool refresh) {
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
 		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
-		list2.push_back(new ChatLine("[00:00:00] Performing Version Check..", CHAT_TYPE::SYSTEM, main_chat_box));
-		ChatLine* c = new ChatLine("[ERROR: Unable to retrieve version]", CHAT_TYPE::ERRORS, main_chat_box);
-		list2.push_back(c);
-		c->playChatSound();
+		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
+		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
 		main_chat_box->setList(list2, 6);
 		main_chat->children[main_chat_box->index = MAIN_CHAT_MESSAGES] = main_chat_box;
+
+		sendSystemMessage("Performing Version Check..");
+		sendErrorMessage("Unable to retrieve version");
 
 		main_chat_input = new InputField(main_chat, x + (controller_list_width + arrow_offset),
 			(CLIENT_WIDTH * width) - width_offset, 10.0, 5, 20, 5);
@@ -376,7 +380,9 @@ void LoadMainChatInterface(bool refresh) {
 void sendSystemMessage(std::string message)
 {
 	main_chat_box->resetReaderIdx();
-	ChatLine* c = new ChatLine(std::string("[00:00:00] ") + message, CHAT_TYPE::SYSTEM, main_chat_box);
+	const std::string* date1 = currentDateTime();
+	const std::string r = std::regex_replace(date1[0], std::regex("/"), ":");
+	ChatLine* c = new ChatLine(std::string("[" + r + "] ") + message, CHAT_TYPE::SYSTEM, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
 	renderDrawings = true;

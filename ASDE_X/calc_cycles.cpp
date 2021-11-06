@@ -271,6 +271,23 @@ void refresh_ctrl_list()
 					}
 					break;
 				}
+				case POSITIONS::DEPARTURE:
+				{
+					if (!dep_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::DEPARTURE)
+					{
+						std::vector<std::string> data;
+
+						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
+						data.push_back("1A");
+						data.push_back(frequency_to_string(c.userdata.frequency[0]));
+						data.push_back(std::to_string(c.getIdentity()->controller_rating));
+
+						add_to_ctrl_list(callsign, data, dep_list);
+						add_to_qlctrl_list(callsign, data, ql_dep_list);
+
+					}
+					break;
+				}
 				}
 			}
 		}
@@ -281,24 +298,40 @@ void refresh_ctrl_list()
 		{
 			if (!obs_list.empty())
 				controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
+			if (!ql_obs_list.empty())
+				qlc_list_box->addLineTop("-----OBS-----", CHAT_TYPE::MAIN);
 			break;
 		}
 		case POSITIONS::DELIVERY:
 		{
 			if (!del_list.empty())
 				controller_list_box->addLineTop("------------DELIVERY----------", CHAT_TYPE::MAIN);
+			if (!ql_del_list.empty())
+				qlc_list_box->addLineTop("-----DEL-----", CHAT_TYPE::MAIN);
 			break;
 		}
 		case POSITIONS::GROUND:
 		{
 			if (!gnd_list.empty())
 				controller_list_box->addLineTop("-------------GROUND-----------", CHAT_TYPE::MAIN);
+			if (!ql_gnd_list.empty())
+				qlc_list_box->addLineTop("-----GND-----", CHAT_TYPE::MAIN);
 			break;
 		}
 		case POSITIONS::TOWER:
 		{
 			if (!twr_list.empty())
 				controller_list_box->addLineTop("-------------TOWER------------", CHAT_TYPE::MAIN);
+			if (!ql_twr_list.empty())
+				qlc_list_box->addLineTop("-----TWR-----", CHAT_TYPE::MAIN);
+			break;
+		}
+		case POSITIONS::DEPARTURE:
+		{
+			if (!dep_list.empty())
+				controller_list_box->addLineTop("-----------DEPARTURE----------", CHAT_TYPE::MAIN);
+			if (!ql_dep_list.empty())
+				qlc_list_box->addLineTop("-----DEP-----", CHAT_TYPE::MAIN);
 			break;
 		}
 		}
@@ -460,10 +493,12 @@ void clear_ctrl_list()
 	clear_ctrl_list(del_list);
 	clear_ctrl_list(gnd_list);
 	clear_ctrl_list(twr_list);
+	clear_ctrl_list(dep_list);
 	clear_qlctrl_list(ql_obs_list);
 	clear_qlctrl_list(ql_del_list);
 	clear_qlctrl_list(ql_gnd_list);
 	clear_qlctrl_list(ql_twr_list);
+	clear_qlctrl_list(ql_dep_list);
 }
 
 void remove_ctrl_list(ChatLine* c)

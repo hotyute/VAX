@@ -1070,7 +1070,29 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				case 56:
 					spec = '*';
 					break;
+				case 187:
+					spec = '+';
+					break;
+				case 188:
+					spec = '<';
+					break;
+				case 190:
+					spec = '>';
+					break;
+				case 192:
+					spec = '@';
+					break;
+				case 219:
+					spec = '{';
+					break;
+				case 220:
+					spec = '|';
+					break;
+				case 221:
+					spec = '}';
+					break;
 				default:
+					printf("%d\n", wParam);
 					break;
 				}
 				if (spec != NULL)
@@ -1360,7 +1382,7 @@ void connect() {
 	//34.142.27.168
 	std::string ip = "vax.ddns.net";
 #ifdef _DEBUG
-	//ip = "127.0.0.1";
+	ip = "127.0.0.1";
 #endif
 	if (intter->connectNew(hWnd, ip, 4403)) {
 		connected = true;
