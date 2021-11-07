@@ -103,7 +103,7 @@ void DisplayBox::prepare()
 				if (pos != std::string::npos)
 					next_text.erase(pos, store[0].length());
 
-				//next_text = rtrim(ltrim(next_text));
+				next_text = rtrim(ltrim(next_text));
 				if (next_text.size() > 0) {
 					n->setText(next_text);
 					continue;

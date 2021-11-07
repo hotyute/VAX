@@ -214,12 +214,13 @@ void PullFPData(Aircraft* user)
 
 			for (auto it = fp_route.begin(); it != fp_route.end(); it++)
 			{
-				route += (*it)->getText();
+				it != fp_route.begin() ? route += " " + (*it)->getText() : route += (*it)->getText();
+
 			}
 
 			for (auto it = fp_remarks.begin(); it != fp_remarks.end(); it++)
 			{
-				remarks += (*it)->getText();
+				it != fp_remarks.begin() ? remarks += " " + (*it)->getText() : remarks += (*it)->getText();
 			}
 
 			FlightPlan& fp = *user->getFlightPlan();
