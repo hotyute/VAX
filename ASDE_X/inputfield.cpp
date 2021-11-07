@@ -13,7 +13,7 @@ InputField::InputField(InterfaceFrame* frame, double width, double height) {
 	InputField::focus = false;
 	InputField::type = CHILD_TYPE::INPUT_FIELD;
 	InputField::inputTextDl = 0;
-	BasicInterface* fieldBounds = new BasicInterface(0.0, width, 10.0, 0.0, height, 10.0, 1.0f, 1.0f, 1.0f, 0.8, false, true);
+	BasicInterface* fieldBounds = new BasicInterface(0.0, width, 10.0, 0.0, height, 10.0, 1.0f, 1.0f, 1.0f, 0.8f, false, true);
 	fieldBounds->setBounds(true);
 	fieldBounds->updateCoordinates();
 	InputField::border = fieldBounds;
@@ -27,7 +27,7 @@ InputField::InputField(InterfaceFrame* frame, double x, double width, double pad
 	InputField::focus = false;
 	InputField::type = CHILD_TYPE::INPUT_FIELD;
 	InputField::inputTextDl = 0;
-	BasicInterface* fieldBounds = new BasicInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* fieldBounds = new BasicInterface(x, width, padding_x, y, height, padding_y, 1.0f, 1.0f, 1.0f, 0.8f, true, true);
 	fieldBounds->setBounds(true);
 	fieldBounds->updateCoordinates();
 	InputField::border = fieldBounds;
@@ -40,7 +40,7 @@ InputField::~InputField()
 
 void InputField::updatePos(double x, double width, double y, double height)
 {
-	InputField::border->setPosX(x), InputField::border->setPosY(y);
+	InputField::border->setPosX((int)x), InputField::border->setPosY((int)y);
 	InputField::border->setWidth(width), InputField::border->setHeight(height);
 	InputField::border->updateCoordinates();
 }
@@ -94,10 +94,10 @@ void InputField::pushInput(bool uni, char c) {
 		return;
 	if (max_chars != 0)
 	{
-		if ((input.size() + 1) > max_chars)
+		if ((input.size() + 1) > ((size_t)max_chars))
 			return;
 	}
-	bool ins = cursor_pos < input.size() ? true : false;
+	bool ins = ((size_t)cursor_pos) < input.size() ? true : false;
 	if (InputField::p_protected)
 	{
 		if (uni) {
@@ -133,7 +133,7 @@ void InputField::setCursor() {
 }
 
 void InputField::setCursor(int pos) {
-	if (pos > input.size())
+	if (((size_t)pos) > input.size())
 		pos = input.size();
 	else if (pos < 0)
 		pos = 0;
@@ -152,11 +152,11 @@ void InputField::clamp_cursor()
 {
 	if (last_cursor_pos < 0)
 		last_cursor_pos = 0;
-	if (last_cursor_pos > input.size())
+	if (((size_t)last_cursor_pos) > input.size())
 		last_cursor_pos = input.size();
 	if (cursor_pos < 0)
 		cursor_pos = 0;
-	else if (cursor_pos > input.size())
+	else if (((size_t)cursor_pos) > input.size())
 		cursor_pos = input.size();
 }
 
@@ -178,7 +178,7 @@ void InputField::cursorLeft()
 
 void InputField::cursorRight()
 {
-	if (cursor_pos < input.size()) {
+	if (((size_t)cursor_pos) < input.size()) {
 		last_cursor_pos = cursor_pos;
 		cursor_pos++;
 		setCursor();
@@ -187,7 +187,7 @@ void InputField::cursorRight()
 }
 
 bool InputField::popInput() {
-	bool ins = cursor_pos < input.size() ? true : false;
+	bool ins = ((size_t)cursor_pos) < input.size() ? true : false;
 	if (ins && (cursor_pos - 1) < 0)
 		return false;
 	if (InputField::p_protected) {
@@ -271,15 +271,15 @@ bool InputField::can_type()
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
-	int maxChars = aW / ave;
+	double maxChars = aW / ave;
 	if (InputField::p_protected)
 	{
-		if (InputField::pp_input.size() < (maxChars - 1))
+		if (InputField::pp_input.size() < ((size_t)(maxChars - 1)))
 			return true;
 	}
 	else
 	{
-		if (InputField::input.size() < (maxChars - 1))
+		if (InputField::input.size() < ((size_t)(maxChars - 1)))
 			return true;
 	}
 	return false;
@@ -341,6 +341,8 @@ void InputField::handleEntry()
 	case FP_ARRIVE_INPUT:
 	case FP_DEPART_INPUT:
 	case FP_CRUISE_INPUT:
+	case FP_ALTERNATE_INPUT:
+	case FP_ACTYPE_INPUT:
 	{
 		if (opened_fp)
 		{
@@ -360,7 +362,7 @@ void InputField::calcCursorPos(double x, double y)
 {
 	SelectObject(hDC, *font);
 	SIZE extent = getTextExtent(input);
-	int _x;
+	double _x;
 	double aW = InputField::border->getActualWidth();
 	if (centered) {
 		_x = (InputField::border->getStartX() + (aW / 2));
@@ -369,5 +371,5 @@ void InputField::calcCursorPos(double x, double y)
 		_x = InputField::border->getStartX() + offset_x;
 	}
 	double x_pos = ((((double)x) - _x) / extent.cx) * input.size();
-	setCursor(x_pos);
+	setCursor((int)x_pos);
 }

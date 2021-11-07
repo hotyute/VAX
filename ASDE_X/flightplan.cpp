@@ -74,7 +74,9 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		actype_label->centered = 2;
 		fp_frame->children[actype_label->index = FP_ACTYPE_LABEL] = actype_label;
 		InputField* ac_type = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * start_y)), 20.0, 0.0);
-		ac_type->setUneditable(ac_type_txt);
+		ac_type->setInput(ac_type_txt);
+		ac_type->max_chars = 8;
+		ac_type->centered = 2;
 		fp_frame->children[ac_type->index = FP_ACTYPE_INPUT] = ac_type;
 		Label* fr_label = new Label(fp_frame, "Flight Rules:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fr_label->centered = 2;
@@ -109,7 +111,9 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		altern_label->centered = 2;
 		fp_frame->children[altern_label->index = FP_ALTERNATE_LABEL] = altern_label;
 		InputField* altern_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		altern_input->setUneditable(alternate);
+		altern_input->setInput(alternate);
+		altern_input->max_chars = 4;
+		altern_input->centered = 2;
 		fp_frame->children[altern_input->index = FP_ALTERNATE_INPUT] = altern_input;
 
 		ClickButton* refreshButton = new ClickButton(fp_frame, "REFRESH PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))) - 2, 24.0);// set button from the left
