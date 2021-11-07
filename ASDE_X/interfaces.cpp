@@ -15,8 +15,8 @@ void RenderCommunications(bool open, double x_, double y_)
 
 	communications->title = "COMMUNICATIONS";
 
-	int width = 310, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-	int height = 500, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+	double width = 310, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	double height = 500, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 	communications->Pane1(x, width, y, height);
 
 	double spacing_x = 0.15, spacing_y = 0.07;

@@ -465,14 +465,36 @@ void ClickButton::doAction() {
 		{
 		case FP_ASSIGN_SQUAWK:
 		{
-			squawk_input->setInput(std::to_string(squawk_range++));
-			renderAllInputText = true;
-			if (opened_fp)
+			std::string pcode = "";
+			while (pcode.empty())
 			{
-				Aircraft* aircraft = ((Aircraft*)opened_fp);
-				PullFPData(aircraft);
-				aircraft->setUpdateFlag(ACF_CALLSIGN, true);
-
+				bool found = false;
+				for (auto& s : acf_map)
+				{
+					Aircraft& a = *s.second;
+					if (a.getFlightPlan()->squawkCode == (std::to_string(squawk_range + 1)))
+					{
+						found = true;
+						++squawk_range;
+						break;
+					}
+				}
+				if (!found)
+				{
+					pcode = std::to_string(++squawk_range);
+					break;
+				}
+			}
+			if (!pcode.empty())
+			{
+				squawk_input->setInput(pcode);
+				renderAllInputText = true;
+				if (opened_fp)
+				{
+					Aircraft* aircraft = ((Aircraft*)opened_fp);
+					PullFPData(aircraft);
+					aircraft->setUpdateFlag(ACF_CALLSIGN, true);
+				}
 			}
 		}
 		break;
