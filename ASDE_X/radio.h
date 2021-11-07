@@ -7,7 +7,7 @@ class Radio : public ChildFrame {
 public:
 	Radio(InterfaceFrame* border, double x, double width, double y, double height);
 public:
-	bool checked = false;
+	bool checked = true;
 
 	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
