@@ -57,29 +57,29 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 	if (!fp_frame || refresh) {
 		fp_frame = new InterfaceFrame(FP_INTERFACE);
 		fp_frame->title = call + " - FLIGHTPLAN (" + name + " " + pilot_rating + ")";
-		int width = 450, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
-		int height = 220, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
+		double width = 450.0, x = x_ == -1 ? (CLIENT_WIDTH / 2) - (width / 2) : x_;
+		double height = 220.0, y = y_ == -1 ? (CLIENT_HEIGHT / 2) - (height / 2) : y_;
 		fp_frame->Pane1(x, width, y, height);
 		const double spacing_x = 0.125, spacing_y = 0.13;
 		double start_x = 1.0, start_y = 0.2;
 		double input_width = 50.0, label_width = 55.0, button_width = 85.0, buttons_offset = (width * 0.035);
 		//1st Line
 		Label* callsign_label = new Label(fp_frame, "Callsign:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * start_y)), 20.0, 0.0);
-		callsign_label->centered = 2;
+		callsign_label->centered = true;
 		fp_frame->children[callsign_label->index = FP_CALLSIGN_LABEL] = callsign_label;
 		InputField* call_sign = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * start_y)), 20.0, 0.0);
 		call_sign->setUneditable(call);
 		fp_frame->children[call_sign->index = FP_CALLSIGN_INPUT] = call_sign;
 		Label* actype_label = new Label(fp_frame, "A/C Type:", x + (width - (width * (start_x -= spacing_x))), label_width, 0.0, y + (height - (height * start_y)), 20.0, 0.0);
-		actype_label->centered = 2;
+		actype_label->centered = true;
 		fp_frame->children[actype_label->index = FP_ACTYPE_LABEL] = actype_label;
 		InputField* ac_type = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * start_y)), 20.0, 0.0);
 		ac_type->setInput(ac_type_txt);
 		ac_type->max_chars = 8;
-		ac_type->centered = 2;
+		ac_type->centered = true;
 		fp_frame->children[ac_type->index = FP_ACTYPE_INPUT] = ac_type;
 		Label* fr_label = new Label(fp_frame, "Flight Rules:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * start_y)), 20.0, 0.0);
-		fr_label->centered = 2;
+		fr_label->centered = true;
 		fp_frame->children[fr_label->index = FP_FLIGHTRULES_LABEL] = fr_label;
 		ComboBox* comboBox1 = new ComboBox(fp_frame, options1, x + (width - (width * (start_x -= spacing_x))) + 10, (input_width - 20.0), 10.0, y + (height - (height * start_y)), 20.0, 0.0);
 		fp_frame->children[comboBox1->index = FP_FLIGHTRULES_INPUT] = comboBox1;
@@ -92,28 +92,28 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		//2nd Line
 		start_x = 1.0;
 		Label* depart_label = new Label(fp_frame, "Depart:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		depart_label->centered = 2;
+		depart_label->centered = true;
 		fp_frame->children[depart_label->index = FP_DEPART_LABEL] = depart_label;
 		InputField* depart_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		depart_input->setInput(depart);
 		depart_input->max_chars = 4;
-		depart_input->centered = 2;
+		depart_input->centered = true;
 		fp_frame->children[depart_input->index = FP_DEPART_INPUT] = depart_input;
 		Label* arrive_label = new Label(fp_frame, "Arrive:", x + (width - (width * (start_x -= spacing_x))), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		arrive_label->centered = 2;
+		arrive_label->centered = true;
 		fp_frame->children[arrive_label->index = FP_ARRIVE_LABEL] = arrive_label;
 		InputField* arrive_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		arrive_input->setInput(arrive);
 		arrive_input->max_chars = 4;
-		arrive_input->centered = 2;
+		arrive_input->centered = true;
 		fp_frame->children[arrive_input->index = FP_ARRIVE_INPUT] = arrive_input;
 		Label* altern_label = new Label(fp_frame, "Alternate:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		altern_label->centered = 2;
+		altern_label->centered = true;
 		fp_frame->children[altern_label->index = FP_ALTERNATE_LABEL] = altern_label;
 		InputField* altern_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		altern_input->setInput(alternate);
 		altern_input->max_chars = 4;
-		altern_input->centered = 2;
+		altern_input->centered = true;
 		fp_frame->children[altern_input->index = FP_ALTERNATE_INPUT] = altern_input;
 
 		ClickButton* refreshButton = new ClickButton(fp_frame, "REFRESH PLAN", x + ((width - buttons_offset) - button_width), button_width, y + (height - (height * (start_y += spacing_y))) - 2, 24.0);// set button from the left
@@ -132,13 +132,13 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		cruise_input->setInput(cruise);
 		fp_frame->children[cruise_input->index = FP_CRUISE_INPUT] = cruise_input;
 		Label* scratch_label = new Label(fp_frame, "Scratch:", x + (width - (width * (start_x -= spacing_x))), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		scratch_label->centered = 2;
+		scratch_label->centered = true;
 		fp_frame->children[scratch_label->index = FP_SCRATCH_LABEL] = scratch_label;
 		InputField* scratch_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		scratch_input->setUneditable(scratch);
 		fp_frame->children[scratch_input->index = FP_SCRATCH_INPUT] = scratch_input;
 		Label* squawk_label = new Label(fp_frame, "Squawk:", x + (width - (width * (start_x -= spacing_x))), label_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
-		squawk_label->centered = 2;
+		squawk_label->centered = true;
 		fp_frame->children[squawk_label->index = FP_SQUAWK_LABEL] = squawk_label;
 		squawk_input = new InputField(fp_frame, x + (width - (width * (start_x -= spacing_x))), input_width, 10.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		squawk_input->setUneditable(a_squawk);
