@@ -42,7 +42,7 @@ void Load_FlightPlan_Interface(double x, double y, Aircraft& user, bool refresh)
 
 void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool refresh) {
 	if (single_opened_frames && !opened_fp) {
-		sendErrorMessage("This is not allowed (Designated Interface)");
+		sendErrorMessage(interface_error);
 		return;
 	}
 	std::vector<std::string> options1;

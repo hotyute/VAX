@@ -819,7 +819,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if (wParam == VK_SHIFT) {
 			if (!SHIFT_DOWN) {
-				CAPS = !CAPS;
 				SHIFT_DOWN = true;
 			}
 		}
@@ -1028,78 +1027,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else {
 			char c = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
-			char c2;
-			if (!CAPS)
-				c2 = tolower(c);
-			else {
-				char spec = NULL;
-				switch (wParam) {
-				case 49:
-					spec = '!';
-					break;
-				case 191:
-					spec = '?';
-					break;
-				case 57:
-					spec = '(';
-					break;
-				case 48:
-					spec = ')';
-					break;
-				case 189:
-					spec = '_';
-					break;
-				case 186:
-					spec = ':';
-					break;
-				case 222:
-					spec = '"';
-					break;
-				case 50:
-					spec = '@';
-					break;
-				case 51:
-					spec = '#';
-					break;
-				case 52:
-					spec = '$';
-					break;
-				case 53:
-					spec = '%';
-					break;
-				case 56:
-					spec = '*';
-					break;
-				case 187:
-					spec = '+';
-					break;
-				case 188:
-					spec = '<';
-					break;
-				case 190:
-					spec = '>';
-					break;
-				case 192:
-					spec = '@';
-					break;
-				case 219:
-					spec = '{';
-					break;
-				case 220:
-					spec = '|';
-					break;
-				case 221:
-					spec = '}';
-					break;
-				default:
-					printf("%d\n", wParam);
-					break;
-				}
-				if (spec != NULL)
-					c2 = spec;
-				else
-					c2 = c;
-			}
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 				InputField& focusField = *(InputField*)focusChild;
 				InterfaceFrame& frame = *focusField.getFrame();
@@ -1107,7 +1034,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				{
 					if (frame.interfaces[FRAME_BOUNDS])
 					{
-						if (CONTROL && (c2 == 'v' || c2 == 'V'))
+						if (CONTROL && (c == 'v' || c == 'V'))
 						{
 							std::string clip = GetClipboardText();
 							for (char& s : clip)
@@ -1128,7 +1055,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							int len = ::ToAscii(wParam, (lParam >> 16) & 0xFF, keyboardState, &ascii, 0);
 							if (len == 1) {
 								if (focusField.can_type()) {
-									focusField.pushInput(false, c2);
+									focusField.pushInput(false, ascii);
 									focusField.setCursor();
 									forward_split_line(frame, (InputField*)focusChild);
 									RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
@@ -1156,9 +1083,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		case VK_SHIFT:
 		{
 			if (SHIFT_DOWN) {
-				if (CAPS) {
-					CAPS = false;
-				}
 				SHIFT_DOWN = false;
 			}
 			break;
@@ -1180,7 +1104,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 void handleConnect() {
 	if (single_opened_frames) {
-		sendErrorMessage("This is not allowed (Designated Interface)");
+		sendErrorMessage(interface_error);
 		return;
 	}
 	if (connected) {

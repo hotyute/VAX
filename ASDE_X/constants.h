@@ -1,12 +1,16 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <iostream>
+
 enum class CLIENT_TYPES { CONTROLLER_CLIENT = 0, PILOT_CLIENT = 1 };
 enum class POSITIONS { OBSERVER = 0, DELIVERY = 1, GROUND = 2, TOWER = 3, DEPARTURE = 4, APPROACH = 5, CENTER = 6, OCEANIC = 7, FSS = 8 };
 
 extern const char* PILOT_RATINGS[], * CONTROLLER_RATINGS[];
 
 const double NM_PER_DEG = 60.0;
+
+const std::string interface_error = "This is not allowed (Multiple Primary Interface)";
 
 const double DEG_PER_NM = 1.0 / NM_PER_DEG;
 
