@@ -1383,6 +1383,11 @@ void conn_clean()
 			delete collision;
 		}
 	}
+	if (departures.size() > 0)
+	{
+		departures.clear();
+		renderDepartures = true;
+	}
 	Collision_Map.clear();
 	controller_map.clear();
 	acf_map.clear();

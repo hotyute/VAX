@@ -114,63 +114,62 @@ void CalculateCollisions() {
 }
 
 void CalcDepartures() {
-	if (acf_map.size() > 0) {
-		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
-			Aircraft* acf1 = iter->second;
-			if (acf1) {
-				FlightPlan& fp = *acf1->getFlightPlan();
-				std::string callsign = acf1->getCallsign();
+	for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
+		Aircraft* acf1 = iter->second;
+		if (acf1) {
+			FlightPlan& fp = *acf1->getFlightPlan();
+			std::string callsign = acf1->getCallsign();
 
-				if (!departures.count(callsign)) {
-					std::vector<std::string> points = split(fp.route, " .");
+			if (!departures.count(callsign)) {
+				std::vector<std::string> points = split(fp.route, " .");
 
-					//check if the aircraft is departing from this airport
-					if (boost::iequals(fp.departure, icao) && !icao.empty()) {
-						std::vector<std::string> new_points;
+				//check if the aircraft is departing from this airport
+				if (boost::iequals(fp.departure, icao) && !icao.empty()) {
+					std::vector<std::string> new_points;
 
-						int max_points = 2;
-						while (max_points > 0 && points.size() > 0) {
-							new_points.push_back(pop_front(points));
-							max_points--;
-						}
-						departures.emplace(callsign, new_points);
-						renderDepartures = true;
+					int max_points = 2;
+					while (max_points > 0 && points.size() > 0) {
+						new_points.push_back(pop_front(points));
+						max_points--;
 					}
+					departures.emplace(callsign, new_points);
+					renderDepartures = true;
+				}
+			}
+			else
+			{
+
+				if (!boost::iequals(fp.departure, icao) || icao.empty())
+				{
 				}
 				else
 				{
+					//refresh
+					std::vector<std::string> _points = departures[callsign];
 
-					if (!boost::iequals(fp.departure, icao) || icao.empty())
-					{
+					std::vector<std::string> points = split(fp.route, " .");
+
+					std::vector<std::string> new_points;
+
+					int max_points = 2;
+					while (max_points > 0 && points.size() > 0) {
+						new_points.push_back(pop_front(points));
+						max_points--;
 					}
-					else
+
+					if (new_points.size() > 0)
 					{
-						std::vector<std::string> _points = departures[callsign];
-
-						std::vector<std::string> points = split(fp.route, " .");
-
-						std::vector<std::string> new_points;
-
-						int max_points = 2;
-						while (max_points > 0 && points.size() > 0) {
-							new_points.push_back(pop_front(points));
-							max_points--;
-						}
-
-						if (new_points.size() > 0)
+						if (!boost::iequals(new_points[0], _points[0])
+							|| (new_points.size() > 1 && !boost::iequals(new_points[1], _points[1])))
 						{
-							if (!boost::iequals(new_points[0], _points[0])
-								|| (new_points.size() > 1 && !boost::iequals(new_points[1], _points[1])))
-							{
-								departures[callsign] = new_points;
-								renderDepartures = true;
-							}
+							departures[callsign] = new_points;
+							renderDepartures = true;
 						}
 					}
-
-
-					//check for removal
 				}
+
+
+				//check for removal
 			}
 		}
 	}

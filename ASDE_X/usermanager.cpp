@@ -142,7 +142,15 @@ void decodePackets(int opCode, Stream& stream) {
 
 			users_map.erase(callsign);
 
-			if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
+			if (type == CLIENT_TYPES::PILOT_CLIENT)
+			{
+				if (departures.count(callsign))
+				{
+					departures.erase(callsign);
+					renderDepartures = true;
+				}
+			}
+			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
 				refresh_ctrl_list();
 			}
