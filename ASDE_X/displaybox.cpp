@@ -213,6 +213,17 @@ bool DisplayBox::placeEdit(InputField* input_field)
 	return false;
 }
 
+std::string DisplayBox::getLinesComb()
+{
+	std::string all_lines;
+	for (auto it = chat_lines.begin(); it != chat_lines.end(); it++)
+	{
+		it != chat_lines.begin() ? all_lines += " " + (*it)->getText() : all_lines += (*it)->getText();
+
+	}
+	return all_lines;
+}
+
 void DisplayBox::setList(std::vector<ChatLine*> chat_lines, int numBlocks)
 {
 	DisplayBox::chat_lines = chat_lines;

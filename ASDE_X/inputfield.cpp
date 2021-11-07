@@ -340,6 +340,7 @@ void InputField::handleEntry()
 	{
 	case FP_ARRIVE_INPUT:
 	case FP_DEPART_INPUT:
+	case FP_CRUISE_INPUT:
 	{
 		if (opened_fp)
 		{

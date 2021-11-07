@@ -39,6 +39,7 @@ public:
 	void prepare();
 	InputField* editText(ChatLine* line, int x, int y);
 	bool placeEdit(InputField* input_field);
+	std::string getLinesComb();
 	void setList(std::vector<ChatLine*> chat_lines, int numBlocks);
 	void gen_points();
 

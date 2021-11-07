@@ -204,24 +204,15 @@ void PullFPData(Aircraft* user)
 			InputField* fp_depart = ((InputField*)fp_frame->children[FP_DEPART_INPUT]);
 			InputField* fp_arrival = ((InputField*)fp_frame->children[FP_ARRIVE_INPUT]);
 			InputField* fp_assigned_sq = ((InputField*)fp_frame->children[FP_SQUAWK_INPUT]);
-			std::vector<ChatLine*> fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX])->chat_lines;
-			std::vector<ChatLine*> fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX])->chat_lines;
+			DisplayBox* fp_route = ((DisplayBox*)fp_frame->children[FP_ROUTE_BOX]);
+			DisplayBox* fp_remarks = ((DisplayBox*)fp_frame->children[FP_REMARKS_BOX]);
 
 			std::string depart, arrival, route, remarks, a_sq;
 			depart = fp_depart->input.c_str();
 			arrival = fp_arrival->input.c_str();
 			a_sq = fp_assigned_sq->input.c_str();
-
-			for (auto it = fp_route.begin(); it != fp_route.end(); it++)
-			{
-				it != fp_route.begin() ? route += " " + (*it)->getText() : route += (*it)->getText();
-
-			}
-
-			for (auto it = fp_remarks.begin(); it != fp_remarks.end(); it++)
-			{
-				it != fp_remarks.begin() ? remarks += " " + (*it)->getText() : remarks += (*it)->getText();
-			}
+			route = fp_route->getLinesComb();
+			remarks = fp_remarks->getLinesComb();
 
 			FlightPlan& fp = *user->getFlightPlan();
 			bool update_required = false;
