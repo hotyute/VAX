@@ -15,29 +15,58 @@ void RenderCommunications(bool open, double x_, double y_)
 
 	communications->title = "COMMUNICATIONS";
 
-	double width = 310, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-	double height = 500, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+	double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	double height = 480, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 	communications->Pane1(x, width, y, height);
 
 	double spacing_x = 0.15, spacing_y = 0.07;
-	double start_x = 1.135, start_y = 0.10;
+	double start_x = 0.6, start_y = 0.08;
 
 	double radio_sep = 0.0;
 	const double _radsep_x = 30.0;
 
 	Radio* radio1_0 = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
-		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
 	communications->children[radio1_0->index = RADIOLINE1_0] = radio1_0;
 
 	radio_sep += _radsep_x;
 	Radio* radio1_1 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
-		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
 	communications->children[radio1_1->index = RADIOLINE1_1] = radio1_1;
 
 	radio_sep += _radsep_x;
 	Radio* radio1_2 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
-		10.0, y + (height - (height * (start_y + spacing_y))), 10.0);
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
 	communications->children[radio1_2->index = RADIOLINE1_2] = radio1_2;
+
+	radio_sep += _radsep_x;
+	Radio* radio1_3 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[radio1_3->index = RADIOLINE1_3] = radio1_3;
+
+	//2nd line
+
+	radio_sep = 0.0;
+	start_y += spacing_y;
+
+	Radio* radio2_0 = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[radio2_0->index = RADIOLINE2_0] = radio2_0;
+
+	radio_sep += _radsep_x;
+	Radio* radio2_1 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[radio2_1->index = RADIOLINE2_1] = radio2_1;
+
+	radio_sep += _radsep_x;
+	Radio* radio2_2 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[radio2_2->index = RADIOLINE2_2] = radio2_2;
+
+	radio_sep += _radsep_x;
+	Radio* radio2_3 = new Radio(communications, x + (width - (width * (start_x - spacing_x))) + radio_sep,
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[radio2_3->index = RADIOLINE2_3] = radio2_3;
 
 	CloseButton* closeb = new CloseButton(communications, 15, 15);
 	communications->children[closeb->index = COMMS_CLOSE] = closeb;

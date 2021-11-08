@@ -10,6 +10,8 @@ extern const char* PILOT_RATINGS[], * CONTROLLER_RATINGS[];
 
 const double NM_PER_DEG = 60.0;
 
+const double RADIO_SIZE = 11.0;
+
 const std::string interface_error = "This is not allowed (Multiple Primary Interface)";
 
 const double DEG_PER_NM = 1.0 / NM_PER_DEG;
@@ -123,7 +125,12 @@ const double EARTH_RADIUS_NM = 3437.670013352;
 #define RADIOLINE1_0 0
 #define RADIOLINE1_1 1
 #define RADIOLINE1_2 2
-#define COMMS_CLOSE 3
+#define RADIOLINE1_3 3
+#define RADIOLINE2_0 4
+#define RADIOLINE2_1 5
+#define RADIOLINE2_2 6
+#define RADIOLINE2_3 7
+#define COMMS_CLOSE 8
 
 //GLOBAL FLAG COUNT
 #define NUM_FLAGS 6

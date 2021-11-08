@@ -287,6 +287,23 @@ void refresh_ctrl_list()
 					}
 					break;
 				}
+				case POSITIONS::APPROACH:
+				{
+					if (!dep_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::APPROACH)
+					{
+						std::vector<std::string> data;
+
+						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
+						data.push_back("1A");
+						data.push_back(frequency_to_string(c.userdata.frequency[0]));
+						data.push_back(std::to_string(c.getIdentity()->controller_rating));
+
+						add_to_ctrl_list(callsign, data, app_list);
+						add_to_qlctrl_list(callsign, data, ql_app_list);
+
+					}
+					break;
+				}
 				}
 			}
 		}
@@ -331,6 +348,14 @@ void refresh_ctrl_list()
 				controller_list_box->addLineTop("-----------DEPARTURE----------", CHAT_TYPE::MAIN);
 			if (!ql_dep_list.empty())
 				qlc_list_box->addLineTop("-----DEP-----", CHAT_TYPE::MAIN);
+			break;
+		}
+		case POSITIONS::APPROACH:
+		{
+			if (!app_list.empty())
+				controller_list_box->addLineTop("-----------APPROACH-----------", CHAT_TYPE::MAIN);
+			if (!ql_app_list.empty())
+				qlc_list_box->addLineTop("-----APP-----", CHAT_TYPE::MAIN);
 			break;
 		}
 		}
@@ -493,11 +518,13 @@ void clear_ctrl_list()
 	clear_ctrl_list(gnd_list);
 	clear_ctrl_list(twr_list);
 	clear_ctrl_list(dep_list);
+	clear_ctrl_list(app_list);
 	clear_qlctrl_list(ql_obs_list);
 	clear_qlctrl_list(ql_del_list);
 	clear_qlctrl_list(ql_gnd_list);
 	clear_qlctrl_list(ql_twr_list);
 	clear_qlctrl_list(ql_dep_list);
+	clear_qlctrl_list(ql_app_list);
 }
 
 void remove_ctrl_list(ChatLine* c)

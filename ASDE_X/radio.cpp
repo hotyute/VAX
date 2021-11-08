@@ -8,7 +8,7 @@ Radio::Radio(InterfaceFrame* frame, double x, double width, double y, double hei
 	Radio::frame = frame;
 	Radio::focus = false;
 	Radio::type = CHILD_TYPE::RADIO;
-	BasicInterface* fieldBounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	BasicInterface* fieldBounds = new BasicInterface(x, width, 0.0, y, height, 0.0, 1.0f, 1.0f, 1.0f, 0.8f, true, true);
 	fieldBounds->setBounds(true);
 	fieldBounds->updateCoordinates();
 	Radio::border = fieldBounds;
