@@ -928,7 +928,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input)
 					{// main chat
-						if (focusField->input.size() > 0) 
+						if (focusField->input.size() > 0)
 						{
 							focusField->history.push_back(std::string(focusField->input));
 							focusField->history_index = focusField->history.size() - 1;
@@ -1014,9 +1014,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 				if (focusField == main_chat_input)
 				{
-					if (focusField->history_index > 0 && focusField->history_index < focusField->history.size())
+					if (focusField->history_index >= 0 && focusField->history_index < focusField->history.size())
 					{
-						std::string line = focusField->history[focusField->history_index--];
+						std::string line = focusField->history[focusField->history_index];
 						if (line.size() > 0)
 						{
 							focusField->clearInput();
@@ -1025,6 +1025,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						}
 					}
+					if ((focusField->history_index - 1) >= 0)
+						focusField->history_index--;
 				}
 			}
 		}
@@ -1035,18 +1037,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 				if (focusField == main_chat_input)
 				{
-					if (focusField->history_index < focusField->history.size())
+					if (focusField->history_index >= 0 && focusField->history_index < focusField->history.size())
 					{
-						std::string line = focusField->history[focusField->history_index++];
+						std::string line = focusField->history[focusField->history_index];
 						if (line.size() > 0)
 						{
-							printf("hello\n");
 							focusField->clearInput();
 							focusField->input = line;
 							focusField->setCursorAtEnd();
 							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						}
 					}
+					if ((focusField->history_index + 1) < focusField->history.size())
+						focusField->history_index++;
 				}
 			}
 		}
