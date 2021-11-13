@@ -114,12 +114,12 @@ void InputField::pushInput(bool uni, char c) {
 }
 
 void InputField::setCursorAtStart() {
-	last_cursor_pos = cursor_pos = 0;
+	cursor_pos = 0;
 	setCursor();
 }
 
 void InputField::setCursorAtEnd() {
-	last_cursor_pos = cursor_pos = input.size();
+	cursor_pos = input.size();
 	setCursor();
 }
 

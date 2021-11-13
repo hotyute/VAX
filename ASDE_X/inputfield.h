@@ -13,6 +13,8 @@ public:
 	HFONT* font = nullptr;
 	unsigned int* base = nullptr;
 	ChatLine* line_ptr = nullptr;
+	int max_history = 100, history_index = 0;
+	std::vector<std::string> history;
 	std::string pp_input;
 	bool p_protected = false; // password protection
 	std::string input;

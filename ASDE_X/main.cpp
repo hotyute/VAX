@@ -769,6 +769,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						focusField.clearInput();
 						focusField.setCursor();
 						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+						focusField.history_index = (focusField.history.size() - 1);
 					}
 					else
 					{
@@ -927,7 +928,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input)
 					{// main chat
-						if (focusField->input.size() > 0) {
+						if (focusField->input.size() > 0) 
+						{
+							focusField->history.push_back(std::string(focusField->input));
+							focusField->history_index = focusField->history.size() - 1;
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
 								focusField->setCursor();
@@ -945,6 +949,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						{
 							if (focusField->input.size() > 0)
 							{
+								focusField->history.push_back(focusField->input);
+								focusField->history_index = focusField->history.size() - 1;
 								if (processCommands(focusField->input))
 								{
 									focusField->clearInput();
@@ -961,6 +967,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					else
 					{
 						//handle regular input field
+						focusField->history.push_back(focusField->input);
+						focusField->history_index = focusField->history.size() - 1;
 						focusField->handleEntry();
 						main_chat_input->setFocus();
 					}
@@ -1000,8 +1008,47 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_UP) {
+			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
+			{
+				InputField* focusField = (InputField*)focusChild;
+
+				if (focusField == main_chat_input)
+				{
+					if (focusField->history_index > 0 && focusField->history_index < focusField->history.size())
+					{
+						std::string line = focusField->history[focusField->history_index--];
+						if (line.size() > 0)
+						{
+							focusField->clearInput();
+							focusField->input = line;
+							focusField->setCursorAtEnd();
+							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+						}
+					}
+				}
+			}
 		}
 		else if (wParam == VK_DOWN) {
+			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
+			{
+				InputField* focusField = (InputField*)focusChild;
+
+				if (focusField == main_chat_input)
+				{
+					if (focusField->history_index < focusField->history.size())
+					{
+						std::string line = focusField->history[focusField->history_index++];
+						if (line.size() > 0)
+						{
+							printf("hello\n");
+							focusField->clearInput();
+							focusField->input = line;
+							focusField->setCursorAtEnd();
+							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+						}
+					}
+				}
+			}
 		}
 		else if (wParam == VK_BACK) {
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
@@ -1017,10 +1064,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						//if (!popped)
 						back_split_line(frame, focusField);
 						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+						focusField->history_index = 0;
 					}
 					else
 					{
 						back_split_line(frame, focusField);
+						focusField->history_index = 0;
 					}
 				}
 			}
@@ -1045,6 +1094,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								focusField.setCursor();
 								forward_split_line(frame, (InputField*)focusChild);
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+								focusField.history_index = focusField.history.size() - 1;
 							}
 						}
 						else
@@ -1059,6 +1109,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									focusField.setCursor();
 									forward_split_line(frame, (InputField*)focusChild);
 									RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+									focusField.history_index = focusField.history.size() - 1;
 								}
 							}
 						}
