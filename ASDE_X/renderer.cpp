@@ -156,6 +156,8 @@ void ResizeGLScene() {
 	glLoadIdentity();                                   // Reset The Modelview Matrix
 
 	SetView(CENTER_LAT, CENTER_LON);
+
+	HandleMessageQueue();
 }
 
 void ResizeInterfaceGLScene() {
@@ -1074,7 +1076,7 @@ void GetOGLPos(int x, int y, double* output) {
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
-	GLfloat winX, winY, winZ;
+	GLfloat winX, winY, winZ = 0.0f;
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 	glGetDoublev(GL_PROJECTION_MATRIX, projection);
@@ -2388,4 +2390,40 @@ void draw_point(double x, double y)
 	endX -= line_width, endY -= line_width;
 	DrawVarLine((float)startX, (float)endY, (float)endX, (float)startY, (float)line_width, (float)line_width);
 	DrawVarLine((float)startX, (float)startY, (float)endX, (float)endY, (float)line_width, (float)line_width);
+}
+
+void HandleMessageQueue()
+{
+	for (auto it = message_queue.begin(); it != message_queue.end();)
+	{
+		if ((*it) != nullptr)
+		{
+			MSG& msg = *(*it);
+			switch (msg.message)
+			{
+			case WM_LBUTTONDOWN:
+			{
+				double coords[3];
+				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
+				MOUSE_POS->x_ = coords[1];
+				MOUSE_POS->y_ = coords[0];
+			}
+			break;
+			case WM_MOUSEMOVE:
+			{
+				if (dragged_pos)
+				{
+					double coords[3];
+					GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
+					dragged_pos->setLat(dragged_pos->getLat() + (-(coords[0] - MOUSE_POS->y_) * 0.1));
+					dragged_pos->setLon(dragged_pos->getLon() + (-(coords[1] - MOUSE_POS->x_) * 0.1));
+					printf("%f %f\n", dragged_pos->getLat(), dragged_pos->getLon());
+				}
+			}
+			break;
+			}
+			*it = nullptr;
+		}
+		++it;
+	}
 }

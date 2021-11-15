@@ -40,9 +40,10 @@ bool done = false, connected = false, show_departures = false, show_squawks = tr
 int single_opened_frames = 0;
 
 #define PROTO_VERSION 32698
-
+Point2* MOUSE_POS = new Point2();
+std::vector<MSG*> message_queue(500, NULL);
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
-Mirror* dragged_mir = nullptr;
+Mirror* dragged_mir = nullptr, *dragged_pos = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL,
 * connect_password = nullptr, * main_chat_input = nullptr, * terminal_input = nullptr, * squawk_input = nullptr;
@@ -51,6 +52,7 @@ Label* callsign_label = NULL, * name_label = NULL, * user_label = NULL, * pass_l
 CloseButton* connect_closeb = NULL;
 DisplayBox* main_chat_box = NULL, * controller_list_box = NULL, * controller_info_box = NULL, * qlc_list_box = NULL;
 
+void DispatchOGLMessages(MSG* lpMsg);
 void handleConnect();
 bool handle_asel(Mirror* mirror, Aircraft* aircraft);
 Aircraft* check_asel(Mirror* mirror, double x, double y);
@@ -149,14 +151,28 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 	/* Run the message loop. It will run until GetMessage() returns 0 */
 	while (GetMessage(&messages, NULL, 0, 0))
 	{
+
 		/* Translate virtual-key messages into character messages */
 		TranslateMessage(&messages);
 		/* Send message to WindowProcedure */
 		DispatchMessage(&messages);
+		if (messages.message == WM_LBUTTONDOWN
+			|| messages.message == WM_LBUTTONUP
+			|| messages.message == WM_MOUSEMOVE)
+		{
+			auto it = std::find(message_queue.begin(), message_queue.end(), nullptr);
+			if (it != message_queue.end())
+				*it = &messages;
+		}
 	}
 
 	/* The program return-value is 0 - The value that PostQuitMessage() gave */
 	return messages.wParam;
+}
+
+void DispatchOGLMessages(MSG* lpMsg)
+{
+	
 }
 
 BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -348,6 +364,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			dragged_mir->handleMovement(dragged_mir->startX + dx, dragged_mir->startY + -dy);
 		}
+		else if (dragged_pos)
+		{
+			WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
+			//double coords[3];
+			//GetOGLPos(x, HIWORD(lParam), coords);
+			//dragged_pos->setLat(dragged_pos->getLat() + (coords[0] - MOUSE_POS->y_));
+			//dragged_pos->setLon(dragged_pos->getLon() + (coords[1] - MOUSE_POS->x_));
+		}
 	}
 	break;
 	case WM_COMMAND:
@@ -480,7 +504,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
 		bool clicked_interface = false;
 		TopButton* clicked_tbutton = nullptr;
-		for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) {
+		for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) 
+		{
 			TopButton* curButton = *btn;
 			int* params = curButton->getParams();
 			double vertx[4] = { params[0], params[0], params[2], params[2] };
@@ -616,6 +641,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								{
 									handle_asel(mir, asel);
 								}
+								else
+								{
+									dragged_pos = mir;
+								}
 								break;
 							}
 						}
@@ -666,6 +695,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			delete dragged_mir->end_pt;
 			dragged_mir->end_pt = nullptr;
 			dragged_mir = nullptr;
+		}
+		else if (dragged_pos)
+		{
+			dragged_pos = nullptr;
 		}
 	}
 	break;

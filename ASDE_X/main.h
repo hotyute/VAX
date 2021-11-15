@@ -7,6 +7,8 @@
 #include "constants.h"
 #include "flightplan.h"
 #include "displaybox.h"
+#include "point2d.h"
+#include "mirror.h"
 
 #define IDC_STATIC -1
 #define IDR_MYMENU 101
@@ -44,6 +46,9 @@ extern HDC hDC;		// Private GDI Device Context
 extern HGLRC hRC;		// Permanent Rendering Context
 extern HWND hWnd;		// Holds Our Window Handle
 extern PAINTSTRUCT ps;
+extern std::vector<MSG*> message_queue;
+extern Point2* MOUSE_POS;
+extern Mirror* dragged_pos;
 
 void connect();
 void send_disconnect();

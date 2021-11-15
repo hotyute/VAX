@@ -132,4 +132,6 @@ bool RenderFocus();
 
 bool RenderFocusChild(CHILD_TYPE type);
 
+void HandleMessageQueue();
+
 #endif
