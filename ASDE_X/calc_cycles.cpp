@@ -47,7 +47,8 @@ void update()
 
 void CalculateCollisions() {
 	if (acf_map.size() > 0) {
-		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) 
+		{
 			Aircraft* acf1 = iter->second;
 			if (acf1) {
 				Aircraft& aircraft1 = *acf1;

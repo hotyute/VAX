@@ -21,9 +21,18 @@ void RenderCommunications(bool open, double x_, double y_)
 
 	double spacing_x = 0.15, spacing_y = 0.07;
 	double start_x = 0.6, start_y = 0.08;
+	const double bar_offset = 0.01;
 
 	double radio_sep = 0.0;
 	const double _radsep_x = 30.0;
+	Radio* prim_0 = new Radio(communications, x + (width - (width * ((start_x + 0.5) - spacing_x))),
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[prim_0->index = PRIM_0] = prim_0;
+
+	ClickButton* slot_0 = new ClickButton(communications, "----", x + (width - (width * ((start_x + 0.4) - spacing_x))),
+		90.0, y + (height - (height * ((start_y + bar_offset) + spacing_y))), 25.0);
+	communications->children[slot_0->index = BUTTON_0] = slot_0;
+	slot_0->btn_border = false;
 
 	Radio* radio1_0 = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
 		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
@@ -48,6 +57,15 @@ void RenderCommunications(bool open, double x_, double y_)
 
 	radio_sep = 0.0;
 	start_y += spacing_y;
+
+	Radio* prim_1 = new Radio(communications, x + (width - (width * ((start_x + 0.5) - spacing_x))),
+		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
+	communications->children[prim_1->index = PRIM_1] = prim_1;
+
+	ClickButton* slot_1 = new ClickButton(communications, "----", x + (width - (width * ((start_x + 0.4) - spacing_x))),
+		90.0, y + (height - (height * ((start_y + bar_offset) + spacing_y))), 25.0);
+	communications->children[slot_1->index = BUTTON_1] = slot_1;
+	slot_1->btn_border = false;
 
 	Radio* radio2_0 = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
 		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);

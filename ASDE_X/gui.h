@@ -122,6 +122,7 @@ class ClickButton : public ChildFrame {
 public:
 	ClickButton(InterfaceFrame*, std::string, double x, double width, double y, double height);
 public:
+	bool btn_border = true;
 	int border_pix = 4;
 	std::string text;
 

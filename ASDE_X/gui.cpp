@@ -370,33 +370,36 @@ void ClickButton::doDrawing() {
 	glRasterPos2f(textXPos, textYPos);
 	glPrint(ClickButton::text.c_str(), &topButtonBase);
 
-	int start_x = param.getStartX(), end_x = param.getEndX();
-	int start_y = param.getStartY(), end_y = param.getEndY();
+	if (btn_border)
+	{
+		int start_x = param.getStartX(), end_x = param.getEndX();
+		int start_y = param.getStartY(), end_y = param.getEndY();
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2d(start_x + border_pix, start_y + border_pix);
-	glVertex2d(start_x + border_pix, end_y - border_pix);
-	glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex2d(start_x + border_pix, start_y + border_pix);
+		glVertex2d(start_x + border_pix, end_y - border_pix);
+		glEnd();
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2d(start_x + border_pix, end_y - border_pix);
-	glVertex2d(end_x - border_pix, end_y - border_pix);
-	glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex2d(start_x + border_pix, end_y - border_pix);
+		glVertex2d(end_x - border_pix, end_y - border_pix);
+		glEnd();
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2d(end_x - border_pix, param.getStartY() + border_pix);
-	glVertex2d(end_x - border_pix, param.getEndY() - border_pix);
-	glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex2d(end_x - border_pix, param.getStartY() + border_pix);
+		glVertex2d(end_x - border_pix, param.getEndY() - border_pix);
+		glEnd();
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2d(start_x + border_pix, start_y + border_pix);
-	glVertex2d(end_x - border_pix, start_y + border_pix);
-	glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex2d(start_x + border_pix, start_y + border_pix);
+		glVertex2d(end_x - border_pix, start_y + border_pix);
+		glEnd();
 
-	DrawVarLine(start_x, start_y, start_x + border_pix, start_y + border_pix, 1, 1);
-	DrawVarLine(start_x, end_y, start_x + border_pix, end_y - border_pix, 1, 1);
-	DrawVarLine(end_x, start_y, end_x - border_pix, start_y + border_pix, 1, 1);
-	DrawVarLine(end_x, end_y, end_x - border_pix, end_y - border_pix, 1, 1);
+		DrawVarLine(start_x, start_y, start_x + border_pix, start_y + border_pix, 1, 1);
+		DrawVarLine(start_x, end_y, start_x + border_pix, end_y - border_pix, 1, 1);
+		DrawVarLine(end_x, start_y, end_x - border_pix, start_y + border_pix, 1, 1);
+		DrawVarLine(end_x, end_y, end_x - border_pix, end_y - border_pix, 1, 1);
+	}
 }
 
 void ClickButton::setFocus() {
