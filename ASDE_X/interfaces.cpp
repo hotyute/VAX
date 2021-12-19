@@ -20,11 +20,55 @@ void RenderCommunications(bool open, double x_, double y_)
 	communications->Pane1(x, width, y, height);
 
 	double spacing_x = 0.15, spacing_y = 0.07;
-	double start_x = 0.6, start_y = 0.08;
+	double start_x = 0.6, start_y = 0.03;
 	const double bar_offset = 0.01;
 
-	double radio_sep = 0.0;
+	double radio_sep = 0.0, label_sep = 0.0;
 	const double _radsep_x = 30.0;
+
+	Label *prim_label = new Label(communications, "PRIM", x + (width - (width * ((start_x + 0.60) - spacing_x))), 
+		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
+	prim_label->centered = 1;
+	communications->children[prim_label->index = PRIM_LABEL] = prim_label;
+
+	label_sep += (0.24 * width);
+
+	Label* name_label = new Label(communications, "Name", x + (width - (width * ((start_x + 0.60) - spacing_x))) + label_sep,
+		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
+	name_label->centered = 1;
+	communications->children[name_label->index = NAME_LABEL] = name_label;
+
+	label_sep += (0.25 * width);
+
+	Label* tx_label = new Label(communications, "TX", x + (width - (width * ((start_x + 0.60) - spacing_x))) + label_sep,
+		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
+	tx_label->centered = 1;
+	communications->children[tx_label->index = TX_LABEL] = tx_label;
+
+	label_sep += (_radsep_x + 2.0);
+
+	Label* rx_label = new Label(communications, "RX", x + (width - (width * ((start_x + 0.60) - spacing_x))) + label_sep,
+		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
+	rx_label->centered = 1;
+	communications->children[rx_label->index = RX_LABEL] = rx_label;
+
+	label_sep += _radsep_x;
+
+	Label* hdst_label = new Label(communications, "HDST", x + (width - (width * ((start_x + 0.60) - spacing_x))) + label_sep,
+		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
+	hdst_label->centered = 1;
+	communications->children[hdst_label->index = HDST_LABEL] = hdst_label;
+
+	label_sep += (_radsep_x + 2.0);
+
+	Label* spkr_label = new Label(communications, "SPKR", x + (width - (width * ((start_x + 0.60) - spacing_x))) + label_sep,
+		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
+	spkr_label->centered = 1;
+	communications->children[spkr_label->index = SPKR_LABEL] = spkr_label;
+
+	radio_sep = 0.0;
+	start_y = 0.1;
+
 	Radio* prim_0 = new Radio(communications, x + (width - (width * ((start_x + 0.5) - spacing_x))),
 		RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
 	communications->children[prim_0->index = PRIM_0] = prim_0;

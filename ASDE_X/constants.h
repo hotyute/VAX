@@ -135,6 +135,12 @@ const double EARTH_RADIUS_NM = 3437.670013352;
 #define RADIOLINE2_2 10
 #define RADIOLINE2_3 11
 #define COMMS_CLOSE 12
+#define PRIM_LABEL 13
+#define NAME_LABEL 14
+#define TX_LABEL 15
+#define RX_LABEL 16
+#define HDST_LABEL 17
+#define SPKR_LABEL 18
 
 //GLOBAL FLAG COUNT
 #define NUM_FLAGS 6
