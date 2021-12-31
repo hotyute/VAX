@@ -11,6 +11,7 @@ using namespace std::chrono_literals;
 
 tcpinterface* intter = new tcpinterface();
 
+/* Use Official Packet Output App to update this. */
 static int packetSizes[256] =
 {
 -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, 8, -2, 2, 0, 36,
