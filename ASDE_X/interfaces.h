@@ -31,4 +31,15 @@ void sendATCMessage(std::string message);
 
 extern InterfaceFrame* controller_list, *main_chat, *terminal_cmd, *communications;
 
+#ifndef CommsLine_interfaces_h
+#define CommsLine_interfaces_h
+struct CommsLine {
+	bool prim;
+	bool rx;
+	bool tx;
+	bool hdst;
+	bool spkr;
+};
+#endif
+
 #endif
