@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 tcpinterface* intter = new tcpinterface();
 
 /* Use Official Packet Output App to update this. */
-static int packetSizes[256] =
+const int packetSizes[256] =
 {
 -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, 8, -2, 2, 0, 36,
 -2, 3, -2, 19, 4, -1, -3, -3, -3, -3, -3, -3, -3, -3, -3,
@@ -35,6 +35,7 @@ static int packetSizes[256] =
 };
 
 tcpinterface::tcpinterface() {
+	this->writeMutex = CreateMutex(NULL, FALSE, NULL);
 	this->in_stream = new Stream(5000);
 	this->in_stream->clearBuf();
 	memset(tcpinterface::message, 0, 5000);
