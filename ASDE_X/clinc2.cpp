@@ -98,8 +98,8 @@ DWORD tcpinterface::run() {
 				continue;
 
 			Stream& in = *in_stream;
-			memcpy(in.buffer + in.length, message, nBytesReceived);
-			in.length += nBytesReceived;
+			memcpy(in.buffer + in.writeIndex, message, nBytesReceived);
+			in.writeIndex += nBytesReceived;
 
 			if (tcpinterface::hand_shake)
 			{
@@ -252,14 +252,14 @@ void decode(Stream& in)
 }
 
 void tcpinterface::sendMessage(Stream* stream) {
-	if (stream->currentOffset == 0) {
+	if (stream->writeIndex == 0) {
 		printf("Can't flush empty stream o.O\n");
 		return;
 	}
 
 	w_lock();
-	DWORD what = send(tcpinterface::sConnect, stream->buffer, stream->currentOffset, NULL);
-	stream->currentOffset = 0;
+	DWORD what = send(tcpinterface::sConnect, stream->buffer, stream->writeIndex, NULL);
+	stream->writeIndex = 0;
 	w_unlock();
 }
 
