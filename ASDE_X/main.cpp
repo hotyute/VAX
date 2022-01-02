@@ -20,6 +20,7 @@
 #include "calc_cycles.h"
 #include "topbutton.h"
 #include "raiiclipboard.h"
+#include "save.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -216,6 +217,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_CONNECT, L"&Connect to Sever...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_DISCONNECT, L"&Disconnect...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
+		AppendMenu(hFile, MF_STRING, ID_FILE_SAVE, L"&Save Profile");
+		AppendMenu(hFile, MF_STRING, ID_FILE_LOAD, L"&Load Profile");
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide All Squawk Codes...");
@@ -470,6 +473,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		break;
+		case ID_FILE_SAVE:
+			save_info();
+			break;
+		case ID_FILE_LOAD:
+			read_info();
+			break;
 		case ID_FILE_EXIT:
 			PostMessage(hwnd, WM_CLOSE, 0, 0);
 			break;
@@ -1542,6 +1551,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	Event& position_updates = ConfigUpdates();
 	position_updates.eAction.setTicks(0);
 	event_manager1->addEvent(&position_updates);
+	read_info();
 	while (!done) {
 		start = boost::posix_time::microsec_clock::local_time();
 		preFlags();

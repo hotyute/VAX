@@ -2,6 +2,7 @@
 #include "radio.h"
 #include "displaybox.h"
 
+#include <boost/algorithm/string.hpp>
 #include <regex>
 #include <string>
 
@@ -26,7 +27,7 @@ void RenderCommunications(bool open, double x_, double y_)
 	double radio_sep = 0.0, label_sep = 0.0;
 	const double _radsep_x = 30.0;
 
-	Label *prim_label = new Label(communications, "PRIM", x + (width - (width * ((start_x + 0.60) - spacing_x))), 
+	Label* prim_label = new Label(communications, "PRIM", x + (width - (width * ((start_x + 0.60) - spacing_x))),
 		50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
 	prim_label->centered = 1;
 	communications->children[prim_label->index = PRIM_LABEL] = prim_label;
@@ -215,6 +216,8 @@ void RenderControllerList(bool open, double x_, double y_)
 
 void RenderConnect(double x_, double y_)
 {
+	Identity& id = *USER->getIdentity();
+	bool data_set = !boost::icontains(id.callsign, "NOT_LOGGED") && !id.callsign.empty();
 	connectFrame = new InterfaceFrame(CONNECT_INTERFACE);
 	connectFrame->title = "CONNECT";
 	int width = 300, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
@@ -231,14 +234,17 @@ void RenderConnect(double x_, double y_)
 	connect_callsign = new InputField(connectFrame, x, 120.0, 10.0, y + (height - 50.0), 20, -10.0);
 	connect_callsign->caps = true;
 	connect_callsign->max_chars = 10;
+
 	connectFrame->children[connect_callsign->index = CALLSIGN_INPUT] = connect_callsign;
 	connect_fullname = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 50.0), 20, -10.0);
 	connectFrame->children[connect_fullname->index = FULLNAME_INPUT] = connect_fullname;
 	connect_username = new InputField(connectFrame, x, 120.0, 10.0, y + (height - 95.0), 20, -10.0);
 	connectFrame->children[connect_username->index = USERNAME_INPUT] = connect_username;
 	connect_username->numbers = true;
+	connect_username->max_chars = 20;
 	connect_password = new InputField(connectFrame, (x + 150.0), 120.0, 10.0, y + (height - 95.0), 20, -10.0);
 	connect_password->p_protected = true;
+	connect_password->max_chars = 20;
 	connectFrame->children[connect_password->index = PASSWORD_INPUT] = connect_password;
 
 	std::vector<std::string> options1;
@@ -275,13 +281,25 @@ void RenderConnect(double x_, double y_)
 	ClickButton* cancelButton = new ClickButton(connectFrame, "CANCEL", (x + 30.0) + 120.0, 100.0, y + 10.0 + (height - 190.0), 25.0);
 	connectFrame->children[cancelButton->index = CONN_CANCEL_BUTTON] = cancelButton;
 
+	if (data_set)
+	{
+		connect_callsign->setInput(id.callsign);
+		connect_fullname->setInput(id.login_name);
+		connect_username->setInput(id.username);
+		connect_password->setInput(id.password);
+		connect_rating->pos = id.controller_rating;
+		connect_position->pos = static_cast<int>(id.controller_position);
+	}
+	else
+	{
 #ifdef _DEBUG
-	connect_callsign->setInput("SM_SUP");
-	connect_fullname->setInput("Samuel Mason");
-	connect_username->setInput("971202");
-	connect_password->setInput("583562");
-	connect_rating->pos = 10;
+		connect_callsign->setInput("SM_SUP");
+		connect_fullname->setInput("Samuel Mason");
+		connect_username->setInput("971202");
+		connect_password->setInput("583562");
+		connect_rating->pos = 10;
 #endif
+	}
 
 	connectFrame->doOpen(false, true);//delete's old object while opening, this should be before setting vector
 
@@ -290,7 +308,7 @@ void RenderConnect(double x_, double y_)
 
 void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, bool open, int id) {
 	InterfaceFrame* pm_frame = frames_def[id];
-	if (!pm_frame || refresh) 
+	if (!pm_frame || refresh)
 	{
 
 		pm_frame = new InterfaceFrame(id);
@@ -334,9 +352,9 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, b
 
 		pm_frame->doInsert();
 	}
-	else 
+	else
 	{
-		if (!pm_frame->render) 
+		if (!pm_frame->render)
 		{
 			pm_frame->doOpen(false, true);
 		}
@@ -387,12 +405,12 @@ void LoadMainChatInterface(bool refresh) {
 	// if you want to make input box longer, remove an arrow offset
 	const int width_offset = (controller_list_width + (arrow_offset + arrow_offset) + c_padding + m_padding);
 
-	if (refresh) 
+	if (refresh)
 	{
-		if (main_chat) 
+		if (main_chat)
 		{
 			main_chat->UpdatePane1(x, width, 0, 125);
-			for (ChildFrame* child : main_chat->children) 
+			for (ChildFrame* child : main_chat->children)
 			{
 				if (child) {
 					switch (child->index) {
@@ -425,7 +443,7 @@ void LoadMainChatInterface(bool refresh) {
 		main_chat->Pane1(x, width, 0, 125);
 
 		//controller list
-		
+
 		qlc_list_box = new DisplayBox(main_chat, x, controller_list_width, 5, 5, 114, 5, true);
 		std::vector<ChatLine*> list;
 		//---Delivery---
