@@ -114,6 +114,7 @@
     <ClCompile Include="projection.cpp" />
     <ClCompile Include="radio.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="save.cpp" />
     <ClCompile Include="spline.cpp" />
     <ClCompile Include="spline2.cpp" />
     <ClCompile Include="Stream.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="raiiclipboard.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="save.h" />
     <ClInclude Include="spline.h" />
     <ClInclude Include="spline2.h" />
     <ClInclude Include="Stream.h" />
