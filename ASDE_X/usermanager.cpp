@@ -11,6 +11,17 @@ Controller* USER = new Controller("(NOT_LOGGED)", 0, 0);
 User* ASEL = nullptr;
 
 void decodePackets(int opCode, Stream& stream) {
+	if (opCode == 7) {
+		char msg[256];
+		stream.readString(msg);
+		sendSystemMessage("Server: " + std::string(msg));
+	}
+
+	if (opCode == 8) {
+		char wx[256];
+		stream.readString(wx);
+	}
+
 	if (opCode == 9) {
 		//create new user packet
 		int index = stream.readUnsignedWord();
