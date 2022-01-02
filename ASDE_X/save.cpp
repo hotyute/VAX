@@ -8,9 +8,11 @@
 void save_info()
 {
     Stream buf = Stream(256);
+
     buf.createFrameVarSizeWord(1);
     buf.writeString((char*)USER->getIdentity()->callsign.c_str());
     buf.endFrameVarSizeWord();
+
     std::fstream myFile("data.bin", std::ios::out | std::ios::binary);
     myFile.write(buf.buffer, buf.writeIndex);
     myFile.close();
