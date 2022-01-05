@@ -364,12 +364,13 @@ void InputField::calcCursorPos(double x, double y)
 	SIZE extent = getTextExtent(input);
 	double _x;
 	double aW = InputField::border->getActualWidth();
-	if (centered) {
-		_x = (InputField::border->getStartX() + (aW / 2));
-	}
-	else {
+	//if (centered) {
+		//_x = (InputField::border->getStartX() + (aW / 2));
+	//}
+	//else {
 		_x = InputField::border->getStartX() + offset_x;
-	}
+	//}
 	double x_pos = ((((double)x) - _x) / extent.cx) * input.size();
+	printf("%f\n", x_pos);
 	setCursor((int)x_pos);
 }
