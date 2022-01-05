@@ -761,9 +761,13 @@ void ChatLine::playChatSound()
 
 bool ChatLine::in_bounds(int x, int y)
 {
-	double vertx[4] = { _x, _x, (_x + _p_x), (_x + _p_x) };
-	double verty[4] = { _y, (_y + _p_y), (_y + _p_y), _y };
-	return pnpoly(4, vertx, verty, x, y);
+	if (_p_x != -1 && _p_y != -1)
+	{
+		double vertx[4] = { _x, _x, (_x + _p_x), (_x + _p_x) };
+		double verty[4] = { _y, (_y + _p_y), (_y + _p_y), _y };
+		return pnpoly(4, vertx, verty, x, y);
+	}
+	return false;
 }
 
 bool ChatLine::in_bounds_text(int x, int y)

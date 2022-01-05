@@ -158,7 +158,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		((InputField*)frame->children[(index + 1)])->handleBox();
 	}
 
-	
+
 
 	if (empty(str))
 	{
@@ -433,15 +433,16 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 				}
 				InputField* input_field = editText(line, x, y);
 				placeEdit(input_field);
+
+				clicked = this;
+				return 1;
 			}
 			else
 			{
-				switch (this->frame->id)
+				if (this->frame->id == CONTROLLER_INTERFACE)
 				{
-				case CONTROLLER_INTERFACE:
-					switch (this->index)
+					if (this->index == CONTROLLER_LIST_BOX)
 					{
-					case CONTROLLER_LIST_BOX:
 						//handle controller click
 						controller_info_box->clearLines();
 
@@ -477,13 +478,11 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 						}
 
 						renderDrawings = true;
-						break;
+						clicked = this;
+						return 1;
 					}
-					break;
 				}
 			}
-			clicked = this;
-			return 1;
 		}
 	}
 	return 0;// returning 1 means break any outside loop
@@ -638,11 +637,7 @@ bool DisplayBox::click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_of
 		inter2.getStartY() + arrow_bounds,
 		inter2.getStartY()
 	};
-	bool clicked_bottom = pnpoly(4, vertxt, vertyt, x, y);
-	if (clicked_bottom) {
-		clicked = true;
-	}
-	return clicked;
+	return pnpoly(4, vertxt, vertyt, x, y);
 }
 
 bool DisplayBox::click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset) {
@@ -660,9 +655,5 @@ bool DisplayBox::click_arrow_top(int x, int y, int arrow_bounds, int arrow_offse
 		inter2.getStartY() + inter2.getActualHeight() - arrow_bounds,
 		inter2.getStartY() + inter2.getActualHeight()
 	};
-	bool clicked_top = pnpoly(4, vertx, verty, x, y);
-	if (clicked_top) {
-		clicked = true;
-	}
-	return clicked;
+	return pnpoly(4, vertx, verty, x, y);
 }
