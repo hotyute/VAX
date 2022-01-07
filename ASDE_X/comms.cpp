@@ -44,8 +44,8 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 					child->border->getPosY() + (expansion / 2.0), child->border->getHeight());
 		}
 
-		const double input_spacingx = 0.15, input_spacingy = 0.05;
-		double input_startx = 0.85, input_starty = 0.83;
+		const double input_spacingx = 0.15, input_spacingy = 0.05, button_spacingx = 0.11;
+		double input_startx = 0.85, input_starty = 0.83, button_starty = 0.90;
 
 		Label* pos_label = new Label(communications, "Position:", x + (width - (width * ((start_x + 0.55) - spacing_x))),
 			50.0, 10.0, y + (height - (height * (input_starty + input_spacingy))), 20, 0.0);
@@ -62,6 +62,18 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 		InputField* freq_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
 			width * 0.60, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
 		communications->children[freq_input->index = COMMSFREQ_INPUT] = freq_input;
+
+		ClickButton* save = new ClickButton(communications, "Save", x + (width - (width * (input_startx + 0.1))),
+			60.0, y + (height - (height * ((button_starty + 0.01) + spacing_y))), 20.0);
+		communications->children[save->index = COMMS_SAVE_BUTTON] = save;
+
+		ClickButton* clear = new ClickButton(communications, "Clear", x + 60.0 + (width - (width * ((input_startx + 0.1) - button_spacingx))),
+			60.0, y + (height - (height * ((button_starty + 0.01) + spacing_y))), 20.0);
+		communications->children[clear->index = COMMS_CLEAR_BUTTON] = clear;
+
+		ClickButton* cancel = new ClickButton(communications, "Cancel", x + (60.0 * 2.0) + (width - (width * ((input_startx + 0.1) - (button_spacingx * 2.0)))),
+			60.0, y + (height - (height * ((button_starty + 0.01) + spacing_y))), 20.0);
+		communications->children[cancel->index = COMMS_CANCEL_BUTTON] = cancel;
 	}
 	else 
 	{
