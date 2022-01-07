@@ -434,19 +434,33 @@ void ClickButton::doAction() {
 		{
 		case COMMS_SAVE_BUTTON:
 		case COMMS_CLEAR_BUTTON:
-		case COMMS_CANCEL_BUTTON:
 			break;
+		case COMMS_CANCEL_BUTTON:
+		{
+			if (expanded)
+			{
+				//clear fields
+				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
+				RenderCommunications(true, wdata[0], wdata[1], 2);
+				expanded = false;
+			}
+		}
+		break;
 		default:
 		{
 			CommsLine* comms = COMMS_MAP[this->index];
 
 			if (comms)
 			{
-				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
-				RenderCommunications(true, wdata[0], wdata[1], true, true);
+				if (!expanded)
+				{
+					int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
+					RenderCommunications(true, wdata[0], wdata[1], 1);
+					expanded = true;
+				}
 			}
 		}
-			break;
+		break;
 		}
 	}
 	break;

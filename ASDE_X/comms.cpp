@@ -3,9 +3,13 @@
 CommsLine* comms_line0 = nullptr, * comms_line1 = nullptr;
 CommsLine* cur_prime = nullptr;
 std::vector<CommsLine*> COMMS_MAP(100, nullptr);
+bool expanded = false;
 
-void RenderCommunications(bool open, double x_, double y_, bool refresh, bool expand)
+void RenderCommunications(bool open, double x_, double y_, int expand_state)
 {
+	bool expand = expand_state == 1;
+	bool deflate = expand_state == 2;
+
 	const double expansion = 100;
 
 	double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
@@ -18,28 +22,49 @@ void RenderCommunications(bool open, double x_, double y_, bool refresh, bool ex
 	double radio_sep = 0.0, label_sep = 0.0;
 	const double _radsep_x = 30.0;
 
-	if (expand && communications)
+	if (deflate && communications)
 	{
 		communications->UpdatePane1(x, width, y, height);
 
 		for (ChildFrame* child : communications->children)
 		{
 			if (child)
-				child->updatePos(child->border->getPosX(), child->border->getWidth(), 
+				child->updatePos(child->border->getPosX(), child->border->getWidth(),
+					child->border->getPosY() - (expansion / 2.0), child->border->getHeight());
+		}
+	}
+	else if (expand && communications)
+	{
+		communications->UpdatePane1(x, width, y, height);
+
+		for (ChildFrame* child : communications->children)
+		{
+			if (child)
+				child->updatePos(child->border->getPosX(), child->border->getWidth(),
 					child->border->getPosY() + (expansion / 2.0), child->border->getHeight());
 		}
 
 		const double input_spacingx = 0.15, input_spacingy = 0.05;
 		double input_startx = 0.85, input_starty = 0.83;
+
+		Label* pos_label = new Label(communications, "Position:", x + (width - (width * ((start_x + 0.55) - spacing_x))),
+			50.0, 10.0, y + (height - (height * (input_starty + input_spacingy))), 20, 0.0);
+		communications->children[pos_label->index = COMMSPOS_LABEL] = pos_label;
+
 		InputField* pos_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
-			width * 0.64, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+			width * 0.60, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
 		communications->children[pos_input->index = COMMSPOS_INPUT] = pos_input;
 
+		Label* freq_label = new Label(communications, "Frequency:", x + (width - (width * ((start_x + 0.55) - spacing_x))),
+			50.0, 10.0, y + (height - (height * (input_starty + input_spacingy))), 20, 0.0);
+		communications->children[freq_label->index = COMMSFREQ_LABEL] = freq_label;
+
 		InputField* freq_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
-			width * 0.64, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+			width * 0.60, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
 		communications->children[freq_input->index = COMMSFREQ_INPUT] = freq_input;
 	}
-	else {
+	else 
+	{
 		communications = new InterfaceFrame(COMMS_INTERFACE);
 		std::fill(COMMS_MAP.begin(), COMMS_MAP.end(), nullptr);
 

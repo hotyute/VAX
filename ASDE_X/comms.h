@@ -4,7 +4,7 @@
 #include "radio.h"
 #include "interfaces.h"
 
-void RenderCommunications(bool open, double x_, double y_, bool refresh, bool expand);
+void RenderCommunications(bool open, double x_, double y_, int expand);
 
 #ifndef CommsLine_interfaces_h
 #define CommsLine_interfaces_h
@@ -23,5 +23,6 @@ void prime_comms(CommsLine* line);
 extern CommsLine* comms_line0, * comms_line1;
 extern CommsLine* cur_prime;
 extern std::vector<CommsLine*> COMMS_MAP;
+extern bool expanded;
 
 #endif

@@ -423,7 +423,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (communications == NULL) {
 				//TODO save X and Y positions when moved
 				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
-				RenderCommunications(true, wdata[0], wdata[1], false, false);
+				RenderCommunications(true, wdata[0], wdata[1], 0);
 			}
 			else if (!communications->render)
 			{
