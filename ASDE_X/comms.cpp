@@ -6,11 +6,38 @@ std::vector<CommsLine*> COMMS_MAP(100, nullptr);
 
 void RenderCommunications(bool open, double x_, double y_, bool refresh, bool expand)
 {
+	const double expansion = 100;
+
+	double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	double height = expand ? (450 + expansion) : 450, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+
+	double spacing_x = 0.15, spacing_y = 0.07;
+	double start_x = 0.6, start_y = 0.03;
+	const double bar_offset = 0.01;
+
+	double radio_sep = 0.0, label_sep = 0.0;
+	const double _radsep_x = 30.0;
+
 	if (expand && communications)
 	{
-		double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-		double height = expand ? 550 : 450, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 		communications->UpdatePane1(x, width, y, height);
+
+		for (ChildFrame* child : communications->children)
+		{
+			if (child)
+				child->updatePos(child->border->getPosX(), child->border->getWidth(), 
+					child->border->getPosY() + (expansion / 2.0), child->border->getHeight());
+		}
+
+		const double input_spacingy = 0.05;
+		double input_starty = 0.83;
+		InputField* pos_input = new InputField(communications, x + (width - (width * ((start_x + 0.60) - spacing_x))), 
+			width * 0.93, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+		communications->children[pos_input->index = COMMSPOS_INPUT] = pos_input;
+
+		InputField* freq_input = new InputField(communications, x + (width - (width * ((start_x + 0.60) - spacing_x))),
+			width * 0.93, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+		communications->children[freq_input->index = COMMSFREQ_INPUT] = freq_input;
 	}
 	else {
 		communications = new InterfaceFrame(COMMS_INTERFACE);
@@ -18,16 +45,7 @@ void RenderCommunications(bool open, double x_, double y_, bool refresh, bool ex
 
 		communications->title = "COMMUNICATIONS";
 
-		double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-		double height = expand ? 550 : 450, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 		communications->Pane1(x, width, y, height);
-
-		double spacing_x = 0.15, spacing_y = 0.07;
-		double start_x = 0.6, start_y = 0.03;
-		const double bar_offset = 0.01;
-
-		double radio_sep = 0.0, label_sep = 0.0;
-		const double _radsep_x = 30.0;
 
 		Label* prim_label = new Label(communications, "PRIM", x + (width - (width * ((start_x + 0.60) - spacing_x))),
 			50.0, 10.0, y + (height - (height * (start_y + spacing_y))), 20, -10.0);
