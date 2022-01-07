@@ -9,7 +9,7 @@ void RenderCommunications(bool open, double x_, double y_, bool refresh, bool ex
 	if (expand && communications)
 	{
 		double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-		double height = expand ? 550 : 440, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+		double height = expand ? 550 : 450, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 		communications->UpdatePane1(x, width, y, height);
 	}
 	else {
@@ -19,7 +19,7 @@ void RenderCommunications(bool open, double x_, double y_, bool refresh, bool ex
 		communications->title = "COMMUNICATIONS";
 
 		double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-		double height = expand ? 550 : 440, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+		double height = expand ? 550 : 450, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 		communications->Pane1(x, width, y, height);
 
 		double spacing_x = 0.15, spacing_y = 0.07;
