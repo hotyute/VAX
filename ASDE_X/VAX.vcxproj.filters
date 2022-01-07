@@ -117,6 +117,9 @@
     <ClCompile Include="save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="comms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -225,6 +228,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="save.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="comms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

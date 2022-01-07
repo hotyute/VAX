@@ -8,6 +8,7 @@
 #include "usermanager.h"
 #include "tools.h"
 #include "displaybox.h"
+#include "comms.h"
 
 std::vector<InterfaceFrame*> frames_def(700);
 std::vector<InterfaceFrame*> rendered_frames;
@@ -427,6 +428,28 @@ void ClickButton::removeFocus() {
 void ClickButton::doAction() {
 	switch (frame->id)
 	{
+	case COMMS_INTERFACE:
+	{
+		switch (this->index)
+		{
+		case COMMS_SAVE_BUTTON:
+		case COMMS_CLEAR_BUTTON:
+		case COMMS_CANCEL_BUTTON:
+			break;
+		default:
+		{
+			CommsLine* comms = COMMS_MAP[this->index];
+
+			if (comms)
+			{
+				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
+				RenderCommunications(true, wdata[0], wdata[1], true, true);
+			}
+		}
+			break;
+		}
+	}
+	break;
 	case CONNECT_INTERFACE://connect frame
 	{
 		switch (ClickButton::index)

@@ -17,6 +17,7 @@
 #include "usermanager.h"
 #include "packets.h"
 #include "interfaces.h"
+#include "comms.h"
 #include "calc_cycles.h"
 #include "topbutton.h"
 #include "raiiclipboard.h"
@@ -422,7 +423,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (communications == NULL) {
 				//TODO save X and Y positions when moved
 				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
-				RenderCommunications(true, wdata[0], wdata[1]);
+				RenderCommunications(true, wdata[0], wdata[1], false, false);
 			}
 			else if (!communications->render)
 			{

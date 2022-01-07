@@ -2,6 +2,7 @@
 
 #include "renderer.h"
 #include "tools.h"
+#include "comms.h"
 
 Radio::Radio(InterfaceFrame* frame, double x, double width, double y, double height)
 {
@@ -70,9 +71,35 @@ int Radio::handleClick(ChildFrame* clicked, int x, int y)
 	bool click = pnpoly(4, vertx, verty, x, y);
 	if (click)
 	{
-		checked = !checked;
-		renderDrawings = true;
+		switch (this->getFrame()->id)
+		{
+		case COMMS_INTERFACE:
+		{
+			CommsLine* comm_line = COMMS_MAP[this->index];
+
+			if (comm_line && comm_line->prim->index == this->index)
+			{
+				prime_comms(comm_line);
+			}
+			else {
+				this->toggle();
+			}
+			break;
+		}
+		default:
+		{
+			this->toggle();
+			break;
+		}
+		}
 		return 1;
 	}
 	return 0;
+}
+
+int Radio::toggle()
+{
+	checked = !checked;
+	renderDrawings = true;
+	return 1;
 }
