@@ -29,14 +29,14 @@ void RenderCommunications(bool open, double x_, double y_, bool refresh, bool ex
 					child->border->getPosY() + (expansion / 2.0), child->border->getHeight());
 		}
 
-		const double input_spacingy = 0.05;
-		double input_starty = 0.83;
-		InputField* pos_input = new InputField(communications, x + (width - (width * ((start_x + 0.60) - spacing_x))), 
-			width * 0.93, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+		const double input_spacingx = 0.15, input_spacingy = 0.05;
+		double input_startx = 0.85, input_starty = 0.83;
+		InputField* pos_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
+			width * 0.64, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
 		communications->children[pos_input->index = COMMSPOS_INPUT] = pos_input;
 
-		InputField* freq_input = new InputField(communications, x + (width - (width * ((start_x + 0.60) - spacing_x))),
-			width * 0.93, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+		InputField* freq_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
+			width * 0.64, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
 		communications->children[freq_input->index = COMMSFREQ_INPUT] = freq_input;
 	}
 	else {
