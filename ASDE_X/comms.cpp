@@ -34,6 +34,27 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 				child->updatePos(child->border->getPosX(), child->border->getWidth(),
 					child->border->getPosY() - (expansion / 2.0), child->border->getHeight());
 		}
+
+		delete communications->children[COMMSPOS_LABEL];
+		communications->children[COMMSPOS_LABEL] = nullptr;
+
+		delete communications->children[COMMSPOS_INPUT];
+		communications->children[COMMSPOS_INPUT] = nullptr;
+
+		delete communications->children[COMMSFREQ_LABEL];
+		communications->children[COMMSFREQ_LABEL] = nullptr;
+
+		delete communications->children[COMMSFREQ_INPUT];
+		communications->children[COMMSFREQ_INPUT] = nullptr;
+
+		delete communications->children[COMMS_SAVE_BUTTON];
+		communications->children[COMMS_SAVE_BUTTON] = nullptr;
+
+		delete communications->children[COMMS_CLEAR_BUTTON];
+		communications->children[COMMS_CLEAR_BUTTON] = nullptr;
+
+		delete communications->children[COMMS_CANCEL_BUTTON];
+		communications->children[COMMS_CANCEL_BUTTON] = nullptr;
 	}
 	else if (expand && communications)
 	{

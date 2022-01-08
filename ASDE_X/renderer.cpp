@@ -417,7 +417,8 @@ void DrawInterfaces() {
 	CallInterfaces();
 	if (renderDrawings) {
 		//TODO add optimizations (refresh per object basis)
-		for (InterfaceFrame* frame : rendered_frames) {
+		for (InterfaceFrame* frame : rendered_frames) 
+		{
 			if (frame)
 			{
 				if (frame->drawingDl != 0)
