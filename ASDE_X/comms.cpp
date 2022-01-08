@@ -75,7 +75,7 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 		communications->move_children(0, expansion);
 
 		const double input_spacingx = 0.15, input_spacingy = 0.05, button_spacingx = 0.11;
-		double input_startx = 0.85, input_starty = 0.83, button_starty = 0.90;
+		double input_startx = 0.85, input_starty = 0.80, button_starty = 0.88;
 
 		Label* pos_label = new Label(communications, "Position:", x + (width - (width * ((start_x + 0.55) - spacing_x))),
 			50.0, 10.0, y + (height - (height * (input_starty + input_spacingy))), 20, 0.0);
