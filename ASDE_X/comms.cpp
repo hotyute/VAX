@@ -1,9 +1,11 @@
 #include "comms.h"
 
 CommsLine* comms_line0 = nullptr, * comms_line1 = nullptr;
-CommsLine* cur_prime = nullptr;
+CommsLine* cur_prime = nullptr, * cur_edit = nullptr;
 std::vector<CommsLine*> COMMS_MAP(100, nullptr);
 bool expanded = false;
+
+//TODO Fix bug - when window is dragged, expand function experiences strange behaviour
 
 void RenderCommunications(bool open, double x_, double y_, int expand_state)
 {

@@ -433,8 +433,15 @@ void ClickButton::doAction() {
 		switch (this->index)
 		{
 		case COMMS_SAVE_BUTTON:
+		{
+
+		}
+		break;
 		case COMMS_CLEAR_BUTTON:
-			break;
+		{
+
+		}
+		break;
 		case COMMS_CANCEL_BUTTON:
 		{
 			if (expanded)
@@ -444,6 +451,7 @@ void ClickButton::doAction() {
 				RenderCommunications(true, wdata[0], wdata[1], 2);
 				expanded = false;
 			}
+			cur_edit = nullptr;
 		}
 		break;
 		default:
@@ -458,6 +466,7 @@ void ClickButton::doAction() {
 					RenderCommunications(true, wdata[0], wdata[1], 1);
 					expanded = true;
 				}
+				cur_edit = comms;
 			}
 		}
 		break;

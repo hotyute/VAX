@@ -21,7 +21,7 @@ void append_comms(int prim, int btn, int tx, int rx, int hdst, int spkr, CommsLi
 void prime_comms(CommsLine* line);
 
 extern CommsLine* comms_line0, * comms_line1;
-extern CommsLine* cur_prime;
+extern CommsLine* cur_prime, * cur_edit;
 extern std::vector<CommsLine*> COMMS_MAP;
 extern bool expanded;
 
