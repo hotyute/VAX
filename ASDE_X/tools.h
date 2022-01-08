@@ -123,6 +123,8 @@ double GetDecelerationDistance(double initialSpeed, double finalSpeed, double de
 
 bool intersects(Point2& p1, Point2& p2, Point2& c, double r);
 
+bool whitespace_only(const std::string& str);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {

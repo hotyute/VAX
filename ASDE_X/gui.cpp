@@ -220,21 +220,27 @@ void InterfaceFrame::move(int dx, int dy)
 					inter1->updateCoordinates();
 				}
 			}
-			for (ChildFrame* children : this->children) {
-				if (children) {
-					for (BasicInterface* inter2 : children->child_interfaces) {
-						inter2->setPosX(inter2->getPosX() + dx);
-						inter2->setPosY(inter2->getPosY() + dy);
-						inter2->updateCoordinates();
-					}
-				}
-			}
+
+			this->move_children(dx, dy);
 
 			this->renderAllInputText = true;
 			this->renderAllLabels = true;
 			renderDrawings = true;
 			renderFocus = true;
 			renderInterfaces = true;
+		}
+	}
+}
+
+void InterfaceFrame::move_children(int dx, int dy)
+{
+	for (ChildFrame* children : this->children) {
+		if (children) {
+			for (BasicInterface* inter2 : children->child_interfaces) {
+				inter2->setPosX(inter2->getPosX() + dx);
+				inter2->setPosY(inter2->getPosY() + dy);
+				inter2->updateCoordinates();
+			}
 		}
 	}
 }
@@ -434,11 +440,19 @@ void ClickButton::doAction() {
 		{
 		case COMMS_SAVE_BUTTON:
 		{
-			if (cur_edit != nullptr)
+			if (cur_edit)
 			{
 				InputField* pos = ((InputField*)communications->children[COMMSPOS_INPUT]);
-				cur_edit->btn->text = pos->input;
+				if (pos->input.empty() || whitespace_only(pos->input)) {
+					cur_edit->btn->text = "----";
+					cur_edit->pos = "";
+				}
+				else
+					cur_edit->pos = cur_edit->btn->text = pos->input;
 				pos->input = "";
+				InputField* freq = ((InputField*)communications->children[COMMSFREQ_INPUT]);
+				(freq->input.empty() || whitespace_only(freq->input)) ? cur_edit->freq = "" : cur_edit->freq = freq->input;
+				freq->input = "";
 				//RenderChild(cur_edit->btn, CHILD_TYPE::CLICK_BUTTON);
 				renderDrawings = true;
 			}
@@ -464,7 +478,7 @@ void ClickButton::doAction() {
 				RenderChild(pos, CHILD_TYPE::INPUT_FIELD);
 				RenderChild(freq, CHILD_TYPE::INPUT_FIELD);
 				//clear fields
-				
+
 			}
 		}
 		break;
@@ -473,6 +487,13 @@ void ClickButton::doAction() {
 			if (expanded)
 			{
 				//clear fields
+				InputField* pos = ((InputField*)communications->children[COMMSPOS_INPUT]);
+				InputField* freq = ((InputField*)communications->children[COMMSFREQ_INPUT]);
+				pos->input = "";
+				freq->input = "";
+				RenderChild(pos, CHILD_TYPE::INPUT_FIELD);
+				RenderChild(freq, CHILD_TYPE::INPUT_FIELD);
+
 				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
 				RenderCommunications(true, wdata[0], wdata[1], 2);
 				focusChild = nullptr;
@@ -491,6 +512,12 @@ void ClickButton::doAction() {
 				{
 					int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
 					RenderCommunications(true, wdata[0], wdata[1], 1);
+
+					InputField* pos = ((InputField*)communications->children[COMMSPOS_INPUT]);
+					pos->setInput(comms->pos);
+					InputField* freq = ((InputField*)communications->children[COMMSFREQ_INPUT]);
+					freq->setInput(comms->freq);
+
 					expanded = true;
 				}
 				cur_edit = comms;

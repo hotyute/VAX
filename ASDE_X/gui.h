@@ -50,6 +50,7 @@ public:
 	void doDefinition();
 	void doInsert();
 	void move(int dx, int dy);
+	void move_children(int dx, int dy);
 	bool withinClient();
 };
 

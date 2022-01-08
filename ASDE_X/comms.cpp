@@ -26,14 +26,17 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 
 	if (deflate && communications)
 	{
-		communications->UpdatePane1(x, width, y, height);
-
-		for (ChildFrame* child : communications->children)
+		for (BasicInterface* inter1 : communications->interfaces) 
 		{
-			if (child)
-				child->updatePos(child->border->getPosX(), child->border->getWidth(),
-					child->border->getPosY() - (expansion / 2.0), child->border->getHeight());
+			if (inter1)
+			{
+				inter1->setWidth(width);
+				inter1->setHeight(height);
+				inter1->updateCoordinates();
+			}
 		}
+
+		communications->move_children(0, -expansion);
 
 		delete communications->children[COMMSPOS_LABEL];
 		communications->children[COMMSPOS_LABEL] = nullptr;
@@ -58,14 +61,18 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 	}
 	else if (expand && communications)
 	{
-		communications->UpdatePane1(x, width, y, height);
-
-		for (ChildFrame* child : communications->children)
+		x = communications->border->getPosX(), y = communications->border->getPosY();
+		for (BasicInterface* inter1 : communications->interfaces) 
 		{
-			if (child)
-				child->updatePos(child->border->getPosX(), child->border->getWidth(),
-					child->border->getPosY() + (expansion / 2.0), child->border->getHeight());
+			if (inter1)
+			{
+				inter1->setWidth(width);
+				inter1->setHeight(height);
+				inter1->updateCoordinates();
+			}
 		}
+
+		communications->move_children(0, expansion);
 
 		const double input_spacingx = 0.15, input_spacingy = 0.05, button_spacingx = 0.11;
 		double input_startx = 0.85, input_starty = 0.83, button_starty = 0.90;
@@ -76,6 +83,8 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 
 		InputField* pos_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
 			width * 0.60, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+		if (cur_edit)
+			pos_input->setInput(cur_edit->pos);
 		communications->children[pos_input->index = COMMSPOS_INPUT] = pos_input;
 
 		Label* freq_label = new Label(communications, "Frequency:", x + (width - (width * ((start_x + 0.55) - spacing_x))),
@@ -84,6 +93,8 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 
 		InputField* freq_input = new InputField(communications, x + (width - (width * (input_startx - input_spacingx))),
 			width * 0.60, 5, y + (height - (height * (input_starty += input_spacingy))), 20.0, 0.0);
+		if (cur_edit)
+			pos_input->setInput(cur_edit->freq);
 		communications->children[freq_input->index = COMMSFREQ_INPUT] = freq_input;
 
 		ClickButton* save = new ClickButton(communications, "Save", x + (width - (width * (input_startx + 0.1))),
@@ -97,6 +108,7 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 		ClickButton* cancel = new ClickButton(communications, "Cancel", x + (60.0 * 2.0) + (width - (width * ((input_startx + 0.1) - (button_spacingx * 2.0)))),
 			60.0, y + (height - (height * ((button_starty + 0.01) + spacing_y))), 20.0);
 		communications->children[cancel->index = COMMS_CANCEL_BUTTON] = cancel;
+
 	}
 	else 
 	{

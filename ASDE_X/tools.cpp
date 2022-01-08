@@ -726,3 +726,7 @@ bool intersects(Point2& p1, Point2& p2, Point2& c, double r)
 
 	return (cornerDistance_sq <= (r * r));
 }
+
+bool whitespace_only(const std::string& str) {
+	return str.find_first_not_of(' ') == str.npos;
+}

@@ -10,6 +10,7 @@ void RenderCommunications(bool open, double x_, double y_, int expand);
 #define CommsLine_interfaces_h
 class CommsLine {
 public:
+	std::string pos = "", freq = "";
 	ClickButton* btn;
 	Radio* prim, * tx, * rx, * hdst, * spkr;
 	CommsLine(Radio* _prim, ClickButton* _btn, Radio* _tx, Radio* _rx, Radio* _hdst, Radio* _spkr) : 
