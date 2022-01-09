@@ -39,6 +39,7 @@ void decodePackets(int opCode, Stream& stream) {
 			Controller* controller1 = new Controller(callSign1, 0, 0);
 			controller1->getIdentity()->controller_rating = stream.readUnsignedByte();
 			controller1->getIdentity()->controller_position = static_cast<POSITIONS>(stream.readUnsignedByte());
+			controller1->userdata.frequency[0] = stream.readDWord();
 			user1 = (User*)controller1;
 			controller1->lock();
 			controller1->setCallsign(callSign1);
@@ -387,6 +388,18 @@ void decodePackets(int opCode, Stream& stream) {
 					printf("code: %s\n", code);
 				}
 			}
+		}
+	}
+
+	if (opCode == 21)
+	{
+		User* subject = userStorage1.at(stream.readUnsignedWord());
+		int flag = stream.readUnsignedByte();
+		int freq = stream.readDWord();
+		if (subject)
+		{
+			subject->userdata.frequency[0] = freq;
+			refresh_ctrl_list();
 		}
 	}
 }

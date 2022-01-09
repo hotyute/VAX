@@ -614,6 +614,20 @@ double atodd(std::string in) {
 	return d;
 }
 
+int string_to_frequency(std::string frequency)
+{
+	if (frequency.size() == 7)
+	{
+
+		frequency.erase(frequency.begin());
+		frequency.erase(frequency.begin() + 2);
+
+		return atodd(frequency);
+	}
+
+	return 99998;
+}
+
 std::string frequency_to_string(int frequency)
 {
 	std::string raw = std::to_string(frequency);

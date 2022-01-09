@@ -109,6 +109,8 @@ std::string TextToBinaryString(std::string words);
 
 double atodd(std::string in);
 
+int string_to_frequency(std::string frequency);
+
 std::string frequency_to_string(int frequency);
 
 Point2* intersect(double $p1_lat, double $p1_lon, double $brng1, double $p2_lat, double $p2_lon, double $brng2);

@@ -80,6 +80,7 @@ int Radio::handleClick(ChildFrame* clicked, int x, int y)
 			if (comm_line && comm_line->prim->index == this->index)
 			{
 				prime_comms(comm_line);
+				sendPrimFreq();
 			}
 			else {
 				this->toggle();

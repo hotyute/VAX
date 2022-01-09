@@ -1403,7 +1403,7 @@ void connect() {
 	//34.142.27.168
 	std::string ip = "vax.ddns.net";
 #ifdef _DEBUG
-	//ip = "127.0.0.1";
+	ip = "127.0.0.1";
 #endif
 	if (intter->connectNew(hWnd, ip, 4403)) {
 		connected = true;
@@ -1429,6 +1429,7 @@ void connect() {
 		{
 			stream.writeByte(USER->getIdentity()->controller_rating);
 			stream.writeByte(static_cast<int>(USER->getIdentity()->controller_position));
+			stream.writeDWord(USER->userdata.frequency[0]);
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{

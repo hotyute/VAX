@@ -1,5 +1,7 @@
 #include "comms.h"
 
+#include "tools.h"
+
 CommsLine* comms_line0 = nullptr, * comms_line1 = nullptr;
 CommsLine* cur_prime = nullptr, * cur_edit = nullptr;
 std::vector<CommsLine*> COMMS_MAP(100, nullptr);
@@ -297,11 +299,14 @@ void prime_comms(CommsLine* line)
 		{
 			line->prim->toggle();
 			cur_prime = line;
+			USER->userdata.frequency[0] = string_to_frequency(line->freq);
 		}
 	}
 	else {
-		if (line->prim->checked)
+		if (line->prim->checked) {
 			line->prim->toggle();
+		}
+		USER->userdata.frequency[0] = 99998;
 		cur_prime = nullptr;
 	}
 }

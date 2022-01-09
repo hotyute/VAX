@@ -74,3 +74,11 @@ void sendFlightPlan(Aircraft& user) {
 	out.endFrameVarSizeWord();
 	intter->sendMessage(&out);
 }
+
+void sendPrimFreq() {
+	Stream& out = Stream(6);
+	out.createFrame(_PRIMARY_FREQ);
+	out.writeByte(0);
+	out.writeDWord(USER->userdata.frequency[0]);
+	intter->sendMessage(&out);
+}
