@@ -20,6 +20,10 @@ public:
 
 #endif
 
+void open_adx(std::string path);
+
 void sort_beziers();
 
 void split_polygons();
+
+extern std::string LAST_ADX_PATH, LAST_POF_PATH, LAST_ALIAS_PATH;

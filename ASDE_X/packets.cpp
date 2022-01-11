@@ -25,7 +25,7 @@ void sendUserMessage(int frequency, std::string to, std::string message) {
 	Stream &out = Stream(512);
 	out.createFrameVarSizeWord(_USER_MESSAGE);
 	out.writeString((char*)to.c_str());
-	out.writeDWord(frequency);//99998 = 199.998
+	out.write3Byte(frequency);//99998 = 199.998
 	out.writeString((char*)message.c_str());
 	out.endFrameVarSizeWord();
 	intter->sendMessage(&out);
@@ -76,9 +76,10 @@ void sendFlightPlan(Aircraft& user) {
 }
 
 void sendPrimFreq() {
-	Stream& out = Stream(6);
+	Stream& out = Stream(8);
 	out.createFrame(_PRIMARY_FREQ);
 	out.writeByte(0);
-	out.writeDWord(USER->userdata.frequency[0]);
+	out.write3Byte(USER->userdata.frequency[0]);
+	out.write3Byte(USER->userdata.frequency[1]);
 	intter->sendMessage(&out);
 }

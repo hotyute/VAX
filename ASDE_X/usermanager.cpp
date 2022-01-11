@@ -231,7 +231,7 @@ void decodePackets(int opCode, Stream& stream) {
 	if (opCode == 15)
 	{
 		int index = stream.readUnsignedWord();
-		int frequency = stream.readDWord();
+		int frequency = stream.read3Byte();
 		bool asel = stream.readUnsignedByte() == 1;
 		char msg[2048];
 		stream.readString(msg);

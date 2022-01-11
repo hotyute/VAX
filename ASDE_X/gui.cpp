@@ -445,7 +445,7 @@ void ClickButton::doAction() {
 			{
 				InputField* pos = ((InputField*)communications->children[COMMSPOS_INPUT]);
 				InputField* freq = ((InputField*)communications->children[COMMSFREQ_INPUT]);
-				if (freq->input.size() > 0 && freq->input.size() != 7)
+				if (freq->input.size() > 0 && (freq->input.size() != 7 || freq->input == "199.998"))
 				{
 					MessageBox(hWnd, L"Invalid Frequency!", L"Notice",
 						MB_OK | MB_ICONINFORMATION);

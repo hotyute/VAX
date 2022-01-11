@@ -9,6 +9,35 @@
 #include "dxfdrawing.h"
 #include "tools.h"
 #include "topbutton.h"
+#include "calc_cycles.h"
+
+std::string LAST_ADX_PATH, LAST_POF_PATH, LAST_ALIAS_PATH;
+
+void open_adx(std::string path)
+{
+	if (FileReader::LoadADX(path)) {
+		LAST_ADX_PATH = path;
+		preFileRender();
+		resize = true;
+		renderSector = true;
+		renderSectorColours = true;
+		renderButtons = true;
+		updateFlags[GBL_CALLSIGN] = true;
+		updateFlags[GBL_COLLISION_TAG] = true;
+		renderLegend = true;
+		renderInterfaces = true;
+		renderDrawings = true;
+		renderConf = true;
+		renderDate = true;
+		renderDepartures = true;
+		updateFlags[GBL_COLLISION_LINE] = true;
+		convert_closures = true;
+		renderClosures = true;
+		zoom_phase = 2;
+		rangeb->refreshOption2();
+		refresh_ctrl_list();
+	}
+}
 
 
 int FileReader::LoadADX(std::string path) {
@@ -232,7 +261,7 @@ int FileReader::LoadADX(std::string path) {
 							double p2[2] = { atodd(args[4].c_str()),  atodd(args[5].c_str()) };
 							double shoulder = atodd(args[7].c_str());
 							double heading = atodd(args[8].c_str());
-							double** bounds = new double*[5];
+							double** bounds = new double* [5];
 							for (int i = 0; i < 5; ++i)
 								bounds[i] = new double[2];
 							getRunwayBounds(p1, p2, atodd(args[6].c_str()) + shoulder, bounds);

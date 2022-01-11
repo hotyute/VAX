@@ -273,6 +273,7 @@ void DrawData()
 {
 	if (acf_map.size() > 0)
 	{
+		//TODO Need to synch this with aircraft deletion
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++)
 		{
 			// iterator->first = key
@@ -281,7 +282,7 @@ void DrawData()
 			{
 				Aircraft& aircraft = *acf_ptr;
 
-				if (within_boundary(aircraft))
+				if (within_boundary(aircraft))//TODO Synch as mentioned above as this triggered breaking point
 					aircraft_window_data(aircraft, nullptr);
 			}
 		}

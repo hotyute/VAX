@@ -1,6 +1,8 @@
 #include "interfaces.h"
 #include "radio.h"
 #include "displaybox.h"
+#include "comms.h"
+#include "tools.h"
 
 #include <boost/algorithm/string.hpp>
 #include <regex>
@@ -375,7 +377,15 @@ void sendMainChatMessage(InputField* focusField)
 	std::string text = ASEL ? ASEL->getCallsign() + ", " + focusField->input : focusField->input;
 	if (connected)
 	{
-		sendUserMessage(99998, ASEL ? ASEL->getCallsign() : "", text);
+		for (auto& it : COMMS_STORE)
+		{
+			if (it && !it->freq.empty() && it->tx->checked)
+			{
+				int freq = string_to_frequency(it->freq);
+				if (freq != 99998)
+					sendUserMessage(freq, ASEL ? ASEL->getCallsign() : "", text);
+			}
+		}
 	}
 	main_chat_box->resetReaderIdx();
 	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + text, CHAT_TYPE::MAIN);

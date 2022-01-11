@@ -4,7 +4,7 @@
 
 CommsLine* comms_line0 = nullptr, * comms_line1 = nullptr;
 CommsLine* cur_prime = nullptr, * cur_edit = nullptr;
-std::vector<CommsLine*> COMMS_MAP(100, nullptr);
+std::vector<CommsLine*> COMMS_MAP(100, nullptr), COMMS_STORE(2);
 bool expanded = false;
 
 //TODO Fix bug - when window is dragged, expand function experiences strange behaviour
@@ -210,6 +210,7 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 		}
 		comms_line0 = new CommsLine(prim_0, slot_0, radio1_0, radio1_1, radio1_2, radio1_3);
 		append_comms(PRIM_0, BUTTON_0, RADIOLINE1_0, RADIOLINE1_1, RADIOLINE1_2, RADIOLINE1_3, comms_line0);
+		COMMS_STORE[0] = comms_line0;
 
 		//2nd line
 
@@ -259,6 +260,7 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 		}
 		comms_line1 = new CommsLine(prim_1, slot_1, radio2_0, radio2_1, radio2_2, radio2_3);
 		append_comms(PRIM_1, BUTTON_1, RADIOLINE2_0, RADIOLINE2_1, RADIOLINE2_2, RADIOLINE2_3, comms_line1);
+		COMMS_STORE[1] = comms_line1;
 
 		CloseButton* closeb = new CloseButton(communications, 15, 15);
 		communications->children[closeb->index = COMMS_CLOSE] = closeb;

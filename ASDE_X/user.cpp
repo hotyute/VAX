@@ -44,10 +44,7 @@ void User::handleMovement(double n_lat, double n_lon)
 
 UserData::UserData()
 {
-	for (int i = 0; i < sizeof(frequency) / sizeof(frequency[0]); ++i)
-	{
-		frequency[i] = 99998;
-	}
+	std::fill_n(frequency, sizeof(frequency) / sizeof(frequency[0]), 99998);
 
 	for (int i = 0; i < sizeof(window_positions) / sizeof(window_positions[0]); ++i)
 	{

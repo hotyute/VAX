@@ -450,27 +450,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			{
 				std::wstring wide(szFileName);
 				std::string final1 = ws2s(wide);
-				if (FileReader::LoadADX(final1)) {
-					preFileRender();
-					resize = true;
-					renderSector = true;
-					renderSectorColours = true;
-					renderButtons = true;
-					updateFlags[GBL_CALLSIGN] = true;
-					updateFlags[GBL_COLLISION_TAG] = true;
-					renderLegend = true;
-					renderInterfaces = true;
-					renderDrawings = true;
-					renderConf = true;
-					renderDate = true;
-					renderDepartures = true;
-					updateFlags[GBL_COLLISION_LINE] = true;
-					convert_closures = true;
-					renderClosures = true;
-					zoom_phase = 2;
-					rangeb->refreshOption2();
-					refresh_ctrl_list();
-				}
+				open_adx(final1);
 			}
 		}
 		break;
@@ -1425,11 +1405,12 @@ void connect() {
 		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
 		stream.writeWord(USER->getVisibility());
 		stream.writeByte(static_cast<int>(type));
+		stream.write3Byte(USER->userdata.frequency[0]);
+		stream.write3Byte(USER->userdata.frequency[1]);
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 		{
 			stream.writeByte(USER->getIdentity()->controller_rating);
 			stream.writeByte(static_cast<int>(USER->getIdentity()->controller_position));
-			stream.writeDWord(USER->userdata.frequency[0]);
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{

@@ -23,7 +23,7 @@ void prime_comms(CommsLine* line);
 
 extern CommsLine* comms_line0, * comms_line1;
 extern CommsLine* cur_prime, * cur_edit;
-extern std::vector<CommsLine*> COMMS_MAP;
+extern std::vector<CommsLine*> COMMS_MAP, COMMS_STORE;
 extern bool expanded;
 
 #endif
