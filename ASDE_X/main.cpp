@@ -1448,6 +1448,8 @@ void disconnect()
 void conn_clean()
 {
 	clear_ctrl_list();
+	controller_list_box->clearLines();
+	qlc_list_box->clearLines();
 	for (int i = 1; i < MAX_USER_SIZE; i++)
 	{
 		User* user = userStorage1[i];

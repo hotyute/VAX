@@ -109,7 +109,6 @@ void read_info()
 			else if (opcode == 3)
 			{
 				int size = buf.readUnsignedWord();
-				printf("%d\n", size);
 				if (size >= buf.remaining())
 				{
 					int length = buf.readUnsignedByte();

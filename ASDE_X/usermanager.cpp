@@ -39,7 +39,7 @@ void decodePackets(int opCode, Stream& stream) {
 			Controller* controller1 = new Controller(callSign1, 0, 0);
 			controller1->getIdentity()->controller_rating = stream.readUnsignedByte();
 			controller1->getIdentity()->controller_position = static_cast<POSITIONS>(stream.readUnsignedByte());
-			controller1->userdata.frequency[0] = stream.readDWord();
+			controller1->userdata.frequency[0] = stream.read3Byte();
 			user1 = (User*)controller1;
 			controller1->lock();
 			controller1->setCallsign(callSign1);
