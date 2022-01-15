@@ -173,6 +173,7 @@ void RenderCommunications(bool open, double x_, double y_, int expand_state)
 		slot_0 = new ClickButton(communications, "----", x + (width - (width * ((start_x + 0.4) - spacing_x))),
 			90.0, y + (height - (height * ((start_y + bar_offset) + spacing_y))), 25.0);
 
+
 		radio1_0 = new Radio(communications, x + (width - (width * (start_x - spacing_x))),
 			RADIO_SIZE, y + (height - (height * (start_y + spacing_y))), RADIO_SIZE);
 

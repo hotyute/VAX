@@ -7,6 +7,7 @@
 #include "Stream.h"
 #include "interfaces.h"
 #include "filereader.h"
+#include "comms.h"
 
 void save_info()
 {
@@ -25,6 +26,27 @@ void save_info()
 	buf.writeString((char*)LAST_ADX_PATH.c_str());
 	buf.writeString((char*)LAST_POF_PATH.c_str());
 	buf.writeString((char*)LAST_ALIAS_PATH.c_str());
+	buf.endFrameVarSizeWord();
+
+	buf.createFrameVarSizeWord(3);
+	buf.writeByte(2);
+
+	buf.writeByte(0);
+	buf.writeString((char*)comms_line0->pos.c_str());
+	buf.writeString((char*)comms_line0->freq.c_str());
+	buf.writeByte(comms_line0->tx->checked ? 1 : 0);
+	buf.writeByte(comms_line0->rx->checked ? 1 : 0);
+	buf.writeByte(comms_line0->hdst->checked ? 1 : 0);
+	buf.writeByte(comms_line0->spkr->checked ? 1 : 0);
+
+	buf.writeByte(1);
+	buf.writeString((char*)comms_line1->pos.c_str());
+	buf.writeString((char*)comms_line1->freq.c_str());
+	buf.writeByte(comms_line1->tx->checked ? 1 : 0);
+	buf.writeByte(comms_line1->rx->checked ? 1 : 0);
+	buf.writeByte(comms_line1->hdst->checked ? 1 : 0);
+	buf.writeByte(comms_line1->spkr->checked ? 1 : 0);
+
 	buf.endFrameVarSizeWord();
 
 	auto full_path = boost::dll::program_location().parent_path();
@@ -81,6 +103,57 @@ void read_info()
 					if (!file_path.empty())
 					{
 						open_adx(file_path);
+					}
+				}
+			}
+			else if (opcode == 3)
+			{
+				int size = buf.readUnsignedWord();
+				printf("%d\n", size);
+				if (size >= buf.remaining())
+				{
+					int length = buf.readUnsignedByte();
+					for (int i = 0; i < length; i++)
+					{
+						int id = buf.readUnsignedByte();
+
+						std::string pos, freq;
+
+						bool tx, rx, hdst, spkr;
+						buf.readString(256, pos);
+						buf.readString(256, freq);
+						tx = buf.readUnsignedByte() == 1;
+						rx = buf.readUnsignedByte() == 1;
+						hdst = buf.readUnsignedByte() == 1;
+						spkr = buf.readUnsignedByte() == 1;
+
+						CommsLine* line = nullptr;
+						if (!communications)
+						{
+							RenderCommunications(false, -1, -1, 0);
+						}
+						switch (id)
+						{
+						case 0:
+							line = comms_line0;
+							break;
+						case 1:
+							line = comms_line1;
+							break;
+						}
+
+						if (line)
+						{
+							line->pos = pos;
+							line->btn->text = pos;
+							line->freq = freq;
+							line->tx->checked = tx;
+							line->rx->checked = rx;
+							line->hdst->checked = hdst;
+							line->spkr->checked = spkr;
+
+							renderDrawings = true;
+						}
 					}
 				}
 			}

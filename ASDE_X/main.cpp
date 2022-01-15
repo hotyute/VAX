@@ -45,7 +45,7 @@ int single_opened_frames = 0;
 Point2* MOUSE_POS = new Point2();
 std::vector<MSG*> message_queue(500, NULL);
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
-Mirror* dragged_mir = nullptr, *dragged_pos = nullptr;
+Mirror* dragged_mir = nullptr, * dragged_pos = nullptr;
 BasicInterface* dragged_bounds = nullptr;
 InputField* connect_callsign = NULL, * connect_fullname = NULL, * connect_username = NULL,
 * connect_password = nullptr, * main_chat_input = nullptr, * terminal_input = nullptr, * squawk_input = nullptr;
@@ -174,7 +174,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 void DispatchOGLMessages(MSG* lpMsg)
 {
-	
+
 }
 
 BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -493,160 +493,162 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
 		bool clicked_interface = false;
-		TopButton* clicked_tbutton = nullptr;
-		for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn) 
-		{
-			TopButton* curButton = *btn;
-			int* params = curButton->getParams();
-			double vertx[4] = { params[0], params[0], params[2], params[2] };
-			double verty[4] = { params[1], params[3], params[3], params[1] };
-			bool clicked = pnpoly(4, vertx, verty, x, y);
-			if (clicked) {
-				if (curButton->handle())
-				{
-					curButton->on = !curButton->on;
-					renderButtons = true;
+		for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
+			InterfaceFrame* frame = *it;
+			if (frame && frame->render) {
+				ChildFrame* clicked1 = nullptr;
+				for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
+					ChildFrame* children = *child;
+					if (children) {
+						BasicInterface* inter2 = children->border;
+						if (children->handleClick(clicked1, x, y))
+							break;
+						if (!clicked1 && inter2->isBounds()) {
+							double vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
+							double verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
+							bool clicked = pnpoly(4, vertx, verty, x, y);
+							if (clicked) {
+								clicked1 = children;
+								break;
+							}
+						}
+					}
 				}
-				clicked_tbutton = curButton;
-				break;
+				if (clicked1) {
+					if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
+						//dont do anything with non editable field
+					}
+					else
+					{
+						if (focusChild != clicked1) {
+							clicked1->setFocus();
+						}
+						if (focusChild == clicked1) {
+							clicked1->doAction();
+							if (clicked1->type == CHILD_TYPE::INPUT_FIELD)
+							{
+								InputField* field = (InputField*)clicked1;
+								field->calcCursorPos(x, y);
+								RenderChild(field, CHILD_TYPE::INPUT_FIELD);
+							}
+						}
+					}
+					clicked_interface = true;
+					break;
+				}
+
+				BasicInterface* clicked2 = nullptr, * inter1 = frame->border;
+				if (inter1 && inter1->isBounds() && frame->pannable) {
+					int b_offset_Y = 25;
+					double vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
+					double vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
+					bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+					if (clicked) {
+						clicked2 = inter1;
+					}
+				}
+				if (clicked2)
+				{
+					if (!frame->s_pt)
+						frame->s_pt = new POINT();
+
+					if (rendered_frames.back() != *it) { //TODO This is bugged as the location is changed in the MAP but the index of the object remains the same
+						InterfaceFrame* _back = rendered_frames.back();
+						int back_idx = _back->index, c_idx = frame->index;
+						frame->index = back_idx, _back->index = c_idx;
+						std::swap(*it, rendered_frames.back()); //bring interface to the front
+					}
+					frame->s_pt->x = (int)(short)LOWORD(lParam);
+					frame->s_pt->y = (int)(short)HIWORD(lParam);
+					dragged = frame;
+					dragged_bounds = clicked2;
+					clicked_interface = true;
+					break;
+				}
 			}
 		}
-		if (!clicked_tbutton) {
-			for (auto it = rendered_frames.rbegin(); it != rendered_frames.rend(); ++it) {
-				InterfaceFrame* frame = *it;
-				if (frame && frame->render) {
-					ChildFrame* clicked1 = nullptr;
-					for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
-						ChildFrame* children = *child;
-						if (children) {
-							BasicInterface* inter2 = children->border;
-							if (children->handleClick(clicked1, x, y))
-								break;
-							if (!clicked1 && inter2->isBounds()) {
-								double vertx[4] = { inter2->getStartX(), inter2->getStartX(), inter2->getEndX(), inter2->getEndX() };
-								double verty[4] = { inter2->getStartY(), inter2->getEndY(), inter2->getEndY(), inter2->getStartY() };
-								bool clicked = pnpoly(4, vertx, verty, x, y);
-								if (clicked) {
-									clicked1 = children;
-									break;
-								}
-							}
-						}
-					}
-					if (clicked1) {
-						if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
-							//dont do anything with non editable field
-						}
-						else
-						{
-							if (focusChild != clicked1) {
-								clicked1->setFocus();
-							}
-							if (focusChild == clicked1) {
-								clicked1->doAction();
-								if (clicked1->type == CHILD_TYPE::INPUT_FIELD)
-								{
-									InputField* field = (InputField*)clicked1;
-									field->calcCursorPos(x, y);
-									RenderChild(field, CHILD_TYPE::INPUT_FIELD);
-								}
-							}
-						}
-						clicked_interface = true;
-						break;
-					}
-
-					BasicInterface* clicked2 = nullptr, * inter1 = frame->border;
-					if (inter1 && inter1->isBounds() && frame->pannable) {
-						int b_offset_Y = 25;
-						double vert_x[4] = { inter1->getStartX(), inter1->getStartX(), inter1->getEndX(), inter1->getEndX() };
-						double vert_y[4] = { inter1->getEndY() - b_offset_Y, inter1->getEndY(), inter1->getEndY(), inter1->getEndY() - b_offset_Y, };
-						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
-						if (clicked) {
-							clicked2 = inter1;
-						}
-					}
-					if (clicked2)
+		if (!clicked_interface)
+		{
+			TopButton* clicked_tbutton = nullptr;
+			for (auto btn = BUTTONS.rbegin(); btn != BUTTONS.rend(); ++btn)
+			{
+				TopButton* curButton = *btn;
+				int* params = curButton->getParams();
+				double vertx[4] = { params[0], params[0], params[2], params[2] };
+				double verty[4] = { params[1], params[3], params[3], params[1] };
+				bool clicked = pnpoly(4, vertx, verty, x, y);
+				if (clicked) {
+					if (curButton->handle())
 					{
-						if (!frame->s_pt)
-							frame->s_pt = new POINT();
-
-						if (rendered_frames.back() != *it) { //TODO This is bugged as the location is changed in the MAP but the index of the object remains the same
-							InterfaceFrame* _back = rendered_frames.back();
-							int back_idx = _back->index, c_idx = frame->index;
-							frame->index = back_idx, _back->index = c_idx;
-							std::swap(*it, rendered_frames.back()); //bring interface to the front
+						curButton->on = !curButton->on;
+						renderButtons = true;
+					}
+					clicked_tbutton = curButton;
+					clicked_interface = true;
+					break;
+				}
+			}
+		}
+		if (!clicked_interface)
+		{
+			bool clicked_mirror = false;
+			//check for mirrors
+			for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3)
+			{
+				Mirror* mir = *it3;
+				if (mir)
+				{
+					Mirror& mirror = *mir;
+					int b_offset_Y = 25;
+					double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
+					double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
+					double vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
+					bool clicked_bar = pnpoly(4, vert_x, vert_y, x, y);
+					if (clicked_bar) {
+						if (!mir->s_pt) {
+							mir->s_pt = new POINT();
 						}
-						frame->s_pt->x = (int)(short)LOWORD(lParam);
-						frame->s_pt->y = (int)(short)HIWORD(lParam);
-						dragged = frame;
-						dragged_bounds = clicked2;
-						clicked_interface = true;
+						mir->s_pt->x = (int)(short)LOWORD(lParam);
+						mir->s_pt->y = (int)(short)HIWORD(lParam);
+						mir->startX = mir->getX();
+						mir->startY = mir->getY();
+						dragged_mir = mir;
+
+						if (mirrors.back() != *it3)
+							std::swap(*it3, mirrors.back());
+						clicked_mirror = true;
 						break;
+					}
+					else
+					{
+						//clicked anywhere else in the mirrror
+						double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
+						double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
+						double vert_y[4] = { mirror.getY(), end_y, end_y, mirror.getY(), };
+						bool clicked = pnpoly(4, vert_x, vert_y, x, y);
+						if (clicked)
+						{
+							clicked_mirror = true;
+							Aircraft* asel = check_asel(mir, x, y);
+							if (asel)
+							{
+								handle_asel(mir, asel);
+							}
+							else
+							{
+								dragged_pos = mir;
+							}
+							break;
+						}
 					}
 				}
 			}
-			if (!clicked_interface)
+			if (!clicked_mirror)
 			{
-				bool clicked_mirror = false;
-				//check for mirrors
-				for (auto it3 = mirrors.rbegin(); it3 != mirrors.rend(); ++it3)
+				Aircraft* asel = check_asel(nullptr, x, y);
+				if (asel)
 				{
-					Mirror* mir = *it3;
-					if (mir)
-					{
-						Mirror& mirror = *mir;
-						int b_offset_Y = 25;
-						double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
-						double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
-						double vert_y[4] = { end_y - b_offset_Y, end_y, end_y, end_y - b_offset_Y, };
-						bool clicked_bar = pnpoly(4, vert_x, vert_y, x, y);
-						if (clicked_bar) {
-							if (!mir->s_pt) {
-								mir->s_pt = new POINT();
-							}
-							mir->s_pt->x = (int)(short)LOWORD(lParam);
-							mir->s_pt->y = (int)(short)HIWORD(lParam);
-							mir->startX = mir->getX();
-							mir->startY = mir->getY();
-							dragged_mir = mir;
-
-							if (mirrors.back() != *it3)
-								std::swap(*it3, mirrors.back());
-							clicked_mirror = true;
-							break;
-						}
-						else
-						{
-							//clicked anywhere else in the mirrror
-							double end_x = mirror.getX() + mirror.getWidth(), end_y = mirror.getY() + mirror.getHeight();
-							double vert_x[4] = { mirror.getX(), mirror.getX(), end_x, end_x };
-							double vert_y[4] = { mirror.getY(), end_y, end_y, mirror.getY(), };
-							bool clicked = pnpoly(4, vert_x, vert_y, x, y);
-							if (clicked)
-							{
-								clicked_mirror = true;
-								Aircraft* asel = check_asel(mir, x, y);
-								if (asel)
-								{
-									handle_asel(mir, asel);
-								}
-								else
-								{
-									dragged_pos = mir;
-								}
-								break;
-							}
-						}
-					}
-				}
-				if (!clicked_mirror)
-				{
-					Aircraft* asel = check_asel(nullptr, x, y);
-					if (asel)
-					{
-						handle_asel(nullptr, asel);
-					}
+					handle_asel(nullptr, asel);
 				}
 			}
 		}
