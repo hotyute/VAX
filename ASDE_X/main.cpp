@@ -264,7 +264,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			acf_map[((User*)cur)->getCallsign()] = cur;
 			cur->unlock();
 
-			cur->setSquawkCode(std::to_string(random(1000, 9999)));
+			cur->setSquawkCode(std::to_string(random(2000, 5200)));
 
 			FlightPlan& fp = *cur->getFlightPlan();
 			fp.departure = "KMIA";
@@ -288,7 +288,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			acf_map[cur2->getCallsign()] = cur2;
 			cur2->unlock();
 
-			cur2->setSquawkCode(std::to_string(random(1000, 9999)));
+			cur2->setSquawkCode(std::to_string(random(2000, 5200)));
 		}
 		userStorage1[1] = cur2;
 
