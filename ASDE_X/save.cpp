@@ -28,26 +28,29 @@ void save_info()
 	buf.writeString((char*)LAST_ALIAS_PATH.c_str());
 	buf.endFrameVarSizeWord();
 
-	buf.createFrameVarSizeWord(3);
-	buf.writeByte(2);
+	if (comms_line0 && comms_line1)
+	{
+		buf.createFrameVarSizeWord(3);
+		buf.writeByte(2);
 
-	buf.writeByte(0);
-	buf.writeString((char*)comms_line0->pos.c_str());
-	buf.writeString((char*)comms_line0->freq.c_str());
-	buf.writeByte(comms_line0->tx->checked ? 1 : 0);
-	buf.writeByte(comms_line0->rx->checked ? 1 : 0);
-	buf.writeByte(comms_line0->hdst->checked ? 1 : 0);
-	buf.writeByte(comms_line0->spkr->checked ? 1 : 0);
+		buf.writeByte(0);
+		buf.writeString((char*)comms_line0->pos.c_str());
+		buf.writeString((char*)comms_line0->freq.c_str());
+		buf.writeByte(comms_line0->tx->checked ? 1 : 0);
+		buf.writeByte(comms_line0->rx->checked ? 1 : 0);
+		buf.writeByte(comms_line0->hdst->checked ? 1 : 0);
+		buf.writeByte(comms_line0->spkr->checked ? 1 : 0);
 
-	buf.writeByte(1);
-	buf.writeString((char*)comms_line1->pos.c_str());
-	buf.writeString((char*)comms_line1->freq.c_str());
-	buf.writeByte(comms_line1->tx->checked ? 1 : 0);
-	buf.writeByte(comms_line1->rx->checked ? 1 : 0);
-	buf.writeByte(comms_line1->hdst->checked ? 1 : 0);
-	buf.writeByte(comms_line1->spkr->checked ? 1 : 0);
+		buf.writeByte(1);
+		buf.writeString((char*)comms_line1->pos.c_str());
+		buf.writeString((char*)comms_line1->freq.c_str());
+		buf.writeByte(comms_line1->tx->checked ? 1 : 0);
+		buf.writeByte(comms_line1->rx->checked ? 1 : 0);
+		buf.writeByte(comms_line1->hdst->checked ? 1 : 0);
+		buf.writeByte(comms_line1->spkr->checked ? 1 : 0);
 
-	buf.endFrameVarSizeWord();
+		buf.endFrameVarSizeWord();
+	}
 
 	auto full_path = boost::dll::program_location().parent_path();
 
