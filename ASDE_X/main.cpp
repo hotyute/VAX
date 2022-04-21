@@ -1314,7 +1314,7 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::istarts_with(command, ".omir")) {
+	else if (boost::istarts_with(command, ".OM")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
@@ -1338,7 +1338,7 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::istarts_with(command, ".cmir")) {
+	else if (boost::istarts_with(command, ".CM")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
