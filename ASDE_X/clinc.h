@@ -1,5 +1,5 @@
-#ifndef CLINC_H
-#define CLINC_H
+#pragma once
+
 
 #include <sdkddkver.h>
 
@@ -7,7 +7,6 @@
 #include <Windows.h>
 #include <iostream>
 #include <string>
-#include <tchar.h>
 
 class tcpinterface1 {
 public:
@@ -19,5 +18,3 @@ public:
 	void startT(HWND);
 	int connectNew(HWND, std::string, unsigned short);
 };
-
-#endif

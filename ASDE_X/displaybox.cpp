@@ -155,7 +155,7 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 
 	if (frame->children[(index + 1)])
 	{
-		((InputField*)frame->children[(index + 1)])->handleBox();
+		((InputField*)frame->children[(index + 1)])->handle_box();
 	}
 
 
@@ -429,7 +429,7 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 
 				if (frame->children[index + 1])
 				{
-					((InputField*)frame->children[index + 1])->handleBox();
+					((InputField*)frame->children[index + 1])->handle_box();
 				}
 				InputField* input_field = editText(line, x, y);
 				placeEdit(input_field);

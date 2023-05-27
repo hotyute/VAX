@@ -1,5 +1,4 @@
-#ifndef INPUTFIELD_H
-#define INPUTFIELD_H
+#pragma once
 
 #include "gui.h"
 
@@ -50,12 +49,10 @@ public:
 	void setUneditable(std::string);
 	void pass_characters(char* chars);
 	bool can_type();
-	void handleBox();
+	void handle_box();
 	void handleBox2();
-	void updateLine();
+	void update_line() const;
 	void updateInput(ChatLine* c);
-	void handleEntry();
+	void handle_entry();
 	void calcCursorPos(double x, double y);
 };
-
-#endif

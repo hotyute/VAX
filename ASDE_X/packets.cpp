@@ -3,83 +3,83 @@
 #include "tools.h"
 
 void sendPositionUpdates(User &user) {
-	Stream &out = Stream(20);
-	out.createFrameVarSize(CONTROLLER_POS_UPDATE);
+	auto out = BasicStream(20);
+	out.create_frame_var_size(CONTROLLER_POS_UPDATE);
 	double lat = user.getLatitude();
 	double lon = user.getLongitude();
-	long long latitude = *(long long *)&lat;
-	long long longitude = *(long long *)&lon;
-	out.writeQWord(latitude);
-    out.writeQWord(longitude);
-	out.endFrameVarSize();
+	const long long latitude = *reinterpret_cast<long long*>(&lat);
+	const long long longitude = *reinterpret_cast<long long*>(&lon);
+	out.write_qword(latitude);
+    out.write_qword(longitude);
+	out.end_frame_var_size();
 	intter->sendMessage(&out);
 }
 
 void sendPingPacket() {
-	Stream &out = Stream(2);
-	out.createFrame(_PING);
+	BasicStream out = BasicStream(2);
+	out.create_frame(_PING);
 	intter->sendMessage(&out);
 }
 
-void sendUserMessage(int frequency, std::string to, std::string message) {
-	Stream &out = Stream(512);
-	out.createFrameVarSizeWord(_USER_MESSAGE);
-	out.writeString((char*)to.c_str());
-	out.write3Byte(frequency);//99998 = 199.998
-	out.writeString((char*)message.c_str());
-	out.endFrameVarSizeWord();
+void sendUserMessage(int frequency, const std::string& to, const std::string& message) {
+	BasicStream out = BasicStream(512);
+	out.create_frame_var_size_word(_USER_MESSAGE);
+	out.write_string(to.c_str());
+	out.write_3byte(frequency);//99998 = 199.998
+	out.write_string(message.c_str());
+	out.end_frame_var_size_word();
 	intter->sendMessage(&out);
 }
 
-void sendPrivateMessage(std::string to, std::string message) {
-	Stream& out = Stream(512);
-	out.createFrameVarSizeWord(_PRIVATE_MESSAGE);
-	out.writeString((char*)to.c_str());
-	out.writeString((char*)message.c_str());
-	out.endFrameVarSizeWord();
+void sendPrivateMessage(const std::string& to, const std::string& message) {
+	BasicStream out = BasicStream(512);
+	out.create_frame_var_size_word(_PRIVATE_MESSAGE);
+	out.write_string(to.c_str());
+	out.write_string(message.c_str());
+	out.end_frame_var_size_word();
 	intter->sendMessage(&out);
 }
 
 void sendFlightPlanRequest(Aircraft& user_for) {
-	Stream& out = Stream(5);
-	out.createFrame(_FLIGHT_PLAN_REQ);
-	out.writeWord(user_for.getUserIndex());
-	out.writeWord(user_for.getFlightPlan()->cycle);
+	BasicStream out = BasicStream(5);
+	out.create_frame(_FLIGHT_PLAN_REQ);
+	out.write_short(user_for.getUserIndex());
+	out.write_short(user_for.getFlightPlan()->cycle);
 	intter->sendMessage(&out);
 }
 
 void sendDisconnect() {
-	Stream &out = Stream(2);
-	out.createFrame(_DISCONNECT_PACKET);
-	out.writeByte(0);
+	BasicStream out = BasicStream(2);
+	out.create_frame(_DISCONNECT_PACKET);
+	out.write_byte(0);
 	intter->sendMessage(&out);
 }
 
 void sendFlightPlan(Aircraft& user) {
-	Stream& out = Stream(256);
+	BasicStream out = BasicStream(256);
 	FlightPlan& fp = *user.getFlightPlan();
-	out.createFrameVarSizeWord(_SEND_FLIGHT_PLAN);
-	out.writeWord(fp.cycle);
-	out.writeWord(user.getUserIndex());
-	out.writeByte(fp.flightRules);
-	out.writeString((char*)fp.squawkCode.c_str());
-	out.writeString((char*)fp.departure.c_str());
-	out.writeString((char*)fp.arrival.c_str());
-	out.writeString((char*)fp.alternate.c_str());
-	out.writeString((char*)fp.cruise.c_str());
-	out.writeString((char*)fp.acType.c_str());
-	out.writeString((char*)fp.scratchPad.c_str());
-	out.writeString((char*)fp.route.c_str());
-	out.writeString((char*)fp.remarks.c_str());
-	out.endFrameVarSizeWord();
+	out.create_frame_var_size_word(_SEND_FLIGHT_PLAN);
+	out.write_short(fp.cycle);
+	out.write_short(user.getUserIndex());
+	out.write_byte(fp.flightRules);
+	out.write_string(fp.squawkCode.c_str());
+	out.write_string(fp.departure.c_str());
+	out.write_string(fp.arrival.c_str());
+	out.write_string(fp.alternate.c_str());
+	out.write_string(fp.cruise.c_str());
+	out.write_string(fp.acType.c_str());
+	out.write_string(fp.scratchPad.c_str());
+	out.write_string(fp.route.c_str());
+	out.write_string(fp.remarks.c_str());
+	out.end_frame_var_size_word();
 	intter->sendMessage(&out);
 }
 
 void sendPrimFreq() {
-	Stream& out = Stream(8);
-	out.createFrame(_PRIMARY_FREQ);
-	out.writeByte(0);
-	out.write3Byte(USER->userdata.frequency[0]);
-	out.write3Byte(USER->userdata.frequency[1]);
+	BasicStream out = BasicStream(8);
+	out.create_frame(_PRIMARY_FREQ);
+	out.write_byte(0);
+	out.write_3byte(USER->userdata.frequency[0]);
+	out.write_3byte(USER->userdata.frequency[1]);
 	intter->sendMessage(&out);
 }

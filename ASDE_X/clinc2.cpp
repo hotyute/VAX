@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "config.h"
+#include "main.h"
 #include "usermanager.h"
 
 using namespace std::chrono_literals;
@@ -35,10 +36,7 @@ const int packetSizes[256] =
 };
 
 tcpinterface::tcpinterface() {
-	this->writeMutex = CreateMutex(NULL, FALSE, NULL);
-	this->in_stream = new Stream(5000);
-	this->in_stream->clearBuf();
-	memset(tcpinterface::message, 0, 5000);
+	this->in_stream = new BasicStream();
 	timeout1.tv_sec = TimeoutSec1;
 	timeout1.tv_usec = 0;
 	sConnect = INVALID_SOCKET;
@@ -52,25 +50,16 @@ DWORD WINAPI tcpinterface::staticStart(void* param) {
 DWORD tcpinterface::run() {
 	while (!quit)
 	{
-		if (closed)
-		{
-			auto start = std::chrono::high_resolution_clock::now();
-			std::this_thread::sleep_for(30ms);
-			auto end = std::chrono::high_resolution_clock::now();
-			std::chrono::duration<double, std::milli> elapsed = end - start;
-			continue;
-		}
-
-		ZeroMemory(message, sizeof(message));
 
 		FD_ZERO(&rfds);
-		FD_SET(tcpinterface::sConnect, &rfds);
+		FD_SET(sConnect, &rfds);
 
-		retval = select(tcpinterface::sConnect + 1, &rfds, 0, 0, &timeout1);
 
-		if (FD_ISSET(tcpinterface::sConnect, &rfds))
+		retval = select(sConnect + 1, &rfds, 0, 0, &timeout1);
+
+		if (FD_ISSET(sConnect, &rfds))
 		{
-			nBytesReceived = recv(tcpinterface::sConnect, message, 5000, 0);
+			nBytesReceived = in_stream->add_data(sConnect);
 
 			if (nBytesReceived == SOCKET_ERROR)
 			{
@@ -79,8 +68,7 @@ DWORD tcpinterface::run() {
 					|| error == WSAECONNRESET || error == WSAETIMEDOUT)
 				{
 					disconnect();
-					in_stream->clearBuf();
-					memset(tcpinterface::message, 0, 5000);
+					in_stream->clear();
 					closed = true;
 					if (error == WSAETIMEDOUT)
 						printf("Connection timeout exceeded 11 seconds\n");
@@ -97,28 +85,26 @@ DWORD tcpinterface::run() {
 			if (nBytesReceived == 0)
 				continue;
 
-			Stream& in = *in_stream;
-			memcpy(in.buffer + in.writeIndex, message, nBytesReceived);
-			in.writeIndex += nBytesReceived;
+			BasicStream& in = *in_stream;
 
 			if (tcpinterface::hand_shake)
 			{
 				if (tcpinterface::current_op == 45)
 				{
-					in.markReaderIndex();
+					in.mark_position();
 					if (nBytesReceived >= 1)
 					{
-						int loginCode = in.readUnsignedByte();
+						const int loginCode = in.read_unsigned_byte();
 
 						if (loginCode == 1)
 						{
-							if (in.remaining() >= 10)
+							if (in.available() >= 10)
 							{
 								//setIndex
 								//setUpdateTimeinMillis
 								//sendUpdates
-								int index = in.readUnsignedWord();
-								long long updateTimeInMillis = in.readQWord();
+								const int index = in.read_unsigned_short();
+								const long long updateTimeInMillis = in.readQWord();
 								USER->setUserIndex(index);
 								USER->setUpdateTime(updateTimeInMillis);
 								if (!this->position_updates)
@@ -134,11 +120,11 @@ DWORD tcpinterface::run() {
 								}
 								event_manager1->addEvent(position_updates);
 								tcpinterface::hand_shake = false;
-								in.deleteReaderBlock();
+								in.delete_marked_block();
 							}
 							else
 							{
-								in.resetReaderIndex();
+								in.reset();
 							}
 						}
 						else
@@ -150,12 +136,12 @@ DWORD tcpinterface::run() {
 								sendErrorMessage("Invalid protocol Version.");
 								if (connected)
 									closesocket(sConnect);
-								in.deleteReaderBlock();
+								in.delete_marked_block();
 								break;
 							}
 							default:
 							{
-								in.deleteReaderBlock();
+								in.delete_marked_block();
 								break;
 							}
 							}
@@ -163,65 +149,57 @@ DWORD tcpinterface::run() {
 					}
 					else
 					{
-						in.resetReaderIndex();
+						in.reset();
 					}
 				}
 			}
 
 			if (!hand_shake)
 			{
-				if (in.remaining() > 0)
+				if (in.available() > 0)
 				{
 					decode(in);
 				}
 			}
 		}
-		FD_ZERO(&rfds);
-		FD_SET(tcpinterface::sConnect, &rfds);
-
-		retval = select(tcpinterface::sConnect + 1, &rfds, 0, 0, &timeout1);
 	}
 	if (retval == SOCKET_ERROR)
 	{
-		//disconnect();
-		in_stream->clearBuf();
-		memset(tcpinterface::message, 0, 5000);
-		closed = true;
 		//do somethin
 	}
 	return 0;
 }
 
-void decode(Stream& in)
+void decode(BasicStream& in)
 {
-	while (in.remaining() > 0)
+	while (in.available() > 0)
 	{
-		in.markReaderIndex();
-		int opCode = in.readUnsignedByte(), length = -3;
+		in.mark_position();
+		int opCode = in.read_unsigned_byte(), length = -3;
 		if (opCode != -1)
 		{
 			length = packetSizes[opCode];
 			if (length == -1)
 			{
-				if (in.remaining() >= 1)
+				if (in.available() >= 1)
 				{
-					length = in.readUnsignedByte();
+					length = in.read_unsigned_byte();
 				}
 				else
 				{
-					in.resetReaderIndex();
+					in.reset();
 					break;
 				}
 			}
 			else if (length == -2)
 			{
-				if (in.remaining() >= 2)
+				if (in.available() >= 2)
 				{
-					length = in.readUnsignedWord();
+					length = in.read_unsigned_short();
 				}
 				else
 				{
-					in.resetReaderIndex();
+					in.reset();
 					break;
 				}
 			}
@@ -229,38 +207,55 @@ void decode(Stream& in)
 			{
 #ifdef _DEBUG
 				std::cout << "Unhandled Packet_Id!! : [" << (int)opCode << ", Packet_Size: "
-					<< length << ", Bytes_Ava: " << in.remaining() << "] ... Skipping" << std::endl;
+					<< length << ", Bytes_Ava: " << in.available() << "] ... Skipping" << std::endl;
 #endif
-				length = in.remaining();
+				length = in.available();
 			}
 #ifdef _DEBUG
-			std::cout << "Packet_Id: " << (int)opCode << ", Packet_Size: " << length << ", Bytes_Ava: " << in.remaining() << std::endl;
+			std::cout << "Packet_Id: " << (int)opCode << ", Packet_Size: " << length << ", Bytes_Ava: " << in.available() << std::endl;
 #endif
-			if (in.remaining() >= length)
+			if (in.available() >= length)
 			{
 				//handle
 				decodePackets(opCode, in);
-				in.deleteReaderBlock();
+				in.delete_marked_block();
 			}
 			else
 			{
-				in.resetReaderIndex();
+				in.reset();
 				break;
 			}
 		}
 	}
 }
 
-void tcpinterface::sendMessage(Stream* stream) {
-	if (stream->writeIndex == 0) {
+void tcpinterface::sendMessage(BasicStream* stream) {
+	std::lock_guard<std::mutex> lock(tcpinterface::writeMutex);
+	if (stream->get_index() == 0) {
 		printf("Can't flush empty stream o.O\n");
 		return;
 	}
 
-	w_lock();
-	DWORD what = send(tcpinterface::sConnect, stream->buffer, stream->writeIndex, NULL);
-	stream->writeIndex = 0;
-	w_unlock();
+	send_data(tcpinterface::sConnect, std::vector<char>(stream->data, stream->data + stream->index));
+	stream->clear();
+}
+
+void tcpinterface::send_data(SOCKET clientSocket, const std::vector<char>& buffer) {
+	size_t totalSent = 0;
+	size_t remaining = buffer.size();
+
+	while (totalSent < buffer.size()) {
+		const int sent = send(clientSocket, buffer.data() + totalSent, static_cast<int>(remaining), 0);
+		if (sent == SOCKET_ERROR) {
+			std::cerr << "Error sending broadcast message: " << WSAGetLastError() << std::endl;
+			break;
+		}
+
+		printf("sent: %d\n", sent);
+
+		totalSent += sent;
+		remaining -= sent;
+	}
 }
 
 void tcpinterface::startT(HWND hWnd) {
@@ -374,14 +369,4 @@ int tcpinterface::connectNew(HWND hWnd, std::string saddr, unsigned short port) 
 	closed = false;
 	std::cout << "Connected!\n";
 	return 1;
-}
-
-void tcpinterface::w_lock()
-{
-	WaitForSingleObject(writeMutex, INFINITE);
-}
-
-void tcpinterface::w_unlock()
-{
-	ReleaseMutex(writeMutex);
 }

@@ -4,58 +4,58 @@
 #include <boost/dll.hpp>
 
 #include "usermanager.h"
-#include "Stream.h"
+#include "basic_stream.h"
 #include "interfaces.h"
 #include "filereader.h"
 #include "comms.h"
 
 void save_info()
 {
-	Stream buf = Stream(256);
+	BasicStream buf = BasicStream(256);
 
-	buf.createFrameVarSizeWord(1);
-	buf.writeString((char*)USER->getIdentity()->callsign.c_str());
-	buf.writeString((char*)USER->getIdentity()->login_name.c_str());
-	buf.writeString((char*)USER->getIdentity()->username.c_str());
-	buf.writeString((char*)USER->getIdentity()->password.c_str());
-	buf.writeByte(USER->getIdentity()->controller_rating);
-	buf.writeByte(static_cast<int>(USER->getIdentity()->controller_position));
-	buf.endFrameVarSizeWord();
+	buf.create_frame_var_size_word(1);
+	buf.write_string(USER->getIdentity()->callsign.c_str());
+	buf.write_string(USER->getIdentity()->login_name.c_str());
+	buf.write_string(USER->getIdentity()->username.c_str());
+	buf.write_string(USER->getIdentity()->password.c_str());
+	buf.write_byte(USER->getIdentity()->controller_rating);
+	buf.write_byte(static_cast<int>(USER->getIdentity()->controller_position));
+	buf.end_frame_var_size_word();
 
-	buf.createFrameVarSizeWord(2);
-	buf.writeString((char*)LAST_ADX_PATH.c_str());
-	buf.writeString((char*)LAST_POF_PATH.c_str());
-	buf.writeString((char*)LAST_ALIAS_PATH.c_str());
-	buf.endFrameVarSizeWord();
+	buf.create_frame_var_size_word(2);
+	buf.write_string(LAST_ADX_PATH.c_str());
+	buf.write_string(LAST_POF_PATH.c_str());
+	buf.write_string(LAST_ALIAS_PATH.c_str());
+	buf.end_frame_var_size_word();
 
 	if (comms_line0 && comms_line1)
 	{
-		buf.createFrameVarSizeWord(3);
-		buf.writeByte(2);
+		buf.create_frame_var_size_word(3);
+		buf.write_byte(2);
 
-		buf.writeByte(0);
-		buf.writeString((char*)comms_line0->pos.c_str());
-		buf.writeString((char*)comms_line0->freq.c_str());
-		buf.writeByte(comms_line0->tx->checked ? 1 : 0);
-		buf.writeByte(comms_line0->rx->checked ? 1 : 0);
-		buf.writeByte(comms_line0->hdst->checked ? 1 : 0);
-		buf.writeByte(comms_line0->spkr->checked ? 1 : 0);
+		buf.write_byte(0);
+		buf.write_string(comms_line0->pos.c_str());
+		buf.write_string(comms_line0->freq.c_str());
+		buf.write_byte(comms_line0->tx->checked ? 1 : 0);
+		buf.write_byte(comms_line0->rx->checked ? 1 : 0);
+		buf.write_byte(comms_line0->hdst->checked ? 1 : 0);
+		buf.write_byte(comms_line0->spkr->checked ? 1 : 0);
 
-		buf.writeByte(1);
-		buf.writeString((char*)comms_line1->pos.c_str());
-		buf.writeString((char*)comms_line1->freq.c_str());
-		buf.writeByte(comms_line1->tx->checked ? 1 : 0);
-		buf.writeByte(comms_line1->rx->checked ? 1 : 0);
-		buf.writeByte(comms_line1->hdst->checked ? 1 : 0);
-		buf.writeByte(comms_line1->spkr->checked ? 1 : 0);
+		buf.write_byte(1);
+		buf.write_string(comms_line1->pos.c_str());
+		buf.write_string(comms_line1->freq.c_str());
+		buf.write_byte(comms_line1->tx->checked ? 1 : 0);
+		buf.write_byte(comms_line1->rx->checked ? 1 : 0);
+		buf.write_byte(comms_line1->hdst->checked ? 1 : 0);
+		buf.write_byte(comms_line1->spkr->checked ? 1 : 0);
 
-		buf.endFrameVarSizeWord();
+		buf.end_frame_var_size_word();
 	}
 
-	auto full_path = boost::dll::program_location().parent_path();
+	const auto full_path = boost::dll::program_location().parent_path();
 
 	std::fstream myFile(full_path.string() + "\\data.bin", std::ios::out | std::ios::binary);
-	myFile.write(buf.buffer, buf.writeIndex);
+	myFile.write(buf.data, buf.index);
 	myFile.close();
 	sendSystemMessage("Data Saved.");
 }
@@ -70,39 +70,37 @@ void read_info()
 	{
 		std::fstream::pos_type size = ifs.tellg();
 
-		Stream buf = Stream(size);
+		BasicStream buf = BasicStream(size);
 
 		ifs.seekg(0, std::ios::beg);
-		ifs.read(buf.buffer + buf.writeIndex, size);
-		buf.writeIndex += size;
+		ifs.read(buf.data + buf.index, size);
 		ifs.close();
 
-		while (buf.remaining() != 0)
+		while (buf.available() != 0)
 		{
-			int opcode = buf.readUnsignedByte();
+			int opcode = buf.read_unsigned_byte();
 
 			if (opcode == 1)
 			{
-				int size = buf.readUnsignedWord();
+				int size = buf.read_unsigned_short();
 				Identity& id = *USER->getIdentity();
-				buf.readString(20, id.callsign);
-				buf.readString(20, id.login_name);
-				buf.readString(20, id.username);
-				buf.readString(20, id.password);
+				id.callsign = buf.read_string();
+				id.login_name = buf.read_string();
+				id.username = buf.read_string();
+				id.password = buf.read_string();
 
 
-				USER->getIdentity()->controller_rating = buf.readUnsignedByte();
-				USER->getIdentity()->controller_position = static_cast<POSITIONS>(buf.readUnsignedByte());
+				USER->getIdentity()->controller_rating = buf.read_unsigned_byte();
+				USER->getIdentity()->controller_position = static_cast<POSITIONS>(buf.read_unsigned_byte());
 			}
 			else if (opcode == 2)
 			{
-				int size = buf.readUnsignedWord();
+				int size = buf.read_unsigned_short();
 				if (size > 0)
 				{
-					std::string file_path, pof_path, alias_path;
-					buf.readString(256, file_path);
-					buf.readString(256, pof_path);
-					buf.readString(256, alias_path);
+					std::string file_path = buf.read_string();
+					std::string pof_path = buf.read_string();
+					std::string alias_path = buf.read_string();
 					if (!file_path.empty())
 					{
 						open_adx(file_path);
@@ -111,23 +109,22 @@ void read_info()
 			}
 			else if (opcode == 3)
 			{
-				int size = buf.readUnsignedWord();
-				if (size >= buf.remaining())
+				int size = buf.read_unsigned_short();
+				if (size >= buf.available())
 				{
-					int length = buf.readUnsignedByte();
+					int length = buf.read_unsigned_byte();
 					for (int i = 0; i < length; i++)
 					{
-						int id = buf.readUnsignedByte();
+						int id = buf.read_unsigned_byte();
 
-						std::string pos, freq;
+						std::string pos = buf.read_string();
+						std::string freq = buf.read_string();
+						printf("%s", pos.c_str());;
 
-						bool tx, rx, hdst, spkr;
-						buf.readString(256, pos);
-						buf.readString(256, freq);
-						tx = buf.readUnsignedByte() == 1;
-						rx = buf.readUnsignedByte() == 1;
-						hdst = buf.readUnsignedByte() == 1;
-						spkr = buf.readUnsignedByte() == 1;
+						bool tx = buf.read_unsigned_byte() == 1;
+						bool rx = buf.read_unsigned_byte() == 1;
+						bool hdst = buf.read_unsigned_byte() == 1;
+						bool spkr = buf.read_unsigned_byte() == 1;
 
 						CommsLine* line = nullptr;
 						if (!communications)

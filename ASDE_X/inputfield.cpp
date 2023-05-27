@@ -73,7 +73,7 @@ void InputField::removeFocus() {
 		RenderChild(lastFocus);
 		if (line_ptr)
 		{
-			handleBox();//this has to come last as it deletes the inputfield
+			handle_box();//this has to come last as it deletes the inputfield
 		}
 	}
 }
@@ -94,21 +94,21 @@ void InputField::pushInput(bool uni, char c) {
 		return;
 	if (max_chars != 0)
 	{
-		if ((input.size() + 1) > ((size_t)max_chars))
+		if ((input.size() + 1) > static_cast<size_t>(max_chars))
 			return;
 	}
-	bool ins = ((size_t)cursor_pos) < input.size() ? true : false;
-	if (InputField::p_protected)
+	const bool ins = static_cast<size_t>(cursor_pos) < input.size() ? true : false;
+	if (p_protected)
 	{
 		if (uni) {
-			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, caps ? toupper(c) : c) : InputField::pp_input.push_back(caps ? toupper(c) : c);
+			ins ? pp_input.insert(pp_input.begin() + cursor_pos, caps ? toupper(c) : c) : pp_input.push_back(caps ? toupper(c) : c);
 		}
 		else {
-			ins ? InputField::pp_input.insert(InputField::pp_input.begin() + cursor_pos, '*') : InputField::pp_input.push_back('*');
+			ins ? pp_input.insert(pp_input.begin() + cursor_pos, '*') : pp_input.push_back('*');
 		}
 	}
-	ins ? InputField::input.insert(InputField::input.begin() + cursor_pos, caps ? toupper(c) : c) : InputField::input.push_back(caps ? toupper(c) : c);
-	InputField::cursor_input.push_back(' ');
+	ins ? input.insert(input.begin() + cursor_pos, caps ? toupper(c) : c) : input.push_back(caps ? toupper(c) : c);
+	cursor_input.push_back(' ');
 	last_cursor_pos = cursor_pos;
 	cursor_pos++;
 }
@@ -240,10 +240,10 @@ bool InputField::can_type()
 {
 	if (line_ptr)
 	{
-		ChatLine* c = line_ptr;
+		const ChatLine* c = line_ptr;
 		if (c->parent && c->parent->type == CHILD_TYPE::DISPLAY_BOX)
 		{
-			DisplayBox* displayBox = (DisplayBox*)c->parent;
+			auto* displayBox = static_cast<DisplayBox*>(c->parent);
 			bool can_type = false;
 			if (c->split)
 			{
@@ -265,27 +265,27 @@ bool InputField::can_type()
 			}
 		}
 	}
-	BasicInterface& param = *InputField::border;
-	double aW = param.getActualWidth();
-	SelectObject(hDC, *InputField::font);
+	BasicInterface& param = *border;
+	const double aW = param.getActualWidth();
+	SelectObject(hDC, *font);
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
-	double maxChars = aW / ave;
-	if (InputField::p_protected)
+	const double maxChars = aW / ave;
+	if (p_protected)
 	{
-		if (InputField::pp_input.size() < ((size_t)(maxChars - 1)))
+		if (pp_input.size() < static_cast<size_t>(maxChars - 1))
 			return true;
 	}
 	else
 	{
-		if (InputField::input.size() < ((size_t)(maxChars - 1)))
+		if (input.size() < static_cast<size_t>(maxChars - 1))
 			return true;
 	}
 	return false;
 }
 
-void InputField::handleBox()
+void InputField::handle_box()
 {
 	ChatLine* c = line_ptr;
 	c->setText(input);
@@ -311,7 +311,7 @@ void InputField::handleBox2()
 	delete this;
 }
 
-void InputField::updateLine()
+void InputField::update_line() const
 {
 	ChatLine* c = line_ptr;
 	if (c)
@@ -334,7 +334,7 @@ void InputField::updateInput(ChatLine* c)
 	}
 }
 
-void InputField::handleEntry()
+void InputField::handle_entry()
 {
 	switch (this->index)
 	{
@@ -346,10 +346,11 @@ void InputField::handleEntry()
 	{
 		if (opened_fp)
 		{
-			PullFPData((Aircraft*)opened_fp);
+			PullFPData(dynamic_cast<Aircraft*>(opened_fp));
 		}
 		break;
 	}
+	default: ;
 	}
 	if (focusChild == this)
 	{

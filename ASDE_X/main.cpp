@@ -19,7 +19,6 @@
 #include "interfaces.h"
 #include "comms.h"
 #include "calc_cycles.h"
-#include "topbutton.h"
 #include "raiiclipboard.h"
 #include "save.h"
 
@@ -246,7 +245,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CreateThread(NULL, 0, OpenGLThread, hwnd, 0, 0);
 		CreateThread(NULL, 0, EventThread1, hwnd, 0, NULL);
 		CreateThread(NULL, 0, CalcThread1, hwnd, 0, NULL);
-		userStorage1.resize(MAX_USER_SIZE);
+		userStorage1.resize(max_user_size);
 
 		logic.push_back("08R");
 		logic.push_back("09");
@@ -574,10 +573,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			{
 				TopButton* curButton = *btn;
 				int* params = curButton->getParams();
-				double vertx[4] = { params[0], params[0], params[2], params[2] };
+				double vertx[4] = {params[0], params[0], params[2], params[2]};
 				double verty[4] = { params[1], params[3], params[3], params[1] };
-				bool clicked = pnpoly(4, vertx, verty, x, y);
-				if (clicked) {
+				if (bool clicked = pnpoly(4, vertx, verty, x, y)) {
 					if (curButton->handle())
 					{
 						curButton->on = !curButton->on;
@@ -931,7 +929,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					int frame_id = frame.id;
 					if (focusField->line_ptr)
 					{
-						focusField->handleBox();
+						focusField->handle_box();
 						pull_data(frame, type);
 						main_chat_input->setFocus();
 					}
@@ -994,7 +992,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						//handle regular input field
 						focusField->history.push_back(focusField->input);
 						focusField->history_index = focusField->history.size() - 1;
-						focusField->handleEntry();
+						focusField->handle_entry();
 						main_chat_input->setFocus();
 					}
 				}
@@ -1383,48 +1381,47 @@ void moveInterfacesOnSize()
 
 void connect() {
 	//34.142.27.168
-	std::string ip = "vax.ddns.net";
-#ifdef _DEBUG
-	ip = "127.0.0.1";
-#endif
-	if (intter->connectNew(hWnd, ip, 4403)) {
+	const std::string ip = "127.0.0.1";
+	tcpinterface& tcp = *intter;
+	if (tcp.connectNew(hWnd, ip, 4403)) {
 		connected = true;
+		tcp.startT(hWnd);
+		Identity& id = *USER->getIdentity();
 		sendSystemMessage("Connected.");
 		EnableMenuItem(hFile, ID_FILE_CONNECT, MF_DISABLED);
 		EnableMenuItem(hFile, ID_FILE_DISCONNECT, MF_ENABLED);
-		Stream stream = Stream(200);
-		CLIENT_TYPES type = USER->getIdentity()->type;
-		intter->hand_shake = true;
-		intter->current_op = 45;
-		stream.createFrameVarSizeWord(45);
-		stream.writeDWord(PROTO_VERSION);
-		stream.writeString((char*)USER->getCallsign().c_str());
-		stream.writeString((char*)USER->getIdentity()->login_name.c_str());
-		stream.writeString((char*)USER->getIdentity()->username.c_str());
-		stream.writeString((char*)USER->getIdentity()->password.c_str());
-		stream.writeQWord(1000);//request time
-		stream.writeQWord(doubleToRawBits(USER->getLatitude()));
-		stream.writeQWord(doubleToRawBits(USER->getLongitude()));
-		stream.writeWord(USER->getVisibility());
-		stream.writeByte(static_cast<int>(type));
-		stream.write3Byte(USER->userdata.frequency[0]);
-		stream.write3Byte(USER->userdata.frequency[1]);
+		BasicStream stream = BasicStream(512);
+		CLIENT_TYPES type = id.type;
+		tcp.hand_shake = true;
+		tcp.current_op = 45;
+		stream.create_frame_var_size_word(45);
+		stream.write_int(PROTO_VERSION);
+		stream.write_string(USER->getCallsign().c_str());
+		stream.write_string(id.login_name.c_str());
+		stream.write_string(id.username.c_str());
+		stream.write_string(id.password.c_str());
+		stream.write_qword(1000);//request time
+		stream.write_qword(doubleToRawBits(USER->getLatitude()));
+		stream.write_qword(doubleToRawBits(USER->getLongitude()));
+		stream.write_short(USER->getVisibility());
+		stream.write_byte(static_cast<int>(type));
+		stream.write_3byte(USER->userdata.frequency[0]);
+		stream.write_3byte(USER->userdata.frequency[1]);
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 		{
-			stream.writeByte(USER->getIdentity()->controller_rating);
-			stream.writeByte(static_cast<int>(USER->getIdentity()->controller_position));
+			stream.write_byte(id.controller_rating);
+			stream.write_byte(static_cast<int>(id.controller_position));
 		}
 		else if (type == CLIENT_TYPES::PILOT_CLIENT)
 		{
-			stream.writeByte(0);
-			stream.writeString("King Air 350");
-			stream.writeString("0000");
-			stream.writeByte(0);
-			stream.writeQWord(0);//info hash
+			stream.write_byte(0);
+			stream.write_string("King Air 350");
+			stream.write_string("0000");
+			stream.write_byte(0);
+			stream.write_qword(0);//info hash
 		}
-		stream.endFrameVarSizeWord();
-		intter->sendMessage(&stream);
-		intter->startT(hWnd);
+		stream.end_frame_var_size_word();
+		tcp.sendMessage(&stream);
 	}
 }
 
@@ -1450,7 +1447,7 @@ void conn_clean()
 	clear_ctrl_list();
 	controller_list_box->clearLines();
 	qlc_list_box->clearLines();
-	for (int i = 1; i < MAX_USER_SIZE; i++)
+	for (int i = 1; i < max_user_size; i++)
 	{
 		User* user = userStorage1[i];
 		if (user && user != USER)
@@ -1532,7 +1529,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		}
 		++id;
 	}
-	((InputField*)frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
+	static_cast<InputField*>(frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	updateFlags[GBL_AIRCRAFT] = true;
 	std::cout.precision(10);
 	Event& position_updates = ConfigUpdates();
@@ -1752,7 +1749,7 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			if (it != displayBox->chat_lines.end())
 			{
 				int pos = it - displayBox->chat_lines.begin();
-				focusField->updateLine();
+				focusField->update_line();
 				displayBox->prepare();
 				displayBox->gen_points();
 				focusField->updateInput(displayBox->chat_lines[pos]);
@@ -1760,7 +1757,7 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 		}
 		else
 		{
-			focusField->handleBox();
+			focusField->handle_box();
 			main_chat_input->setFocus();
 		}
 	}
@@ -1779,7 +1776,7 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 			if (it != displayBox->chat_lines.end())
 			{
 				int pos = it - displayBox->chat_lines.begin();
-				focusField->updateLine();
+				focusField->update_line();
 				displayBox->prepare();
 				displayBox->gen_points();
 				ChatLine* c2 = focusField->line_ptr;

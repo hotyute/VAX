@@ -42,13 +42,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\boost_1_74_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\boost_1_74_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\boost_1_74_0;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_74_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\boost_1_74_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\boost_1_74_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\boost_1_74_0;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_74_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,6 +89,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aircraft.cpp" />
+    <ClCompile Include="basic_stream.cpp" />
     <ClCompile Include="calc_cycles.cpp" />
     <ClCompile Include="chatinterface.cpp" />
     <ClCompile Include="clinc.cpp" />
@@ -118,7 +119,6 @@
     <ClCompile Include="save.cpp" />
     <ClCompile Include="spline.cpp" />
     <ClCompile Include="spline2.cpp" />
-    <ClCompile Include="Stream.cpp" />
     <ClCompile Include="tools.cpp" />
     <ClCompile Include="topbutton.cpp" />
     <ClCompile Include="user.cpp" />
@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aircraft.h" />
+    <ClInclude Include="basic_stream.h" />
     <ClInclude Include="calc_cycles.h" />
     <ClInclude Include="chatinterface.h" />
     <ClInclude Include="clinc.h" />
@@ -157,7 +158,6 @@
     <ClInclude Include="save.h" />
     <ClInclude Include="spline.h" />
     <ClInclude Include="spline2.h" />
-    <ClInclude Include="Stream.h" />
     <ClInclude Include="tools.h" />
     <ClInclude Include="topbutton.h" />
     <ClInclude Include="user.h" />

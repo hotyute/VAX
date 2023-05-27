@@ -1,32 +1,30 @@
-#ifndef CLINC2_H
-#define CLINC2_H
+#pragma once
 
-#include <windows.h>
-#include <winsock.h>
-#include <iostream>
+#define _WINSOCK2API_
+#include <mutex>
 #include <string>
-#include <tchar.h>
+#include <windows.h>
+#include <WinSock2.h>
 
+#include "basic_stream.h"
 #include "events.h"
-#include "Stream.h"
 
 
 class tcpinterface {
-private:
-	HANDLE writeMutex;
 public:
+	std::mutex writeMutex;
 	SOCKET sConnect;
 	tcpinterface();
 	static DWORD WINAPI staticStart(void*);
 	DWORD run();
-	void sendMessage(Stream*);
+	void sendMessage(BasicStream* stream);
+	void send_data(SOCKET clientSocket, const std::vector<char>& buffer);
 	void startT(HWND);
 	int disconnect_socket();
 	int connectNew(HWND, std::string, unsigned short);
 	Event* position_updates = nullptr;
 
-	char message[5000];
-	Stream* in_stream;
+	BasicStream* in_stream;
 	bool hand_shake;
 	int current_op = -1;
 
@@ -36,13 +34,8 @@ public:
 	fd_set rfds;
 	int retval;
 	bool closed = true;
-
-	void w_lock();
-	void w_unlock();
 };
 
 extern tcpinterface* intter;
 
-#endif
-
-void decode(Stream& in);
+void decode(BasicStream& in);

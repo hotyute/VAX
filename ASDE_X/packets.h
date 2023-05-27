@@ -6,9 +6,9 @@
 
 void sendPositionUpdates(User &user);
 void sendPingPacket();
-void sendUserMessage(int frequency, std::string to, std::string message);
+void sendUserMessage(int frequency, const std::string& to, const std::string& message);
 
-void sendPrivateMessage(std::string to, std::string message);
+void sendPrivateMessage(const std::string& to, const std::string& message);
 
 void sendFlightPlanRequest(Aircraft& user_for);
 

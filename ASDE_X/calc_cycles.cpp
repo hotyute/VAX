@@ -46,7 +46,7 @@ void update()
 }
 
 void CalculateCollisions() {
-	if (acf_map.size() > 0) {
+	if (!acf_map.empty()) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) 
 		{
 			Aircraft* acf1 = iter->second;
@@ -65,10 +65,10 @@ void CalculateCollisions() {
 
 				if (!log.empty())
 				{
-					for (auto iter2 = acf_map.begin(); iter2 != acf_map.end(); iter2++)
+					for (const auto& iter2 : acf_map)
 					{
 
-						Aircraft* acf2 = iter2->second;
+						Aircraft* acf2 = iter2.second;
 						if (acf2 && acf2 != acf1) {
 							if (aircraft1.collisions.find(acf2) == aircraft1.collisions.end())
 							{
@@ -77,7 +77,7 @@ void CalculateCollisions() {
 								{
 									if (aircraft2.near_logic(log))
 									{
-										Collision* collision = new Collision(acf1, acf2);
+										auto* collision = new Collision(acf1, acf2);
 										collision->setUpdateFlag(COL_COLLISION_LINE, true);
 										aircraft1.collisions.emplace(acf2, collision);
 										aircraft2.collisions.emplace(acf1, collision);
@@ -92,12 +92,12 @@ void CalculateCollisions() {
 					}
 				}
 
-				if (aircraft1.collisions.size() > 0 && !aircraft1.isCollision())
+				if (!aircraft1.collisions.empty() && !aircraft1.isCollision())
 				{
 					aircraft1.setUpdateFlag(ACF_COLLISION, true);
 					aircraft1.setCollision(true);
 				}
-				else if (aircraft1.collisions.size() <= 0 && aircraft1.isCollision())
+				else if (aircraft1.collisions.empty() && aircraft1.isCollision())
 				{
 					aircraft1.setUpdateFlag(ACF_COLLISION, true);
 					aircraft1.setCollision(false);
@@ -106,17 +106,19 @@ void CalculateCollisions() {
 		}
 	}
 
-	if (Collision_Map.size() > 0) {
-		for (auto iter = Collision_Map.begin(); iter != Collision_Map.end(); iter++) {
+	if (!Collision_Map.empty()) {
+		for (const auto& iter : Collision_Map)
+		{
 			// iterator->first = key
-			Collision* col = iter->second;
+			Collision* col = iter.second;
 		}
 	}
 }
 
 void CalcDepartures() {
-	for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
-		Aircraft* acf1 = iter->second;
+	for (const auto& iter : acf_map)
+	{
+		Aircraft* acf1 = iter.second;
 		if (acf1) {
 			FlightPlan& fp = *acf1->getFlightPlan();
 			std::string callsign = acf1->getCallsign();
@@ -177,7 +179,7 @@ void CalcDepartures() {
 }
 
 void CalcControllerList() {
-	if (controller_map.size() > 0)
+	if (!controller_map.empty())
 	{
 		for (int i = 0; i < 9; i++)
 		{
@@ -193,7 +195,7 @@ void refresh_ctrl_list()
 	qlc_list_box->clearLines();
 	for (int i = 0; i < 9; i++)
 	{
-		POSITIONS pos = static_cast<POSITIONS>(i);
+		auto pos = static_cast<POSITIONS>(i);
 		for (auto& s : controller_map)
 		{
 			Controller& c = *s.second;
@@ -368,8 +370,8 @@ void refresh_ctrl_list()
 void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
-	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN, controller_list_box);
-	std::string controller_user = "";
+	auto* c = new ChatLine("", CHAT_TYPE::MAIN, controller_list_box);
+	std::string controller_user;
 	for (size_t i = 0; i < 7; i++)
 	{
 		if (i < data[1].length())
@@ -402,7 +404,7 @@ void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	std::unordered_map<std::string, ChatLine*>& store)
 {
-	ChatLine* c = new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box);
+	auto* c = new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box);
 	std::string controller_user = "";
 	for (size_t i = 0; i < 4; i++)
 	{
