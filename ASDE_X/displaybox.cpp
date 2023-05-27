@@ -30,7 +30,7 @@ DisplayBox::~DisplayBox()
 
 void DisplayBox::prepare()
 {
-	BasicInterface& param = *DisplayBox::border;
+	BasicInterface& param = *border;
 
 	double aW = param.getActualWidth();
 	SelectObject(hDC, *font);
@@ -43,8 +43,8 @@ void DisplayBox::prepare()
 	bool reset_idx = false;
 
 	//split line
-	auto it = DisplayBox::chat_lines.end();
-	while (it != DisplayBox::chat_lines.begin())
+	auto it = chat_lines.end();
+	while (it != chat_lines.begin())
 	{
 		--it;
 		ChatLine* m = *it;
@@ -73,7 +73,7 @@ void DisplayBox::prepare()
 				m->setText(rtrim(ltrim(store[s_size - 1])));
 
 				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type, this);
-				it = DisplayBox::chat_lines.insert(it, c) + 1;
+				it = chat_lines.insert(it, c) + 1;
 
 				c->split = m;
 			}
@@ -81,8 +81,8 @@ void DisplayBox::prepare()
 	}
 
 	//unsplit lines
-	auto i = DisplayBox::chat_lines.begin();
-	while (i != DisplayBox::chat_lines.end())
+	auto i = chat_lines.begin();
+	while (i != chat_lines.end())
 	{
 		ChatLine* c = *i;
 
@@ -104,7 +104,7 @@ void DisplayBox::prepare()
 					next_text.erase(pos, store[0].length());
 
 				next_text = rtrim(ltrim(next_text));
-				if (next_text.size() > 0) {
+				if (!next_text.empty()) {
 					n->setText(next_text);
 					continue;
 				}
@@ -543,12 +543,10 @@ void DisplayBox::clearLines()
 
 void DisplayBox::updatePos(double x, double width, double y, double height)
 {
-	DisplayBox::border->setPosX(x), DisplayBox::border->setPosY(y);
-	DisplayBox::border->setWidth(width), DisplayBox::border->setHeight(height);
-	DisplayBox::border->updateCoordinates();
+	border->setPosX(x), border->setPosY(y);
+	border->setWidth(width), border->setHeight(height);
+	border->updateCoordinates();
 }
-
-
 
 
 void DisplayBox::addLine(std::string text, CHAT_TYPE type) {

@@ -187,7 +187,7 @@ void InputField::cursorRight()
 }
 
 bool InputField::popInput() {
-	bool ins = ((size_t)cursor_pos) < input.size() ? true : false;
+	const bool ins = static_cast<size_t>(cursor_pos) < input.size() ? true : false;
 	if (ins && (cursor_pos - 1) < 0)
 		return false;
 	if (InputField::p_protected) {

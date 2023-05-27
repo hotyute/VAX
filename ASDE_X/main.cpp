@@ -1079,12 +1079,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_BACK) {
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
 			{
-				InputField* focusField = (InputField*)focusChild;
+				auto* focusField = dynamic_cast<InputField*>(focusChild);
 				InterfaceFrame& frame = *focusField->getFrame();
 				CHILD_TYPE type = focusField->type;
 				if (focusField->editable) {
-					if (focusField->input.size() > 0)
-					{
+					if (!focusField->input.empty()) {
 						bool popped = focusField->popInput();
 						focusField->setCursor();
 						//if (!popped)
@@ -1092,8 +1091,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						focusField->history_index = 0;
 					}
-					else
-					{
+					else {
 						back_split_line(frame, focusField);
 						focusField->history_index = 0;
 					}
@@ -1726,37 +1724,30 @@ void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc)
 void back_split_line(InterfaceFrame& frame, InputField* focusField)
 {
 	CHILD_TYPE type = focusField->type;
-	if (focusField->line_ptr)
-	{
-		ChatLine* c = focusField->line_ptr;
-		if (frame.id == FP_INTERFACE)
-		{
-			ChatLine* nf = nullptr;
-			DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
-			auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
-			auto i = displayBox->chat_lines.begin();
-			while (i != displayBox->chat_lines.end())
-			{
-				ChatLine* c2 = *i;
-				if (c2->split == c)
-				{
+	if (focusField->line_ptr) {
+		const ChatLine* c = focusField->line_ptr;
+		if (frame.id == FP_INTERFACE) {
+			const ChatLine* nf;
+			auto* display_box = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
+			const auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), c);
+			auto i = display_box->chat_lines.begin();
+			while (i != display_box->chat_lines.end()) {
+				if (ChatLine* c2 = *i; c2->split == c) {
 					printf("split: %s\n", c2->getText().c_str());
 					nf = c2;
 					break;
 				}
 				++i;
 			}
-			if (it != displayBox->chat_lines.end())
-			{
-				int pos = it - displayBox->chat_lines.begin();
+			if (it != display_box->chat_lines.end()) {
+				const int pos = it - display_box->chat_lines.begin();
 				focusField->update_line();
-				displayBox->prepare();
-				displayBox->gen_points();
-				focusField->updateInput(displayBox->chat_lines[pos]);
+				display_box->prepare();
+				display_box->gen_points();
+				focusField->updateInput(display_box->chat_lines[pos]);
 			}
 		}
-		else
-		{
+		else {
 			focusField->handle_box();
 			main_chat_input->setFocus();
 		}
