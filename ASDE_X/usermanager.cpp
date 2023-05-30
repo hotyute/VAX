@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "tools.h"
 #include "calc_cycles.h"
+#include "interfaces.h"
 
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
@@ -235,7 +236,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 		if (User* user1 = userStorage1.at(index))
 		{
 			main_chat_box->resetReaderIdx();
-			auto* c = new ChatLine(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN, main_chat_box);
+			auto c = std::make_shared<ChatLine>(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN, main_chat_box);
 			main_chat_box->addLine(c);
 			c->playChatSound();
 			renderDrawings = true;
@@ -286,7 +287,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 			}
 			DisplayBox& box = *dynamic_cast<DisplayBox*>(frame.children[PRIVATE_MESSAGE_BOX]);
 			box.resetReaderIdx();
-			auto* c = new ChatLine(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT, &box);
+			auto c = std::make_shared<ChatLine>(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT, &box);
 			box.addLine(c);
 			c->playChatSound();
 		}

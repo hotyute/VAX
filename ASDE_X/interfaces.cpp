@@ -36,18 +36,18 @@ void RenderControllerList(bool open, double x_, double y_)
 	double route_box_size = 150.0;
 	controller_list_box = new DisplayBox(controller_list, x + (width - (width * (start_x - spacing_x))),
 		width - 25, 5, y + (height - (height * (start_y += spacing_y))) - (route_box_size - 10), route_box_size, 5, false);
-	std::vector<ChatLine*> list;
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
-	list.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_list_box));
+	std::vector<std::shared_ptr<ChatLine>> list;
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
+	list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box));
 	controller_list_box->setList(list, list.size());
 	controller_list->children[controller_list_box->index = CONTROLLER_LIST_BOX] = controller_list_box;
 
@@ -56,12 +56,12 @@ void RenderControllerList(bool open, double x_, double y_)
 	double route_box_size2 = 75.0;
 	controller_info_box = new DisplayBox(controller_list, x + (width - (width * (start_x - spacing_x))),
 		width - 25, 5, y + ((height - (height * (start_y += spacing_y))) - (route_box_size2 - 10)) - route_box_size, route_box_size2, 5, false);
-	std::vector<ChatLine*> list2;
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_info_box));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_info_box));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_info_box));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_info_box));
-	list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, controller_info_box));
+	std::vector<std::shared_ptr<ChatLine>> list2;
+	list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_info_box));
+	list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_info_box));
+	list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_info_box));
+	list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_info_box));
+	list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_info_box));
 	controller_info_box->setList(list2, list2.size());
 	controller_list->children[controller_info_box->index = CONTROLLER_LIST_INFOBOX] = controller_info_box;
 
@@ -189,14 +189,14 @@ void LoadPrivateChat(double x_, double y_, std::string callsign, bool refresh, b
 		double route_box_size = 90.0;
 		DisplayBox* displayBox = new DisplayBox(pm_frame, x + (width - (width * (start_x - spacing))), width * 0.93, 5, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
-		std::vector<ChatLine*> list;
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
+		std::vector<std::shared_ptr<ChatLine>> list;
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
 		displayBox->setList(list, 7);
 		displayBox->prune_top = true;
 		pm_frame->children[displayBox->index = PRIVATE_MESSAGE_BOX] = displayBox;
@@ -311,19 +311,19 @@ void LoadMainChatInterface(bool refresh) {
 		//controller list
 
 		qlc_list_box = new DisplayBox(main_chat, x, controller_list_width, 5, 5, 114, 5, true);
-		std::vector<ChatLine*> list;
+		std::vector<std::shared_ptr<ChatLine>> list;
 		//---Delivery---
 		//1A - MIA_DEL
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box));
 		qlc_list_box->setList(list, 10);
 		main_chat->children[qlc_list_box->index = MAIN_CONTROLLERS_BOX] = qlc_list_box;
 
@@ -331,13 +331,13 @@ void LoadMainChatInterface(bool refresh) {
 		main_chat_box = new DisplayBox(main_chat, x + (controller_list_width + arrow_offset),
 			(CLIENT_WIDTH * width) - width_offset, m_padding, 27, 87, 10, false);
 		main_chat_box->prune_top = true;
-		std::vector<ChatLine*> list2;
-		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
-		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
-		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
-		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
-		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
-		list2.push_back(new ChatLine("", CHAT_TYPE::MAIN, main_chat_box));
+		std::vector<std::shared_ptr<ChatLine>> list2;
+		list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, main_chat_box));
+		list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, main_chat_box));
+		list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, main_chat_box));
+		list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, main_chat_box));
+		list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, main_chat_box));
+		list2.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, main_chat_box));
 		main_chat_box->setList(list2, 6);
 		main_chat->children[main_chat_box->index = MAIN_CHAT_MESSAGES] = main_chat_box;
 
@@ -358,7 +358,8 @@ void sendSystemMessage(std::string message)
 	const std::string* date1 = currentDateTime();
 	std::string r = std::regex_replace(date1[1], std::regex("/"), ":");
 	r.insert(2, ":");
-	ChatLine* c = new ChatLine(std::string("[" + r + "] ") + message, CHAT_TYPE::SYSTEM, main_chat_box);
+	const auto c = std::make_shared<ChatLine>(std::string("[" + r + "] ") + 
+	                                          message, CHAT_TYPE::SYSTEM, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
 	renderDrawings = true;
@@ -366,7 +367,8 @@ void sendSystemMessage(std::string message)
 
 void sendErrorMessage(std::string message) {
 	main_chat_box->resetReaderIdx();
-	ChatLine* c = new ChatLine(std::string("[ERROR: ") + message + std::string("]"), CHAT_TYPE::ERRORS, main_chat_box);
+	const auto c = std::make_shared<ChatLine>(std::string("[ERROR: ") + 
+		message + std::string("]"), CHAT_TYPE::ERRORS, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
 	renderDrawings = true;
@@ -420,7 +422,7 @@ void sendATCMessage(std::string message) {
 		}
 	}
 	main_chat_box->resetReaderIdx();
-	ChatLine* c = new ChatLine(USER->getIdentity()->callsign + std::string(": ") + message, CHAT_TYPE::ATC, main_chat_box);
+	const auto c = std::make_shared<ChatLine>(USER->getIdentity()->callsign + std::string(": ") + message, CHAT_TYPE::ATC, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
 	renderDrawings = true;

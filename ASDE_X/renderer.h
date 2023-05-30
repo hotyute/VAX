@@ -1,17 +1,13 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <iostream>
 #include <vector>
 #include <unordered_map>
 
 #include "main.h"
 #include <gl/GL.h>
-#include <gl/GLU.h>
 
-#include "projection.h"
 #include "mirror.h"
-#include "collision.h"
 #include "inputfield.h"
 
 extern std::unordered_map<std::string, Mirror*> mirrors_storage;

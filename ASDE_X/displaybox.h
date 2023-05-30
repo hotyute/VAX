@@ -1,21 +1,20 @@
-#ifndef DISPLAYBOX_H
-#define DISPLAYBOX_H
+#pragma once
 
 #include "gui.h"
 #include "inputfield.h"
 
 class DisplayBox : public ChildFrame {
-private:
 	int noncp = 2;
 public:
 	DisplayBox(InterfaceFrame* frame, double, double, double, double, double, double, bool);
 	~DisplayBox();
-public:
+	void consolidate_lines();
+
 	int numBlocks = 0;
 	int read_index = 0, max_history = 100;
 	bool centered, editable = false, prune_top = false, caps = false;
-	std::vector<ChatLine*> chat_lines;
-	std::vector<ChatLine*> displayed_lines;
+	std::vector<std::shared_ptr<ChatLine>> chat_lines;
+	std::vector<std::shared_ptr<ChatLine>> displayed_lines;
 
 	void updatePos(double x, double width, double y, double height);
 	void doDrawing();
@@ -29,23 +28,20 @@ public:
 	void resetReaderIdxTop();
 	void doActionUp();
 	void doActionDown();
-	void addLine(std::string, CHAT_TYPE type);
-	void addLineTop(std::string, CHAT_TYPE type);
-	void addLine(ChatLine* c);
-	void addLineTop(ChatLine* c);
-	void removeLine(ChatLine* c);
+	void addLine(const std::string&, CHAT_TYPE type);
+	void addLineTop(const std::string&, CHAT_TYPE type);
+	void addLine(const std::shared_ptr<ChatLine>& c);
+	void addLineTop(const std::shared_ptr<ChatLine>& c);
+	void removeLine(const std::shared_ptr<ChatLine>& c);
 	void SetChatTextColour(CHAT_TYPE t);
 	void clearLines();
-	void prepare();
-	InputField* editText(ChatLine* line, int x, int y);
-	bool placeEdit(InputField* input_field);
+	InputField* edit_text(std::shared_ptr<ChatLine> line, int x, int y) const;
+	bool placeEdit(InputField* input_field) const;
 	std::string getLinesComb();
-	void setList(std::vector<ChatLine*> chat_lines, int numBlocks);
-	void gen_points();
+	void setList(std::vector<std::shared_ptr<ChatLine>> chat_lines, int numBlocks);
+	void gen_points() const;
 
 	bool click_arrow_bottom(int x, int y, int arrow_bounds, int arrow_offset);
 	bool click_arrow_top(int x, int y, int arrow_bounds, int arrow_offset);
 
 };
-
-#endif

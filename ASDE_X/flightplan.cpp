@@ -2,12 +2,14 @@
 
 #include "constants.h"
 #include "inputfield.h"
+#include "interfaces.h"
+#include "packets.h"
 
 User* opened_fp = NULL;
 int squawk_range = 1000;
 
 std::unordered_map<std::string, std::vector<std::string>> departures;
-std::unordered_map<std::string, ChatLine*> obs_list, ql_obs_list, del_list, ql_del_list, gnd_list, ql_gnd_list,
+std::unordered_map<std::string, std::shared_ptr<ChatLine>> obs_list, ql_obs_list, del_list, ql_del_list, gnd_list, ql_gnd_list,
 twr_list, ql_twr_list, dep_list, ql_dep_list, app_list, ql_app_list;
 
 void Load_Unknown_FlightPlan_Interface(double x, double y, char* call_sign, bool refresh)
@@ -151,16 +153,16 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 
 		//4th Line
 		start_x = 1.0;
-		Label* route_label = new Label(fp_frame, "Route:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
+		auto route_label = new Label(fp_frame, "Route:", x + (width - (width * start_x)), label_width, 0.0, y + (height - (height * (start_y + spacing_y))), 20.0, 0.0);
 		route_label->centered = 2;
 		fp_frame->children[route_label->index = FP_ROUTE_LABEL] = route_label;
 		double route_box_size = 50.0;
-		DisplayBox* displayBox = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
-			- (route_box_size - 10), route_box_size, 5, false);
-		std::vector<ChatLine*> list;
-		list.push_back(new ChatLine(route, CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
-		list.push_back(new ChatLine("", CHAT_TYPE::MAIN, displayBox));
+		auto* displayBox = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
+		                                  - (route_box_size - 10), route_box_size, 5, false);
+		std::vector<std::shared_ptr<ChatLine>> list;
+		list.push_back(std::make_shared<ChatLine>(route, CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
+		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
 		displayBox->setList(list, 3);
 		displayBox->editable = true;
 		displayBox->caps = true;
@@ -178,9 +180,9 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 			- (route_box_size - 10), route_box_size, 5, false);
 		remarks_box->editable = true;
 		remarks_box->caps = true;
-		std::vector<ChatLine*> remarks_list;
-		remarks_list.push_back(new ChatLine(remarks, CHAT_TYPE::MAIN, remarks_box));
-		remarks_list.push_back(new ChatLine("", CHAT_TYPE::MAIN, remarks_box));
+		std::vector<std::shared_ptr<ChatLine>> remarks_list;
+		remarks_list.push_back(std::make_shared<ChatLine>(remarks, CHAT_TYPE::MAIN, remarks_box));
+		remarks_list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, remarks_box));
 		remarks_box->setList(remarks_list, 2);
 		fp_frame->children[remarks_box->index = FP_REMARKS_BOX] = remarks_box;
 

@@ -84,7 +84,7 @@ private:
 	int _x = -1, _y = -1, _s_x = -1, _s_y = -1, _p_x = -1, _p_y = -1;
 public:
 	ChildFrame* parent = nullptr;
-	ChatLine* split = nullptr;
+	std::shared_ptr<ChatLine> split = nullptr;
 	ChatLine(std::string, CHAT_TYPE, ChildFrame* parent = nullptr);
 	~ChatLine();
 	void setType(CHAT_TYPE type);
@@ -102,8 +102,7 @@ public:
 	int size_y() { return _p_y; }
 	bool in_bounds(int x, int y);
 	bool in_bounds_text(int x, int y);
-	bool can_type();
-	void reset_p() { this->_x = -1; this->_y = -1; this->_s_x = -1; this->_s_y = -1; }
+	bool can_type();void reset_p() { this->_x = -1; this->_y = -1; this->_s_x = -1; this->_s_y = -1; }
 	bool has_p() { this->_x != -1 && this->_y != -1; }
 };
 

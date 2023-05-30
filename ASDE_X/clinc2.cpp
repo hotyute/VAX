@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "config.h"
+#include "interfaces.h"
 #include "main.h"
 #include "usermanager.h"
 

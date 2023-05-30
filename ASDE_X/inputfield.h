@@ -11,7 +11,7 @@ public:
 	bool centered = false, editable = true, numbers = false, caps = false, cursor_default = true;
 	HFONT* font = nullptr;
 	unsigned int* base = nullptr;
-	ChatLine* line_ptr = nullptr;
+	std::shared_ptr<ChatLine> line_ptr;
 	int max_history = 100, history_index = 0;
 	std::vector<std::string> history;
 	std::string pp_input;
@@ -52,7 +52,7 @@ public:
 	void handle_box();
 	void handleBox2();
 	void update_line() const;
-	void updateInput(ChatLine* c);
+	void updateInput(const std::shared_ptr<ChatLine>& c);
 	void handle_entry();
 	void calcCursorPos(double x, double y);
 };

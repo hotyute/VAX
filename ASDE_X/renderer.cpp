@@ -5,6 +5,9 @@
 
 #include "projection.h"
 #include "renderer.h"
+
+#include <gl/GLU.h>
+
 #include "point2d.h"
 #include "topbutton.h"
 #include "tools.h"
@@ -13,6 +16,7 @@
 #include "aircraft.h"
 #include "events.h"
 #include "flightplan.h"
+#include "interfaces.h"
 
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;

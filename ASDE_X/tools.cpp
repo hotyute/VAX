@@ -5,6 +5,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "interfaces.h"
+
 const int TRANSITION = 18000;
 
 #define N_SEG 20 // num points

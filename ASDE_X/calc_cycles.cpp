@@ -1,5 +1,6 @@
 #include "calc_cycles.h"
 #include "controller.h"
+#include "packets.h"
 
 DWORD __stdcall CalcThread1(LPVOID)
 {
@@ -368,9 +369,9 @@ void refresh_ctrl_list()
 }
 
 void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
-	std::unordered_map<std::string, ChatLine*>& store)
+	std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store)
 {
-	auto* c = new ChatLine("", CHAT_TYPE::MAIN, controller_list_box);
+	auto c = std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, controller_list_box);
 	std::string controller_user;
 	for (size_t i = 0; i < 7; i++)
 	{
@@ -395,17 +396,17 @@ void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
 		c->setType(CHAT_TYPE::SUP_POS);
 
 	controller_list_box->addLineTop(c);
-	controller_list_box->prepare();
+	controller_list_box->consolidate_lines();
 	controller_list_box->gen_points();
 
 	store.emplace(callsign, c);
 }
 
 void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
-	std::unordered_map<std::string, ChatLine*>& store)
+	std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store)
 {
-	auto* c = new ChatLine("", CHAT_TYPE::MAIN, qlc_list_box);
-	std::string controller_user = "";
+	auto c = std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, qlc_list_box);
+	std::string controller_user;
 	for (size_t i = 0; i < 4; i++)
 	{
 		if (i < data[1].length())
@@ -431,7 +432,7 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 		c->setType(CHAT_TYPE::SUP_POS);
 
 	qlc_list_box->addLineTop(c);
-	qlc_list_box->prepare();
+	qlc_list_box->consolidate_lines();
 	qlc_list_box->gen_points();
 
 	store.emplace(callsign, c);
@@ -494,7 +495,7 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 	}
 }*/
 
-void clear_ctrl_list(std::unordered_map<std::string, ChatLine*>& store)
+void clear_ctrl_list(std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store)
 {
 	auto it = store.begin();
 	while (it != store.end())
@@ -504,7 +505,7 @@ void clear_ctrl_list(std::unordered_map<std::string, ChatLine*>& store)
 	}
 }
 
-void clear_qlctrl_list(std::unordered_map<std::string, ChatLine*>& store)
+void clear_qlctrl_list(std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store)
 {
 	auto it = store.begin();
 	while (it != store.end())
@@ -530,13 +531,13 @@ void clear_ctrl_list()
 	clear_qlctrl_list(ql_app_list);
 }
 
-void remove_ctrl_list(ChatLine* c)
+void remove_ctrl_list(std::shared_ptr<ChatLine>& c)
 {
 	controller_list_box->removeLine(c);
 	renderDrawings = true;
 }
 
-void remove_qlctrl_list(ChatLine* c)
+void remove_qlctrl_list(std::shared_ptr<ChatLine>& c)
 {
 	printf("%s", c->getText().c_str());
 	qlc_list_box->removeLine(c);

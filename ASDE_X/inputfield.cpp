@@ -152,11 +152,11 @@ void InputField::clamp_cursor()
 {
 	if (last_cursor_pos < 0)
 		last_cursor_pos = 0;
-	if (((size_t)last_cursor_pos) > input.size())
+	if (static_cast<size_t>(last_cursor_pos) > input.size())
 		last_cursor_pos = input.size();
 	if (cursor_pos < 0)
 		cursor_pos = 0;
-	else if (((size_t)cursor_pos) > input.size())
+	else if (static_cast<size_t>(cursor_pos) > input.size())
 		cursor_pos = input.size();
 }
 
@@ -178,7 +178,7 @@ void InputField::cursorLeft()
 
 void InputField::cursorRight()
 {
-	if (((size_t)cursor_pos) < input.size()) {
+	if (static_cast<size_t>(cursor_pos) < input.size()) {
 		last_cursor_pos = cursor_pos;
 		cursor_pos++;
 		setCursor();
@@ -240,7 +240,7 @@ bool InputField::can_type()
 {
 	if (line_ptr)
 	{
-		const ChatLine* c = line_ptr;
+		const std::shared_ptr<ChatLine>& c = line_ptr;
 		if (c->parent && c->parent->type == CHILD_TYPE::DISPLAY_BOX)
 		{
 			auto* displayBox = static_cast<DisplayBox*>(c->parent);
@@ -250,7 +250,7 @@ bool InputField::can_type()
 				auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
 				while (it != displayBox->chat_lines.end() && (*it)->split && *(it + 1) == (*it)->split)
 				{
-					ChatLine* split = *(it + 1);
+					std::shared_ptr<ChatLine>& split = *(it + 1);
 					if (split && !split->split)
 					{
 						if (split->can_type())
@@ -287,7 +287,7 @@ bool InputField::can_type()
 
 void InputField::handle_box()
 {
-	ChatLine* c = line_ptr;
+	std::shared_ptr<ChatLine>& c = line_ptr;
 	c->setText(input);
 	clearInput();
 	setCursor();
@@ -313,21 +313,21 @@ void InputField::handleBox2()
 
 void InputField::update_line() const
 {
-	ChatLine* c = line_ptr;
-	if (c)
+	if (line_ptr != nullptr)
 	{
+		const std::shared_ptr<ChatLine>& c = line_ptr;
 		c->setText(input);
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderDrawings = true;
 	}
 }
 
-void InputField::updateInput(ChatLine* c)
+void InputField::updateInput(const std::shared_ptr<ChatLine>& c)
 {
 	if (c)
 	{
-		line_ptr = c;
 		input = c->getText();
+		line_ptr = c;
 		setCursor();
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderDrawings = true;

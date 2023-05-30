@@ -189,7 +189,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 		case IDOK:
 			EndDialog(hwnd, IDOK);
 			break;
-			break;
+		default: ;
 		}
 		break;
 	default:
@@ -260,7 +260,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			cur->setHeading(85.0);
 			cur->setUpdateFlag(ACF_CALLSIGN, true);
 			cur->setMode(1);
-			acf_map[((User*)cur)->getCallsign()] = cur;
+			acf_map[cur->getCallsign()] = cur;
 			cur->unlock();
 
 			cur->setSquawkCode(std::to_string(random(2000, 5200)));
@@ -271,7 +271,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			fp.remarks = "/v/";
 			++fp.cycle;
 		}
-		userStorage1[0] = (User*)cur;
+		userStorage1[0] = dynamic_cast<User*>(cur);
 
 
 		Aircraft* cur2 = new Aircraft("EGF4427", 0, 0);
@@ -289,7 +289,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			cur2->setSquawkCode(std::to_string(random(2000, 5200)));
 		}
-		userStorage1[1] = cur2;
+		userStorage1[1] = dynamic_cast<User*>(cur2);
 
 		break;
 	}
@@ -727,11 +727,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					BasicInterface& bdr = *((DisplayBox*)focus)->border;
 					if (bdr.isBounds()) {
 						if (val < 0) {
-							((DisplayBox*)focus)->doActionDown();
+							dynamic_cast<DisplayBox*>(focus)->doActionDown();
 						}
 
 						if (val > 0) {
-							((DisplayBox*)focus)->doActionUp();
+							dynamic_cast<DisplayBox*>(focus)->doActionUp();
 						}
 						used_focused = true;
 					}
@@ -1056,14 +1056,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_DOWN) {
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
 			{
-				InputField* focusField = (InputField*)focusChild;
+				InputField* focusField = dynamic_cast<InputField*>(focusChild);
 
 				if (focusField == main_chat_input)
 				{
 					if (focusField->history_index >= 0 && focusField->history_index < focusField->history.size())
 					{
 						std::string line = focusField->history[focusField->history_index];
-						if (line.size() > 0)
+						if (!line.empty())
 						{
 							focusField->clearInput();
 							focusField->input = line;
@@ -1077,8 +1077,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 		else if (wParam == VK_BACK) {
-			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD)
-			{
+			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 				auto* focusField = dynamic_cast<InputField*>(focusChild);
 				InterfaceFrame& frame = *focusField->getFrame();
 				CHILD_TYPE type = focusField->type;
@@ -1116,7 +1115,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									break;
 								focusField.pushInput(false, s);
 								focusField.setCursor();
-								forward_split_line(frame, (InputField*)focusChild);
+								forward_split_line(frame, dynamic_cast<InputField*>(focusChild));
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 								focusField.history_index = focusField.history.size() - 1;
 							}
@@ -1131,7 +1130,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								if (focusField.can_type()) {
 									focusField.pushInput(false, ascii);
 									focusField.setCursor();
-									forward_split_line(frame, (InputField*)focusChild);
+									forward_split_line(frame, dynamic_cast<InputField*>(focusChild));
 									RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 									focusField.history_index = focusField.history.size() - 1;
 								}
@@ -1717,7 +1716,7 @@ void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc)
 		&& _fc == CHILD_TYPE::INPUT_FIELD)
 	{
 		if (opened_fp)
-			PullFPData((Aircraft*)opened_fp);
+			PullFPData(dynamic_cast<Aircraft*>(opened_fp));
 	}
 }
 
@@ -1725,14 +1724,14 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 {
 	CHILD_TYPE type = focusField->type;
 	if (focusField->line_ptr) {
-		const ChatLine* c = focusField->line_ptr;
+		const std::shared_ptr<ChatLine>& c = focusField->line_ptr;
 		if (frame.id == FP_INTERFACE) {
-			const ChatLine* nf;
+			std::shared_ptr<ChatLine> nf = nullptr;
 			auto* display_box = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
 			const auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), c);
 			auto i = display_box->chat_lines.begin();
 			while (i != display_box->chat_lines.end()) {
-				if (ChatLine* c2 = *i; c2->split == c) {
+				if (const std::shared_ptr<ChatLine>& c2 = *i; c2->split == c) {
 					printf("split: %s\n", c2->getText().c_str());
 					nf = c2;
 					break;
@@ -1742,7 +1741,7 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			if (it != display_box->chat_lines.end()) {
 				const int pos = it - display_box->chat_lines.begin();
 				focusField->update_line();
-				display_box->prepare();
+				display_box->consolidate_lines();
 				display_box->gen_points();
 				focusField->updateInput(display_box->chat_lines[pos]);
 			}
@@ -1759,26 +1758,25 @@ void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 	CHILD_TYPE type = focusField->type;
 	if (focusField->line_ptr)
 	{
-		ChatLine* c = focusField->line_ptr;
+		std::shared_ptr<ChatLine>& c = focusField->line_ptr;
 		if (frame.id == FP_INTERFACE)
 		{
-			DisplayBox* displayBox = (DisplayBox*)frame.children[FP_ROUTE_BOX];
+			auto* displayBox = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
 			auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
 			if (it != displayBox->chat_lines.end())
 			{
 				int pos = it - displayBox->chat_lines.begin();
 				focusField->update_line();
-				displayBox->prepare();
+				displayBox->consolidate_lines();
 				displayBox->gen_points();
-				ChatLine* c2 = focusField->line_ptr;
+				std::shared_ptr<ChatLine>& c2 = focusField->line_ptr;
 				printf("%d, %d\n", c2->get_x(), c2->get_y());
 				auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
 				int pos2 = it2 - displayBox->chat_lines.begin();
 				if (pos != pos2)
 				{
 					focusField->handleBox2();
-					InputField* new_input = displayBox->editText(c2, c2->get_x(), c2->get_y());
-					if (new_input)
+					if (InputField* new_input = displayBox->edit_text(c2, c2->get_x(), c2->get_y()))
 					{
 						displayBox->placeEdit(new_input);
 						new_input->setCursorAtStart();

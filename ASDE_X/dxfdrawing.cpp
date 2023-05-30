@@ -440,8 +440,8 @@ void DxfDrawing::addCoordinates(double x, double y) {
 	value[0] = x;
 	value[1] = y;
 	value[2] = 0;
-	DxfDrawing::coordinates.push_back(value);
-	DxfDrawing::formated_coordinates.push_back(NULL);
+	coordinates.push_back(value);
+	formated_coordinates.push_back(NULL);
 }
 
 std::vector<double*> DxfDrawing::getCoordinates() {

@@ -1,20 +1,22 @@
 #include "displaybox.h"
 
+#include <utility>
+
 #include "tools.h"
 
 DisplayBox::DisplayBox(InterfaceFrame* frame, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
 	DisplayBox::frame = frame;
-	DisplayBox::centered = centerText;
-	DisplayBox::focus = false;
-	DisplayBox::editable = false;
-	DisplayBox::type = CHILD_TYPE::DISPLAY_BOX;
-	BasicInterface* comboBounds = new BasicInterface(x, width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
+	centered = centerText;
+	focus = false;
+	editable = false;
+	type = CHILD_TYPE::DISPLAY_BOX;
+	auto* comboBounds = new BasicInterface(x, width, x_padding, y, height, y_padding, 1.0f, 1.0f, 1.0f, 0.8, true, true);
 	comboBounds->setBounds(true);
 	comboBounds->updateCoordinates();
-	DisplayBox::border = comboBounds;
-	DisplayBox::child_interfaces.push_back(comboBounds);
-	DisplayBox::font = &topBtnFont;
-	DisplayBox::base = &topButtonBase;
+	border = comboBounds;
+	child_interfaces.push_back(comboBounds);
+	font = &topBtnFont;
+	base = &topButtonBase;
 }
 
 DisplayBox::~DisplayBox()
@@ -22,13 +24,12 @@ DisplayBox::~DisplayBox()
 	auto it = chat_lines.begin();
 	while (it != chat_lines.end())
 	{
-		ChatLine* _r = *it;
+		std::shared_ptr<ChatLine>& _r = *it;
 		it = chat_lines.erase(it);
-		delete _r;
 	}
 }
 
-void DisplayBox::prepare()
+void DisplayBox::consolidate_lines()
 {
 	BasicInterface& param = *border;
 
@@ -47,35 +48,37 @@ void DisplayBox::prepare()
 	while (it != chat_lines.begin())
 	{
 		--it;
-		ChatLine* m = *it;
+		std::shared_ptr<ChatLine>& m = *it;
 		m->reset_p();
 		std::string text = m->getText();
 		CHAT_TYPE type = m->getType();
 		SIZE size = getTextExtent(text);
-		if (size.cx >= (param.getActualWidth() - 1)) {
+		if (size.cx >= (aW - 1)) {
 			std::vector<std::string> store;
+			store.reserve(maxChars);
 			if (!wordWrap(store, text.c_str(), maxChars, 0)) {
 				//std::cout << "hello" << std::endl;
 				continue;
 			}
 
-			std::string new_text;
+			std::stringstream new_text_ss;
 			int remaining = 0;
 			int s_size = store.size();
 
 			for (int iy = 0; iy < s_size - 1; iy++) {
-				new_text += store[iy];
+				new_text_ss << store[iy];
 				remaining++;
 			}
+
+			std::string new_text = new_text_ss.str();
 
 			if (remaining > 0)
 			{
 				m->setText(rtrim(ltrim(store[s_size - 1])));
 
-				ChatLine* c = new ChatLine(rtrim(ltrim(new_text)), type, this);
-				it = chat_lines.insert(it, c) + 1;
-
+				auto c = std::make_shared<ChatLine>(rtrim(ltrim(new_text)), type, this);
 				c->split = m;
+				it = chat_lines.insert(it, c) + 1;
 			}
 		}
 	}
@@ -84,20 +87,25 @@ void DisplayBox::prepare()
 	auto i = chat_lines.begin();
 	while (i != chat_lines.end())
 	{
-		ChatLine* c = *i;
+		std::shared_ptr<ChatLine>& c = *i;
 
 		bool set_pos = false;
 		if (c->split) {
-			ChatLine* n = *(i + 1);
+			std::shared_ptr<ChatLine>& n = *(i + 1);
 			std::string next_text = n->getText();
 			std::vector<std::string> store = split(next_text, " ", 1);
-			if (store.size() < 1) {
+			if (store.empty()) {
 				++i;
 				continue;
 			}
-			SIZE size = getTextExtent(c->getText() + " " + store[0]);
-			if (size.cx < (param.getActualWidth() - 1)) {
-				c->setText(c->getText() + " " + store[0]);
+
+			std::stringstream size_ss;
+			size_ss << c->getText() << " " << store[0];
+			SIZE size = getTextExtent(size_ss.str());
+			if (size.cx < (aW - 1)) {
+				std::stringstream text_ss;
+				text_ss << c->getText() << " " << store[0];
+				c->setText(text_ss.str());
 
 				size_t pos = next_text.find(store[0]);
 				if (pos != std::string::npos)
@@ -109,8 +117,7 @@ void DisplayBox::prepare()
 					continue;
 				}
 				c->split = n->split;
-				DisplayBox::chat_lines.erase(i + 1);
-				delete n;
+				chat_lines.erase(i + 1);
 				reset_idx = true;
 			}
 			else ++i;
@@ -119,27 +126,30 @@ void DisplayBox::prepare()
 	}
 
 	//prune
+	size_t chat_lines_size = chat_lines.size();
 	auto i2 = chat_lines.begin();
 	while (i2 != chat_lines.end())
 	{
-		if (chat_lines.size() <= numBlocks)
+		if (chat_lines_size <= numBlocks)
 			break;
-		ChatLine* c = *i2;
+		std::shared_ptr<ChatLine>& c = *i2;
 		if (empty(c->getText()))
 		{
 			i2 = chat_lines.erase(i2);
-			delete c;
+			--chat_lines_size;
 			reset_idx = true;
 		}
 		else ++i2;
 	}
 
-	while (chat_lines.size() < numBlocks)
+	while (chat_lines_size < numBlocks)
 	{
 		if (prune_top)
-			chat_lines.insert(chat_lines.begin(), new ChatLine("", CHAT_TYPE::MAIN, this));
+			chat_lines.insert(chat_lines.begin(), std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, this));
 		else
-			chat_lines.push_back(new ChatLine("", CHAT_TYPE::MAIN, this));
+			chat_lines.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, this));
+
+		++chat_lines_size;
 	}
 
 	if (reset_idx) {
@@ -148,17 +158,15 @@ void DisplayBox::prepare()
 	}
 }
 
-InputField* DisplayBox::editText(ChatLine* line, int x, int y)
+InputField* DisplayBox::edit_text(std::shared_ptr<ChatLine> line, int x, int y) const
 {
 	InputField* input_field = nullptr;
-	std::string str = line->getText();
+	const std::string str = line->getText();
 
 	if (frame->children[(index + 1)])
 	{
-		((InputField*)frame->children[(index + 1)])->handle_box();
+		dynamic_cast<InputField*>(frame->children[(index + 1)])->handle_box();
 	}
-
-
 
 	if (empty(str))
 	{
@@ -173,15 +181,15 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 	{
 		//TODO set cursor exactly 
 		SelectObject(hDC, *font);
-		SIZE extent = getTextExtent(line->getText());
-		double x_pos = ((((double)x) - line->get_x()) / extent.cx) * line->getText().size();
+		const SIZE extent = getTextExtent(line->getText());
+		const double x_pos = ((static_cast<double>(x) - line->get_x()) / extent.cx) * line->getText().size();
 		input_field = new InputField(frame, line->get_x(), line->size_x(), 0.0, line->get_y(), line->size_y(), 0.0);
 		input_field->line_ptr = line;
 		input_field->show_border = false;
 		input_field->setInput(str);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
-		input_field->caps = DisplayBox::caps;
+		input_field->caps = caps;
 		input_field->cursor_default = false;
 		input_field->setCursor(x_pos);
 	}
@@ -193,13 +201,13 @@ InputField* DisplayBox::editText(ChatLine* line, int x, int y)
 		input_field->setInput(str);
 		input_field->offset_x = 0;
 		input_field->offset_y = 0;
-		input_field->caps = DisplayBox::caps;
+		input_field->caps = caps;
 	}
 
 	return input_field;
 }
 
-bool DisplayBox::placeEdit(InputField* input_field)
+bool DisplayBox::placeEdit(InputField* input_field) const
 {
 	if (input_field)
 	{
@@ -216,40 +224,38 @@ bool DisplayBox::placeEdit(InputField* input_field)
 std::string DisplayBox::getLinesComb()
 {
 	std::string all_lines;
-	for (auto it = chat_lines.begin(); it != chat_lines.end(); it++)
-	{
+	for (auto it = chat_lines.begin(); it != chat_lines.end(); ++it) {
 		it != chat_lines.begin() ? all_lines += " " + (*it)->getText() : all_lines += (*it)->getText();
-
 	}
 	return all_lines;
 }
 
-void DisplayBox::setList(std::vector<ChatLine*> chat_lines, int numBlocks)
+void DisplayBox::setList(std::vector<std::shared_ptr<ChatLine>> chat_lines, int numBlocks)
 {
 	DisplayBox::chat_lines = chat_lines;
 	DisplayBox::numBlocks = numBlocks;
 }
 
-void DisplayBox::gen_points()
+void DisplayBox::gen_points() const
 {
-	BasicInterface& param = *DisplayBox::border;
+	BasicInterface& param = *border;
 	double x;
 	double aW = param.getActualWidth();
-	if (DisplayBox::centered) {
+	if (centered) {
 		x = (param.getStartX() + (aW / 2));
 	}
 	else {
 		x = param.getStartX();
 	}
 	int dbox_padding = 0;
-	double y_height = ((param.getActualHeight() - dbox_padding) / DisplayBox::numBlocks);
+	double y_height = ((param.getActualHeight() - dbox_padding) / numBlocks);
 
 	double last_end_y = -1;
 
 
 	for (size_t i = read_index; i < read_index + numBlocks; i++)
 	{
-		ChatLine* line = DisplayBox::chat_lines[i];
+		const std::shared_ptr<ChatLine>& line = chat_lines[i];
 		std::string text = line->getText();
 		//std::cout << text << ", " << i << std::endl;
 		double y, endY;
@@ -274,7 +280,7 @@ void DisplayBox::gen_points()
 			cx = size.cx, cy = size.cy;
 		//int tH = tm.tmAscent - tm.tmInternalLeading;
 		double textXPos;
-		DisplayBox::centered ? (textXPos = x - (cx / 2.0)) : (textXPos = x + noncp);
+		centered ? (textXPos = x - (cx / 2.0)) : (textXPos = x + noncp);
 		double textYPos = y - ((cy / 2.0) / 2.0);
 		last_end_y = endY;
 
@@ -283,17 +289,17 @@ void DisplayBox::gen_points()
 }
 
 void DisplayBox::doDrawing() {
-	BasicInterface& param = *DisplayBox::border;
+	BasicInterface& param = *border;
 	double x;
 	double aW = param.getActualWidth();
-	if (DisplayBox::centered) {
+	if (centered) {
 		x = (param.getStartX() + (aW / 2));
 	}
 	else {
 		x = param.getStartX();
 	}
-	int dbox_padding = 0;
-	double y_height = ((param.getActualHeight() - dbox_padding) / DisplayBox::numBlocks);
+	const int dbox_padding = 0;
+	const double y_height = ((param.getActualHeight() - dbox_padding) / numBlocks);
 	double last_end_y = -1;
 	//SelectObject(hDC, topBtnFont);
 	//TEXTMETRIC tm;
@@ -301,14 +307,14 @@ void DisplayBox::doDrawing() {
 	//long ave = tm.tmAveCharWidth;
 	//int maxChars = aW / ave;
 
-	prepare();
+	consolidate_lines();
 
 
 	//draw Text to screen
 	displayed_lines.clear();
 	for (size_t i = read_index; i < read_index + numBlocks; i++)
 	{
-		ChatLine* line = DisplayBox::chat_lines[i];
+		std::shared_ptr<ChatLine>& line = chat_lines[i];
 		std::string text = line->getText();
 		CHAT_TYPE type = line->getType();
 		//std::cout << text << ", " << i << std::endl;
@@ -364,22 +370,22 @@ void DisplayBox::doDrawing() {
 }
 
 void DisplayBox::setFocus() {
-	if (!DisplayBox::focus) {
+	if (!focus) {
 		if (focusChild) {
 			focusChild->removeFocus();
 			RenderChild(lastFocus);
 		}
-		DisplayBox::focus = true;
+		focus = true;
 		focusChild = this;
 		renderFocus = true;
 	}
 }
 
 void DisplayBox::removeFocus() {
-	if (DisplayBox::focus) {
+	if (focus) {
 		//TODO Design
 
-		DisplayBox::focus = false;
+		focus = false;
 		lastFocus = this;
 		focusChild = nullptr;
 		renderFocus = true;
@@ -390,13 +396,16 @@ void DisplayBox::doAction() {
 }
 
 void DisplayBox::focusDrawing() {
-	if (DisplayBox::focus) {
-		int offsetX = 4, offsetY = 4;
-		BasicInterface& param = *DisplayBox::border;
-		double x1 = (param.getStartX() - offsetX), x2 = (param.getStartX() + param.getActualWidth()) + offsetX;
-		double y1 = (param.getStartY() - offsetY), y2 = (param.getStartY() + param.getActualHeight()) + offsetY;
+	if (focus) {
+		constexpr int offset_x = 4;
+		constexpr int offset_y = 4;
+		BasicInterface& param = *border;
+		const double x1 = (param.getStartX() - offset_x);
+		const double x2 = (param.getStartX() + param.getActualWidth()) + offset_x;
+		const double y1 = (param.getStartY() - offset_y);
+		const double y2 = (param.getStartY() + param.getActualHeight()) + offset_y;
 		glColor3f(0.32549019607f, 0.03137254901f, 0.91372549019f);
-		int line_size = 2;
+		constexpr int line_size = 2;
 		DrawVarLine(x1, y1, x1, y2, line_size, line_size);
 		DrawVarLine(x1, y2, x2, y2, line_size, line_size);
 		DrawVarLine(x2, y2, x2, y1, line_size, line_size);
@@ -406,7 +415,8 @@ void DisplayBox::focusDrawing() {
 
 int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 {
-	int arrow_bounds = 15, arrow_offset = 3;
+	constexpr int arrow_bounds = 15;
+	constexpr int arrow_offset = 3;
 	if (click_arrow_bottom(x, y, arrow_bounds, arrow_offset)) {
 		clicked = this;
 		doActionDown();
@@ -419,8 +429,8 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 		return 1;
 	}
 	for (auto d_it = displayed_lines.begin(); d_it != displayed_lines.end(); ++d_it) {
-		ChatLine* line = *d_it;
-		std::string str = line->getText();
+		std::shared_ptr<ChatLine>& line = *d_it;
+		const std::string str = line->getText();
 
 		if (line->in_bounds(x, y))
 		{
@@ -429,9 +439,9 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 
 				if (frame->children[index + 1])
 				{
-					((InputField*)frame->children[index + 1])->handle_box();
+					dynamic_cast<InputField*>(frame->children[index + 1])->handle_box();
 				}
-				InputField* input_field = editText(line, x, y);
+				InputField* input_field = edit_text(line, x, y);
 				placeEdit(input_field);
 
 				clicked = this;
@@ -448,26 +458,20 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 
 						if (!str.empty())
 						{
-
-							std::string callsign = trim(str.substr(6, 16));
-
-							if (!callsign.empty())
+							if (const std::string call_sign = trim(str.substr(6, 16)); !call_sign.empty())
 							{
-
-								Controller* controller_selected = controller_map[callsign];
-
-								if (controller_selected)
+								if (Controller* controller_selected = controller_map[call_sign])
 								{
-									controller_info_box->addLineTop(new ChatLine(
+									controller_info_box->addLineTop(std::make_shared<ChatLine>(
 										"Vis Range: " + std::to_string(controller_selected->getVisibility()),
 										CHAT_TYPE::MAIN, controller_info_box));
-									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN, controller_info_box));
-									controller_info_box->addLineTop(new ChatLine(" ", CHAT_TYPE::MAIN, controller_info_box));
-									controller_info_box->addLineTop(new ChatLine(controller_selected->getIdentity()->login_name
+									controller_info_box->addLineTop(std::make_shared<ChatLine>(" ", CHAT_TYPE::MAIN, controller_info_box));
+									controller_info_box->addLineTop(std::make_shared<ChatLine>(" ", CHAT_TYPE::MAIN, controller_info_box));
+									controller_info_box->addLineTop(std::make_shared<ChatLine>(controller_selected->getIdentity()->login_name
 										+ " (" + CONTROLLER_RATINGS[controller_selected->getIdentity()->controller_rating] + ")",
 										CHAT_TYPE::MAIN, controller_info_box));
 
-									controller_info_box->addLineTop(new ChatLine(controller_selected->getCallsign(),
+									controller_info_box->addLineTop(std::make_shared<ChatLine>(controller_selected->getCallsign(),
 										CHAT_TYPE::MAIN, controller_info_box));
 								}
 							}
@@ -488,38 +492,37 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 	return 0;// returning 1 means break any outside loop
 }
 
-void DisplayBox::addLine(ChatLine* c) {
-	if (DisplayBox::chat_lines.size() >= max_history)
-		DisplayBox::chat_lines.erase(DisplayBox::chat_lines.begin());
-	DisplayBox::chat_lines.push_back(c);
+void DisplayBox::addLine(const std::shared_ptr<ChatLine>& c) {
+	if (chat_lines.size() >= max_history)
+		chat_lines.erase(chat_lines.begin());
+	chat_lines.push_back(c);
 	if ((read_index + numBlocks) < max_history)
 		read_index++;
 }
 
-void DisplayBox::addLineTop(ChatLine* c) {
-	if (DisplayBox::chat_lines.size() >= max_history)
-		DisplayBox::chat_lines.pop_back();
-	DisplayBox::chat_lines.insert(DisplayBox::chat_lines.begin(), c);
+void DisplayBox::addLineTop(const std::shared_ptr<ChatLine>& c) {
+	if (chat_lines.size() >= max_history)
+		chat_lines.pop_back();
+	chat_lines.insert(chat_lines.begin(), c);
 	if ((read_index + numBlocks) < max_history)
 		read_index++;
 }
 
-void DisplayBox::removeLine(ChatLine* c)
+void DisplayBox::removeLine(const std::shared_ptr<ChatLine>& c)
 {
 	//std::cout << DisplayBox::chat_lines.size() << ", " << numBlocks << std::endl;
-	if (DisplayBox::chat_lines.size() <= numBlocks)
+	if (chat_lines.size() <= numBlocks)
 	{
 		c->setText("");
 		c->setType(CHAT_TYPE::MAIN);
 	}
 	else
 	{
-		auto it = std::find(std::begin(DisplayBox::chat_lines), std::end(DisplayBox::chat_lines), c);
+		auto it = std::find(std::begin(chat_lines), std::end(chat_lines), c);
 
-		if (it != std::end(DisplayBox::chat_lines))
+		if (it != std::end(chat_lines))
 		{
-			it = DisplayBox::chat_lines.erase(it);
-			delete c;
+			it = chat_lines.erase(it);
 		}
 	}
 }
@@ -529,15 +532,14 @@ void DisplayBox::clearLines()
 	resetReaderIdxTop();
 	for (size_t i = read_index; i < read_index + numBlocks; i++)
 	{
-		ChatLine* line = DisplayBox::chat_lines[i];
+		std::shared_ptr<ChatLine>& line = chat_lines[i];
 		line->setText("");
 	}
-	auto p_it = DisplayBox::chat_lines.begin() + (read_index + numBlocks);
-	while (p_it != DisplayBox::chat_lines.end())
+	auto p_it = chat_lines.begin() + (read_index + numBlocks);
+	while (p_it != chat_lines.end())
 	{
-		ChatLine* line = *p_it;
-		p_it = DisplayBox::chat_lines.erase(p_it);
-		delete line;
+		std::shared_ptr<ChatLine>& line = *p_it;
+		p_it = chat_lines.erase(p_it);
 	}
 }
 
@@ -549,14 +551,12 @@ void DisplayBox::updatePos(double x, double width, double y, double height)
 }
 
 
-void DisplayBox::addLine(std::string text, CHAT_TYPE type) {
-	ChatLine* c = new ChatLine(text, type, this);
-	addLine(c);
+void DisplayBox::addLine(const std::string& text, CHAT_TYPE type) {
+	addLine(std::make_shared<ChatLine>(text, type, this));
 }
 
-void DisplayBox::addLineTop(std::string text, CHAT_TYPE type) {
-	ChatLine* c = new ChatLine(text, type, this);
-	addLineTop(c);
+void DisplayBox::addLineTop(const std::string& text, CHAT_TYPE type) {
+	addLineTop(std::make_shared<ChatLine>(text, type, this));
 }
 
 void DisplayBox::doActionUp()

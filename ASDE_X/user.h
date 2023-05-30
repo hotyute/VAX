@@ -1,6 +1,4 @@
-#ifndef __USER_H
-#define __USER_H
-
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -89,7 +87,5 @@ protected:
 	double longitude;
 	HANDLE aMutex;
 };
-#endif
-
 #endif
 
