@@ -6,6 +6,9 @@
 #include "events.h"
 #include "projection.h"
 #include "main.h"
+
+#include <windowsx.h>
+
 #include "later.h"
 #include "renderer.h"
 #include "filereader.h"
@@ -19,6 +22,7 @@
 #include "interfaces.h"
 #include "comms.h"
 #include "calc_cycles.h"
+#include "flightplan.h"
 #include "raiiclipboard.h"
 #include "save.h"
 

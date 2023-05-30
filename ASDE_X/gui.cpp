@@ -9,6 +9,7 @@
 #include "tools.h"
 #include "displaybox.h"
 #include "comms.h"
+#include "flightplan.h"
 
 std::vector<InterfaceFrame*> frames_def(700);
 std::vector<InterfaceFrame*> rendered_frames;

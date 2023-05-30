@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "tools.h"
 #include "calc_cycles.h"
+#include "flightplan.h"
 #include "interfaces.h"
 
 std::vector<User*> userStorage1;

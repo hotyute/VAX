@@ -8,6 +8,8 @@
 #include <regex>
 #include <string>
 
+#include "usermanager.h"
+
 std::vector<std::string> pm_callsigns(20);
 
 InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr, * communications = nullptr;

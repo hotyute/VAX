@@ -1,5 +1,6 @@
 #include "inputfield.h"
 
+#include "flightplan.h"
 #include "tools.h"
 
 InputField::InputField(InterfaceFrame* frame, double width, double height) {

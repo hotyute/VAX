@@ -1,6 +1,7 @@
 #include "packets.h"
 #include "clinc2.h"
 #include "tools.h"
+#include "usermanager.h"
 
 void sendPositionUpdates(User &user) {
 	auto out = BasicStream(20);

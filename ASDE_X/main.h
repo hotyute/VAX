@@ -2,10 +2,7 @@
 #define MAIN_H
 
 #include <windows.h>
-#include <windowsx.h>
 #include "gui.h"
-#include "constants.h"
-#include "flightplan.h"
 #include "displaybox.h"
 #include "point2d.h"
 #include "mirror.h"
