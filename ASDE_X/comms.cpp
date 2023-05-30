@@ -12,16 +12,20 @@ bool expanded = false;
 
 void RenderCommunications(bool open, double x_, double y_, int expand_state)
 {
-	bool expand = expand_state == 1;
-	bool deflate = expand_state == 2;
+	const bool expand = expand_state == 1;
+	const bool deflate = expand_state == 2;
 
-	const double expansion = 100;
+	constexpr double expansion = 100;
 
-	double width = 280, x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
-	double height = expand ? (450 + expansion) : 450, y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
+	constexpr double width = 280;
+	double x = x_ == -1 ? (CLIENT_WIDTH / 2.0) - (width / 2.0) : x_;
+	const double height = expand ? (450 + expansion) : 450;
+	double y = y_ == -1 ? (CLIENT_HEIGHT / 2.0) - (height / 2.0) : y_;
 
-	double spacing_x = 0.15, spacing_y = 0.07;
-	double start_x = 0.6, start_y = 0.03;
+	const double spacing_x = 0.15;
+	const double spacing_y = 0.07;
+	const double start_x = 0.6;
+	double start_y = 0.03;
 	const double bar_offset = 0.01;
 
 	double radio_sep = 0.0, label_sep = 0.0;
