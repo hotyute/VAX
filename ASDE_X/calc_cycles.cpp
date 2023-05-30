@@ -1,5 +1,6 @@
 #include "calc_cycles.h"
 #include "controller.h"
+#include "flightplan.h"
 #include "packets.h"
 
 DWORD __stdcall CalcThread1(LPVOID)

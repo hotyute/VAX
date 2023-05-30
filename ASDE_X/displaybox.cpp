@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "controller.h"
 #include "tools.h"
 
 DisplayBox::DisplayBox(InterfaceFrame* frame, double x, double width, double x_padding, double y, double height, double y_padding, bool centerText) {
