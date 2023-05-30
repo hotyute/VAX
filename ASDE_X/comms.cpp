@@ -1,6 +1,7 @@
 #include "comms.h"
 
 #include "tools.h"
+#include "usermanager.h"
 
 CommsLine* comms_line0 = nullptr, * comms_line1 = nullptr;
 CommsLine* cur_prime = nullptr, * cur_edit = nullptr;
