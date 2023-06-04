@@ -1741,18 +1741,21 @@ void pop_split_line(const InterfaceFrame& frame, InputField* focusField)
 				const int pos = it - display_box->chat_lines.begin();
 				focusField->update_line();
 				if (const std::shared_ptr<ChatLine> u = display_box->check_unsplit()) {
+					display_box->gen_points();
 					focusField->history_index = 0;
 					focusField->removeFocus();
 					if (display_box->handleClick(nullptr, u->get_x(), u->get_y())) {
 						if (display_box->getFrame()->children[display_box->index + 1]) {
 							dynamic_cast<InputField*>(display_box->getFrame()->children[display_box->index + 1])->setCursorAtEnd();
+							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						}
 					}
-				} else {
+				}
+				else {
+					display_box->consolidate_lines();
+					display_box->gen_points();
 					focusField->updateInput(display_box->chat_lines[pos]);
 				}
-				display_box->consolidate_lines();
-				display_box->gen_points();
 			}
 		}
 		else {
@@ -1776,7 +1779,7 @@ ChildFrame *position_cursor_pop(const InterfaceFrame& frame, InputField* focusFi
 					focusField->removeFocus();
 					if (display_box->handleClick(nullptr, c2->get_x(), c2->get_y())) {
 						if (display_box->getFrame()->children[display_box->index + 1]) {
-							dynamic_cast<InputField*>(display_box->getFrame()->children[display_box->index + 1])->setCursorAtEnd();
+							dynamic_cast<InputField*>(display_box->getFrame()->children[display_box->index + 1])->setCursorAtStart();
 							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						}
 					}
