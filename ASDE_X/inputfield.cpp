@@ -325,8 +325,7 @@ void InputField::update_line() const
 
 void InputField::updateInput(const std::shared_ptr<ChatLine>& c)
 {
-	if (c)
-	{
+	if (c) {
 		input = c->getText();
 		line_ptr = c;
 		setCursor();

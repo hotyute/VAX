@@ -7,7 +7,6 @@ public:
 	virtual ~InputField();
 	InputField(InterfaceFrame*, double, double);
 	InputField(InterfaceFrame* frame, double x, double width, double padding_x, double, double, double);
-public:
 	bool centered = false, editable = true, numbers = false, caps = false, cursor_default = true;
 	HFONT* font = nullptr;
 	unsigned int* base = nullptr;

@@ -23,15 +23,80 @@ DisplayBox::DisplayBox(InterfaceFrame* frame, double x, double width, double x_p
 DisplayBox::~DisplayBox()
 {
 	auto it = chat_lines.begin();
-	while (it != chat_lines.end())
-	{
+	while (it != chat_lines.end()) {
 		std::shared_ptr<ChatLine>& _r = *it;
 		it = chat_lines.erase(it);
 	}
 }
 
-void DisplayBox::consolidate_lines()
+std::shared_ptr<ChatLine> DisplayBox::check_unsplit()
 {
+	BasicInterface& param = *border;
+
+	double aW = param.getActualWidth();
+	SelectObject(hDC, *font);
+	TEXTMETRIC tm;
+	GetTextMetrics(hDC, &tm);
+
+	long ave = tm.tmAveCharWidth;
+	int maxChars = aW / ave;
+
+	bool reset_idx = false;
+
+	std::shared_ptr<ChatLine> u = nullptr;
+
+	//unsplit lines
+	auto i = chat_lines.begin();
+	while (i != chat_lines.end()) {
+		std::shared_ptr<ChatLine>& c = *i;
+
+		if (c->split) {
+			std::shared_ptr<ChatLine>& n = *(i + 1);
+			std::string next_text = n->getText();
+			std::vector<std::string> store = split(next_text, " ", 1);
+			if (store.empty()) {
+				++i;
+				continue;
+			}
+
+			std::stringstream size_ss;
+			size_ss << c->getText() << " " << store[0];
+			SIZE size = getTextExtent(size_ss.str());
+			if (size.cx < (aW - 1)) {
+				std::stringstream text_ss;
+				text_ss << c->getText() << " " << store[0];
+				c->setText(text_ss.str());
+
+				size_t pos = next_text.find(store[0]);
+				if (pos != std::string::npos)
+					next_text.erase(pos, store[0].length());
+
+				next_text = rtrim(ltrim(next_text));
+				if (!next_text.empty()) {
+					n->setText(next_text);
+					continue;
+				}
+				c->split = n->split;
+				u = c;
+				chat_lines.erase(i + 1);
+				reset_idx = true;
+			}
+			else ++i;
+		}
+		else ++i;
+	}
+
+	prune(reset_idx);
+
+	if (reset_idx) {
+		resetReaderIdx();
+		reset_idx = false;
+	}
+
+	return u;
+}
+
+void DisplayBox::consolidate_lines() {
 	BasicInterface& param = *border;
 
 	double aW = param.getActualWidth();
@@ -46,8 +111,7 @@ void DisplayBox::consolidate_lines()
 
 	//split line
 	auto it = chat_lines.end();
-	while (it != chat_lines.begin())
-	{
+	while (it != chat_lines.begin()) {
 		--it;
 		std::shared_ptr<ChatLine>& m = *it;
 		m->reset_p();
@@ -86,8 +150,7 @@ void DisplayBox::consolidate_lines()
 
 	//unsplit lines
 	auto i = chat_lines.begin();
-	while (i != chat_lines.end())
-	{
+	while (i != chat_lines.end()) {
 		std::shared_ptr<ChatLine>& c = *i;
 
 		bool set_pos = false;
@@ -127,10 +190,20 @@ void DisplayBox::consolidate_lines()
 	}
 
 	//prune
+	prune(reset_idx);
+
+	if (reset_idx) {
+		resetReaderIdx();
+		reset_idx = false;
+	}
+}
+
+void DisplayBox::prune(bool &reset_idx)
+{
+	//prune
 	size_t chat_lines_size = chat_lines.size();
 	auto i2 = chat_lines.begin();
-	while (i2 != chat_lines.end())
-	{
+	while (i2 != chat_lines.end()) {
 		if (chat_lines_size <= numBlocks)
 			break;
 		std::shared_ptr<ChatLine>& c = *i2;
@@ -143,19 +216,13 @@ void DisplayBox::consolidate_lines()
 		else ++i2;
 	}
 
-	while (chat_lines_size < numBlocks)
-	{
+	while (chat_lines_size < numBlocks) {
 		if (prune_top)
 			chat_lines.insert(chat_lines.begin(), std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, this));
 		else
 			chat_lines.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, this));
 
 		++chat_lines_size;
-	}
-
-	if (reset_idx) {
-		resetReaderIdx();
-		reset_idx = false;
 	}
 }
 
@@ -275,14 +342,14 @@ void DisplayBox::gen_points() const
 		long ave = tm.tmAveCharWidth;
 		SIZE size = getTextExtent(text);
 		long long cx, cy;
-		if (text.size() == 0 || (size.cx == 0 && size.cy == 0))
+		if (text.empty() || (size.cx == 0 && size.cy == 0))
 			cx = ave, cy = tm.tmHeight;
 		else
 			cx = size.cx, cy = size.cy;
 		//int tH = tm.tmAscent - tm.tmInternalLeading;
 		double textXPos;
 		centered ? (textXPos = x - (cx / 2.0)) : (textXPos = x + noncp);
-		double textYPos = y - ((cy / 2.0) / 2.0);
+		const double textYPos = y - ((cy / 2.0) / 2.0);
 		last_end_y = endY;
 
 		line->set_p(textXPos, textYPos, cx, cy, param.getActualWidth(), y_height);
@@ -433,13 +500,9 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 		std::shared_ptr<ChatLine>& line = *d_it;
 		const std::string str = line->getText();
 
-		if (line->in_bounds(x, y))
-		{
-			if (editable)
-			{
-
-				if (frame->children[index + 1])
-				{
+		if (line->in_bounds(x, y)) {
+			if (editable) {
+				if (frame->children[index + 1]) {
 					dynamic_cast<InputField*>(frame->children[index + 1])->handle_box();
 				}
 				InputField* input_field = edit_text(line, x, y);
@@ -448,21 +511,15 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 				clicked = this;
 				return 1;
 			}
-			else
-			{
-				if (this->frame->id == CONTROLLER_INTERFACE)
-				{
-					if (this->index == CONTROLLER_LIST_BOX)
-					{
+			else {
+				if (this->frame->id == CONTROLLER_INTERFACE) {
+					if (this->index == CONTROLLER_LIST_BOX) {
 						//handle controller click
 						controller_info_box->clearLines();
 
-						if (!str.empty())
-						{
-							if (const std::string call_sign = trim(str.substr(6, 16)); !call_sign.empty())
-							{
-								if (Controller* controller_selected = controller_map[call_sign])
-								{
+						if (!str.empty()) {
+							if (const std::string call_sign = trim(str.substr(6, 16)); !call_sign.empty()) {
+								if (Controller* controller_selected = controller_map[call_sign]) {
 									controller_info_box->addLineTop(std::make_shared<ChatLine>(
 										"Vis Range: " + std::to_string(controller_selected->getVisibility()),
 										CHAT_TYPE::MAIN, controller_info_box));
@@ -477,8 +534,7 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 								}
 							}
 						}
-						else
-						{
+						else {
 
 						}
 

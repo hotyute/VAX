@@ -67,7 +67,8 @@ void moveInterfacesOnSize();
 void conn_clean();
 void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc);
 
-void back_split_line(InterfaceFrame& frame, InputField* focusField);
+void pop_split_line(const InterfaceFrame& frame, InputField* focusField);
+ChildFrame* position_cursor_pop(const InterfaceFrame& frame, InputField* input_field);
 
 void forward_split_line(InterfaceFrame& frame, InputField* focusField);
 
@@ -271,7 +272,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			FlightPlan& fp = *cur->getFlightPlan();
 			fp.departure = "KMIA";
-			fp.route = "HEDLY1.HEDLY LAL";
+			fp.arrival = "KSLC";
+			fp.route = "HURCN3 SMELZ Q116 JAWJA DEFUN MERDN IZAAC LIT KM33G KK42C KK45A ZAROS BRK EKR LEEHY5";
 			fp.remarks = "/v/";
 			++fp.cycle;
 		}
@@ -501,8 +503,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (frame && frame->render) {
 				ChildFrame* clicked1 = nullptr;
 				for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
-					ChildFrame* children = *child;
-					if (children) {
+					if (ChildFrame* children = *child) {
 						BasicInterface* inter2 = children->border;
 						if (children->handleClick(clicked1, x, y))
 							break;
@@ -518,7 +519,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 				}
 				if (clicked1) {
-					if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !((InputField*)clicked1)->editable) {
+					if (clicked1->type == CHILD_TYPE::INPUT_FIELD && !dynamic_cast<InputField*>(clicked1)->editable) {
 						//dont do anything with non editable field
 					}
 					else
@@ -530,7 +531,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 							clicked1->doAction();
 							if (clicked1->type == CHILD_TYPE::INPUT_FIELD)
 							{
-								InputField* field = (InputField*)clicked1;
+								auto* field = dynamic_cast<InputField*>(clicked1);
 								field->calcCursorPos(x, y);
 								RenderChild(field, CHILD_TYPE::INPUT_FIELD);
 							}
@@ -561,8 +562,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						frame->index = back_idx, _back->index = c_idx;
 						std::swap(*it, rendered_frames.back()); //bring interface to the front
 					}
-					frame->s_pt->x = (int)(short)LOWORD(lParam);
-					frame->s_pt->y = (int)(short)HIWORD(lParam);
+					frame->s_pt->x = static_cast<int>(static_cast<short>(LOWORD(lParam)));
+					frame->s_pt->y = static_cast<int>(static_cast<short>(HIWORD(lParam)));
 					dragged = frame;
 					dragged_bounds = clicked2;
 					clicked_interface = true;
@@ -728,7 +729,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			ChildFrame* focus = focusChild;
 			if (focus) {
 				if (focus->type == CHILD_TYPE::DISPLAY_BOX) {
-					BasicInterface& bdr = *((DisplayBox*)focus)->border;
+					BasicInterface& bdr = *focus->border;
 					if (bdr.isBounds()) {
 						if (val < 0) {
 							dynamic_cast<DisplayBox*>(focus)->doActionDown();
@@ -750,9 +751,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					if (frame && frame->render) {
 						ChildFrame* clicked1 = nullptr;
 						for (auto child = frame->children.rbegin(); child != frame->children.rend(); ++child) {
-							ChildFrame* children = *child;
-							if (children) {
-
+							if (ChildFrame* children = *child) {
 								BasicInterface& border = *children->border;
 								if (border.isBounds()) {
 									double vertx[4] = { border.getStartX(), border.getStartX(), border.getEndX(), border.getEndX() };
@@ -760,12 +759,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									bool clicked = pnpoly(4, vertx, verty, pt.x, pt.y);
 									if (clicked) {
 										if (val < 0) {
-											((DisplayBox*)children)->doActionDown();
+											dynamic_cast<DisplayBox*>(children)->doActionDown();
 											break;
 										}
 
 										if (val > 0) {
-											((DisplayBox*)children)->doActionUp();
+											dynamic_cast<DisplayBox*>(children)->doActionUp();
 											break;
 										}
 										clicked1 = children;
@@ -928,7 +927,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				CHILD_TYPE type = focusChild->type;
 				if (type == CHILD_TYPE::INPUT_FIELD)
 				{
-					InputField* focusField = (InputField*)focusChild;
+					auto* focusField = dynamic_cast<InputField*>(focusChild);
 					InterfaceFrame& frame = *focusField->getFrame();
 					int frame_id = frame.id;
 					if (focusField->line_ptr)
@@ -939,7 +938,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else if (frame_id == TERMINAL_COMMAND && focusField == terminal_input)
 					{// terminal commands
-						if (focusField->input.size() > 0) {
+						if (!focusField->input.empty()) {
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
 								focusField->setCursor();
@@ -955,9 +954,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else if (frame_id == MAIN_CHAT_INTERFACE && focusField == main_chat_input)
 					{// main chat
-						if (focusField->input.size() > 0)
+						if (!focusField->input.empty())
 						{
-							focusField->history.push_back(std::string(focusField->input));
+							focusField->history.emplace_back(focusField->input);
 							focusField->history_index = focusField->history.size() - 1;
 							if (processCommands(focusField->input)) {
 								focusField->clearInput();
@@ -974,7 +973,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						if (focusField->index == PRIVATE_MESSAGE_INPUT)
 						{
-							if (focusField->input.size() > 0)
+							if (!focusField->input.empty())
 							{
 								focusField->history.push_back(focusField->input);
 								focusField->history_index = focusField->history.size() - 1;
@@ -1044,7 +1043,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					if (focusField->history_index >= 0 && focusField->history_index < focusField->history.size())
 					{
 						std::string line = focusField->history[focusField->history_index];
-						if (line.size() > 0)
+						if (!line.empty())
 						{
 							focusField->clearInput();
 							focusField->input = line;
@@ -1090,13 +1089,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						bool popped = focusField->popInput();
 						focusField->setCursor();
 						//if (!popped)
-						back_split_line(frame, focusField);
+						pop_split_line(frame, focusField);
 						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						focusField->history_index = 0;
 					}
 					else {
-						back_split_line(frame, focusField);
-						focusField->history_index = 0;
+						printf("hello\n");
+						if (ChildFrame* split_prev = position_cursor_pop(frame, focusField)) {
+							
+						}
 					}
 				}
 			}
@@ -1104,7 +1105,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else {
 			char c = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
-				InputField& focusField = *(InputField*)focusChild;
+				InputField& focusField = *dynamic_cast<InputField*>(focusChild);
 				InterfaceFrame& frame = *focusField.getFrame();
 				if (focusField.editable)
 				{
@@ -1300,10 +1301,10 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::istarts_with(command, ".AN")) {
+	if (boost::istarts_with(command, ".AN")) {
 		return true;
 	}
-	else if (boost::istarts_with(command, ".CHAT")) {
+	if (boost::istarts_with(command, ".CHAT")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			capitalize(array3[1]);
@@ -1313,7 +1314,7 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::istarts_with(command, ".OM")) {
+	if (boost::istarts_with(command, ".OM")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
@@ -1337,7 +1338,7 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::istarts_with(command, ".CM")) {
+	if (boost::istarts_with(command, ".CM")) {
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			std::string id = array3[1];
@@ -1353,12 +1354,12 @@ bool processCommands(std::string command)
 		}
 		return true;
 	}
-	else if (boost::istarts_with(command, ".test")) {
+	if (boost::istarts_with(command, ".test")) {
 		controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
 		renderDrawings = true;
 		return true;
 	}
-	else if (boost::istarts_with(command, "/")) {
+	if (boost::istarts_with(command, "/")) {
 		command.erase(0, 1);
 		sendATCMessage(command);
 		return true;
@@ -1450,7 +1451,7 @@ void conn_clean()
 	qlc_list_box->clearLines();
 	for (int i = 1; i < max_user_size; i++)
 	{
-		User* user = userStorage1[i];
+		const User* user = userStorage1[i];
 		if (user && user != USER)
 		{
 			delete user;
@@ -1459,12 +1460,10 @@ void conn_clean()
 	}
 	for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it)
 	{
-		Collision* collision = it->second;
-		if (collision != nullptr) {
-			delete collision;
-		}
+		const Collision* collision = it->second;
+		delete collision;
 	}
-	if (departures.size() > 0)
+	if (!departures.empty())
 	{
 		departures.clear();
 		renderDepartures = true;
@@ -1530,7 +1529,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		}
 		++id;
 	}
-	static_cast<InputField*>(frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
+	dynamic_cast<InputField*>(frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	updateFlags[GBL_AIRCRAFT] = true;
 	std::cout.precision(10);
 	Event& position_updates = ConfigUpdates();
@@ -1625,9 +1624,7 @@ void preFlags() {
 
 	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
 	{
-		Mirror* mir = (*it).second;
-
-		if (mir)
+		if (Mirror* mir = (*it).second)
 		{
 			for (size_t i = 0; i < MIR_FLAG_COUNT; i++) {
 				if (mir->update_flags[i]) {
@@ -1637,7 +1634,7 @@ void preFlags() {
 			}
 		}
 	}
-	if (acf_map.size() > 0) {
+	if (!acf_map.empty()) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
@@ -1651,10 +1648,10 @@ void preFlags() {
 			}
 		}
 	}
-	if (Collision_Map.size() > 0) {
+	if (!Collision_Map.empty()) {
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
-			if (collision != NULL) {
+			if (collision != nullptr) {
 				for (int i = 0; i < COL_FLAG_COUNT; i++)
 				{
 					if (collision->getUpdateFlag(i)) {
@@ -1668,11 +1665,11 @@ void preFlags() {
 }
 
 void resetFlags() {
-	if (acf_map.size() > 0) {
+	if (!acf_map.empty()) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
 			// iterator->first = key
 			Aircraft* aircraft = iter->second;
-			if (aircraft != NULL) {
+			if (aircraft != nullptr) {
 				for (int i = 0; i < ACF_FLAG_COUNT; i++)
 				{
 					aircraft->setRenderFlag(i, false);
@@ -1680,10 +1677,10 @@ void resetFlags() {
 			}
 		}
 	}
-	if (Collision_Map.size() > 0) {
+	if (!Collision_Map.empty()) {
 		for (auto it = Collision_Map.begin(); it != Collision_Map.end(); ++it) {
 			Collision* collision = it->second;
-			if (collision != NULL) {
+			if (collision != nullptr) {
 				for (int i = 0; i < COL_FLAG_COUNT; i++)
 				{
 					collision->setRenderFlag(i, false);
@@ -1695,9 +1692,7 @@ void resetFlags() {
 
 	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
 	{
-		Mirror* mir = (*it).second;
-
-		if (mir)
+		if (Mirror* mir = (*it).second)
 		{
 			for (size_t i = 0; i < MIR_FLAG_COUNT; i++) {
 				if (mir->render_flags[i]) {
@@ -1724,18 +1719,18 @@ void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc)
 	}
 }
 
-void back_split_line(InterfaceFrame& frame, InputField* focusField)
+void pop_split_line(const InterfaceFrame& frame, InputField* focusField)
 {
 	CHILD_TYPE type = focusField->type;
 	if (focusField->line_ptr) {
-		const std::shared_ptr<ChatLine>& c = focusField->line_ptr;
+		const std::shared_ptr<ChatLine>& line = focusField->line_ptr;
 		if (frame.id == FP_INTERFACE) {
 			std::shared_ptr<ChatLine> nf = nullptr;
 			auto* display_box = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
-			const auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), c);
+			const auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), line);
 			auto i = display_box->chat_lines.begin();
 			while (i != display_box->chat_lines.end()) {
-				if (const std::shared_ptr<ChatLine>& c2 = *i; c2->split == c) {
+				if (const std::shared_ptr<ChatLine>& c2 = *i; c2->split == line) {
 					printf("split: %s\n", c2->getText().c_str());
 					nf = c2;
 					break;
@@ -1745,9 +1740,19 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			if (it != display_box->chat_lines.end()) {
 				const int pos = it - display_box->chat_lines.begin();
 				focusField->update_line();
+				if (const std::shared_ptr<ChatLine> u = display_box->check_unsplit()) {
+					focusField->history_index = 0;
+					focusField->removeFocus();
+					if (display_box->handleClick(nullptr, u->get_x(), u->get_y())) {
+						if (display_box->getFrame()->children[display_box->index + 1]) {
+							dynamic_cast<InputField*>(display_box->getFrame()->children[display_box->index + 1])->setCursorAtEnd();
+						}
+					}
+				} else {
+					focusField->updateInput(display_box->chat_lines[pos]);
+				}
 				display_box->consolidate_lines();
 				display_box->gen_points();
-				focusField->updateInput(display_box->chat_lines[pos]);
 			}
 		}
 		else {
@@ -1755,6 +1760,35 @@ void back_split_line(InterfaceFrame& frame, InputField* focusField)
 			main_chat_input->setFocus();
 		}
 	}
+}
+
+ChildFrame *position_cursor_pop(const InterfaceFrame& frame, InputField* focusField) {
+	if (focusField->line_ptr) {
+		const std::shared_ptr<ChatLine>& line = focusField->line_ptr;
+		if (frame.id == FP_INTERFACE) {
+			std::shared_ptr<ChatLine> nf = nullptr;
+			auto* display_box = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
+			const auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), line);
+			auto i = display_box->chat_lines.begin();
+			while (i != display_box->chat_lines.end()) {
+				if (const std::shared_ptr<ChatLine>& c2 = *i; c2->split == line) {
+					focusField->history_index = 0;
+					focusField->removeFocus();
+					if (display_box->handleClick(nullptr, c2->get_x(), c2->get_y())) {
+						if (display_box->getFrame()->children[display_box->index + 1]) {
+							dynamic_cast<InputField*>(display_box->getFrame()->children[display_box->index + 1])->setCursorAtEnd();
+							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+						}
+					}
+					printf("pop_position_split: %s\n", c2->getText().c_str());
+					nf = c2;
+					break;
+				}
+				++i;
+			}
+		}
+	}
+	return nullptr;
 }
 
 void forward_split_line(InterfaceFrame& frame, InputField* focusField)

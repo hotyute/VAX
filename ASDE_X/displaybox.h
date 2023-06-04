@@ -8,7 +8,9 @@ class DisplayBox : public ChildFrame {
 public:
 	DisplayBox(InterfaceFrame* frame, double, double, double, double, double, double, bool);
 	~DisplayBox();
+	std::shared_ptr<ChatLine> check_unsplit();
 	void consolidate_lines();
+	void prune(bool& reset_idx);
 
 	int numBlocks = 0;
 	int read_index = 0, max_history = 100;
