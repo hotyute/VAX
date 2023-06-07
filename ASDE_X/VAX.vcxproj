@@ -119,6 +119,8 @@
     <ClCompile Include="save.cpp" />
     <ClCompile Include="spline.cpp" />
     <ClCompile Include="spline2.cpp" />
+    <ClCompile Include="thread_pool.cpp" />
+    <ClCompile Include="timed_task.cpp" />
     <ClCompile Include="tools.cpp" />
     <ClCompile Include="topbutton.cpp" />
     <ClCompile Include="user.cpp" />
@@ -158,6 +160,8 @@
     <ClInclude Include="save.h" />
     <ClInclude Include="spline.h" />
     <ClInclude Include="spline2.h" />
+    <ClInclude Include="thread_pool.h" />
+    <ClInclude Include="timed_task.h" />
     <ClInclude Include="tools.h" />
     <ClInclude Include="topbutton.h" />
     <ClInclude Include="user.h" />
