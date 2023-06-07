@@ -25,6 +25,7 @@
 #include "flightplan.h"
 #include "raiiclipboard.h"
 #include "save.h"
+#include "thread_pool.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -45,6 +46,7 @@ bool done = false, connected = false, show_departures = false, show_squawks = tr
 int single_opened_frames = 0;
 
 #define PROTO_VERSION 32698
+constexpr int NUM_THREADS = 8;
 Point2* MOUSE_POS = new Point2();
 std::vector<MSG*> message_queue(500, NULL);
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
@@ -238,6 +240,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		//opengl stuff
 
 		hWnd = hwnd;
+
+		// Initialize the thread pool
+		ThreadPool threadPool(NUM_THREADS);
 
 		show_departures ? CheckMenuItem(hSettings, ID_SETTINGS_DEPARTS, MF_CHECKED) : CheckMenuItem(hSettings, ID_SETTINGS_DEPARTS, MF_UNCHECKED);
 		show_squawks ? CheckMenuItem(hSettings, ID_SETTINGS_SQUAWKS, MF_CHECKED) : CheckMenuItem(hSettings, ID_SETTINGS_SQUAWKS, MF_UNCHECKED);
