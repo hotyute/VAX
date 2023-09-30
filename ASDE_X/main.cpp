@@ -1802,20 +1802,20 @@ ChildFrame *position_cursor_pop(const InterfaceFrame& frame, InputField* focusFi
 
 void wrap_and_clip(InputField* focusField)
 {
-	if (!focusField->line_ptr) return;
+	if (!focusField || !focusField->line_ptr)
+		return;
 
-	CHILD_TYPE type = focusField->type;
 	std::shared_ptr<ChatLine>& c = focusField->line_ptr;
-	ChildFrame* parent = c->parent;
+	if (!c->parent || c->parent->type != CHILD_TYPE::DISPLAY_BOX)
+		return;
 
-	if (parent->type != CHILD_TYPE::DISPLAY_BOX) return;
-
-	auto* displayBox = dynamic_cast<DisplayBox*>(parent);
-
-	if (!displayBox->combined_lines) return;
+	DisplayBox* displayBox = static_cast<DisplayBox*>(c->parent);
+	if (!displayBox->combined_lines)
+		return;
 
 	auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
-	if (it == displayBox->chat_lines.end()) return;
+	if (it == displayBox->chat_lines.end())
+		return;
 
 	int pos = it - displayBox->chat_lines.begin();
 
@@ -1826,7 +1826,8 @@ void wrap_and_clip(InputField* focusField)
 
 	std::shared_ptr<ChatLine>& c2 = focusField->line_ptr;
 	auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
-	if (it2 == displayBox->chat_lines.end()) return;
+	if (it2 == displayBox->chat_lines.end())
+		return;
 
 	int pos2 = it2 - displayBox->chat_lines.begin();
 

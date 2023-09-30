@@ -74,6 +74,7 @@ public:
 	virtual void focusDrawing() = 0;
 	virtual int handleClick(ChildFrame* clicked, int x, int y) = 0;
 	void setFrame(InterfaceFrame* fr) { this->frame = fr; }
+	int get_max_chars();
 	InterfaceFrame* getFrame() { return this->frame; }
 };
 

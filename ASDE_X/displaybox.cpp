@@ -84,15 +84,9 @@ std::shared_ptr<ChatLine> DisplayBox::check_unsplit()
 }
 
 void DisplayBox::consolidate_lines() {
-	BasicInterface& param = *border;
+	double aW = border->getActualWidth();
 
-	double aW = param.getActualWidth();
-	SelectObject(hDC, *font);
-	TEXTMETRIC tm;
-	GetTextMetrics(hDC, &tm);
-
-	long ave = tm.tmAveCharWidth;
-	int maxChars = aW / ave;
+	int max_chars = get_max_chars();
 
 	bool reset_idx = false;
 
@@ -107,8 +101,8 @@ void DisplayBox::consolidate_lines() {
 		SIZE size = getTextExtent(text);
 		if (size.cx >= (aW - 1)) {
 			std::vector<std::string> store;
-			store.reserve(maxChars);
-			if (!wordWrap(store, text.c_str(), maxChars, 0)) {
+			store.reserve(max_chars);
+			if (!wordWrap(store, text.c_str(), max_chars, 0)) {
 				//std::cout << "hello" << std::endl;
 				continue;
 			}

@@ -919,3 +919,16 @@ ChildFrame::~ChildFrame()
 
 	//no need to delete "border" as it's stored in child_interfaces
 }
+
+int ChildFrame::get_max_chars()
+{
+	BasicInterface& param = *border;
+
+	double aW = param.getActualWidth();
+	SelectObject(hDC, *font);
+	TEXTMETRIC tm;
+	GetTextMetrics(hDC, &tm);
+
+	long ave = tm.tmAveCharWidth;
+	int maxChars = aW / ave;
+}
