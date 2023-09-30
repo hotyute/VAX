@@ -1801,40 +1801,44 @@ ChildFrame *position_cursor_pop(const InterfaceFrame& frame, InputField* focusFi
 
 void forward_split_line(InterfaceFrame& frame, InputField* focusField)
 {
+	if (!focusField->line_ptr) return;
+
 	CHILD_TYPE type = focusField->type;
-	if (focusField->line_ptr)
+	std::shared_ptr<ChatLine>& c = focusField->line_ptr;
+
+	if (frame.id != FP_INTERFACE) return;
+
+	auto* displayBox = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
+	auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
+	if (it == displayBox->chat_lines.end()) return;
+
+	int pos = it - displayBox->chat_lines.begin();
+
+	// Update the line and consolidate before generating points
+	focusField->update_line();
+	displayBox->consolidate_lines();
+	displayBox->gen_points();
+
+	std::shared_ptr<ChatLine>& c2 = focusField->line_ptr;
+	auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
+	if (it2 == displayBox->chat_lines.end()) return;
+
+	int pos2 = it2 - displayBox->chat_lines.begin();
+
+	if (pos != pos2)
 	{
-		std::shared_ptr<ChatLine>& c = focusField->line_ptr;
-		if (frame.id == FP_INTERFACE)
+		focusField->handleBox2();
+		if (InputField* new_input = displayBox->edit_text(c2, c2->get_x(), c2->get_y()))
 		{
-			auto* displayBox = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
-			auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
-			if (it != displayBox->chat_lines.end())
-			{
-				int pos = it - displayBox->chat_lines.begin();
-				focusField->update_line();
-				displayBox->consolidate_lines();
-				displayBox->gen_points();
-				std::shared_ptr<ChatLine>& c2 = focusField->line_ptr;
-				printf("%d, %d\n", c2->get_x(), c2->get_y());
-				auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
-				int pos2 = it2 - displayBox->chat_lines.begin();
-				if (pos != pos2)
-				{
-					focusField->handleBox2();
-					if (InputField* new_input = displayBox->edit_text(c2, c2->get_x(), c2->get_y()))
-					{
-						displayBox->placeEdit(new_input);
-						new_input->setCursorAtStart();
-						new_input->setFocus();
-						renderAllInputText = true;
-						renderDrawings = true;
-					}
-				}
-			}
+			displayBox->placeEdit(new_input);
+			new_input->setCursorAtStart();
+			new_input->setFocus();
+			renderAllInputText = true;
+			renderDrawings = true;
 		}
 	}
 }
+
 
 void open_chat(std::string call_sign)
 {

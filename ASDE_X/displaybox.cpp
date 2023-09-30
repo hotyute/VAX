@@ -46,44 +46,31 @@ std::shared_ptr<ChatLine> DisplayBox::check_unsplit()
 	std::shared_ptr<ChatLine> u = nullptr;
 
 	//unsplit lines
-	auto i = chat_lines.begin();
-	while (i != chat_lines.end()) {
-		std::shared_ptr<ChatLine>& c = *i;
-
-		if (c->split) {
-			std::shared_ptr<ChatLine>& n = *(i + 1);
-			std::string next_text = n->getText();
-			std::vector<std::string> store = split(next_text, " ", 1);
-			if (store.empty()) {
-				++i;
+	auto it = chat_lines.end();
+	while (it != chat_lines.begin()) {
+		--it;
+		std::shared_ptr<ChatLine>& m = *it;
+		m->reset_p();
+		std::string text = m->getText();
+		CHAT_TYPE type = m->getType();
+		SIZE size = getTextExtent(text);
+		if (size.cx >= (aW - 1)) {
+			std::vector<std::string> store;
+			store.reserve(maxChars);
+			if (!wordWrap(store, text.c_str(), maxChars, 0)) {
 				continue;
 			}
 
-			std::stringstream size_ss;
-			size_ss << c->getText() << " " << store[0];
-			SIZE size = getTextExtent(size_ss.str());
-			if (size.cx < (aW - 1)) {
-				std::stringstream text_ss;
-				text_ss << c->getText() << " " << store[0];
-				c->setText(text_ss.str());
-
-				size_t pos = next_text.find(store[0]);
-				if (pos != std::string::npos)
-					next_text.erase(pos, store[0].length());
-
-				next_text = rtrim(ltrim(next_text));
-				if (!next_text.empty()) {
-					n->setText(next_text);
-					continue;
+			// Handle the split lines and insert new lines if necessary
+			if (!store.empty()) {
+				m->setText(store[0]);
+				for (size_t i = 1; i < store.size(); ++i) {
+					auto c = std::make_shared<ChatLine>(store[i], type, this);
+					c->split = m;
+					it = chat_lines.insert(it + 1, c);
 				}
-				c->split = n->split;
-				u = c;
-				chat_lines.erase(i + 1);
-				reset_idx = true;
 			}
-			else ++i;
 		}
-		else ++i;
 	}
 
 	prune(reset_idx);
