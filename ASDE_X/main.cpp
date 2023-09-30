@@ -72,7 +72,7 @@ void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc);
 void pop_split_line(const InterfaceFrame& frame, InputField* focusField);
 ChildFrame* position_cursor_pop(const InterfaceFrame& frame, InputField* input_field);
 
-void forward_split_line(InterfaceFrame& frame, InputField* focusField);
+void wrap_and_clip(InputField* focusField);
 
 void open_chat(std::string call_sign);
 
@@ -1125,7 +1125,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									break;
 								focusField.pushInput(false, s);
 								focusField.setCursor();
-								forward_split_line(frame, dynamic_cast<InputField*>(focusChild));
+								//I need a method that wraps all words together
+								wrap_and_clip(dynamic_cast<InputField*>(focusChild));
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 								focusField.history_index = focusField.history.size() - 1;
 							}
@@ -1140,7 +1141,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 								if (focusField.can_type()) {
 									focusField.pushInput(false, ascii);
 									focusField.setCursor();
-									forward_split_line(frame, dynamic_cast<InputField*>(focusChild));
+									wrap_and_clip(dynamic_cast<InputField*>(focusChild));
 									RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 									focusField.history_index = focusField.history.size() - 1;
 								}
@@ -1799,16 +1800,20 @@ ChildFrame *position_cursor_pop(const InterfaceFrame& frame, InputField* focusFi
 	return nullptr;
 }
 
-void forward_split_line(InterfaceFrame& frame, InputField* focusField)
+void wrap_and_clip(InputField* focusField)
 {
 	if (!focusField->line_ptr) return;
 
 	CHILD_TYPE type = focusField->type;
 	std::shared_ptr<ChatLine>& c = focusField->line_ptr;
+	ChildFrame* parent = c->parent;
 
-	if (frame.id != FP_INTERFACE) return;
+	if (parent->type != CHILD_TYPE::DISPLAY_BOX) return;
 
-	auto* displayBox = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
+	auto* displayBox = dynamic_cast<DisplayBox*>(parent);
+
+	if (!displayBox->combined_lines) return;
+
 	auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
 	if (it == displayBox->chat_lines.end()) return;
 

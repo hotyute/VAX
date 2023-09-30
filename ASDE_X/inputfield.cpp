@@ -239,33 +239,32 @@ void InputField::pass_characters(char* chars) {
 
 bool InputField::can_type()
 {
-	if (line_ptr)
+	if (!line_ptr)
 	{
-		const std::shared_ptr<ChatLine>& c = line_ptr;
-		if (c->parent && c->parent->type == CHILD_TYPE::DISPLAY_BOX)
-		{
-			auto* displayBox = static_cast<DisplayBox*>(c->parent);
-			bool can_type = false;
-			if (c->split)
-			{
-				auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
-				while (it != displayBox->chat_lines.end() && (*it)->split && *(it + 1) == (*it)->split)
-				{
-					std::shared_ptr<ChatLine>& split = *(it + 1);
-					if (split && !split->split)
-					{
-						if (split->can_type())
-						{
-							printf("hello\n");
-							return true;
-						}
-					}
-					it++;
-				}
-				return false;
-			}
-		}
+		goto CalculateWidth;
 	}
+
+	const std::shared_ptr<ChatLine>& c = line_ptr;
+	if (!c->parent || c->parent->type != CHILD_TYPE::DISPLAY_BOX)
+	{
+		goto CalculateWidth;
+	}
+
+	auto* displayBox = static_cast<DisplayBox*>(c->parent);
+	if (c->split)
+	{
+		auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
+		while (it != displayBox->chat_lines.end() && (*it)->split && *(it + 1) == (*it)->split)
+		{
+			std::shared_ptr<ChatLine>& split = *(it + 1);
+			if (split && !split->split && split->can_type())
+				return true;
+			it++;
+		}
+		return false;
+	}
+
+CalculateWidth:
 	BasicInterface& param = *border;
 	const double aW = param.getActualWidth();
 	SelectObject(hDC, *font);
@@ -273,18 +272,10 @@ bool InputField::can_type()
 	GetTextMetrics(hDC, &tm);
 	long ave = tm.tmAveCharWidth;
 	const double maxChars = aW / ave;
-	if (p_protected)
-	{
-		if (pp_input.size() < static_cast<size_t>(maxChars - 1))
-			return true;
-	}
-	else
-	{
-		if (input.size() < static_cast<size_t>(maxChars - 1))
-			return true;
-	}
-	return false;
+
+	return (p_protected ? pp_input.size() : input.size()) < static_cast<size_t>(maxChars - 1);
 }
+
 
 void InputField::handle_box()
 {
@@ -350,7 +341,7 @@ void InputField::handle_entry()
 		}
 		break;
 	}
-	default: ;
+	default:;
 	}
 	if (focusChild == this)
 	{
@@ -369,7 +360,7 @@ void InputField::calcCursorPos(double x, double y)
 		//_x = (InputField::border->getStartX() + (aW / 2));
 	//}
 	//else {
-		_x = InputField::border->getStartX() + offset_x;
+	_x = InputField::border->getStartX() + offset_x;
 	//}
 	double x_pos = ((((double)x) - _x) / extent.cx) * input.size();
 	setCursor((int)x_pos);

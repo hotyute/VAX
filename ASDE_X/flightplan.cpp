@@ -165,6 +165,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		list.push_back(std::make_shared<ChatLine>("", CHAT_TYPE::MAIN, displayBox));
 		displayBox->setList(list, 3);
 		displayBox->editable = true;
+		displayBox->combined_lines = true;
 		displayBox->caps = true;
 		fp_frame->children[displayBox->index = FP_ROUTE_BOX] = displayBox;
 
@@ -178,6 +179,7 @@ void Load_FlightPlan_Interface(double x_, double y_, std::string* strings, bool 
 		route_box_size = 30.0;
 		DisplayBox* remarks_box = new DisplayBox(fp_frame, x + (width - (width * (start_x -= spacing_x))), width * 0.815, 0.0, y + (height - (height * (start_y += spacing_y)))
 			- (route_box_size - 10), route_box_size, 5, false);
+		remarks_box->combined_lines = true;
 		remarks_box->editable = true;
 		remarks_box->caps = true;
 		std::vector<std::shared_ptr<ChatLine>> remarks_list;

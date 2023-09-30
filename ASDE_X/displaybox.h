@@ -15,6 +15,7 @@ public:
 	int numBlocks = 0;
 	int read_index = 0, max_history = 100;
 	bool centered, editable = false, prune_top = false, caps = false;
+	bool combined_lines = false;
 	std::vector<std::shared_ptr<ChatLine>> chat_lines;
 	std::vector<std::shared_ptr<ChatLine>> displayed_lines;
 
