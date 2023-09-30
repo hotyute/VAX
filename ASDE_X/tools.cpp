@@ -202,59 +202,31 @@ long long doubleToRawBits(double x) {
 	return bits;
 }
 
-int wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent)
+int wordWrap(std::vector<std::string>& dest, const std::string& buffer, size_t maxlength, int indent)
 {
-	bool has_space = false;
+    size_t count = 0;
+    size_t buflen = buffer.length();
 
-	for (size_t i = 0; i < maxlength; i++) {
-		if (isspace(buffer[i])) {
-			has_space = true;
-			break;
-		}
-	}
+    while (count < buflen) {
+        size_t end = count + maxlength;
+        if (end > buflen) {
+            end = buflen;
+        } else {
+            while (end > count && !isspace(buffer[end])) {
+                --end;
+            }
+            if (end == count) {
+                end = count + maxlength;
+            }
+        }
 
-#ifdef _DEBUG
-	std::cout << has_space << ", " << (strlen(buffer)) << ", " << maxlength << std::endl;
-#endif
+        dest.push_back(buffer.substr(count, end - count));
+        count = end + 1;
+    }
 
-	if (!has_space && (strlen(buffer) > maxlength)) {
-		return 0;
-	}
-
-	//std::cout << p << std::endl;
-
-	size_t count, buflen;
-	const char* ptr, * endptr;
-	count = 0;
-	buflen = strlen(buffer);
-	do {
-		ptr = buffer + count;
-
-		/* don't set endptr beyond the end of the buffer */
-
-		if (ptr - buffer + maxlength <= buflen)
-			endptr = ptr + maxlength;
-		else
-			endptr = buffer + buflen;
-		/* back up EOL to a null terminator or space */
-
-		while (*(endptr) && !isspace(*(endptr)))
-			endptr--;
-
-		const int size = (endptr - ptr);
-		char* out = (char*)malloc(size);
-
-		strncpy(out, ptr, size);
-		out[size] = '\0';
-		rtrim(out);
-		dest.push_back(out);
-
-		count += size;
-		//TODO Fix bug where word is longer than max length (word as in no spaces)
-	} while (*endptr);
-
-	return 1;
+    return 1;
 }
+
 
 char* s2ca1(const std::string& s) {
 	char* res = new char[s.size() + 1];

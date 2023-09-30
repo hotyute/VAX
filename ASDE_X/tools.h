@@ -47,7 +47,7 @@ extern bool pnpoly(int nvert, double *vertx, double *verty, double testx, double
 
 extern long long doubleToRawBits(double x);
 
-extern int wordWrap(std::vector<std::string>& dest, const char* buffer, size_t maxlength, int indent);
+extern int wordWrap(std::vector<std::string>& dest, const std::string& buffer, size_t maxlength, int indent);
 
 extern double radians(double degrees);
 

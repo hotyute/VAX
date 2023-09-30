@@ -71,6 +71,8 @@ int Radio::handleClick(ChildFrame* clicked, int x, int y)
 	bool click = pnpoly(4, vertx, verty, x, y);
 	if (click)
 	{
+#pragma omp section
+	{
 		switch (this->getFrame()->id)
 		{
 		case COMMS_INTERFACE:
@@ -93,6 +95,7 @@ int Radio::handleClick(ChildFrame* clicked, int x, int y)
 			break;
 		}
 		}
+	}
 		return 1;
 	}
 	return 0;
