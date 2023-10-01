@@ -126,6 +126,9 @@
     <ClCompile Include="timed_task.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tempdata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -243,6 +246,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="timed_task.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tempdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

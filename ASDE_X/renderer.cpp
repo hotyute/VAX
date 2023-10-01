@@ -1,6 +1,10 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <thread>
 #include <chrono>
+#include <algorithm>
+#include <limits>
+
+#define NOMINMAX
 
 
 #include "projection.h"
@@ -17,13 +21,14 @@
 #include "events.h"
 #include "flightplan.h"
 #include "interfaces.h"
+#include "tempdata.h"
 
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
 std::vector<double*> closures, wnd_closures;
 
-bool renderSector = false, renderSectorColours = false,
+bool renderSector = false, renderSectorColours = false, redrawClosures = false,
 renderButtons = false, renderLegend = false, renderInterfaces = false, renderConf = false, renderDate = false,
 renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
 renderAllInputText = false, renderClosures = false;
@@ -34,7 +39,7 @@ bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
 
 bool resize = false;
-int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0;
+int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -54,6 +59,9 @@ int RenderUnknown(bool, int&);
 int RenderCallsign(Aircraft&, bool, float, float);
 int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float longitude);
 void deleteFrame(InterfaceFrame*);
+void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas);
+void renderDiagonalStripes(const ClosureArea& area);
+LatLon rotateLatLon(const LatLon& p, float angle, const LatLon& origin);
 
 void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, double rotate, bool top_bar);
 
@@ -255,7 +263,14 @@ void DrawGLScene() {
 		renderSectorColours = false;
 	}
 
+	if (redrawClosures)
+	{
+		glDeleteLists(closureAreaList, 1);
+		compileClosureAreaList(closureAreas);
+	}
+
 	glCallList(sectorDl);
+	renderAllClosureAreas();
 
 	if (acf_map.size() > 0) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
@@ -2432,4 +2447,116 @@ void HandleMessageQueue()
 		}
 		++it;
 	}
+}
+
+void renderAllClosureAreas() {
+	glCallList(closureAreaList);
+}
+
+void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas) {
+	// If the list already exists, delete it
+	if (glIsList(closureAreaList)) {
+		glDeleteLists(closureAreaList, 1);
+	}
+
+	// Generate a new list
+	closureAreaList = glGenLists(1);
+	glNewList(closureAreaList, GL_COMPILE);
+
+	// Render each closure area
+	for (const ClosureArea& area : closureAreas) {
+		renderClosureArea(area);
+	}
+
+	glEndList();
+}
+
+void renderClosureArea(const ClosureArea& area) {
+	// Mask the polygon area in the stencil buffer
+	glEnable(GL_STENCIL_TEST);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	// Render the polygon using the latitude/longitude points directly
+	glBegin(GL_POLYGON);
+	for (const LatLon& point : area.getPoints()) {
+		glVertex2f(point.lon, point.lat);  // Assuming x is longitude and y is latitude in your projection
+	}
+	glEnd();
+
+	// Render the diagonal stripes using the stencil mask
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+	renderDiagonalStripes(area);
+
+	glDisable(GL_STENCIL_TEST);
+}
+
+
+void renderDiagonalStripes(const ClosureArea& area) {
+	// Define stripe properties
+	const float stripeWidthDegrees = 0.01f;  // Width of each stripe in degrees
+	const float stripeSpacingDegrees = 0.005f;  // Space between stripes in degrees
+	const float stripeAngle = 45.0f;  // Angle of stripes in degrees
+
+	// Calculate the bounding box of the closure area in latitude/longitude
+	float minLat = std::numeric_limits<float>::max();
+	float maxLat = std::numeric_limits<float>::min();
+	float minLon = std::numeric_limits<float>::max();
+	float maxLon = std::numeric_limits<float>::min();
+	for (const LatLon& point : area.getPoints()) {
+		minLat = std::min(minLat, point.lat);
+		maxLat = std::max(maxLat, point.lat);
+		minLon = std::min(minLon, point.lon);
+		maxLon = std::max(maxLon, point.lon);
+	}
+
+	// Calculate the number of stripes based on the bounding box and stripe properties
+	float diagonalLengthDegrees = sqrt((maxLat - minLat) * (maxLat - minLat) + (maxLon - minLon) * (maxLon - minLon));
+	int numStripes = (int)(diagonalLengthDegrees / (stripeWidthDegrees + stripeSpacingDegrees));
+
+	// Set stripe color (e.g., red)
+	glColor3f(1.0f, 0.0f, 0.0f);
+
+	// Render each stripe
+	for (int i = 0; i < numStripes; ++i) {
+		float offsetDegrees = i * (stripeWidthDegrees + stripeSpacingDegrees);
+
+		// Calculate start and end points of the stripe in latitude/longitude
+		LatLon start = { minLat - diagonalLengthDegrees + offsetDegrees, minLon };
+		LatLon end = { maxLat + offsetDegrees, maxLon + diagonalLengthDegrees };
+
+		// Rotate the points around the bottom-left corner of the bounding box to get the diagonal effect
+		LatLon rotatedStart = rotateLatLon(start, stripeAngle, { minLat, minLon });
+		LatLon rotatedEnd = rotateLatLon(end, stripeAngle, { minLat, minLon });
+
+		// Draw the stripe
+		glBegin(GL_QUADS);
+		glVertex2f(rotatedStart.lon, rotatedStart.lat);
+		glVertex2f(rotatedStart.lon + stripeWidthDegrees, rotatedStart.lat);
+		glVertex2f(rotatedEnd.lon + stripeWidthDegrees, rotatedEnd.lat);
+		glVertex2f(rotatedEnd.lon, rotatedEnd.lat);
+		glEnd();
+	}
+}
+
+LatLon rotateLatLon(const LatLon& p, float angle, const LatLon& origin) {
+	float rad = angle * M_PI / 180.0f;
+	float s = sin(rad);
+	float c = cos(rad);
+
+	// Translate point to origin
+	LatLon translated = { p.lat - origin.lat, p.lon - origin.lon };
+
+	// Rotate the point
+	float latNew = translated.lat * c - translated.lon * s;
+	float lonNew = translated.lat * s + translated.lon * c;
+
+	// Translate the point back
+	LatLon rotated = { latNew + origin.lat, lonNew + origin.lon };
+
+	return rotated;
 }

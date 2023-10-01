@@ -94,6 +94,7 @@
     <ClCompile Include="chatinterface.cpp" />
     <ClCompile Include="clinc.cpp" />
     <ClCompile Include="clinc2.cpp" />
+    <ClCompile Include="tempdata.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="comms.cpp" />
     <ClCompile Include="config.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="save.h" />
     <ClInclude Include="spline.h" />
     <ClInclude Include="spline2.h" />
+    <ClInclude Include="tempdata.h" />
     <ClInclude Include="thread_pool.h" />
     <ClInclude Include="timed_task.h" />
     <ClInclude Include="tools.h" />
