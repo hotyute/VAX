@@ -78,6 +78,8 @@ std::shared_ptr<ChatLine> DisplayBox::check_unsplit()
 	return u;
 }
 
+/* Used Mainly in the Main Chat */
+
 void DisplayBox::consolidate_lines() {
 	double aW = border->getActualWidth();
 
