@@ -48,6 +48,7 @@ int single_opened_frames = 0;
 #define PROTO_VERSION 32698
 constexpr int NUM_THREADS = 8;
 Point2* MOUSE_POS = new Point2();
+Point2* DISPLAY_MOUSE_POS = new Point2();
 std::vector<MSG*> message_queue(500, NULL);
 InterfaceFrame* connectFrame = NULL, * dragged = nullptr, * fp_frame = nullptr;
 Mirror* dragged_mir = nullptr, * dragged_pos = nullptr;
@@ -165,6 +166,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 		/* Send message to WindowProcedure */
 		DispatchMessage(&messages);
 		if (messages.message == WM_LBUTTONDOWN
+			|| messages.message == WM_RBUTTONDOWN
 			|| messages.message == WM_LBUTTONUP
 			|| messages.message == WM_MOUSEMOVE)
 		{
@@ -196,7 +198,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 		case IDOK:
 			EndDialog(hwnd, IDOK);
 			break;
-		default: ;
+		default:;
 		}
 		break;
 	default:
@@ -342,6 +344,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderDrawings = true;
 		renderConf = true;
 		renderDate = true;
+		renderCoordinates = true;
 		renderDepartures = true;
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderAllInputText = true;
@@ -499,6 +502,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		PostQuitMessage(0);       /* send a WM_QUIT to the message queue */
 	}
 	break;
+	case WM_RBUTTONDOWN:
+	{
+		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
+
+	}
+	break;
 	case WM_LBUTTONDOWN:
 	{
 		WORD x = LOWORD(lParam), y = (CLIENT_HEIGHT - HIWORD(lParam));
@@ -583,7 +592,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			{
 				TopButton* curButton = *btn;
 				int* params = curButton->getParams();
-				double vertx[4] = {params[0], params[0], params[2], params[2]};
+				double vertx[4] = { params[0], params[0], params[2], params[2] };
 				double verty[4] = { params[1], params[3], params[3], params[1] };
 				if (bool clicked = pnpoly(4, vertx, verty, x, y)) {
 					if (curButton->handle())
@@ -1100,7 +1109,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					}
 					else {
 						if (ChildFrame* split_prev = position_cursor_pop(frame, focusField)) {
-							
+
 						}
 					}
 				}
@@ -1547,6 +1556,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		//Draw Main Scene
 		ResizeGLScene();
 		DrawGLScene();
+		renderAllClosureAreas();
 
 		//Draw Aircraft Data like Callsigns vectors
 		ResizeDataGLScene();
@@ -1769,7 +1779,7 @@ void pop_split_line(const InterfaceFrame& frame, InputField* focusField)
 	}
 }
 
-ChildFrame *position_cursor_pop(const InterfaceFrame& frame, InputField* focusField) {
+ChildFrame* position_cursor_pop(const InterfaceFrame& frame, InputField* focusField) {
 	if (focusField->line_ptr) {
 		const std::shared_ptr<ChatLine>& line = focusField->line_ptr;
 		if (frame.id == FP_INTERFACE) {

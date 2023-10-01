@@ -22,6 +22,7 @@
 #include "flightplan.h"
 #include "interfaces.h"
 #include "tempdata.h"
+#include "tempdata.h"
 
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
@@ -31,7 +32,7 @@ std::vector<double*> closures, wnd_closures;
 bool renderSector = false, renderSectorColours = false, redrawClosures = false,
 renderButtons = false, renderLegend = false, renderInterfaces = false, renderConf = false, renderDate = false,
 renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
-renderAllInputText = false, renderClosures = false;
+renderAllInputText = false, renderClosures = false, renderCoordinates = false;
 
 bool convert_closures = false;
 
@@ -39,7 +40,7 @@ bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
 
 bool resize = false;
-int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList;
+int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList, coordinateDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -60,10 +61,7 @@ int RenderCallsign(Aircraft&, bool, float, float);
 int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float longitude);
 void deleteFrame(InterfaceFrame*);
 void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas);
-void renderClosureArea(const ClosureArea& area);
-void renderAllClosureAreas();
-void renderDiagonalStripes(const ClosureArea& area);
-LatLon rotateLatLon(const LatLon& p, float angle, const LatLon& origin);
+void renderClosureArea(const ClosureArea& area, float spacing);
 
 void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, double rotate, bool top_bar);
 
@@ -265,14 +263,7 @@ void DrawGLScene() {
 		renderSectorColours = false;
 	}
 
-	if (redrawClosures)
-	{
-		glDeleteLists(closureAreaList, 1);
-		compileClosureAreaList(closureAreas);
-	}
-
 	glCallList(sectorDl);
-	renderAllClosureAreas();
 
 	if (acf_map.size() > 0) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) {
@@ -292,6 +283,15 @@ void DrawGLScene() {
 
 void DrawData()
 {
+	if (redrawClosures)
+	{
+		glDeleteLists(closureAreaList, 1);
+		compileClosureAreaList(closureAreas);
+		redrawClosures = false;
+	}
+
+	renderAllClosureAreas();
+
 	if (acf_map.size() > 0)
 	{
 		//TODO Need to synch this with aircraft deletion
@@ -439,7 +439,7 @@ void DrawInterfaces() {
 	CallInterfaces();
 	if (renderDrawings) {
 		//TODO add optimizations (refresh per object basis)
-		for (InterfaceFrame* frame : rendered_frames) 
+		for (InterfaceFrame* frame : rendered_frames)
 		{
 			if (frame)
 			{
@@ -500,23 +500,35 @@ void DrawInterfaces() {
 			}
 		}
 	}
+
 	if (renderConf) {
 		glDeleteLists(confDl, 1);
 		RenderConf();
 		RenderTerminalCommands(true);
 		renderConf = false;
 	}
+
 	glPushMatrix();
 	glCallList(confDl);
 	glPopMatrix();
+
 	if (renderDate) {
 		glDeleteLists(dateDl, 1);
 		RenderDate();
 		renderDate = false;
 	}
+
+	if (renderCoordinates) {
+		glDeleteLists(coordinateDl, 1);
+		RenderCoordinates();
+		renderCoordinates = false;
+	}
+
 	glPushMatrix();
 	glCallList(dateDl);
+	glCallList(coordinateDl);
 	glPopMatrix();
+
 	if (renderDepartures) {
 		glDeleteLists(departuresDl, 1);
 		RenderDepartures();
@@ -1354,6 +1366,22 @@ void RenderDate() {
 	//std::string date2 = "1645/22";
 	glRasterPos2f(53, (CLIENT_HEIGHT / 6.0) - 12);
 	glPrint(date1[1].c_str(), &confBase);
+	glEndList();
+}
+
+void RenderCoordinates() {
+	coordinateDl = glGenLists(1);
+
+	glNewList(coordinateDl, GL_COMPILE);
+
+
+	glColor4f(conf_clr[0], conf_clr[1], conf_clr[2], 1.0f);
+	SelectObject(hDC, confFont);
+
+	std::string str = std::to_string(DISPLAY_MOUSE_POS->y_) + " : " + std::to_string(DISPLAY_MOUSE_POS->x_);
+	glRasterPos2f((CLIENT_WIDTH - 160), 140);
+	glPrint(str.c_str(), &confBase);
+
 	glEndList();
 }
 
@@ -2424,24 +2452,41 @@ void HandleMessageQueue()
 			MSG& msg = *(*it);
 			switch (msg.message)
 			{
+			case WM_RBUTTONDOWN:
+			{
+				double coords[3];
+				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
+				printf("\nBoundaries For Closure: %f %f\n", coords[0], coords[1]);
+				if (closureAreas.empty())
+					startNewClosureArea();
+				addPointToActiveArea(coords[0], coords[1]);
+			}
+			break;
 			case WM_LBUTTONDOWN:
 			{
 				double coords[3];
 				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
 				MOUSE_POS->x_ = coords[1];
 				MOUSE_POS->y_ = coords[0];
+				if (closureAreas.back().opened) {
+					finishDefiningArea();
+					redrawClosures = true;
+				}
 			}
 			break;
 			case WM_MOUSEMOVE:
 			{
+				double coords[3];
+				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
 				if (dragged_pos)
 				{
-					double coords[3];
-					GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
 					dragged_pos->setLat(dragged_pos->getLat() + (-(coords[0] - MOUSE_POS->y_) * 0.1));
 					dragged_pos->setLon(dragged_pos->getLon() + (-(coords[1] - MOUSE_POS->x_) * 0.1));
 					printf("%f %f\n", dragged_pos->getLat(), dragged_pos->getLon());
 				}
+				DISPLAY_MOUSE_POS->x_ = coords[1];
+				DISPLAY_MOUSE_POS->y_ = coords[0];
+				renderCoordinates = true;
 			}
 			break;
 			}
@@ -2452,7 +2497,9 @@ void HandleMessageQueue()
 }
 
 void renderAllClosureAreas() {
+	glPushMatrix();
 	glCallList(closureAreaList);
+	glPopMatrix();
 }
 
 void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas) {
@@ -2467,98 +2514,143 @@ void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas) {
 
 	// Render each closure area
 	for (const ClosureArea& area : closureAreas) {
-		renderClosureArea(area);
+		renderClosureArea(area, 0.001f);
 	}
 
 	glEndList();
 }
 
-void renderClosureArea(const ClosureArea& area) {
-	// Mask the polygon area in the stencil buffer
-	glEnable(GL_STENCIL_TEST);
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+#define MAX_NODES 1000
+#define FAR_FAR_AWAY 999999999.
 
-	// Render the polygon using the latitude/longitude points directly
-	glBegin(GL_POLYGON);
+void drawLineSegmentABtoXY(double a, double b, double x, double y) {
+	// This function will draw a line segment from (a, b) to (x, y)
+	// You can use OpenGL commands here to draw the line segment.
+	glBegin(GL_LINES);
+	glVertex2f(a, b);
+	glVertex2f(x, y);
+	glEnd();
+}
+
+bool drawDiagonalStripes(long polygonCount, long* polygonCorners,
+	double** polygons, double spacing) {
+
+#define  MAX_NODES          1000
+#define  FAR_FAR_AWAY  999999999.
+
+	double  spanMin = FAR_FAR_AWAY, theCos, theSin, nodeX[MAX_NODES];
+	double  spanMax = -FAR_FAR_AWAY, x, y, a, b, newX, stripeY, swap;
+	long    i, j, k, spanStart, spanEnd, nodeCount, step;
+
+	// Create a 45-degree angle for stripes.
+	theCos = sqrt(.5);
+	theSin = sqrt(.5);
+
+	// Loop to determine the span over which diagonal lines must be drawn.
+	for (i = 0; i < polygonCount; i++) {
+		for (j = 0; j < polygonCorners[i]; j++) {
+			x = polygons[i][j * 2];
+			y = polygons[i][j * 2 + 1];
+
+			// Rotate the point, since the stripes may be at an angle.
+			y = y * theCos - x * theSin;
+
+			// Adjust the span.
+			if (spanMin > y) spanMin = y;
+			if (spanMax < y) spanMax = y;
+		}
+	}
+
+	// Turn the span into a discrete step range.
+	spanStart = (long)floor(spanMin / spacing) - 1;
+	spanEnd = (long)floor(spanMax / spacing) + 1;
+
+	// Loop to create all stripes.
+	for (step = spanStart; step <= spanEnd; step++) {
+		nodeCount = 0;  // Initialize nodeCount here
+		stripeY = spacing * (double)step;
+
+		// Loop to build a node list for one row of stripes.
+		for (i = 0; i < polygonCount; i++) {
+			k = polygonCorners[i] - 1;
+			for (j = 0; j < polygonCorners[i]; j++) {
+				a = polygons[i][k * 2];
+				b = polygons[i][k * 2 + 1];
+				x = polygons[i][j * 2];
+				y = polygons[i][j * 2 + 1];
+
+				// Rotate the points, since the stripes may be at an angle.
+				newX = a * theCos + b * theSin;
+				b = b * theCos - a * theSin; a = newX;
+				newX = x * theCos + y * theSin;
+				y = y * theCos - x * theSin; x = newX;
+
+				// Find the node, if any.
+				if (b < stripeY && y >= stripeY
+					|| y < stripeY && b >= stripeY) {
+					if (nodeCount >= MAX_NODES) return false;
+					nodeX[nodeCount++] = a + (x - a) * (stripeY - b) / (y - b);
+				}
+
+				k = j;
+			}
+		}
+
+		// Sort the node list.
+		i = 0;
+		while (i < nodeCount - 1) {
+			if (nodeX[i] <= nodeX[i + 1]) i++;
+			else {
+				swap = nodeX[i]; nodeX[i] = nodeX[i + 1]; nodeX[i + 1] = swap; if (i) i--;
+			}
+		}
+
+		// Loop to draw one row of stripe segments.
+		for (i = 0; i < nodeCount; i += 2) {
+
+			// Rotate the points back to their original coordinate system.
+			a = nodeX[i] * theCos - stripeY * theSin;
+			b = stripeY * theCos + nodeX[i] * theSin;
+			x = nodeX[i + 1] * theCos - stripeY * theSin;
+			y = stripeY * theCos + nodeX[i + 1] * theSin;
+
+			// Draw a single stripe segment.
+			drawLineSegmentABtoXY(a, b, x, y);
+		}
+	}
+
+	// Success.
+	return true;
+}
+
+
+void renderClosureArea(const ClosureArea& area, float spacing) {
+	glColor3f(1.0f, 0.0f, 0.0f);
+
+	glBegin(GL_LINE_LOOP);// use this to draw the diagonal lines
 	for (const LatLon& point : area.getPoints()) {
-		glVertex2f(point.lon, point.lat);  // Assuming x is longitude and y is latitude in your projection
+		glVertex2f(point.lon, point.lat);
 	}
 	glEnd();
 
-	// Render the diagonal stripes using the stencil mask
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glStencilFunc(GL_EQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	// Extract points from the ClosureArea object
+	std::vector<LatLon> points = area.getPoints();
+	long polygonCount = 1; // We're assuming one polygon for now
+	long polygonCorners[1] = { points.size() }; // Number of corners in the polygon
 
-	renderDiagonalStripes(area);
-
-	glDisable(GL_STENCIL_TEST);
-}
-
-
-void renderDiagonalStripes(const ClosureArea& area) {
-	// Define stripe properties
-	const float stripeWidthDegrees = 0.01f;  // Width of each stripe in degrees
-	const float stripeSpacingDegrees = 0.005f;  // Space between stripes in degrees
-	const float stripeAngle = 45.0f;  // Angle of stripes in degrees
-
-	// Calculate the bounding box of the closure area in latitude/longitude
-	float minLat = std::numeric_limits<float>::max();
-	float maxLat = std::numeric_limits<float>::min();
-	float minLon = std::numeric_limits<float>::max();
-	float maxLon = std::numeric_limits<float>::min();
-	for (const LatLon& point : area.getPoints()) {
-		minLat = std::min(minLat, point.lat);
-		maxLat = std::max(maxLat, point.lat);
-		minLon = std::min(minLon, point.lon);
-		maxLon = std::max(maxLon, point.lon);
+	// Convert the points to the format expected by drawDiagonalStripes
+	double** polygons = new double* [1];
+	polygons[0] = new double[points.size() * 2];
+	for (size_t i = 0; i < points.size(); ++i) {
+		polygons[0][i * 2] = points[i].lon;
+		polygons[0][i * 2 + 1] = points[i].lat;
 	}
 
-	// Calculate the number of stripes based on the bounding box and stripe properties
-	float diagonalLengthDegrees = sqrt((maxLat - minLat) * (maxLat - minLat) + (maxLon - minLon) * (maxLon - minLon));
-	int numStripes = (int)(diagonalLengthDegrees / (stripeWidthDegrees + stripeSpacingDegrees));
+	// Draw the diagonal stripes
+	drawDiagonalStripes(polygonCount, polygonCorners, polygons, spacing);
 
-	// Set stripe color (e.g., red)
-	glColor3f(1.0f, 0.0f, 0.0f);
-
-	// Render each stripe
-	for (int i = 0; i < numStripes; ++i) {
-		float offsetDegrees = i * (stripeWidthDegrees + stripeSpacingDegrees);
-
-		// Calculate start and end points of the stripe in latitude/longitude
-		LatLon start = { minLat - diagonalLengthDegrees + offsetDegrees, minLon };
-		LatLon end = { maxLat + offsetDegrees, maxLon + diagonalLengthDegrees };
-
-		// Rotate the points around the bottom-left corner of the bounding box to get the diagonal effect
-		LatLon rotatedStart = rotateLatLon(start, stripeAngle, { minLat, minLon });
-		LatLon rotatedEnd = rotateLatLon(end, stripeAngle, { minLat, minLon });
-
-		// Draw the stripe
-		glBegin(GL_QUADS);
-		glVertex2f(rotatedStart.lon, rotatedStart.lat);
-		glVertex2f(rotatedStart.lon + stripeWidthDegrees, rotatedStart.lat);
-		glVertex2f(rotatedEnd.lon + stripeWidthDegrees, rotatedEnd.lat);
-		glVertex2f(rotatedEnd.lon, rotatedEnd.lat);
-		glEnd();
-	}
+	// Clean up
+	delete[] polygons[0];
+	delete[] polygons;
 }
 
-LatLon rotateLatLon(const LatLon& p, float angle, const LatLon& origin) {
-	float rad = angle * M_PI / 180.0f;
-	float s = sin(rad);
-	float c = cos(rad);
-
-	// Translate point to origin
-	LatLon translated = { p.lat - origin.lat, p.lon - origin.lon };
-
-	// Rotate the point
-	float latNew = translated.lat * c - translated.lon * s;
-	float lonNew = translated.lat * s + translated.lon * c;
-
-	// Translate the point back
-	LatLon rotated = { latNew + origin.lat, lonNew + origin.lon };
-
-	return rotated;
-}

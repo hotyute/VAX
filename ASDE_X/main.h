@@ -46,7 +46,7 @@ extern HGLRC hRC;		// Permanent Rendering Context
 extern HWND hWnd;		// Holds Our Window Handle
 extern PAINTSTRUCT ps;
 extern std::vector<MSG*> message_queue;
-extern Point2* MOUSE_POS;
+extern Point2* MOUSE_POS, * DISPLAY_MOUSE_POS;
 extern Mirror* dragged_pos;
 
 void connect();

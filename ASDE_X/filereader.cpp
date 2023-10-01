@@ -29,6 +29,7 @@ void open_adx(std::string path)
 		renderDrawings = true;
 		renderConf = true;
 		renderDate = true;
+		renderCoordinates = true;
 		renderDepartures = true;
 		updateFlags[GBL_COLLISION_LINE] = true;
 		convert_closures = true;

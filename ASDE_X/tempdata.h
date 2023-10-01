@@ -4,10 +4,15 @@
 
 struct LatLon {
     float lat, lon;
+
+    bool operator!=(const LatLon& other) const {
+        return lat != other.lat || lon != other.lon;
+    }
 };
 
 class ClosureArea {
 public:
+    bool opened = false;
     void addPoint(float lat, float lon) {
         points.push_back({ lat, lon });
     }

@@ -18,7 +18,8 @@ extern std::vector<double*> closures, wnd_closures;
 extern std::string heavy_text, regular_text;
 
 extern bool renderSector, renderSectorColours, renderButtons, renderLegend, renderInterfaces,
-renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderClosures;
+renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderClosures,
+renderCoordinates;
 
 extern bool convert_closures;
 
@@ -92,6 +93,7 @@ void RenderInterface(InterfaceFrame* frame);
 void RenderMirrorLines(Mirror& mirror);
 void RenderConf();
 void RenderDate();
+void RenderCoordinates();
 void RenderDepartures();
 void GetOGLPos(int, int, double*);
 void GetWndPos(double latitude, double longitude, double* output);
@@ -103,6 +105,7 @@ void DrawVarLine(float, float, float, float, float, float);
 void preFileRender();
 void aircrafts_to_mirrors();
 void collisions_to_mirrors();
+void renderAllClosureAreas();
 
 void CallInterfaces();
 

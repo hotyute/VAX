@@ -34,6 +34,7 @@ void ConfigUpdates::execute() {
 	acf->setHeading(acf->getHeading() + 3);*/
 
 	renderDate = true;
+	renderCoordinates = true;
 }
 
 void ConfigUpdates::stop() 
