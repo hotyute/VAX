@@ -31,15 +31,10 @@ DisplayBox::~DisplayBox()
 
 std::shared_ptr<ChatLine> DisplayBox::check_unsplit()
 {
-	BasicInterface& param = *border;
 
-	double aW = param.getActualWidth();
-	SelectObject(hDC, *font);
-	TEXTMETRIC tm;
-	GetTextMetrics(hDC, &tm);
+	double aW = border->getActualWidth();
 
-	long ave = tm.tmAveCharWidth;
-	int maxChars = aW / ave;
+	int maxChars = get_max_chars();
 
 	bool reset_idx = false;
 
@@ -169,6 +164,53 @@ void DisplayBox::consolidate_lines() {
 		}
 		else ++i;
 	}
+
+	//prune
+	prune(reset_idx);
+
+	if (reset_idx) {
+		resetReaderIdx();
+		reset_idx = false;
+	}
+}
+
+void DisplayBox::Wrap_Combined()
+{
+	double aW = border->getActualWidth();
+
+	int max_chars = get_max_chars();
+
+	bool reset_idx = false;
+
+	// Now combine and reflow the text.
+	std::string combinedText;
+	for (const auto& line : chat_lines) {
+		combinedText += line->getText() + " ";
+	}
+
+	// Clear original lines
+	for (auto& line : chat_lines) {
+		line->clear_text();
+	}
+
+	int x = 10;
+	int lineIdx = 0;
+	std::string word;
+	std::istringstream stream(combinedText);
+	while (stream >> word) {
+		SIZE size = getTextExtent(word);
+		if (size.cx >= (aW - 1) || (chat_lines[lineIdx]->getText().length() + word.length()) > max_chars) {
+			lineIdx++;
+			x = 10;
+			if (lineIdx >= chat_lines.size()) {
+				break; // This will stop adding words once we reach the last line and its max_chars limit.
+			}
+		}
+
+		chat_lines[lineIdx]->setText(chat_lines[lineIdx]->getText() + word + " ");
+		x += getTextExtent(word + " ").cx;
+	}
+
 
 	//prune
 	prune(reset_idx);

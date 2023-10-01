@@ -51,6 +51,7 @@ public:
 	void handle_box();
 	void handleBox2();
 	void update_line() const;
+	void reverse_update();
 	void updateInput(const std::shared_ptr<ChatLine>& c);
 	void handle_entry();
 	void calcCursorPos(double x, double y);

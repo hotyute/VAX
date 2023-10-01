@@ -314,6 +314,17 @@ void InputField::update_line() const
 	}
 }
 
+void InputField::reverse_update()
+{
+	if (line_ptr != nullptr)
+	{
+		const std::shared_ptr<ChatLine>& c = line_ptr;
+		input = c->getText().c_str();
+		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+		renderDrawings = true;
+	}
+}
+
 void InputField::updateInput(const std::shared_ptr<ChatLine>& c)
 {
 	if (c) {

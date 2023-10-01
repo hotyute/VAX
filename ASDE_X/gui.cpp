@@ -838,6 +838,11 @@ std::string ChatLine::getText()
 	return ChatLine::line;
 }
 
+void ChatLine::clear_text()
+{
+	ChatLine::line.clear();
+}
+
 void ChatLine::playChatSound()
 {
 	switch (ChatLine::type) {
@@ -930,5 +935,5 @@ int ChildFrame::get_max_chars()
 	GetTextMetrics(hDC, &tm);
 
 	long ave = tm.tmAveCharWidth;
-	int maxChars = aW / ave;
+	return aW / ave;
 }

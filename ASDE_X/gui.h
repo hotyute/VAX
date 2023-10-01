@@ -92,6 +92,7 @@ public:
 	CHAT_TYPE getType();
 	void setText(std::string text);
 	std::string getText();
+	void clear_text();
 	void playChatSound();
 	void set_p(int x, int y, int t_x, int t_y, int e_x, int e_y)
 	{

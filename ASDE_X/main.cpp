@@ -1099,7 +1099,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						focusField->history_index = 0;
 					}
 					else {
-						printf("hello\n");
 						if (ChildFrame* split_prev = position_cursor_pop(frame, focusField)) {
 							
 						}
@@ -1125,7 +1124,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 									break;
 								focusField.pushInput(false, s);
 								focusField.setCursor();
-								//I need a method that wraps all words together
 								wrap_and_clip(dynamic_cast<InputField*>(focusChild));
 								RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 								focusField.history_index = focusField.history.size() - 1;
@@ -1821,28 +1819,10 @@ void wrap_and_clip(InputField* focusField)
 
 	// Update the line and consolidate before generating points
 	focusField->update_line();
-	displayBox->consolidate_lines();
+	displayBox->Wrap_Combined();
 	displayBox->gen_points();
+	focusField->reverse_update();
 
-	std::shared_ptr<ChatLine>& c2 = focusField->line_ptr;
-	auto it2 = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c2);
-	if (it2 == displayBox->chat_lines.end())
-		return;
-
-	int pos2 = it2 - displayBox->chat_lines.begin();
-
-	if (pos != pos2)
-	{
-		focusField->handleBox2();
-		if (InputField* new_input = displayBox->edit_text(c2, c2->get_x(), c2->get_y()))
-		{
-			displayBox->placeEdit(new_input);
-			new_input->setCursorAtStart();
-			new_input->setFocus();
-			renderAllInputText = true;
-			renderDrawings = true;
-		}
-	}
 }
 
 

@@ -10,6 +10,7 @@ public:
 	~DisplayBox();
 	std::shared_ptr<ChatLine> check_unsplit();
 	void consolidate_lines();
+	void Wrap_Combined();
 	void prune(bool& reset_idx);
 
 	int numBlocks = 0;
