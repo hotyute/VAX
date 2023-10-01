@@ -60,6 +60,8 @@ int RenderCallsign(Aircraft&, bool, float, float);
 int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float longitude);
 void deleteFrame(InterfaceFrame*);
 void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas);
+void renderClosureArea(const ClosureArea& area);
+void renderAllClosureAreas();
 void renderDiagonalStripes(const ClosureArea& area);
 LatLon rotateLatLon(const LatLon& p, float angle, const LatLon& origin);
 
