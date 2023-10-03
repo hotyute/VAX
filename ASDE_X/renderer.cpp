@@ -2468,7 +2468,7 @@ void HandleMessageQueue()
 				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
 				MOUSE_POS->x_ = coords[1];
 				MOUSE_POS->y_ = coords[0];
-				if (closureAreas.back().opened) {
+				if (!closureAreas.empty() && closureAreas.back().opened) {
 					finishDefiningArea();
 					redrawClosures = true;
 				}
