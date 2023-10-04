@@ -100,7 +100,7 @@ void GetWndPos(double latitude, double longitude, double* output);
 void BuildFont(LPCWSTR, int, bool, unsigned int*, HFONT*);
 void glPrint(const char*, unsigned int*, ...);
 void deleteTess();
-SIZE getTextExtent(std::string &s);
+SIZE getTextExtent(const std::string &s);
 void DrawVarLine(float, float, float, float, float, float);
 void preFileRender();
 void aircrafts_to_mirrors();

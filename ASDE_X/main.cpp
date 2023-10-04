@@ -827,7 +827,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_F1) {
 		}
 		else if (wParam == VK_F2) {
-			char* cmd = ".AN ";
+			const char* cmd = ".AN ";
 			pass_command(cmd);
 		}
 		else if (wParam == VK_F3) {
@@ -837,7 +837,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else if (wParam == VK_F5) {
 		}
 		else if (wParam == VK_F6) {
-			char* cmd = ".SS ";
+			const char* cmd = ".SS ";
 			pass_command(cmd);
 		}
 		else if (wParam == VK_F7) {
@@ -1545,7 +1545,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	dynamic_cast<InputField*>(frames_def[MAIN_CHAT_INTERFACE]->children[MAIN_CHAT_INPUT])->setFocus();
 	updateFlags[GBL_AIRCRAFT] = true;
 	std::cout.precision(10);
-	Event& position_updates = ConfigUpdates();
+	ConfigUpdates position_updates = ConfigUpdates();
 	position_updates.eAction.setTicks(0);
 	event_manager1->addEvent(&position_updates);
 	read_info();
@@ -1602,7 +1602,7 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	return 0;
 }
 
-void pass_command(char* cmd) {
+void pass_command(const char* cmd) {
 	InterfaceFrame* frame = frames_def[MAIN_CHAT_INTERFACE];
 	if (frame && frame->id == MAIN_CHAT_INTERFACE && frame->render) {
 		ChildFrame* child = frame->children[MAIN_CHAT_INPUT];

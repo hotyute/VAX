@@ -55,7 +55,7 @@ void disconnect();
 DWORD WINAPI OpenGLThread(LPVOID lpParameter);
 DWORD WINAPI EventThread1(LPVOID lpParameter);
 
-void pass_command(char* cmd);
+void pass_command(const char* cmd);
 
 void pass_chars(char* chars);
 

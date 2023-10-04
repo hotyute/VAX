@@ -48,6 +48,7 @@ public:
 	void setUneditable(std::string);
 	void pass_characters(char* chars);
 	bool can_type();
+	bool CalculateWidth();
 	void handle_box();
 	void handleBox2();
 	void update_line() const;

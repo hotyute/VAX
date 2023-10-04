@@ -102,13 +102,29 @@ void InputField::pushInput(bool uni, char c) {
 	if (p_protected)
 	{
 		if (uni) {
-			ins ? pp_input.insert(pp_input.begin() + cursor_pos, caps ? toupper(c) : c) : pp_input.push_back(caps ? toupper(c) : c);
+			char charToInsert = caps ? toupper(c) : c;
+			if (ins) {
+				pp_input.insert(pp_input.begin() + cursor_pos, charToInsert);
+			}
+			else {
+				pp_input.push_back(charToInsert);
+			}
 		}
 		else {
-			ins ? pp_input.insert(pp_input.begin() + cursor_pos, '*') : pp_input.push_back('*');
+			if (ins) {
+				pp_input.insert(pp_input.begin() + cursor_pos, '*');
+			}
+			else {
+				pp_input.push_back('*');
+			}
 		}
 	}
-	ins ? input.insert(input.begin() + cursor_pos, caps ? toupper(c) : c) : input.push_back(caps ? toupper(c) : c);
+	if (ins) {
+		input.insert(input.begin() + cursor_pos, caps ? toupper(c) : c);
+	}
+	else {
+		input.push_back(caps ? toupper(c) : c);
+	}
 	cursor_input.push_back(' ');
 	last_cursor_pos = cursor_pos;
 	cursor_pos++;
@@ -192,9 +208,19 @@ bool InputField::popInput() {
 	if (ins && (cursor_pos - 1) < 0)
 		return false;
 	if (InputField::p_protected) {
-		ins ? InputField::pp_input.erase(InputField::pp_input.begin() + (cursor_pos - 1)) : InputField::pp_input.pop_back();
+		if (ins) {
+			InputField::pp_input.erase(InputField::pp_input.begin() + (cursor_pos - 1));
+		}
+		else {
+			InputField::pp_input.pop_back();
+		}
 	}
-	ins ? InputField::input.erase(InputField::input.begin() + (cursor_pos - 1)) : InputField::input.pop_back();
+	if (ins) {
+		InputField::input.erase(InputField::input.begin() + (cursor_pos - 1));
+	}
+	else {
+		InputField::input.pop_back();
+	}
 	InputField::cursor_input.pop_back();
 	last_cursor_pos = cursor_pos;
 	cursor_pos--;
@@ -239,18 +265,19 @@ void InputField::pass_characters(char* chars) {
 
 bool InputField::can_type()
 {
-	if (!line_ptr)
+	if (!this->line_ptr)
 	{
-		goto CalculateWidth;
+		return CalculateWidth();
 	}
 
-	const std::shared_ptr<ChatLine>& c = line_ptr;
+	const std::shared_ptr<ChatLine>& c = this->line_ptr;
+	auto* displayBox = static_cast<DisplayBox*>(c->parent);
+
 	if (!c->parent || c->parent->type != CHILD_TYPE::DISPLAY_BOX)
 	{
-		goto CalculateWidth;
+		return CalculateWidth();
 	}
 
-	auto* displayBox = static_cast<DisplayBox*>(c->parent);
 	if (c->split)
 	{
 		auto it = std::find(displayBox->chat_lines.begin(), displayBox->chat_lines.end(), c);
@@ -264,7 +291,11 @@ bool InputField::can_type()
 		return false;
 	}
 
-CalculateWidth:
+	return CalculateWidth();
+}
+
+bool InputField::CalculateWidth()
+{
 	BasicInterface& param = *border;
 	const double aW = param.getActualWidth();
 	SelectObject(hDC, *font);

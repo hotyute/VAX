@@ -1197,7 +1197,7 @@ void deleteTess() {
 	tesses.clear();
 }
 
-SIZE getTextExtent(std::string& s) {
+SIZE getTextExtent(const std::string& s) {
 	std::wstring ws = s2ws(s);
 	LPCWSTR wText2 = ws.c_str();
 	SIZE extent;

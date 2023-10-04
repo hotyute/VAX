@@ -70,8 +70,8 @@ struct HiLo {
 	void SetLo(Point2 f) { lo = Point2(f.x_, f.y_); has_lo = true; }
 	void SetHi(Point2 f) { hi = Point2(f.x_, f.y_); has_hi = true; }
 
-	Point2 GetLo() { return lo; }
-	Point2 GetHi() { return hi; }
+	Point2& GetLo() { return lo; }
+	Point2& GetHi() { return hi; }
 };
 
 struct	LinearSegment {
