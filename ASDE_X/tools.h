@@ -127,6 +127,8 @@ bool intersects(Point2& p1, Point2& p2, Point2& c, double r);
 
 bool whitespace_only(const std::string& str);
 
+double getPanningFactor(double width, double height);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {

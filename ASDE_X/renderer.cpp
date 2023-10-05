@@ -2487,7 +2487,10 @@ void HandleMessageQueue()
 					int yDiff = HIWORD(msg.lParam) - MOUSE_POS->y_;
 
 					if (dragged_pos)
-						dragged_pos->addToCoords(yDiff / 1000.0, xDiff / 1000.0);
+					{
+						//double panningFactor = getPanningFactor(dragged_pos->getWidth(), dragged_pos->getHeight());
+						dragged_pos->addToCoords(yDiff / PANNING_SENSITIVITY, xDiff / PANNING_SENSITIVITY);
+					}
 
 					MOUSE_POS->x_ = LOWORD(msg.lParam);
 					MOUSE_POS->y_ = HIWORD(msg.lParam);

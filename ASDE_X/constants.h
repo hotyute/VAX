@@ -12,6 +12,8 @@ const double NM_PER_DEG = 60.0;
 
 const double RADIO_SIZE = 13.0;
 
+const double PANNING_SENSITIVITY = 10000.0;
+
 const std::string interface_error = "This is not allowed (Multiple Primary Interface)";
 
 const double DEG_PER_NM = 1.0 / NM_PER_DEG;

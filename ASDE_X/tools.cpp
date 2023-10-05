@@ -718,3 +718,11 @@ bool intersects(Point2& p1, Point2& p2, Point2& c, double r)
 bool whitespace_only(const std::string& str) {
 	return str.find_first_not_of(' ') == str.npos;
 }
+
+double getPanningFactor(double width, double height) {
+
+	double averageDimension = (width + height) / 2.0;
+	double baselineAverage = (400.0 + 250.0) / 2.0;
+
+	return 10000.0 * (averageDimension / baselineAverage);
+}
