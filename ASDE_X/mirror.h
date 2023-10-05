@@ -42,6 +42,7 @@ public:
 	double getZoom();
 	void setLat(double lat) { lat_ = lat; }
 	void setLon(double lon) { lon_ = lon; }
+	void addToCoords(double lat, double lon) { lat_ += lat; lon_ += lon; }
 	double getLat() { return lat_; }
 	double getLon() { return lon_; }
 	double getRotation() { return this->rotation; }

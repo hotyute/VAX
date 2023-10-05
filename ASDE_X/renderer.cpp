@@ -39,6 +39,7 @@ bool convert_closures = false;
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
 
+bool isPanning = false;
 bool resize = false;
 int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList, coordinateDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
@@ -2464,10 +2465,12 @@ void HandleMessageQueue()
 			break;
 			case WM_LBUTTONDOWN:
 			{
+				isPanning = true;
 				double coords[3];
 				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
-				MOUSE_POS->x_ = coords[1];
-				MOUSE_POS->y_ = coords[0];
+
+				MOUSE_POS->x_ = LOWORD(msg.lParam);// coords[1];
+				MOUSE_POS->y_ = HIWORD(msg.lParam);//coords[0];
 				if (!closureAreas.empty() && closureAreas.back().opened) {
 					finishDefiningArea();
 					redrawClosures = true;
@@ -2478,15 +2481,25 @@ void HandleMessageQueue()
 			{
 				double coords[3];
 				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
-				if (dragged_pos)
+				if (isPanning)
 				{
-					dragged_pos->setLat(dragged_pos->getLat() + (-(coords[0] - MOUSE_POS->y_) * 0.1));
-					dragged_pos->setLon(dragged_pos->getLon() + (-(coords[1] - MOUSE_POS->x_) * 0.1));
-					printf("%f %f\n", dragged_pos->getLat(), dragged_pos->getLon());
+					int xDiff = MOUSE_POS->x_ - LOWORD(msg.lParam);
+					int yDiff = HIWORD(msg.lParam) - MOUSE_POS->y_;
+
+					if (dragged_pos)
+						dragged_pos->addToCoords(yDiff / 1000.0, xDiff / 1000.0);
+
+					MOUSE_POS->x_ = LOWORD(msg.lParam);
+					MOUSE_POS->y_ = HIWORD(msg.lParam);
 				}
 				DISPLAY_MOUSE_POS->x_ = coords[1];
 				DISPLAY_MOUSE_POS->y_ = coords[0];
 				renderCoordinates = true;
+			}
+			break;
+			case WM_LBUTTONUP:
+			{
+				isPanning = false;
 			}
 			break;
 			}
