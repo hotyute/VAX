@@ -5,6 +5,7 @@ class Aircraft;
 
 #include <unordered_map>
 #include "aircraft.h"
+#include "point2d.h"
 
 #ifndef COLLISION_Collision_h
 #define COLLISION_Collision_h
@@ -29,6 +30,7 @@ public:
 #endif
 
 extern std::unordered_map<Aircraft*, Collision*> Collision_Map;
+extern std::vector<std::vector<Point2>> taxiway_polygons;
 extern std::unordered_map<std::string, double**> runway_polygons;
 extern std::vector<std::string> logic;
 

@@ -14,6 +14,12 @@ const double RADIO_SIZE = 13.0;
 
 const double PANNING_SENSITIVITY = 10000.0;
 
+//collision logic
+const double SOME_SMALL_ANGLE = 5.0;            // 5 degrees
+const double SHORT_TIME_INTERVAL = 4.0;         // 4 seconds
+const double AIRCRAFT_RADIUS = 0.0809935;          // Approximately 150 meters or 0.0216 nautical miles
+
+
 const std::string interface_error = "This is not allowed (Multiple Primary Interface)";
 
 const double DEG_PER_NM = 1.0 / NM_PER_DEG;

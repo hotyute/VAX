@@ -726,3 +726,100 @@ double getPanningFactor(double width, double height) {
 
 	return 10000.0 * (averageDimension / baselineAverage);
 }
+
+bool haveConvergingPaths(Aircraft* obj1, Aircraft* obj2) {
+	double headingDifference = std::abs(obj1->getHeading() - obj2->getHeading());
+	return headingDifference < SOME_SMALL_ANGLE || std::abs(headingDifference - 180) < SOME_SMALL_ANGLE;
+}
+
+double haversineDistance(const Point2& pos1, const Point2& pos2) {
+	const double R = 3440.1; // Earth radius in nautical miles
+	double dLat = (pos2.y_ - pos1.y_) * M_PI / 180.0;
+	double dLon = (pos2.x_ - pos1.x_) * M_PI / 180.0;
+
+	double a = sin(dLat / 2) * sin(dLat / 2) + cos(pos1.y_ * M_PI / 180.0) * cos(pos2.y_ * M_PI / 180.0) * sin(dLon / 2) * sin(dLon / 2);
+	double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+	return R * c;
+}
+
+/*Here, SHORT_TIME_INTERVAL is a small duration (like 0.1 or 0.01) that you can define, used to create a short segment in the direction of each aircraft's movement. This modification should make the logic more robust and in line with the expectations of the isOnPath function.*/
+bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
+	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), obj1->getSpeed() * time, obj1->getHeading());
+	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), obj2->getSpeed() * time, obj2->getHeading());
+
+	if (!(on_path_logic(futurePos1) && on_path_logic(futurePos2))) {
+		return false;  // One of them is not on a pathway.
+	}
+
+	if (!haveConvergingPaths(obj1, obj2)) {
+		return false;  // They are on the same pathway but not heading towards each other.
+	}
+
+	// Creating short path segments in the direction of each aircraft's movement
+	PathSegment futurePath1 = { futurePos1, getLocFromBearing(futurePos1.y_, futurePos1.x_, obj1->getSpeed() * (time + SHORT_TIME_INTERVAL), obj1->getHeading()) };
+	PathSegment futurePath2 = { futurePos2, getLocFromBearing(futurePos2.y_, futurePos2.x_, obj2->getSpeed() * (time + SHORT_TIME_INTERVAL), obj2->getHeading()) };
+
+	// Now, check their relative speeds.
+	if (obj1->getSpeed() > obj2->getSpeed() && on_path_logic(futurePos2)) {
+		return true;  // obj1 might catch up to obj2.
+	}
+	else if (obj2->getSpeed() > obj1->getSpeed() && on_path_logic(futurePos1)) {
+		return true;  // obj2 might catch up to obj1.
+	}
+
+	return false; // They aren't likely to collide based on their relative speeds and pathways.
+}
+
+
+bool areColliding(Aircraft* obj1, Aircraft* obj2, double time) {
+	if (!isOnSameOrAdjacentPath(obj1, obj2, time)) {
+		return false; // If they aren't on the same or adjacent paths, they cannot collide.
+	}
+
+	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), obj1->getSpeed() * time, obj1->getHeading());
+	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), obj2->getSpeed() * time, obj2->getHeading());
+
+	double distance = haversineDistance(futurePos1, futurePos2);
+
+	return distance < 2 * AIRCRAFT_RADIUS;  // Assuming AIRCRAFT_RADIUS is a defined constant representing aircraft size.
+}
+
+
+
+bool on_path_logic(const Point2& point)
+{
+	for (auto& s : logic)
+	{
+		auto it = runway_polygons.find(s);
+		if (it != runway_polygons.end())
+		{
+			double** coodinates = it->second;
+
+			double vertx[4] = { coodinates[0][0], coodinates[2][0], coodinates[3][0], coodinates[1][0] };
+			double verty[4] = { coodinates[0][1], coodinates[2][1], coodinates[3][1], coodinates[1][1] };
+
+			if (pnpoly(4, vertx, verty, point.x_, point.y_))
+			{
+				return true;
+			}
+		}
+	}
+
+	for (auto& polygon : taxiway_polygons) {
+		int nvert = polygon.size();
+		std::vector<double> vertx(nvert);
+		std::vector<double> verty(nvert);
+
+		for (int i = 0; i < nvert; i++) {
+			vertx[i] = polygon[i].x_;
+			verty[i] = polygon[i].y_;
+		}
+
+		if (pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_)) {
+			return true;
+		}
+	}
+
+	return false;
+}

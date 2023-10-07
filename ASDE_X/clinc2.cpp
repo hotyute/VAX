@@ -213,7 +213,7 @@ void decode(BasicStream& in)
 				length = in.available();
 			}
 #ifdef _DEBUG
-			std::cout << "Packet_Id: " << (int)opCode << ", Packet_Size: " << length << ", Bytes_Ava: " << in.available() << std::endl;
+			//std::cout << "Packet_Id: " << (int)opCode << ", Packet_Size: " << length << ", Bytes_Ava: " << in.available() << std::endl;
 #endif
 			if (in.available() >= length)
 			{

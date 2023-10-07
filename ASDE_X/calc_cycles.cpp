@@ -49,47 +49,34 @@ void update()
 
 void CalculateCollisions() {
 	if (!acf_map.empty()) {
-		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++) 
+		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++)
 		{
 			Aircraft* acf1 = iter->second;
 			if (acf1) {
 				Aircraft& aircraft1 = *acf1;
 
-				std::string log = "";
-				for (auto& s : logic)
+				for (const auto& iter2 : acf_map)
 				{
-					if (aircraft1.on_logic(s))
-					{
-						log = s;
-						break;
-					}
-				}
 
-				if (!log.empty())
-				{
-					for (const auto& iter2 : acf_map)
-					{
-
-						Aircraft* acf2 = iter2.second;
-						if (acf2 && acf2 != acf1) {
-							if (aircraft1.collisions.find(acf2) == aircraft1.collisions.end())
+					Aircraft* acf2 = iter2.second;
+					if (acf2 && acf2 != acf1) {
+						if (aircraft1.collisions.find(acf2) == aircraft1.collisions.end())
+						{
+							Aircraft& aircraft2 = *acf2;
+							if (aircraft2.collisions.find(acf1) == aircraft2.collisions.end())
 							{
-								Aircraft& aircraft2 = *acf2;
-								if (aircraft2.collisions.find(acf1) == aircraft2.collisions.end())
-								{
-									if (aircraft2.near_logic(log))
-									{
-										auto* collision = new Collision(acf1, acf2);
-										collision->setUpdateFlag(COL_COLLISION_LINE, true);
-										aircraft1.collisions.emplace(acf2, collision);
-										aircraft2.collisions.emplace(acf1, collision);
-										addCollisionToMirrors(collision);
-										Collision_Map.emplace(acf1, collision);
-										Collision_Map.emplace(acf2, collision);
-									}
+								if (areColliding(acf1, acf2, 15.0)) {
+									auto* collision = new Collision(acf1, acf2);
+									collision->setUpdateFlag(COL_COLLISION_LINE, true);
+									aircraft1.collisions.emplace(acf2, collision);
+									aircraft2.collisions.emplace(acf1, collision);
+									addCollisionToMirrors(collision);
+									Collision_Map.emplace(acf1, collision);
+									Collision_Map.emplace(acf2, collision);
+									printf("Collision Detected!!\n");
 								}
-								//Check What Runway Aircraft1
 							}
+							//Check What Runway Aircraft1
 						}
 					}
 				}

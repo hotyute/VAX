@@ -129,6 +129,10 @@ bool whitespace_only(const std::string& str);
 
 double getPanningFactor(double width, double height);
 
+bool areColliding(Aircraft* obj1, Aircraft* obj2, double time);
+
+bool on_path_logic(const Point2& point);
+
 template<typename T>
 T pop_front(std::vector<T>& vec)
 {
@@ -137,5 +141,10 @@ T pop_front(std::vector<T>& vec)
 	vec.erase(vec.begin());
 	return element;
 }
+
+struct PathSegment {
+	Point2 start;  // Using Point2 for start and end points of the path.
+	Point2 end;
+};
 
 #endif

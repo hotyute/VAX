@@ -385,6 +385,18 @@ int FileReader::LoadADX(std::string path) {
 		myfile.close();
 		split_polygons();
 		sort_beziers();
+
+		// Now extract the taxiway polygons for on_path_logic
+		for (auto point2d : ALL) {
+			if (point2d->get_type() == TAXIWAY) {
+				std::vector<Point2> taxiway_polygon;
+				for (auto seg : point2d->get_coordinates()) {
+					taxiway_polygon.push_back(seg->pt);
+				}
+				taxiway_polygons.push_back(taxiway_polygon);
+			}
+		}
+
 		return 1;
 	}
 	else

@@ -44,24 +44,6 @@ void Aircraft::handleModeChange(int new_mode)
 	}
 }
 
-bool Aircraft::on_logic(std::string logic_id)
-{
-	auto it = runway_polygons.find(logic_id);
-	if (it != runway_polygons.end())
-	{
-		double** coodinates = it->second;
-
-		double vertx[4] = { coodinates[0][0], coodinates[2][0], coodinates[3][0], coodinates[1][0] };
-		double verty[4] = { coodinates[0][1], coodinates[2][1], coodinates[3][1], coodinates[1][1] };
-
-		if (pnpoly(4, vertx, verty, longitude, latitude))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 bool Aircraft::near_logic(std::string logic_id)
 {
 	auto it = runway_polygons.find(logic_id);
