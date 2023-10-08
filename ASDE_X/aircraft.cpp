@@ -44,17 +44,6 @@ void Aircraft::handleModeChange(int new_mode)
 	}
 }
 
-bool Aircraft::near_logic(std::string logic_id)
-{
-	auto it = runway_polygons.find(logic_id);
-	if (it != runway_polygons.end())
-	{
-		double decel1 = GetDecelerationDistance(speed, 0, 5);
-		Point2 decel_point1 = getLocFromBearing(latitude, longitude, decel1, heading);
-	}
-	return false;
-}
-
 Aircraft::~Aircraft()
 {
 	delete Aircraft::flight_plan;

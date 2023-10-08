@@ -266,10 +266,21 @@ int FileReader::LoadADX(std::string path) {
 							for (int i = 0; i < 5; ++i)
 								bounds[i] = new double[2];
 							getRunwayBounds(p1, p2, atodd(args[6].c_str()) + shoulder, bounds);
-							for (int i = 0; i < 5; i++) {
-								point2d->add_coordinates(bounds[i][1], bounds[i][0], 0);
+							if (runway_polygons.find(rw1) != runway_polygons.end()) {
+								// If rw1 already exists in the map, append the polygons to the existing vector
+								for (int i = 0; i < 5; i++) {
+									runway_polygons[rw1].push_back(point2d->add_coordinates(bounds[i][1], bounds[i][0], 0));
+								}
 							}
-							runway_polygons.emplace(rw1, bounds);
+							else {
+								// If rw1 does not exist in the map, create a new vector and add polygons to it
+								std::vector<Point2> new_vector;
+								for (int i = 0; i < 5; i++) {
+									new_vector.push_back(point2d->add_coordinates(bounds[i][1], bounds[i][0], 0));
+								}
+								runway_polygons[rw1] = new_vector;
+							}
+
 							//for (int i = 0; i < 5; ++i)
 							//{
 								//delete[] bounds[i];

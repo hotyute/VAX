@@ -129,9 +129,21 @@ bool whitespace_only(const std::string& str);
 
 double getPanningFactor(double width, double height);
 
+bool doPolygonsIntersect(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2);
+
+bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2);
+
+bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time);
+
 bool areColliding(Aircraft* obj1, Aircraft* obj2, double time);
 
 bool on_path_logic(const Point2& point);
+
+bool doSegmentsIntersect(Point2 p1, Point2 q1, Point2 p2, Point2 q2);
+
+bool onSegment(Point2 p, Point2 q, Point2 r);
+
+std::vector<Point2> getPolygonForPoint(const Point2& point);
 
 template<typename T>
 T pop_front(std::vector<T>& vec)

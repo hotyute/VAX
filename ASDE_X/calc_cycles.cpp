@@ -65,7 +65,7 @@ void CalculateCollisions() {
 							Aircraft& aircraft2 = *acf2;
 							if (aircraft2.collisions.find(acf1) == aircraft2.collisions.end())
 							{
-								if (areColliding(acf1, acf2, 15.0)) {
+								if (areColliding(acf1, acf2, 30.0)) {
 									auto* collision = new Collision(acf1, acf2);
 									collision->setUpdateFlag(COL_COLLISION_LINE, true);
 									aircraft1.collisions.emplace(acf2, collision);

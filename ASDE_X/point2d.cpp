@@ -28,12 +28,13 @@ void PointTess::add_coordinates(LinearSegment *seg)
 	PointTess::coordinates.push_back(seg);
 }
 
-void PointTess::add_coordinates(double lat, double lon, double z)
+Point2 PointTess::add_coordinates(double lat, double lon, double z)
 {
 	Point2 pt = Point2(lon, lat);
 	LinearSegment *seg = new LinearSegment();
 	seg->pt = pt;
 	PointTess::coordinates.push_back(seg);
+	return pt;
 }
 
 void PointTess::add_vector(double lat, double lon, double z, double lat2, double lon2, double z2) 

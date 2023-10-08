@@ -2,7 +2,7 @@
 
 std::unordered_map<Aircraft*, Collision*> Collision_Map;
 std::vector<std::vector<Point2>> taxiway_polygons;
-std::unordered_map<std::string, double**> runway_polygons;
+std::unordered_map<std::string, std::vector<Point2>> runway_polygons;
 std::vector<std::string> logic;
 
 Collision::Collision(Aircraft* aircraft1, Aircraft* aircraft2)

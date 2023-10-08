@@ -102,7 +102,7 @@ public:
 	}
 	int get_type() { return type; }
 	void add_coordinates(LinearSegment*p);
-	void add_coordinates(double lat, double lon, double z);
+	Point2 add_coordinates(double lat, double lon, double z);
 	void add_vector(double lat, double lon, double z, double lat2, double lon2, double z2);
 	void add_holes(LinearSegment* p);
 	void add_coord(LinearSegment* p);

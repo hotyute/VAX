@@ -53,7 +53,6 @@ public:
 	std::unordered_map<Aircraft*, Collision*> collisions;
 	Aircraft(std::string, int, int);
 	void handleModeChange(int new_mode);
-	bool near_logic(std::string logic_id);
 	virtual ~Aircraft();
 	unsigned int Ccallsign = 0, Ccolltext = 0, collisionDl = 0, vectorDl = 0;
 	bool getRenderFlag(int flag);

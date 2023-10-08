@@ -377,6 +377,10 @@ double get_delta(double from, double to, double move_by) {
 Point2 getLocFromBearing(double latitude, double longitude, double distance, double bearing) {
 	double R = 6378.14;
 
+	// Normalize bearing to between 0 and 360
+	while (bearing < 0) bearing += 360;
+	while (bearing >= 360) bearing -= 360;
+
 	// Degree to Radian
 	double latitude1 = radians(latitude);
 	double longitude1 = radians(longitude);
@@ -389,7 +393,7 @@ Point2 getLocFromBearing(double latitude, double longitude, double distance, dou
 	latitude2 = degrees(latitude2);
 	longitude2 = degrees(longitude2);
 
-	// 8 decimal for Leafletand other system compatibility
+	// 8 decimal for Leaflet and other system compatibility
 	double lat2 = round_up(latitude2, 8);
 	double long2 = round_up(longitude2, 8);
 
@@ -727,10 +731,33 @@ double getPanningFactor(double width, double height) {
 	return 10000.0 * (averageDimension / baselineAverage);
 }
 
-bool haveConvergingPaths(Aircraft* obj1, Aircraft* obj2) {
-	double headingDifference = std::abs(obj1->getHeading() - obj2->getHeading());
-	return headingDifference < SOME_SMALL_ANGLE || std::abs(headingDifference - 180) < SOME_SMALL_ANGLE;
+bool haveConvergingPaths(Aircraft* obj1, Aircraft* obj2, double time) {
+	Point2 start1 = { obj1->getLongitude(), obj1->getLatitude() };
+	Point2 end1_straight = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
+	Point2 end1_left = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading() - 45);
+	Point2 end1_right = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading() + 45);
+
+	Point2 start2 = { obj2->getLongitude(), obj2->getLatitude() };
+	Point2 end2_straight = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
+	Point2 end2_left = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading() - 45);
+	Point2 end2_right = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading() + 45);
+
+	// Check all combinations of paths
+	if (doSegmentsIntersect(start1, end1_straight, start2, end2_straight) ||
+		doSegmentsIntersect(start1, end1_straight, start2, end2_left) ||
+		doSegmentsIntersect(start1, end1_straight, start2, end2_right) ||
+		doSegmentsIntersect(start1, end1_left, start2, end2_straight) ||
+		doSegmentsIntersect(start1, end1_left, start2, end2_left) ||
+		doSegmentsIntersect(start1, end1_left, start2, end2_right) ||
+		doSegmentsIntersect(start1, end1_right, start2, end2_straight) ||
+		doSegmentsIntersect(start1, end1_right, start2, end2_left) ||
+		doSegmentsIntersect(start1, end1_right, start2, end2_right)) {
+		return true;
+	}
+
+	return false;
 }
+
 
 double haversineDistance(const Point2& pos1, const Point2& pos2) {
 	const double R = 3440.1; // Earth radius in nautical miles
@@ -743,46 +770,91 @@ double haversineDistance(const Point2& pos1, const Point2& pos2) {
 	return R * c;
 }
 
-/*Here, SHORT_TIME_INTERVAL is a small duration (like 0.1 or 0.01) that you can define, used to create a short segment in the direction of each aircraft's movement. This modification should make the logic more robust and in line with the expectations of the isOnPath function.*/
-bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
-	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), obj1->getSpeed() * time, obj1->getHeading());
-	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), obj2->getSpeed() * time, obj2->getHeading());
+bool doPolygonsIntersect(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2) {
+	// Check if any edge of poly1 intersects with any edge of poly2
+	for (size_t i = 0; i < poly1.size(); i++) {
+		for (size_t j = 0; j < poly2.size(); j++) {
+			Point2 a = poly1[i];
+			Point2 b = poly1[(i + 1) % poly1.size()];
+			Point2 c = poly2[j];
+			Point2 d = poly2[(j + 1) % poly2.size()];
+			if (doSegmentsIntersect(a, b, c, d)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
-	if (!(on_path_logic(futurePos1) && on_path_logic(futurePos2))) {
-		return false;  // One of them is not on a pathway.
+bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2) {
+	// Check if the polygons are identical
+	if (poly1 == poly2) {
+		return true;
 	}
 
-	if (!haveConvergingPaths(obj1, obj2)) {
-		return false;  // They are on the same pathway but not heading towards each other.
+	// Check if any point from poly1 is inside poly2
+	for (const auto& point : poly1) {
+		if (on_path_logic(point)) {
+			return true;
+		}
 	}
 
-	// Creating short path segments in the direction of each aircraft's movement
-	PathSegment futurePath1 = { futurePos1, getLocFromBearing(futurePos1.y_, futurePos1.x_, obj1->getSpeed() * (time + SHORT_TIME_INTERVAL), obj1->getHeading()) };
-	PathSegment futurePath2 = { futurePos2, getLocFromBearing(futurePos2.y_, futurePos2.x_, obj2->getSpeed() * (time + SHORT_TIME_INTERVAL), obj2->getHeading()) };
-
-	// Now, check their relative speeds.
-	if (obj1->getSpeed() > obj2->getSpeed() && on_path_logic(futurePos2)) {
-		return true;  // obj1 might catch up to obj2.
-	}
-	else if (obj2->getSpeed() > obj1->getSpeed() && on_path_logic(futurePos1)) {
-		return true;  // obj2 might catch up to obj1.
+	// Check if any point from poly2 is inside poly1
+	for (const auto& point : poly2) {
+		if (on_path_logic(point)) {
+			return true;
+		}
 	}
 
-	return false; // They aren't likely to collide based on their relative speeds and pathways.
+	return false;
 }
 
 
-bool areColliding(Aircraft* obj1, Aircraft* obj2, double time) {
-	if (!isOnSameOrAdjacentPath(obj1, obj2, time)) {
-		return false; // If they aren't on the same or adjacent paths, they cannot collide.
+/**/
+bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
+	/*Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
+	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
+
+	std::vector<Point2> path1 = getPolygonForPoint(futurePos1);
+	std::vector<Point2> path2 = getPolygonForPoint(futurePos2);
+
+	if (path1.empty() || path2.empty()) {
+		return false;  // One of them is not on a pathway.
+	}*/
+
+	if (haveConvergingPaths(obj1, obj2, time)) {
+		return true;  // They are on converging pathways but not heading towards each other.
 	}
 
-	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), obj1->getSpeed() * time, obj1->getHeading());
-	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), obj2->getSpeed() * time, obj2->getHeading());
+	// Direct path intersection
+	/*if (path1 == path2) {
+		return true;
+	}
+
+	// Converging paths
+	if (polygonsRepresentSameOrConvergingTaxiway(path1, path2)) {
+		return true;
+	}*/
+
+	return false;
+}
+
+
+
+
+bool areColliding(Aircraft* obj1, Aircraft* obj2, double time) {
+	if (isOnSameOrAdjacentPath(obj1, obj2, time)) {
+		return true; // If they aren't on the same or adjacent paths, they cannot collide.
+	}
+
+	/*Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
+	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
 
 	double distance = haversineDistance(futurePos1, futurePos2);
 
-	return distance < 2 * AIRCRAFT_RADIUS;  // Assuming AIRCRAFT_RADIUS is a defined constant representing aircraft size.
+	return distance < 2 * AIRCRAFT_RADIUS;  // Assuming AIRCRAFT_RADIUS is a defined constant representing aircraft size.*/
+
+	return false;
 }
 
 
@@ -794,13 +866,18 @@ bool on_path_logic(const Point2& point)
 		auto it = runway_polygons.find(s);
 		if (it != runway_polygons.end())
 		{
-			double** coodinates = it->second;
+			std::vector<Point2> polygon = it->second;
+			int nvert = polygon.size();
 
-			double vertx[4] = { coodinates[0][0], coodinates[2][0], coodinates[3][0], coodinates[1][0] };
-			double verty[4] = { coodinates[0][1], coodinates[2][1], coodinates[3][1], coodinates[1][1] };
+			std::vector<double> vertx(nvert);
+			std::vector<double> verty(nvert);
 
-			if (pnpoly(4, vertx, verty, point.x_, point.y_))
-			{
+			for (int i = 0; i < nvert; i++) {
+				vertx[i] = polygon[i].x_;
+				verty[i] = polygon[i].y_;
+			}
+
+			if (pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_)) {
 				return true;
 			}
 		}
@@ -823,3 +900,86 @@ bool on_path_logic(const Point2& point)
 
 	return false;
 }
+
+bool doSegmentsIntersect(Point2 p1, Point2 q1, Point2 p2, Point2 q2) {
+	// This function checks if segment 'p1q1' and 'p2q2' intersect.
+
+	// Calculate orientation of three points
+	// 0 --> p, q, and r are colinear
+	// 1 --> Clockwise
+	// 2 --> Counterclockwise
+	auto orientation = [](Point2 p, Point2 q, Point2 r) -> int {
+		double val = (q.y_ - p.y_) * (r.x_ - q.x_) - (q.x_ - p.x_) * (r.y_ - q.y_);
+		if (val == 0) return 0;
+		return (val > 0) ? 1 : 2;
+		};
+
+	int o1 = orientation(p1, q1, p2);
+	int o2 = orientation(p1, q1, q2);
+	int o3 = orientation(p2, q2, p1);
+	int o4 = orientation(p2, q2, q1);
+
+	// General case
+	if (o1 != o2 && o3 != o4) return true;
+
+	// Special cases
+	// p1, q1, and p2 are colinear and p2 lies on segment p1q1
+	if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+	// p1, q1, and q2 are colinear and q2 lies on segment p1q1
+	if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+	// p2, q2, and p1 are colinear and p1 lies on segment p2q2
+	if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+	// p2, q2, and q1 are colinear and q1 lies on segment p2q2
+	if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+
+	return false;
+}
+
+bool onSegment(Point2 p, Point2 q, Point2 r) {
+	return (q.x_ <= (std::max)(p.x_, r.x_) && q.x_ >= (std::min)(p.x_, r.x_) && q.y_ <= (std::max)(p.y_, r.y_) && q.y_ >= (std::min)(p.y_, r.y_));
+}
+
+std::vector<Point2> getPolygonForPoint(const Point2& point) {
+	for (const auto& polygon : taxiway_polygons) {
+		int nvert = polygon.size();
+		std::vector<double> vertx(nvert);
+		std::vector<double> verty(nvert);
+
+		for (int i = 0; i < nvert; i++) {
+			vertx[i] = polygon[i].x_;
+			verty[i] = polygon[i].y_;
+		}
+
+		if (pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_)) {
+			return polygon;
+		}
+	}
+
+	// If not found in taxiways, check in runways.
+	// For simplicity, I'm assuming the runway polygons are also stored in a similar vector of Point2 format.
+	// If not, you'll need to adjust the code accordingly.
+	for (auto& s : logic)
+	{
+		auto it = runway_polygons.find(s);
+		if (it != runway_polygons.end())
+		{
+			std::vector<Point2> polygon = it->second;
+			int nvert = polygon.size();
+
+			std::vector<double> vertx(nvert);
+			std::vector<double> verty(nvert);
+
+			for (int i = 0; i < nvert; i++) {
+				vertx[i] = polygon[i].x_;
+				verty[i] = polygon[i].y_;
+			}
+
+			if (pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_)) {
+				return polygon;
+			}
+		}
+	}
+
+	return {};  // Return empty vector if no matching polygon is found.
+}
+
