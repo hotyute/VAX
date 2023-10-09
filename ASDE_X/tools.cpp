@@ -786,6 +786,19 @@ bool doPolygonsIntersect(const std::vector<Point2>& poly1, const std::vector<Poi
 	return false;
 }
 
+bool isPointInPolygon(const Point2& point, const std::vector<Point2>& polygon) {
+	int nvert = polygon.size();
+	std::vector<double> vertx(nvert);
+	std::vector<double> verty(nvert);
+
+	for (int i = 0; i < nvert; i++) {
+		vertx[i] = polygon[i].x_;
+		verty[i] = polygon[i].y_;
+	}
+
+	return pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_);
+}
+
 bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2) {
 	// Check if the polygons are identical
 	if (poly1 == poly2) {
@@ -794,14 +807,14 @@ bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, 
 
 	// Check if any point from poly1 is inside poly2
 	for (const auto& point : poly1) {
-		if (on_path_logic(point)) {
+		if (isPointInPolygon(point, poly2)) {
 			return true;
 		}
 	}
 
 	// Check if any point from poly2 is inside poly1
 	for (const auto& point : poly2) {
-		if (on_path_logic(point)) {
+		if (isPointInPolygon(point, poly1)) {
 			return true;
 		}
 	}
@@ -812,7 +825,7 @@ bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, 
 
 /**/
 bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
-	/*Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
+	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
 	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
 
 	std::vector<Point2> path1 = getPolygonForPoint(futurePos1);
@@ -820,21 +833,21 @@ bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
 
 	if (path1.empty() || path2.empty()) {
 		return false;  // One of them is not on a pathway.
-	}*/
+	}
 
-	if (haveConvergingPaths(obj1, obj2, time)) {
-		return true;  // They are on converging pathways but not heading towards each other.
+	if (!haveConvergingPaths(obj1, obj2, time)) {
+		return false;  // They are on converging pathways but not heading towards each other.
 	}
 
 	// Direct path intersection
-	/*if (path1 == path2) {
+	if (path1 == path2) {
 		return true;
 	}
 
 	// Converging paths
 	if (polygonsRepresentSameOrConvergingTaxiway(path1, path2)) {
 		return true;
-	}*/
+	}
 
 	return false;
 }
@@ -843,18 +856,16 @@ bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
 
 
 bool areColliding(Aircraft* obj1, Aircraft* obj2, double time) {
-	if (isOnSameOrAdjacentPath(obj1, obj2, time)) {
-		return true; // If they aren't on the same or adjacent paths, they cannot collide.
+	if (!isOnSameOrAdjacentPath(obj1, obj2, time)) {
+		return false; // If they aren't on the same or adjacent paths, they cannot collide.
 	}
 
-	/*Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
+	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
 	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
 
 	double distance = haversineDistance(futurePos1, futurePos2);
 
-	return distance < 2 * AIRCRAFT_RADIUS;  // Assuming AIRCRAFT_RADIUS is a defined constant representing aircraft size.*/
-
-	return false;
+	return distance < 2 * AIRCRAFT_RADIUS;  // Assuming AIRCRAFT_RADIUS is a defined constant representing aircraft size.
 }
 
 

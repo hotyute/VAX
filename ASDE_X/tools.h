@@ -131,6 +131,8 @@ double getPanningFactor(double width, double height);
 
 bool doPolygonsIntersect(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2);
 
+bool isPointInPolygon(const Point2& point, const std::vector<Point2>& polygon);
+
 bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2);
 
 bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time);
