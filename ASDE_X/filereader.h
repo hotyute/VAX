@@ -1,5 +1,4 @@
-#ifndef FILEREADER_H
-#define FILEREADER_H
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -16,9 +15,8 @@
 class FileReader {
 public:
 	static int LoadADX(std::string);
+	std::vector<Point2> LoadCollisionPaths(const std::string& path);
 };
-
-#endif
 
 void open_adx(std::string path);
 

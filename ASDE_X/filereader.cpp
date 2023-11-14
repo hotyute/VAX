@@ -417,6 +417,34 @@ int FileReader::LoadADX(std::string path) {
 	}
 }
 
+std::vector<Point2> FileReader::LoadCollisionPaths(const std::string& filename) {
+	std::vector<Point2> coordinates;
+
+	std::ifstream file(filename);
+	if (!file.is_open()) {
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return coordinates;
+	}
+
+	std::string line;
+	while (std::getline(file, line)) {
+		std::istringstream iss(line);
+		Point2 coord;
+
+		// Assuming the format is "latitude,longitude"
+		char delimiter;
+		if (iss >> coord.y_ >> delimiter >> coord.x_) {
+			coordinates.push_back(coord);
+		}
+		else {
+			std::cerr << "Error parsing line: " << line << std::endl;
+		}
+	}
+
+	file.close();
+	return coordinates;
+}
+
 void sort_beziers() {
 	for (size_t i = 0; i < ALL.size(); i++)
 	{
