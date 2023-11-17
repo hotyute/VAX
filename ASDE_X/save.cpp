@@ -24,6 +24,7 @@ void save_info()
 
 	buf.create_frame_var_size_word(2);
 	buf.write_string(LAST_ADX_PATH.c_str());
+	buf.write_string(LAST_CPF_PATH.c_str());
 	buf.write_string(LAST_POF_PATH.c_str());
 	buf.write_string(LAST_ALIAS_PATH.c_str());
 	buf.end_frame_var_size_word();
@@ -99,12 +100,13 @@ void read_info()
 				if (size > 0)
 				{
 					std::string file_path = buf.read_string();
+					std::string cpf_file_path = buf.read_string();
 					std::string pof_path = buf.read_string();
 					std::string alias_path = buf.read_string();
 					if (!file_path.empty())
-					{
 						open_adx(file_path);
-					}
+					if (!cpf_file_path.empty())
+						parseCpfFile(cpf_file_path, filerdr.collisionPaths);
 				}
 			}
 			else if (opcode == 3)

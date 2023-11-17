@@ -31,6 +31,8 @@ struct Point2 {
 	Point2 operator+(const Vector2& v) const;
 	Point2 operator-(const Vector2& v) const;
 
+	bool unset() { return x_ == -1 && y_ == -1; }
+
 	double* as_array();
 
 	double x_, y_;

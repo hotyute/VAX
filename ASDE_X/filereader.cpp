@@ -11,7 +11,8 @@
 #include "topbutton.h"
 #include "calc_cycles.h"
 
-std::string LAST_ADX_PATH, LAST_POF_PATH, LAST_ALIAS_PATH;
+std::string LAST_ADX_PATH, LAST_POF_PATH, LAST_ALIAS_PATH, LAST_CPF_PATH;
+
 
 void open_adx(std::string path)
 {
@@ -417,13 +418,63 @@ int FileReader::LoadADX(std::string path) {
 	}
 }
 
-std::vector<Point2> FileReader::LoadCollisionPaths(const std::string& filename) {
-	std::vector<Point2> coordinates;
+void parseCpfFile(const std::string& filename, std::vector<Path>& paths) {
+	std::ifstream file(filename);
+	LAST_CPF_PATH = filename;
+
+	if (!file.is_open()) {
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return;
+	}
+
+	std::string line;
+	Path currentPath;
+
+	while (std::getline(file, line)) {
+		std::istringstream iss(line);
+
+		// Check if the line starts with [PATH]
+		if (line.find("[PATH ") != std::string::npos) {
+			// New path starts
+			if (!currentPath.name.empty()) {
+				// Close the previous path before starting a new one
+				paths.push_back(currentPath);
+			}
+			currentPath.points.clear();  // Clear previous path points
+			iss >> line >> currentPath.name;  // Read path name
+			currentPath.name.erase(currentPath.name.size() - 1); // Remove the trailing ']'
+			iss >> currentPath.surfaceType;  // Read surface type
+		}
+		else if (!line.empty() && line.find_first_not_of(" \t\n\v\f\r") == std::string::npos) {
+			// Whitespace line encountered, consider it as an indication to close the current path
+			if (!currentPath.name.empty()) {
+				paths.push_back(currentPath);
+				currentPath.name.clear();
+			}
+		}
+		else {
+			// Read coordinate points
+			Point2 coord;
+			if (iss >> coord.y_ >> coord.x_) {
+				currentPath.points.push_back(coord);
+			}
+		}
+	}
+
+	// Check if there's an unfinished path
+	if (!currentPath.name.empty()) {
+		paths.push_back(currentPath);
+	}
+
+	file.close();
+}
+
+void FileReader::LoadCollisionPaths(const std::string& filename) {
 
 	std::ifstream file(filename);
 	if (!file.is_open()) {
 		std::cerr << "Error opening file: " << filename << std::endl;
-		return coordinates;
+		return;
 	}
 
 	std::string line;
@@ -434,7 +485,7 @@ std::vector<Point2> FileReader::LoadCollisionPaths(const std::string& filename) 
 		// Assuming the format is "latitude,longitude"
 		char delimiter;
 		if (iss >> coord.y_ >> delimiter >> coord.x_) {
-			coordinates.push_back(coord);
+			clickPoints.push_back(coord);
 		}
 		else {
 			std::cerr << "Error parsing line: " << line << std::endl;
@@ -442,7 +493,26 @@ std::vector<Point2> FileReader::LoadCollisionPaths(const std::string& filename) 
 	}
 
 	file.close();
-	return coordinates;
+}
+
+void FileReader::DumpCollisionsToFile() {
+	std::ofstream outputFile("collisionPoints.txt");
+	if (!outputFile.is_open()) {
+		MessageBox(NULL, L"Error opening file for writing!", L"Error", MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	outputFile << std::fixed << std::setprecision(6);
+
+	for (const auto& point : clickPoints) {
+		outputFile << point.y_ << " " << point.x_ << std::endl;
+	}
+
+	outputFile.close();
+	MessageBox(NULL, L"Collision paths dumped to file!", L"Success", MB_OK | MB_ICONINFORMATION);
+
+	// Clear the stored click points
+	clickPoints.clear();
 }
 
 void sort_beziers() {

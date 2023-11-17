@@ -1,5 +1,4 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
 
 #include <windows.h>
 #include "gui.h"
@@ -25,6 +24,7 @@
 #define ID_SETTINGS_SQUAWKS 40008
 #define ID_SETTINGS_CLIST 40009
 #define ID_SETTINGS_COMMS 40011
+#define ID_FILE_OPENC 40014
 
 #define IDW_SOUND1 1000
 #define IDW_SOUND2 1001
@@ -63,6 +63,7 @@ void preFlags();
 
 void resetFlags();
 
+
 extern InterfaceFrame *connectFrame, * fp_frame;
 extern BasicInterface* dragged_bounds;
 extern InputField *connect_callsign, *connect_fullname, *connect_username, 
@@ -74,5 +75,3 @@ extern DisplayBox * main_chat_box, *controller_list_box, *controller_info_box, *
 extern bool connected, show_departures, show_squawks;
 
 extern int single_opened_frames;
-
-#endif

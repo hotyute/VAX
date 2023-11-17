@@ -9,6 +9,8 @@
 
 const int TRANSITION = 18000;
 
+FileReader filerdr;
+
 #define N_SEG 20 // num points
 
 void quad_bezier(Point2& p1, Point2& p2, Point2& p3, std::vector<LinearSegment*>& add_to) {
@@ -799,28 +801,60 @@ bool isPointInPolygon(const Point2& point, const std::vector<Point2>& polygon) {
 	return pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_);
 }
 
-bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2) {
+Point2 findClosestConvergingPoint(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2, const Point2& midpoint) {
 	// Check if the polygons are identical
 	if (poly1 == poly2) {
-		return true;
+		return poly1[0];
 	}
+
+	// Initialize variables to track the closest converging point and its distance
+	Point2 closestPoint(-1, -1);
+	double minDistance = std::numeric_limits<double>::infinity();
 
 	// Check if any point from poly1 is inside poly2
 	for (const auto& point : poly1) {
 		if (isPointInPolygon(point, poly2)) {
-			return true;
+			double distance = haversineDistance(midpoint, point);
+			if (distance < minDistance) {
+				minDistance = distance;
+				closestPoint = point;
+			}
 		}
 	}
 
 	// Check if any point from poly2 is inside poly1
 	for (const auto& point : poly2) {
 		if (isPointInPolygon(point, poly1)) {
-			return true;
+			double distance = haversineDistance(midpoint, point);
+			if (distance < minDistance) {
+				minDistance = distance;
+				closestPoint = point;
+			}
 		}
 	}
 
-	return false;
+	return closestPoint;
 }
+
+Point2 findConvergingPoint(Aircraft* obj1, Aircraft* obj2, double time) {
+	// Calculate the converging point of the two taxiway polygons
+	// This example assumes that the converging point is the intersection of the extended paths.
+
+	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
+	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
+
+	// Calculate midpoint
+	Point2 midpoint = {
+		(futurePos1.x_ + futurePos2.x_) / 2.0,
+		(futurePos1.y_ + futurePos2.y_) / 2.0
+	};
+
+	// Find the converging point closest to the midpoint
+	Point2 convergingPoint = findClosestConvergingPoint(getPolygonForPoint(futurePos1), getPolygonForPoint(futurePos2), midpoint);
+
+	return convergingPoint;
+}
+
 
 
 /**/
@@ -844,12 +878,21 @@ bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time) {
 		return true;
 	}
 
+	Point2 converging = findConvergingPoint(obj1, obj2, time);;
+
 	// Converging paths
-	if (polygonsRepresentSameOrConvergingTaxiway(path1, path2)) {
-		return true;
+	if (!converging.unset()) {
+		return false;
 	}
 
-	return false;
+	// Set a threshold distance for adjacency (adjust as needed)
+	double adjacencyThreshold = 2 * AIRCRAFT_RADIUS;  // Adjust this value as needed
+
+	// Check if both aircraft are within the threshold distance from the converging point
+	double distance1 = haversineDistance(futurePos1, converging);
+	double distance2 = haversineDistance(futurePos2, converging);
+
+	return (distance1 < adjacencyThreshold && distance2 < adjacencyThreshold);
 }
 
 
@@ -894,14 +937,14 @@ bool on_path_logic(const Point2& point)
 		}
 	}
 
-	for (auto& polygon : taxiway_polygons) {
-		int nvert = polygon.size();
+	for (auto& polygon : filerdr.collisionPaths) {
+		int nvert = polygon.points.size();
 		std::vector<double> vertx(nvert);
 		std::vector<double> verty(nvert);
 
 		for (int i = 0; i < nvert; i++) {
-			vertx[i] = polygon[i].x_;
-			verty[i] = polygon[i].y_;
+			vertx[i] = polygon.points[i].x_;
+			verty[i] = polygon.points[i].y_;
 		}
 
 		if (pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_)) {
@@ -951,18 +994,18 @@ bool onSegment(Point2 p, Point2 q, Point2 r) {
 }
 
 std::vector<Point2> getPolygonForPoint(const Point2& point) {
-	for (const auto& polygon : taxiway_polygons) {
-		int nvert = polygon.size();
+	for (const auto& polygon : filerdr.collisionPaths) {
+		int nvert = polygon.points.size();
 		std::vector<double> vertx(nvert);
 		std::vector<double> verty(nvert);
 
 		for (int i = 0; i < nvert; i++) {
-			vertx[i] = polygon[i].x_;
-			verty[i] = polygon[i].y_;
+			vertx[i] = polygon.points[i].x_;
+			verty[i] = polygon.points[i].y_;
 		}
 
 		if (pnpoly(nvert, vertx.data(), verty.data(), point.x_, point.y_)) {
-			return polygon;
+			return polygon.points;
 		}
 	}
 

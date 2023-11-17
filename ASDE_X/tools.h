@@ -1,5 +1,4 @@
-#ifndef __TOOLS_H
-#define __TOOLS_H
+#pragma once
 
 #include <algorithm> 
 #include <functional>
@@ -18,6 +17,9 @@
 #include "point2d.h"
 #include "renderer.h"
 #include "constants.h"
+
+class FileReader;
+#include "filereader.h"
 
 std::wstring s2ws(const std::string& s);
 
@@ -133,7 +135,7 @@ bool doPolygonsIntersect(const std::vector<Point2>& poly1, const std::vector<Poi
 
 bool isPointInPolygon(const Point2& point, const std::vector<Point2>& polygon);
 
-bool polygonsRepresentSameOrConvergingTaxiway(const std::vector<Point2>& poly1, const std::vector<Point2>& poly2);
+Point2 findConvergingPoint(Aircraft* obj1, Aircraft* obj2, double time);
 
 bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time);
 
@@ -161,4 +163,4 @@ struct PathSegment {
 	Point2 end;
 };
 
-#endif
+extern FileReader filerdr;

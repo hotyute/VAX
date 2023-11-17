@@ -2458,9 +2458,15 @@ void HandleMessageQueue()
 				double coords[3];
 				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
 				printf("\nBoundaries For Closure: %f %f\n", coords[0], coords[1]);
-				if (closureAreas.empty())
-					startNewClosureArea();
-				addPointToActiveArea(coords[0], coords[1]);
+				if (DUMP_COLLISION)
+				{
+					filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
+				}
+				else {
+					if (closureAreas.empty())
+						startNewClosureArea();
+					addPointToActiveArea(coords[0], coords[1]);
+				}
 			}
 			break;
 			case WM_LBUTTONDOWN:

@@ -11,7 +11,6 @@
 
 #include "later.h"
 #include "renderer.h"
-#include "filereader.h"
 #include "guicon.h"
 #include "topbutton.h"
 #include "dxfdrawing.h"
@@ -226,6 +225,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_CONNECT, L"&Connect to Sever...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_DISCONNECT, L"&Disconnect...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_OPEN, L"&Open ADX File...");
+		AppendMenu(hFile, MF_STRING, ID_FILE_OPENC, L"&Open Collision File...");
 		AppendMenu(hFile, MF_STRING, ID_FILE_SAVE, L"&Save Profile");
 		AppendMenu(hFile, MF_STRING, ID_FILE_LOAD, L"&Load Profile");
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
@@ -445,6 +445,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		break;
 		case ID_FILE_OPEN:
+		case ID_FILE_OPENC:
 		{
 			OPENFILENAME ofn;
 			TCHAR szFileName[MAX_PATH] = L"";
@@ -453,17 +454,27 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
 			ofn.hwndOwner = hwnd;
-			ofn.lpstrFilter = L"ASDE-X Files (*.adx)\0*.adx\0All Files (*.*)\0*.*\0";
+			ofn.lpstrFilter = ID_FILE_OPENC ? L"Collision Path Files (*.cpf)\0*.cpf\0All Files (*.*)\0*.*\0" :
+				L"ASDE-X Files (*.adx)\0*.adx\0All Files (*.*)\0*.*\0";
 			ofn.lpstrFile = szFileName;
 			ofn.nMaxFile = MAX_PATH;
 			ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-			ofn.lpstrDefExt = L"adx";
+			ofn.lpstrDefExt = ID_FILE_OPENC ? L"cpf" : L"adx";
 
 			if (GetOpenFileName(&ofn))
 			{
 				std::wstring wide(szFileName);
 				std::string final1 = ws2s(wide);
-				open_adx(final1);
+				if (wParam == ID_FILE_OPEN)
+				{
+					sendSystemMessage("ADX File Loaded.");
+					open_adx(final1);
+				}
+				else
+				{
+					parseCpfFile(final1, filerdr.collisionPaths);
+					sendSystemMessage("Collision Paths Loaded.");
+				}
 			}
 		}
 		break;
@@ -858,9 +869,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			else
 				CAPS = false;
 		}
-		else if (wParam == VK_SHIFT) {
-			if (!SHIFT_DOWN) {
-				SHIFT_DOWN = true;
+		else if (GetKeyState(VK_SHIFT) < 0) {
+			switch (wParam)
+			{
+			case 'D':
+			{
+				// SHIFT+D is pressed
+				DUMP_COLLISION = !DUMP_COLLISION;
+				std::wstring msg = DUMP_COLLISION ? L"Dumping Collision Paths" : L"No Longer dumping Collision Paths";
+				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
+				if (!DUMP_COLLISION)
+					filerdr.DumpCollisionsToFile();
+				break;
+			}
 			}
 		}
 		else if (wParam == VK_TAB) {
@@ -1170,13 +1191,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				CAPS = true;
 			else
 				CAPS = false;
-			break;
-		}
-		case VK_SHIFT:
-		{
-			if (SHIFT_DOWN) {
-				SHIFT_DOWN = false;
-			}
 			break;
 		}
 		case 0x11: case VK_LCONTROL: case VK_RCONTROL:
