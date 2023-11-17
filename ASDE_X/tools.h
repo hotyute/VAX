@@ -87,6 +87,8 @@ void addAircraftToMirrors(Aircraft*);
 
 void addCollisionToMirrors(Collision* collision);
 
+void removeCollisionToMirrors(Collision* collision);
+
 void addCollisionsToMirror(Mirror* mir);
 
 void addCollisionToMirror(Collision* collision, Mirror* mir);

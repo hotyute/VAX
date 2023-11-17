@@ -84,6 +84,24 @@ void CalculateCollisions() {
 									printf("Collision Detected!!\n");
 								}
 							}
+							else if (aircraft2.collisions.find(acf1) != aircraft2.collisions.end())
+							{
+								if (!areColliding(acf1, acf2, 30.0)) {
+									Collision* collision = aircraft1.collisions[acf2];
+									Collision* collision2 = aircraft2.collisions[acf1];
+									if (collision = collision2)
+									{
+										Collision* map_col = Collision_Map[acf1];
+										Collision* map_col2 = Collision_Map[acf2];
+										if (map_col == map_col2)
+										{
+											removeCollisionToMirrors(collision);
+											collision->setUpdateFlag(COL_COLLISION_LINE, true);
+											//add collision to a queue to be deleted.
+										}
+									}
+								}
+							}
 							//Check What Runway Aircraft1
 						}
 					}
