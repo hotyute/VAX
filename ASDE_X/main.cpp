@@ -25,6 +25,7 @@
 #include "raiiclipboard.h"
 #include "save.h"
 #include "thread_pool.h"
+#include "tempdata.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -880,6 +881,25 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
 				if (!DUMP_COLLISION)
 					filerdr.DumpCollisionsToFile();
+				break;
+			}
+			case 'C':
+			{
+				DUMP_CLOSURE = !DUMP_CLOSURE;
+				std::wstring msg = DUMP_CLOSURE ? L"Dumping Closure Points" : L"No Longer dumping Closure Points";
+				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
+				if (DUMP_CLOSURE) {
+					//if (closureAreas.empty())
+					startNewClosureArea();
+					sendSystemMessage("Dumping Closure Points.");
+				}
+				else {
+					if (!closureAreas.empty() && closureAreas.back().opened) {
+						finishDefiningArea();
+						redrawClosures = true;
+						sendSystemMessage("Finished Closure Points.");
+					}
+				}
 				break;
 			}
 			}

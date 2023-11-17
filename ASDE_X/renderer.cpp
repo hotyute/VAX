@@ -2463,8 +2463,7 @@ void HandleMessageQueue()
 					filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
 				}
 				else {
-					if (closureAreas.empty())
-						startNewClosureArea();
+					
 					addPointToActiveArea(coords[0], coords[1]);
 				}
 			}
@@ -2477,10 +2476,7 @@ void HandleMessageQueue()
 
 				MOUSE_POS->x_ = LOWORD(msg.lParam);// coords[1];
 				MOUSE_POS->y_ = HIWORD(msg.lParam);//coords[0];
-				if (!closureAreas.empty() && closureAreas.back().opened) {
-					finishDefiningArea();
-					redrawClosures = true;
-				}
+				
 			}
 			break;
 			case WM_MOUSEMOVE:

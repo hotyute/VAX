@@ -3,6 +3,14 @@
 #include "flightplan.h"
 #include "packets.h"
 
+void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
+	std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store);
+
+void append_to_ctlr_List(std::string callsign, Controller& c, std::unordered_map<std::string,
+	std::shared_ptr<ChatLine>>&list, std::unordered_map<std::string, std::shared_ptr<ChatLine>>& ql_list);
+
+void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data, std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store);
+
 DWORD __stdcall CalcThread1(LPVOID)
 {
 	boost::posix_time::ptime start;
@@ -198,33 +206,15 @@ void refresh_ctrl_list()
 				{
 					if (!obs_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::OBSERVER)
 					{
-						std::vector<std::string> data;
-
-						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
-						data.push_back("1A");
-						data.push_back(frequency_to_string(c.userdata.frequency[0]));
-						data.push_back(std::to_string(c.getIdentity()->controller_rating));
-
-						add_to_ctrl_list(callsign, data, obs_list);
-						add_to_qlctrl_list(callsign, data, ql_obs_list);
-
+						append_to_ctlr_List(callsign, c, obs_list, ql_obs_list);
 					}
 					break;
 				}
 				case POSITIONS::DELIVERY:
 				{
 					if (!del_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::DELIVERY)
-					{
-						std::vector<std::string> data;
-
-						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
-						data.push_back("1A");
-						data.push_back(frequency_to_string(c.userdata.frequency[0]));
-						data.push_back(std::to_string(c.getIdentity()->controller_rating));
-
-						add_to_ctrl_list(callsign, data, del_list);
-						add_to_qlctrl_list(callsign, data, ql_del_list);
-
+					{					
+						append_to_ctlr_List(callsign, c, del_list, ql_del_list);
 					}
 					break;
 				}
@@ -232,16 +222,7 @@ void refresh_ctrl_list()
 				{
 					if (!gnd_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::GROUND)
 					{
-						std::vector<std::string> data;
-
-						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
-						data.push_back("1A");
-						data.push_back(frequency_to_string(c.userdata.frequency[0]));
-						data.push_back(std::to_string(c.getIdentity()->controller_rating));
-
-						add_to_ctrl_list(callsign, data, gnd_list);
-						add_to_qlctrl_list(callsign, data, ql_gnd_list);
-
+						append_to_ctlr_List(callsign, c, gnd_list, ql_gnd_list);
 					}
 					break;
 				}
@@ -249,16 +230,7 @@ void refresh_ctrl_list()
 				{
 					if (!twr_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::TOWER)
 					{
-						std::vector<std::string> data;
-
-						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
-						data.push_back("1A");
-						data.push_back(frequency_to_string(c.userdata.frequency[0]));
-						data.push_back(std::to_string(c.getIdentity()->controller_rating));
-
-						add_to_ctrl_list(callsign, data, twr_list);
-						add_to_qlctrl_list(callsign, data, ql_twr_list);
-
+						append_to_ctlr_List(callsign, c, twr_list, ql_twr_list);
 					}
 					break;
 				}
@@ -266,33 +238,23 @@ void refresh_ctrl_list()
 				{
 					if (!dep_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::DEPARTURE)
 					{
-						std::vector<std::string> data;
-
-						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
-						data.push_back("1A");
-						data.push_back(frequency_to_string(c.userdata.frequency[0]));
-						data.push_back(std::to_string(c.getIdentity()->controller_rating));
-
-						add_to_ctrl_list(callsign, data, dep_list);
-						add_to_qlctrl_list(callsign, data, ql_dep_list);
-
+						append_to_ctlr_List(callsign, c, dep_list, ql_dep_list);
 					}
 					break;
 				}
 				case POSITIONS::APPROACH:
 				{
-					if (!dep_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::APPROACH)
+					if (!app_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::APPROACH)
 					{
-						std::vector<std::string> data;
-
-						data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
-						data.push_back("1A");
-						data.push_back(frequency_to_string(c.userdata.frequency[0]));
-						data.push_back(std::to_string(c.getIdentity()->controller_rating));
-
-						add_to_ctrl_list(callsign, data, app_list);
-						add_to_qlctrl_list(callsign, data, ql_app_list);
-
+						append_to_ctlr_List(callsign, c, app_list, ql_app_list);
+					}
+					break;
+				}
+				case POSITIONS::CENTER:
+				{
+					if (!ctr_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::CENTER)
+					{
+						append_to_ctlr_List(callsign, c, ctr_list, ql_ctr_list);
 					}
 					break;
 				}
@@ -348,6 +310,14 @@ void refresh_ctrl_list()
 				controller_list_box->addLineTop("-----------APPROACH-----------", CHAT_TYPE::MAIN);
 			if (!ql_app_list.empty())
 				qlc_list_box->addLineTop("-----APP-----", CHAT_TYPE::MAIN);
+			break;
+		}
+		case POSITIONS::CENTER:
+		{
+			if (!ctr_list.empty())
+				controller_list_box->addLineTop("------------CENTER------------", CHAT_TYPE::MAIN);
+			if (!ql_ctr_list.empty())
+				qlc_list_box->addLineTop("-----CTR-----", CHAT_TYPE::MAIN);
 			break;
 		}
 		}
@@ -482,6 +452,19 @@ void add_to_qlctrl_list(std::string callsign, std::vector<std::string>& data,
 		}
 	}
 }*/
+
+void append_to_ctlr_List(std::string callsign, Controller& c, std::unordered_map<std::string, std::shared_ptr<ChatLine>>& list,
+	std::unordered_map<std::string, std::shared_ptr<ChatLine>>& ql_list) {
+	std::vector<std::string> data;
+
+	data.push_back(std::to_string(static_cast<int>(c.getIdentity()->controller_position)));
+	data.push_back("1A");
+	data.push_back(frequency_to_string(c.userdata.frequency[0]));
+	data.push_back(std::to_string(c.getIdentity()->controller_rating));
+
+	add_to_ctrl_list(callsign, data, list);
+	add_to_qlctrl_list(callsign, data, ql_list);
+}
 
 void clear_ctrl_list(std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store)
 {

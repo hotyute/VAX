@@ -24,6 +24,6 @@ double u_aircraft_size = 0.52;
 double elevation;
 std::string icao;
 
-bool DAY = true, DB_BLOCK = true, SHOW_VECTORS = false, CAPS = false, DUMP_COLLISION = false, CONTROL = false;
+bool DAY = true, DB_BLOCK = true, SHOW_VECTORS = false, CAPS = false, DUMP_COLLISION = false, DUMP_CLOSURE = false, CONTROL = false;
 
 char input_cursor = '_';

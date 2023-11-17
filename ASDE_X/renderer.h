@@ -17,7 +17,7 @@ extern std::vector<double*> closures, wnd_closures;
 
 extern std::string heavy_text, regular_text;
 
-extern bool renderSector, renderSectorColours, renderButtons, renderLegend, renderInterfaces,
+extern bool renderSector, renderSectorColours, redrawClosures, renderButtons, renderLegend, renderInterfaces,
 renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderClosures,
 renderCoordinates;
 
