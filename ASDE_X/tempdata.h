@@ -10,6 +10,23 @@ struct LatLon {
     }
 };
 
+class LineVis {
+public:
+    void addPoint(float lat, float lon) {
+        points.push_back({ lat, lon });
+    }
+
+    const std::vector<LatLon>& getPoints() const {
+        return points;
+    }
+
+    void clear() {
+        points.clear();
+    }
+private:
+    std::vector<LatLon> points;
+};
+
 class ClosureArea {
 public:
     bool opened = false;

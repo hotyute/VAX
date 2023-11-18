@@ -3,6 +3,7 @@
 #include <chrono>
 #include <algorithm>
 #include <limits>
+#include <cstdarg>
 
 #define NOMINMAX
 
@@ -27,14 +28,14 @@
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
-std::vector<double*> closures, wnd_closures;
+std::vector<double*> closures;
+
+LineVis debug_vis;
 
 bool renderSector = false, renderSectorColours = false, redrawClosures = false,
 renderButtons = false, renderLegend = false, renderInterfaces = false, renderConf = false, renderDate = false,
 renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
-renderAllInputText = false, renderClosures = false, renderCoordinates = false;
-
-bool convert_closures = false;
+renderAllInputText = false, renderLineVis = false, renderCoordinates = false;
 
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
@@ -82,7 +83,7 @@ void collision_graphics(Collision& collision, Mirror* mirror);
 
 void updateCollisionLine(Mirror* mirror, Collision& aircraft, unsigned int& base, double zo);
 
-void draw_point(double x, double y);
+void draw_point(double x, double y, ...);
 
 
 std::vector<GLdouble*> tesses;
@@ -319,23 +320,27 @@ void DrawData()
 		}
 	}
 
-	if (renderClosures)
+	if (renderLineVis)
 	{
-		glDeleteLists(closuresDl, 1);
+		if (glIsList(closuresDl)) {
+			glDeleteLists(closuresDl, 1);
+		}
 
 		closuresDl = glGenLists(1);
 
 		glNewList(closuresDl, GL_COMPILE);
 
-		for (auto it = wnd_closures.begin(); it != wnd_closures.end(); ++it)
-		{
-			double* c = *it;
-			draw_point(c[1], c[0]);
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+
+		glBegin(GL_LINE_LOOP);// use this to draw the diagonal lines
+		for (const LatLon& point : debug_vis.getPoints()) {
+			glVertex2f(point.lon, point.lat);
 		}
+		glEnd();
 
 		glEndList();
 
-		renderClosures = false;
+		renderLineVis = false;
 	}
 
 	glCallList(closuresDl);
@@ -2061,30 +2066,6 @@ void aircraft_graphics(Aircraft& aircraft, Mirror* mirror) {
 		GetWndPos(acf_lat, acf_lon, aircraft.wnd_loc);
 	}
 
-	if (convert_closures)
-	{
-		auto p_it = wnd_closures.begin();
-		while (p_it != wnd_closures.end())
-		{
-			double* c1 = *p_it;
-			p_it = wnd_closures.erase(p_it);
-			delete[] c1;
-		}
-
-		auto it = closures.begin();
-		while (it != closures.end())
-		{
-			double* n = new double[3];
-
-			double* c = *it;
-			GetWndPos(c[0], c[1], n);
-			++it;
-
-			wnd_closures.push_back(n);
-		}
-		convert_closures = false;
-	}
-
 	//if (renderCallsign || renderFlags[GBL_CALLSIGN]) {
 	//	GetCallsignCoords(aircraft, mirror, heavy, latitude, longitude);
 	//}
@@ -2128,8 +2109,7 @@ void collision_graphics(Collision& collision, Mirror* mirror) {
 	bool is_mirror = mirror ? true : false;
 	double zo = is_mirror ? mirror->getZoom() : mZoom;
 
-	if (is_mirror)
-	{
+	if (is_mirror) {
 		//TODO make this more efficient, we shouldn't be searching an ordermap every single frame
 		if (collision.getRenderFlag(COL_COLLISION_LINE) || mirror->render_flags[MIR_COLLISION_LINE]) {
 			updateCollisionLine(mirror, collision, mirror->c_flags[&collision][0], zo);
@@ -2139,8 +2119,7 @@ void collision_graphics(Collision& collision, Mirror* mirror) {
 		glCallList(mirror->c_flags[&collision][0]);
 		glPopMatrix();
 	}
-	else
-	{
+	else {
 		if (collision.getRenderFlag(COL_COLLISION_LINE) || renderFlags[GBL_COLLISION_LINE]) {
 			updateCollisionLine(mirror, collision, collision.collLineDL, zo);
 		}
@@ -2430,16 +2409,28 @@ void RenderInterfaceInputText() {
 	renderAllInputText = false;
 }
 
-void draw_point(double x, double y)
+void draw_point(double x, double y, ...)
 {
 	double size = 10.0;
 	double startX = x - size, startY = y - size;
 	double endX = x + size, endY = y + size;
 
-	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	va_list args;
+	va_start(args, y);
+
+	GLfloat color[4];
+	for (int i = 0; i < 4; ++i) {
+		color[i] = static_cast<GLfloat>(va_arg(args, double));
+	}
+
+	va_end(args);
+
 	int line_width = 2;
 	startX += line_width, startY += line_width;
 	endX -= line_width, endY -= line_width;
+
+	glColor4fv(color);
+
 	DrawVarLine((float)startX, (float)endY, (float)endX, (float)startY, (float)line_width, (float)line_width);
 	DrawVarLine((float)startX, (float)startY, (float)endX, (float)endY, (float)line_width, (float)line_width);
 }
@@ -2465,6 +2456,8 @@ void HandleMessageQueue()
 				else {
 					
 					addPointToActiveArea(coords[0], coords[1]);
+					debug_vis.addPoint(coords[0], coords[1]);
+					renderLineVis = true;
 				}
 			}
 			break;
@@ -2670,5 +2663,9 @@ void renderClosureArea(const ClosureArea& area, float spacing) {
 	// Clean up
 	delete[] polygons[0];
 	delete[] polygons;
+}
+
+void clear_debug_lines() {
+	debug_vis.clear();
 }
 

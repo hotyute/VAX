@@ -349,8 +349,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderDepartures = true;
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderAllInputText = true;
-		convert_closures = true;
-		renderClosures = true;
+		renderLineVis = true;
 		//renderAircraft = true;
 	}
 	break;
@@ -898,6 +897,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						finishDefiningArea();
 						redrawClosures = true;
 						sendSystemMessage("Finished Closure Points.");
+						clear_debug_lines();
 					}
 				}
 				break;

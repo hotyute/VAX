@@ -56,6 +56,7 @@ void update()
 }
 
 void CalculateCollisions() {
+	//TODO We shouldn't be using Collision logic when aircraft are stopped.
 	if (!acf_map.empty()) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++)
 		{
@@ -68,41 +69,41 @@ void CalculateCollisions() {
 
 					Aircraft* acf2 = iter2.second;
 					if (acf2 && acf2 != acf1) {
-						if (aircraft1.collisions.find(acf2) == aircraft1.collisions.end())
+						Aircraft& aircraft2 = *acf2;
+						bool notColliding = aircraft1.collisions.find(acf2) == aircraft1.collisions.end() &&
+							aircraft2.collisions.find(acf1) == aircraft2.collisions.end();
+						if (notColliding)
 						{
-							Aircraft& aircraft2 = *acf2;
-							if (aircraft2.collisions.find(acf1) == aircraft2.collisions.end())
-							{
-								if (areColliding(acf1, acf2, 30.0)) {
-									auto* collision = new Collision(acf1, acf2);
-									collision->setUpdateFlag(COL_COLLISION_LINE, true);
-									aircraft1.collisions.emplace(acf2, collision);
-									aircraft2.collisions.emplace(acf1, collision);
-									addCollisionToMirrors(collision);
-									Collision_Map.emplace(acf1, collision);
-									Collision_Map.emplace(acf2, collision);
-									printf("Collision Detected!!\n");
-								}
+							if (areColliding(acf1, acf2, 30.0)) {
+								auto* collision = new Collision(acf1, acf2);
+								collision->setUpdateFlag(COL_COLLISION_LINE, true);
+								aircraft1.collisions.emplace(acf2, collision);
+								aircraft2.collisions.emplace(acf1, collision);
+								addCollisionToMirrors(collision);
+								Collision_Map.emplace(acf1, collision);
+								Collision_Map.emplace(acf2, collision);
 							}
-							else if (aircraft2.collisions.find(acf1) != aircraft2.collisions.end())
-							{
-								if (!areColliding(acf1, acf2, 30.0)) {
-									Collision* collision = aircraft1.collisions[acf2];
-									Collision* collision2 = aircraft2.collisions[acf1];
-									if (collision = collision2)
+						}
+						else
+						{
+							if (!futureDistanceCollide(acf1, acf2, 30.0)) {
+								Collision* collision = aircraft1.collisions[acf2];
+								Collision* collision2 = aircraft2.collisions[acf1];
+								if (collision = collision2)
+								{
+									Collision* map_col = Collision_Map[acf1];
+									Collision* map_col2 = Collision_Map[acf2];
+									if (map_col == map_col2)
 									{
-										Collision* map_col = Collision_Map[acf1];
-										Collision* map_col2 = Collision_Map[acf2];
-										if (map_col == map_col2)
-										{
-											removeCollisionToMirrors(collision);
-											collision->setUpdateFlag(COL_COLLISION_LINE, true);
-											//add collision to a queue to be deleted.
-										}
+										aircraft1.collisions.erase(acf2);
+										aircraft2.collisions.erase(acf1);
+										removeCollisionFromMirrors(collision);
+										collision->setUpdateFlag(COL_COLLISION_LINE, true);
+										//add collision to a queue to be deleted.
 									}
 								}
+								printf("No Longer Colliding.\n");
 							}
-							//Check What Runway Aircraft1
 						}
 					}
 				}
@@ -231,7 +232,7 @@ void refresh_ctrl_list()
 				case POSITIONS::DELIVERY:
 				{
 					if (!del_list.count(callsign) && c.getIdentity()->controller_position == POSITIONS::DELIVERY)
-					{					
+					{
 						append_to_ctlr_List(callsign, c, del_list, ql_del_list);
 					}
 					break;

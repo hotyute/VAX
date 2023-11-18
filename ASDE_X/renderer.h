@@ -13,15 +13,13 @@
 extern std::unordered_map<std::string, Mirror*> mirrors_storage;
 extern std::vector<Mirror*> mirrors;
 
-extern std::vector<double*> closures, wnd_closures;
+extern std::vector<double*> closures;
 
 extern std::string heavy_text, regular_text;
 
 extern bool renderSector, renderSectorColours, redrawClosures, renderButtons, renderLegend, renderInterfaces,
-renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderClosures,
+renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderLineVis,
 renderCoordinates;
-
-extern bool convert_closures;
 
 extern bool updateFlags[NUM_FLAGS];
 extern bool renderFlags[NUM_FLAGS];
@@ -132,5 +130,7 @@ bool RenderFocus();
 bool RenderFocusChild(CHILD_TYPE type);
 
 void HandleMessageQueue();
+
+void clear_debug_lines();
 
 #endif

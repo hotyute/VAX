@@ -87,7 +87,7 @@ void addAircraftToMirrors(Aircraft*);
 
 void addCollisionToMirrors(Collision* collision);
 
-void removeCollisionToMirrors(Collision* collision);
+void removeCollisionFromMirrors(Collision* collision);
 
 void addCollisionsToMirror(Mirror* mir);
 
@@ -142,6 +142,8 @@ Point2 findConvergingPoint(Aircraft* obj1, Aircraft* obj2, double time);
 bool isOnSameOrAdjacentPath(Aircraft* obj1, Aircraft* obj2, double time);
 
 bool areColliding(Aircraft* obj1, Aircraft* obj2, double time);
+
+bool futureDistanceCollide(Aircraft* obj1, Aircraft* obj2, double time);
 
 bool on_path_logic(const Point2& point);
 

@@ -459,14 +459,14 @@ void addCollisionToMirrors(Collision* collision)
 	}
 }
 
-void removeCollisionToMirrors(Collision* collision)
+void removeCollisionFromMirrors(Collision* collision)
 {
 	for (auto it = mirrors_storage.begin(); it != mirrors_storage.end(); ++it)
 	{
 		Mirror* mir = (*it).second;
-		if (mir && mir->c_flags.find(collision) == mir->c_flags.end())
+		if (mir && mir->c_flags.find(collision) != mir->c_flags.end())
 		{
-			mir->c_flags.emplace(collision, std::vector<unsigned int>(COL_FLAG_COUNT)); // initialized to 0 by default
+			mir->c_flags.erase(collision); // initialized to 0 by default
 		}
 	}
 }
@@ -915,6 +915,10 @@ bool areColliding(Aircraft* obj1, Aircraft* obj2, double time) {
 		return false; // If they aren't on the same or adjacent paths, they cannot collide.
 	}
 
+	return futureDistanceCollide(obj1, obj2, time);
+}
+
+bool futureDistanceCollide(Aircraft* obj1, Aircraft* obj2, double time) {
 	Point2 futurePos1 = getLocFromBearing(obj1->getLatitude(), obj1->getLongitude(), (obj1->getSpeed() / 3600.0) * time, obj1->getHeading());
 	Point2 futurePos2 = getLocFromBearing(obj2->getLatitude(), obj2->getLongitude(), (obj2->getSpeed() / 3600.0) * time, obj2->getHeading());
 

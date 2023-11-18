@@ -33,8 +33,7 @@ void open_adx(std::string path)
 		renderCoordinates = true;
 		renderDepartures = true;
 		updateFlags[GBL_COLLISION_LINE] = true;
-		convert_closures = true;
-		renderClosures = true;
+		renderLineVis = true;
 		zoom_phase = 2;
 		rangeb->refreshOption2();
 		refresh_ctrl_list();
