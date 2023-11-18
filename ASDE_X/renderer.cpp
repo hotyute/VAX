@@ -42,7 +42,7 @@ bool renderFlags[NUM_FLAGS];
 
 bool isPanning = false;
 bool resize = false;
-GLint sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList, coordinateDl;
+GLint sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, lineVisDl = 0, closureAreaList, coordinateDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -290,13 +290,13 @@ void DrawGLScene() {
 
 	if (renderLineVis)
 	{
-		if (glIsList(closuresDl)) {
-			glDeleteLists(closuresDl, 1);
+		if (glIsList(lineVisDl)) {
+			glDeleteLists(lineVisDl, 1);
 		}
 
-		closuresDl = glGenLists(1);
+		lineVisDl = glGenLists(1);
 
-		glNewList(closuresDl, GL_COMPILE);
+		glNewList(lineVisDl, GL_COMPILE);
 
 		glColor3f(1.0f, 1.0f, 1.0f);
 
@@ -371,6 +371,10 @@ void DrawMirrorScenes(Mirror& mirror)
 		mirror.renderBorder = false;
 	}
 	glCallList(mirror.borderDl);
+
+	renderAllClosureAreas();
+
+	renderDebugLine();
 }
 
 void DrawMirrorData(Mirror& mirror)
@@ -2502,15 +2506,11 @@ void HandleMessageQueue()
 }
 
 void renderAllClosureAreas() {
-	glPushMatrix();
 	glCallList(closureAreaList);
-	glPopMatrix();
 }
 
 void renderDebugLine() {
-	glPushMatrix();
-	glCallList(closuresDl);
-	glPopMatrix();
+	glCallList(lineVisDl);
 }
 
 void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas) {

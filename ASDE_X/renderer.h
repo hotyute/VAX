@@ -27,7 +27,7 @@ extern bool renderFlags[NUM_FLAGS];
 extern bool resize;
 
 extern int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, 
-holesDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl, closuresDl;
+holesDl, legendDl, buttonsDl, confDl, aircraftDl, heavyDl, unkTarDl, lineVisDl;
 
 extern unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 extern HFONT callSignFont, topBtnFont, confFont, legendFont, titleFont, labelFont, errorFont;
