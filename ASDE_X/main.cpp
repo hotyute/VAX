@@ -9,6 +9,8 @@
 
 #include <windowsx.h>
 
+#include <gl/GLU.h>
+
 #include "later.h"
 #include "renderer.h"
 #include "guicon.h"
@@ -349,7 +351,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderDepartures = true;
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		renderAllInputText = true;
-		renderLineVis = true;
 		//renderAircraft = true;
 	}
 	break;
@@ -898,6 +899,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						redrawClosures = true;
 						sendSystemMessage("Finished Closure Points.");
 						clear_debug_lines();
+						renderLineVis = true;
 					}
 				}
 				break;
@@ -1590,7 +1592,6 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		//Draw Main Scene
 		ResizeGLScene();
 		DrawGLScene();
-		renderAllClosureAreas();
 
 		//Draw Aircraft Data like Callsigns vectors
 		ResizeDataGLScene();

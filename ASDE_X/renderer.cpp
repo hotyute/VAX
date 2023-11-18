@@ -42,7 +42,7 @@ bool renderFlags[NUM_FLAGS];
 
 bool isPanning = false;
 bool resize = false;
-int sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList, coordinateDl;
+GLint sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, closuresDl = 0, closureAreaList, coordinateDl;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -240,13 +240,10 @@ void SetView(double latitude, double longitude) {
 
 void DrawGLScene() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (DAY) {
+	if (DAY)
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
-	}
 	else
-	{
 		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
-	}
 	if (renderSector) {
 		glDeleteLists(taxiwaysDl, 1);
 		glDeleteLists(apronDl, 1);
@@ -281,10 +278,7 @@ void DrawGLScene() {
 			}
 		}
 	}
-}
 
-void DrawData()
-{
 	if (redrawClosures)
 	{
 		glDeleteLists(closureAreaList, 1);
@@ -293,6 +287,35 @@ void DrawData()
 	}
 
 	renderAllClosureAreas();
+
+	if (renderLineVis)
+	{
+		if (glIsList(closuresDl)) {
+			glDeleteLists(closuresDl, 1);
+		}
+
+		closuresDl = glGenLists(1);
+
+		glNewList(closuresDl, GL_COMPILE);
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+
+		glBegin(GL_LINE_LOOP);
+		for (const LatLon& point : debug_vis.getPoints()) {
+			glVertex2f(point.lon, point.lat);
+		}
+		glEnd();
+
+		glEndList();
+
+		renderLineVis = false;
+	}
+
+	renderDebugLine();
+}
+
+void DrawData()
+{
 
 	if (acf_map.size() > 0)
 	{
@@ -319,43 +342,15 @@ void DrawData()
 			}
 		}
 	}
-
-	if (renderLineVis)
-	{
-		if (glIsList(closuresDl)) {
-			glDeleteLists(closuresDl, 1);
-		}
-
-		closuresDl = glGenLists(1);
-
-		glNewList(closuresDl, GL_COMPILE);
-
-		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-
-		glBegin(GL_LINE_LOOP);// use this to draw the diagonal lines
-		for (const LatLon& point : debug_vis.getPoints()) {
-			glVertex2f(point.lon, point.lat);
-		}
-		glEnd();
-
-		glEndList();
-
-		renderLineVis = false;
-	}
-
-	glCallList(closuresDl);
 }
 
 void DrawMirrorScenes(Mirror& mirror)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (DAY) {
+	if (DAY)
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
-	}
 	else
-	{
 		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
-	}
 
 
 	glCallList(sectorDl);
@@ -2453,8 +2448,7 @@ void HandleMessageQueue()
 				{
 					filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
 				}
-				else {
-					
+				if (DUMP_CLOSURE) {
 					addPointToActiveArea(coords[0], coords[1]);
 					debug_vis.addPoint(coords[0], coords[1]);
 					renderLineVis = true;
@@ -2469,7 +2463,7 @@ void HandleMessageQueue()
 
 				MOUSE_POS->x_ = LOWORD(msg.lParam);// coords[1];
 				MOUSE_POS->y_ = HIWORD(msg.lParam);//coords[0];
-				
+
 			}
 			break;
 			case WM_MOUSEMOVE:
@@ -2510,6 +2504,12 @@ void HandleMessageQueue()
 void renderAllClosureAreas() {
 	glPushMatrix();
 	glCallList(closureAreaList);
+	glPopMatrix();
+}
+
+void renderDebugLine() {
+	glPushMatrix();
+	glCallList(closuresDl);
 	glPopMatrix();
 }
 

@@ -502,7 +502,6 @@ int TopButton::handleScroll(bool hi_scroll)
 			if (this->value != change) {
 				this->setOption2(std::to_string((int)(rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
 
-				renderLineVis = true;
 				updateFlags[GBL_COLLISION_LINE] = true;
 				updateFlags[GBL_VECTOR] = true;
 			}
@@ -588,7 +587,6 @@ void TopButton::set_range(int val, int min, int max, int &var)
 		mZoom = zoom_from_range();
 		updateFlags[GBL_COLLISION_LINE] = true;
 		updateFlags[GBL_VECTOR] = true;
-		renderLineVis = true;
 	}
 	renderButtons = true;
 }
@@ -603,7 +601,6 @@ void TopButton::set_rotation(int val, int min, int max)
 	if (this->value != change) {
 		this->setOption2(std::to_string((int)(rotation = this->value)));//range is set in 100's of feet so 100 = 10,000 feet
 
-		renderLineVis = true;
 		updateFlags[GBL_COLLISION_LINE] = true;
 		updateFlags[GBL_VECTOR] = true;
 	}
