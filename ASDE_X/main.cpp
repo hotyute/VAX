@@ -904,6 +904,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				}
 				break;
 			}
+			case 'Z':
+			{
+				if (DUMP_CLOSURE) {
+					removePointFromActiveArea();
+					pop_debug_vis();
+					renderLineVis = true;
+				}
+				break;
+			}
 			}
 		}
 		else if (wParam == VK_TAB) {

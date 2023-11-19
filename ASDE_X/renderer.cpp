@@ -304,6 +304,7 @@ void DrawGLScene() {
 		for (const LatLon& point : debug_vis.getPoints()) {
 			glVertex2f(point.lon, point.lat);
 		}
+		glVertex2f(DISPLAY_MOUSE_POS->x_, DISPLAY_MOUSE_POS->y_);
 		glEnd();
 
 		glEndList();
@@ -2490,6 +2491,8 @@ void HandleMessageQueue()
 				}
 				DISPLAY_MOUSE_POS->x_ = coords[1];
 				DISPLAY_MOUSE_POS->y_ = coords[0];
+				if (DUMP_CLOSURE)
+					renderLineVis = true;
 				renderCoordinates = true;
 			}
 			break;
@@ -2667,5 +2670,9 @@ void renderClosureArea(const ClosureArea& area, float spacing) {
 
 void clear_debug_lines() {
 	debug_vis.clear();
+}
+
+void pop_debug_vis() {
+	debug_vis.pop_back();
 }
 

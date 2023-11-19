@@ -12,17 +12,13 @@ struct LatLon {
 
 class LineVis {
 public:
-    void addPoint(float lat, float lon) {
-        points.push_back({ lat, lon });
-    }
+    void addPoint(float lat, float lon) { points.push_back({ lat, lon }); }
 
-    const std::vector<LatLon>& getPoints() const {
-        return points;
-    }
+    const std::vector<LatLon>& getPoints() const { return points; }
 
-    void clear() {
-        points.clear();
-    }
+    void clear() { points.clear(); }
+
+    void pop_back() { points.pop_back(); }
 private:
     std::vector<LatLon> points;
 };
@@ -47,5 +43,7 @@ extern std::vector<ClosureArea> closureAreas;
 void startNewClosureArea();
 
 void addPointToActiveArea(float lat, float lon);
+
+void removePointFromActiveArea();
 
 void finishDefiningArea();

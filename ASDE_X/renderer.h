@@ -136,4 +136,6 @@ void renderDebugLine();
 
 void clear_debug_lines();
 
+void pop_debug_vis();
+
 #endif
