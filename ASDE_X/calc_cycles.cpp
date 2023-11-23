@@ -97,8 +97,11 @@ void CalculateCollisions() {
 									{
 										aircraft1.collisions.erase(acf2);
 										aircraft2.collisions.erase(acf1);
+										Collision_Map.erase(acf1);
+										Collision_Map.erase(acf2);
 										removeCollisionFromMirrors(collision);
 										collision->setUpdateFlag(COL_COLLISION_LINE, true);
+										Collision_Del.push_back(collision);
 										//add collision to a queue to be deleted.
 									}
 								}

@@ -1771,6 +1771,11 @@ void resetFlags() {
 			renderFlags[i] = false;
 		}
 	}
+
+	for (auto it = Collision_Del.begin(); it != Collision_Del.end(); ++it) {
+		delete* it;
+	}
+	Collision_Del.clear();
 }
 
 void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc)

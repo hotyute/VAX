@@ -30,6 +30,7 @@ public:
 #endif
 
 extern std::unordered_map<Aircraft*, Collision*> Collision_Map;
+extern std::vector<Collision*> Collision_Del;
 extern std::vector<std::vector<Point2>> taxiway_polygons;
 extern std::unordered_map<std::string, std::vector<Point2>> runway_polygons;
 extern std::vector<std::string> logic;
