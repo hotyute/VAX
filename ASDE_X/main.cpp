@@ -350,7 +350,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		renderCoordinates = true;
 		renderDepartures = true;
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-		renderAllInputText = true;
+		rendererFlags["renderAllInputText"] = true;
 		//renderAircraft = true;
 	}
 	break;
