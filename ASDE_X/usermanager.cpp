@@ -158,7 +158,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 				if (departures.count(callsign))
 				{
 					departures.erase(callsign);
-					renderDepartures = true;
+					rendererFlags["renderDepartures"] = true;
 				}
 			}
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
@@ -240,7 +240,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 			auto c = std::make_shared<ChatLine>(user1->getIdentity()->callsign + std::string(": ") + msg, CHAT_TYPE::MAIN, main_chat_box);
 			main_chat_box->addLine(c);
 			c->playChatSound();
-			renderDrawings = true;
+			rendererFlags["drawings"] = true;
 		}
 	}
 
@@ -296,7 +296,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 		{
 
 		}
-		renderDrawings = true;
+		rendererFlags["drawings"] = true;
 	}
 
 	if (opCode == 19)

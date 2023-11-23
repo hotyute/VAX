@@ -33,8 +33,8 @@ void ConfigUpdates::execute() {
 	else
 	acf->setHeading(acf->getHeading() + 3);*/
 
-	renderDate = true;
-	renderCoordinates = true;
+	rendererFlags["renderDate"] = true;
+	rendererFlags["renderCoordinates"] = true;
 }
 
 void ConfigUpdates::stop() 

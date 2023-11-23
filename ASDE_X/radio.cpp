@@ -104,6 +104,6 @@ int Radio::handleClick(ChildFrame* clicked, int x, int y)
 int Radio::toggle()
 {
 	checked = !checked;
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 	return 1;
 }

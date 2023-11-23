@@ -153,7 +153,7 @@ void read_info()
 							line->hdst->checked = hdst;
 							line->spkr->checked = spkr;
 
-							renderDrawings = true;
+							rendererFlags["drawings"] = true;
 						}
 					}
 				}

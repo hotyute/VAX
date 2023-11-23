@@ -17,9 +17,7 @@ extern std::vector<double*> closures;
 
 extern std::string heavy_text, regular_text;
 
-extern bool renderSector, renderSectorColours, redrawClosures, renderButtons, renderLegend, renderInterfaces,
-renderConf, renderDate, renderFocus, renderDrawings, queueDeleteInterface, renderDepartures, renderAllInputText, renderLineVis,
-renderCoordinates;
+extern std::unordered_map<std::string, bool> rendererFlags;
 
 extern bool updateFlags[NUM_FLAGS];
 extern bool renderFlags[NUM_FLAGS];

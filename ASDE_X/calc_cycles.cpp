@@ -152,7 +152,7 @@ void CalcDepartures() {
 						max_points--;
 					}
 					departures.emplace(callsign, new_points);
-					renderDepartures = true;
+					rendererFlags["renderDepartures"] = true;
 				}
 			}
 			else
@@ -182,7 +182,7 @@ void CalcDepartures() {
 							|| (new_points.size() > 1 && !boost::iequals(new_points[1], _points[1])))
 						{
 							departures[callsign] = new_points;
-							renderDepartures = true;
+							rendererFlags["renderDepartures"] = true;
 						}
 					}
 				}
@@ -342,7 +342,7 @@ void refresh_ctrl_list()
 		}
 	}
 
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }
 
 void add_to_ctrl_list(std::string callsign, std::vector<std::string>& data,
@@ -524,12 +524,11 @@ void clear_ctrl_list()
 void remove_ctrl_list(std::shared_ptr<ChatLine>& c)
 {
 	controller_list_box->removeLine(c);
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }
 
 void remove_qlctrl_list(std::shared_ptr<ChatLine>& c)
 {
-	printf("%s", c->getText().c_str());
 	qlc_list_box->removeLine(c);
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }

@@ -307,8 +307,8 @@ bool DisplayBox::placeEdit(InputField* input_field) const
 		frame->children[input_field->index = (index + 1)] = input_field;
 		input_field->setFocus();
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-		renderInterfaces = true;
-		renderDrawings = true;
+		rendererFlags["renderInterfaces"] = true;
+		rendererFlags["renderDrawings"] = true;
 		return true;
 	}
 	return false;
@@ -394,14 +394,8 @@ void DisplayBox::doDrawing() {
 	const int dbox_padding = 0;
 	const double y_height = ((param.getActualHeight() - dbox_padding) / numBlocks);
 	double last_end_y = -1;
-	//SelectObject(hDC, topBtnFont);
-	//TEXTMETRIC tm;
-	//GetTextMetrics(hDC, &tm);
-	//long ave = tm.tmAveCharWidth;
-	//int maxChars = aW / ave;
 
 	consolidate_lines();
-
 
 	//draw Text to screen
 	displayed_lines.clear();
@@ -470,7 +464,7 @@ void DisplayBox::setFocus() {
 		}
 		focus = true;
 		focusChild = this;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 
@@ -481,7 +475,7 @@ void DisplayBox::removeFocus() {
 		focus = false;
 		lastFocus = this;
 		focusChild = nullptr;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 
@@ -563,7 +557,7 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 
 						}
 
-						renderDrawings = true;
+						rendererFlags["renderDrawings"] = true;
 						clicked = this;
 						return 1;
 					}
@@ -645,7 +639,7 @@ void DisplayBox::doActionUp()
 {
 	if ((read_index - 1) >= 0) {
 		--read_index;
-		renderDrawings = true;
+		rendererFlags["renderDrawings"] = true;
 	}
 }
 
@@ -653,7 +647,7 @@ void DisplayBox::doActionDown()
 {
 	if ((read_index + 1) <= ((chat_lines.end() - numBlocks) - chat_lines.begin())) {
 		++read_index;
-		renderDrawings = true;
+		rendererFlags["renderDrawings"] = true;
 	}
 }
 

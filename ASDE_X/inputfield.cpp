@@ -319,7 +319,7 @@ void InputField::handle_box()
 		removeFocus();
 	frame->children[index] = nullptr;
 	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 	delete this;
 }
 
@@ -330,7 +330,7 @@ void InputField::handleBox2()
 		removeFocus();
 	frame->children[index] = nullptr;
 	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 	delete this;
 }
 
@@ -341,7 +341,7 @@ void InputField::update_line() const
 		const std::shared_ptr<ChatLine>& c = line_ptr;
 		c->setText(input);
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-		renderDrawings = true;
+		rendererFlags["drawings"] = true;
 	}
 }
 
@@ -352,7 +352,7 @@ void InputField::reverse_update()
 		const std::shared_ptr<ChatLine>& c = line_ptr;
 		input = c->getText().c_str();
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-		renderDrawings = true;
+		rendererFlags["drawings"] = true;
 	}
 }
 
@@ -363,7 +363,7 @@ void InputField::updateInput(const std::shared_ptr<ChatLine>& c)
 		line_ptr = c;
 		setCursor();
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-		renderDrawings = true;
+		rendererFlags["drawings"] = true;
 	}
 }
 
@@ -389,7 +389,7 @@ void InputField::handle_entry()
 	{
 		removeFocus();
 	}
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }
 
 void InputField::calcCursorPos(double x, double y)

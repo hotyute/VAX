@@ -32,10 +32,23 @@ std::vector<double*> closures;
 
 LineVis debug_vis;
 
-bool renderSector = false, renderSectorColours = false, redrawClosures = false,
-renderButtons = false, renderLegend = false, renderInterfaces = false, renderConf = false, renderDate = false,
-renderFocus = false, renderDrawings = false, queueDeleteInterface = false, renderDepartures = false,
-renderAllInputText = false, renderLineVis = false, renderCoordinates = false;
+std::unordered_map<std::string, bool> rendererFlags = {
+	{"sector", false},
+	{"renderSectorColours", false},
+	{"redrawClosures", false},
+	{"buttons", false},
+	{"legend", false},
+	{"renderInterfaces", false},
+	{"renderConf", false},
+	{"renderDate", false},
+	{"focus", false},
+	{"drawings", false},
+	{"queueDeleteInterface", false},
+	{"renderDepartures", false},
+	{"renderAllInputText", false},
+	{"renderLineVis", false},
+	{"renderCoordinates", false}
+};
 
 bool updateFlags[NUM_FLAGS];
 bool renderFlags[NUM_FLAGS];
@@ -244,7 +257,7 @@ void DrawGLScene() {
 		glClearColor(day_background[0], day_background[1], day_background[2], 0.0f);
 	else
 		glClearColor(nite_background[0], nite_background[1], nite_background[2], 0.0f);
-	if (renderSector) {
+	if (rendererFlags["sector"]) {
 		glDeleteLists(taxiwaysDl, 1);
 		glDeleteLists(apronDl, 1);
 		glDeleteLists(runwaysDl, 1);
@@ -252,14 +265,14 @@ void DrawGLScene() {
 		glPushMatrix();
 		DrawSceneryData(nullptr);
 		glPopMatrix();
-		renderSector = false;
+		rendererFlags["sector"] = false;
 	}
 
-	if (renderSectorColours)
+	if (rendererFlags["renderSectorColours"])
 	{
 		glDeleteLists(sectorDl, 1);
 		CreateSectorColours();
-		renderSectorColours = false;
+		rendererFlags["renderSectorColours"] = false;
 	}
 
 	glCallList(sectorDl);
@@ -279,16 +292,16 @@ void DrawGLScene() {
 		}
 	}
 
-	if (redrawClosures)
+	if (rendererFlags["redrawClosures"])
 	{
 		glDeleteLists(closureAreaList, 1);
 		compileClosureAreaList(closureAreas);
-		redrawClosures = false;
+		rendererFlags["redrawClosures"] = false;
 	}
 
 	renderAllClosureAreas();
 
-	if (renderLineVis)
+	if (rendererFlags["renderLineVis"])
 	{
 		if (glIsList(lineVisDl)) {
 			glDeleteLists(lineVisDl, 1);
@@ -309,7 +322,7 @@ void DrawGLScene() {
 
 		glEndList();
 
-		renderLineVis = false;
+		rendererFlags["renderLineVis"] = false;
 	}
 
 	renderDebugLine();
@@ -412,23 +425,23 @@ void DrawMirrorData(Mirror& mirror)
 
 void DrawInterfaces() {
 
-	if (renderLegend) {
+	if (rendererFlags["legend"]) {
 		glDeleteLists(legendDl, 1);
 		RenderLegend();
-		renderLegend = false;
+		rendererFlags["legend"] = false;
 	}
 	glPushMatrix();
 	glCallList(legendDl);
 	glPopMatrix();
-	if (renderButtons) {
+	if (rendererFlags["buttons"]) {
 		glDeleteLists(buttonsDl, 1);
 		RenderButtons();
-		renderButtons = false;
+		rendererFlags["buttons"] = false;
 	}
 	glPushMatrix();
 	glCallList(buttonsDl);
 	glPopMatrix();
-	if (renderInterfaces) {
+	if (rendererFlags["renderInterfaces"]) {
 		for (InterfaceFrame* frame : rendered_frames) {
 			if (frame)
 			{
@@ -440,10 +453,10 @@ void DrawInterfaces() {
 				RenderInterface(frame);
 			}
 		}
-		renderInterfaces = false;
+		rendererFlags["renderInterfaces"] = false;
 	}
 	CallInterfaces();
-	if (renderDrawings) {
+	if (rendererFlags["drawings"]) {
 		//TODO add optimizations (refresh per object basis)
 		for (InterfaceFrame* frame : rendered_frames)
 		{
@@ -457,10 +470,10 @@ void DrawInterfaces() {
 				RenderDrawings(frame);
 			}
 		}
-		renderDrawings = false;
+		rendererFlags["drawings"] = false;
 	}
 	CallDrawings();
-	if (renderFocus) {
+	if (rendererFlags["focus"]) {
 		//TODO add optimizations (refresh per object basis)
 		for (InterfaceFrame* frame : rendered_frames) {
 			if (frame)
@@ -473,7 +486,7 @@ void DrawInterfaces() {
 				RenderFocuses(frame);
 			}
 		}
-		renderFocus = false;
+		rendererFlags["focus"] = false;
 	}
 	CallFocuses();
 
@@ -507,27 +520,27 @@ void DrawInterfaces() {
 		}
 	}
 
-	if (renderConf) {
+	if (rendererFlags["renderConf"]) {
 		glDeleteLists(confDl, 1);
 		RenderConf();
 		RenderTerminalCommands(true);
-		renderConf = false;
+		rendererFlags["renderConf"] = false;
 	}
 
 	glPushMatrix();
 	glCallList(confDl);
 	glPopMatrix();
 
-	if (renderDate) {
+	if (rendererFlags["renderDate"]) {
 		glDeleteLists(dateDl, 1);
 		RenderDate();
-		renderDate = false;
+		rendererFlags["renderDate"] = false;
 	}
 
-	if (renderCoordinates) {
+	if (rendererFlags["renderCoordinates"]) {
 		glDeleteLists(coordinateDl, 1);
 		RenderCoordinates();
-		renderCoordinates = false;
+		rendererFlags["renderCoordinates"] = false;
 	}
 
 	glPushMatrix();
@@ -535,10 +548,10 @@ void DrawInterfaces() {
 	glCallList(coordinateDl);
 	glPopMatrix();
 
-	if (renderDepartures) {
+	if (rendererFlags["renderDepartures"]) {
 		glDeleteLists(departuresDl, 1);
 		RenderDepartures();
-		renderDepartures = false;
+		rendererFlags["renderDepartures"] = false;
 	}
 	if (show_departures) {
 		glPushMatrix();
@@ -745,19 +758,6 @@ void RenderButtons() {
 	buttonsDl = glGenLists(1);
 
 	glNewList(buttonsDl, GL_COMPILE);
-	/*glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, CLIENT_WIDTH, 0.0, CLIENT_HEIGHT);
-
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//std::cout << viewport[0] << ", " << viewport[1] << ", " << viewport[2] << ", " <<  viewport[3] << ", " << std::endl;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();*/
 
 	glColor3f(button_bg[0], button_bg[1], button_bg[2]);
 	glBegin(GL_POLYGON);
@@ -925,12 +925,6 @@ void RenderButtons() {
 		}
 		last_index = index;
 	}
-	//Restore old ortho
-	/*glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);*/
 	glEndList();
 }
 
@@ -2367,7 +2361,7 @@ void RenderInterfaceInputText() {
 		if (frame && frame->render) {
 			for (ChildFrame* child : frame->children)
 			{
-				if (child && (child->render || frame->renderAllInputText || renderAllInputText))
+				if (child && (child->render || frame->renderAllInputText || rendererFlags["renderAllInputText"]))
 				{
 					if (child->type == CHILD_TYPE::INPUT_FIELD)
 					{
@@ -2406,7 +2400,7 @@ void RenderInterfaceInputText() {
 		}
 	}
 
-	renderAllInputText = false;
+	rendererFlags["renderAllInputText"] = false;
 }
 
 void draw_point(double x, double y, ...)
@@ -2456,7 +2450,7 @@ void HandleMessageQueue()
 				if (DUMP_CLOSURE) {
 					addPointToActiveArea(coords[0], coords[1]);
 					debug_vis.addPoint(coords[0], coords[1]);
-					renderLineVis = true;
+					rendererFlags["renderLineVis"] = true;
 				}
 			}
 			break;
@@ -2492,8 +2486,8 @@ void HandleMessageQueue()
 				DISPLAY_MOUSE_POS->x_ = coords[1];
 				DISPLAY_MOUSE_POS->y_ = coords[0];
 				if (DUMP_CLOSURE)
-					renderLineVis = true;
-				renderCoordinates = true;
+					rendererFlags["renderLineVis"] = true;
+				rendererFlags["renderCoordinates"] = true;
 			}
 			break;
 			case WM_LBUTTONUP:

@@ -316,6 +316,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		int msg_size = wParam;
 
+		if (msg_size == SIZE_MINIMIZED) {
+			// Window is minimized, so skip the resizing logic
+			break;
+		}
+
 		RECT rect;
 		if (GetWindowRect(hwnd, &rect))
 		{
@@ -326,6 +331,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		CLIENT_WIDTH = width;
 		CLIENT_HEIGHT = height;
+
 		LoadMainChatInterface(true);
 
 		if (msg_size != SIZE_MINIMIZED && msg_size != SIZE_MAXIMIZED)
@@ -341,14 +347,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		updateFlags[GBL_VECTOR] = true;
 
 		resize = true;
-		renderButtons = true;
-		renderLegend = true;
-		renderInterfaces = true;
-		renderDrawings = true;
-		renderConf = true;
-		renderDate = true;
-		renderCoordinates = true;
-		renderDepartures = true;
+		rendererFlags["buttons"] = true;
+		rendererFlags["legend"] = true;
+		rendererFlags["renderInterfaces"] = true;
+		rendererFlags["drawings"] = true;
+		rendererFlags["renderConf"] = true;
+		rendererFlags["renderDate"] = true;
+		rendererFlags["renderCoordinates"] = true;
+		rendererFlags["renderDepartures"] = true;
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		rendererFlags["renderAllInputText"] = true;
 		//renderAircraft = true;
@@ -610,7 +616,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					if (curButton->handle())
 					{
 						curButton->on = !curButton->on;
-						renderButtons = true;
+						rendererFlags["buttons"] = true;
 					}
 					clicked_tbutton = curButton;
 					clicked_interface = true;
@@ -744,7 +750,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (clicked) {
 				if (curButton->handleScroll(val > 0))
 				{
-					renderButtons = true;
+					rendererFlags["buttons"] = true;
 				}
 				clicked_tbutton = curButton;
 				break;
@@ -826,13 +832,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					else
 					{
 						ASEL = nullptr;
-						renderConf = true;
+						rendererFlags["renderConf"] = true;
 					}
 				}
 				else
 				{
 					ASEL = nullptr;
-					renderConf = true;
+					rendererFlags["renderConf"] = true;
 				}
 			}
 		}
@@ -896,10 +902,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				else {
 					if (!closureAreas.empty() && closureAreas.back().opened) {
 						finishDefiningArea();
-						redrawClosures = true;
+						rendererFlags["redrawClosures"] = true;
 						sendSystemMessage("Finished Closure Points.");
 						clear_debug_lines();
-						renderLineVis = true;
+						rendererFlags["renderLineVis"] = true;
 					}
 				}
 				break;
@@ -909,7 +915,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				if (DUMP_CLOSURE) {
 					removePointFromActiveArea();
 					pop_debug_vis();
-					renderLineVis = true;
+					rendererFlags["renderLineVis"] = true;
 				}
 				break;
 			}
@@ -1074,7 +1080,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					ComboBox* box = (ComboBox*)focusChild;
 					if (box->pos > 0) {
 						box->pos--;
-						renderDrawings = true;
+						rendererFlags["drawings"] = true;
 					}
 				}
 				else if (type == CHILD_TYPE::INPUT_FIELD) {
@@ -1090,7 +1096,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					ComboBox* box = (ComboBox*)focusChild;
 					if (box->pos < (box->options.size() - 1)) {
 						box->pos++;
-						renderDrawings = true;
+						rendererFlags["drawings"] = true;
 					}
 				}
 				else if (type == CHILD_TYPE::INPUT_FIELD) {
@@ -1282,7 +1288,7 @@ bool handle_asel(Mirror* mirror, Aircraft* aircraft)
 		}
 	}
 	ASEL = aircraft;
-	renderConf = true;
+	rendererFlags["renderConf"] = true;
 	return true;
 }
 
@@ -1414,7 +1420,7 @@ bool processCommands(std::string command)
 	}
 	if (boost::istarts_with(command, ".test")) {
 		controller_list_box->addLineTop("------------OBSERVER----------", CHAT_TYPE::MAIN);
-		renderDrawings = true;
+		rendererFlags["drawings"] = true;
 		return true;
 	}
 	if (boost::istarts_with(command, "/")) {
@@ -1524,7 +1530,7 @@ void conn_clean()
 	if (!departures.empty())
 	{
 		departures.clear();
-		renderDepartures = true;
+		rendererFlags["renderDepartures"] = true;
 	}
 	Collision_Map.clear();
 	controller_map.clear();

@@ -119,8 +119,8 @@ void InterfaceFrame::doOpen(bool multi_open, bool pannable)
 	InterfaceFrame::multi_open = multi_open;
 	InterfaceFrame::pannable = pannable;
 	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-	renderInterfaces = true;
-	renderDrawings = true;
+	rendererFlags["renderInterfaces"] = true;
+	rendererFlags["drawings"] = true;
 	renderAllLabels = true;
 	_openedframe = this;
 	if (InterfaceFrame::id == CONNECT_INTERFACE)
@@ -154,10 +154,10 @@ void InterfaceFrame::doClose()
 	}
 	}
 	InterfaceFrame::render = false;
-	renderInterfaces = true;
+	rendererFlags["renderInterfaces"] = true;
 	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-	renderDrawings = true;
-	renderFocus = true;
+	rendererFlags["drawings"] = true;
+	rendererFlags["focus"] = true;
 	_openedframe = nullptr;
 	if (!multi_open)
 		single_opened_frames--;
@@ -226,9 +226,9 @@ void InterfaceFrame::move(int dx, int dy)
 
 			this->renderAllInputText = true;
 			this->renderAllLabels = true;
-			renderDrawings = true;
-			renderFocus = true;
-			renderInterfaces = true;
+			rendererFlags["drawings"] = true;
+			rendererFlags["focus"] = true;
+			rendererFlags["renderInterfaces"] = true;
 		}
 	}
 }
@@ -326,7 +326,7 @@ void CloseButton::setFocus() {
 		}
 		CloseButton::focus = true;
 		focusChild = this;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 
@@ -335,7 +335,7 @@ void CloseButton::removeFocus() {
 		CloseButton::focus = false;
 		lastFocus = this;
 		focusChild = nullptr;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 
@@ -418,7 +418,7 @@ void ClickButton::setFocus() {
 		}
 		ClickButton::focus = true;
 		focusChild = this;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 
@@ -429,7 +429,7 @@ void ClickButton::removeFocus() {
 		ClickButton::focus = false;
 		lastFocus = this;
 		focusChild = nullptr;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 void ClickButton::doAction() {
@@ -463,7 +463,7 @@ void ClickButton::doAction() {
 					(freq->input.empty() || whitespace_only(freq->input)) ? cur_edit->freq = "" : cur_edit->freq = freq->input;
 					freq->input = "";
 					//RenderChild(cur_edit->btn, CHILD_TYPE::CLICK_BUTTON);
-					renderDrawings = true;
+					rendererFlags["drawings"] = true;
 				}
 			}
 
@@ -605,7 +605,7 @@ void ClickButton::doAction() {
 			if (!pcode.empty())
 			{
 				squawk_input->setInput(pcode);
-				renderAllInputText = true;
+				rendererFlags["renderAllInputText"] = true;
 				if (opened_fp)
 				{
 					Aircraft* aircraft = ((Aircraft*)opened_fp);
@@ -716,7 +716,7 @@ void ComboBox::setFocus() {
 		}
 		ComboBox::focus = true;
 		focusChild = this;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 
@@ -727,7 +727,7 @@ void ComboBox::removeFocus() {
 		ComboBox::focus = false;
 		lastFocus = this;
 		focusChild = nullptr;
-		renderFocus = true;
+		rendererFlags["focus"] = true;
 	}
 }
 

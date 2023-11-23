@@ -364,7 +364,7 @@ void sendSystemMessage(std::string message)
 	                                          message, CHAT_TYPE::SYSTEM, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }
 
 void sendErrorMessage(std::string message) {
@@ -373,7 +373,7 @@ void sendErrorMessage(std::string message) {
 		message + std::string("]"), CHAT_TYPE::ERRORS, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }
 
 void sendMainChatMessage(InputField* focusField)
@@ -393,7 +393,7 @@ void sendMainChatMessage(InputField* focusField)
 	}
 	main_chat_box->resetReaderIdx();
 	main_chat_box->addLine(USER->getIdentity()->callsign + std::string(": ") + text, CHAT_TYPE::MAIN);
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 	focusField->clearInput();
 	focusField->setCursor();
 	focusField->render = true;
@@ -410,7 +410,7 @@ void sendPrivateChatMessage(InterfaceFrame& frame, InputField* focusField)
 	DisplayBox& box = *((DisplayBox*)frame.children[PRIVATE_MESSAGE_BOX]);
 	box.resetReaderIdx();
 	box.addLine(USER->getIdentity()->callsign + std::string(": ") + focusField->input, CHAT_TYPE::MAIN);
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 	focusField->clearInput();
 	focusField->setCursor();
 	RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
@@ -427,5 +427,5 @@ void sendATCMessage(std::string message) {
 	const auto c = std::make_shared<ChatLine>(USER->getIdentity()->callsign + std::string(": ") + message, CHAT_TYPE::ATC, main_chat_box);
 	main_chat_box->addLine(c);
 	c->playChatSound();
-	renderDrawings = true;
+	rendererFlags["drawings"] = true;
 }

@@ -406,14 +406,14 @@ int TopButton::handle()
 			if (rotation != 0)
 			{
 				rotateb->setDualOption(true);
-				renderButtons = true;
+				rendererFlags["buttons"] = true;
 				updateFlags[GBL_COLLISION_LINE] = true;
 				updateFlags[GBL_VECTOR] = true;
 			}
 			else
 			{
 				rotateb->setDualOption(false);
-				renderButtons = true;
+				rendererFlags["buttons"] = true;
 				updateFlags[GBL_COLLISION_LINE] = true;
 				updateFlags[GBL_VECTOR] = true;
 			}
@@ -427,7 +427,7 @@ int TopButton::handle()
 		case TOP_TYPE::DAY_NITE_BTN:
 		{
 			DAY = !DAY;
-			renderSectorColours = true;
+			rendererFlags["renderSectorColours"] = true;
 			return 1;
 		}
 		case TOP_TYPE::VECTOR_BTN:
@@ -477,7 +477,7 @@ int TopButton::handleScroll(bool hi_scroll)
 				mZoom = zoom_from_range();
 				updateFlags[GBL_COLLISION_LINE] = true;
 				updateFlags[GBL_VECTOR] = true;
-				renderLineVis = true;
+				rendererFlags["renderLineVis"] = true;
 			}
 			return 1;
 		}
@@ -573,7 +573,7 @@ void TopButton::refreshOption2()
 			break;
 		}
 	}
-	renderButtons = true;
+	rendererFlags["buttons"] = true;
 }
 
 void TopButton::set_range(int val, int min, int max, int &var)
@@ -588,7 +588,7 @@ void TopButton::set_range(int val, int min, int max, int &var)
 		updateFlags[GBL_COLLISION_LINE] = true;
 		updateFlags[GBL_VECTOR] = true;
 	}
-	renderButtons = true;
+	rendererFlags["buttons"] = true;
 }
 
 void TopButton::set_rotation(int val, int min, int max)
@@ -605,5 +605,5 @@ void TopButton::set_rotation(int val, int min, int max)
 		updateFlags[GBL_VECTOR] = true;
 	}
 	rotation != 0 ? rotateb->setDualOption(true) : rotateb->setDualOption(false);
-	renderButtons = true;
+	rendererFlags["buttons"] = true;
 }
