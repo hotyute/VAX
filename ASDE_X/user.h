@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <any>
 
 #include "gui.h"
 #include "constants.h"
@@ -40,6 +41,13 @@ struct UserData {
 };
 #endif
 
+struct ClientScript {
+	int idx = -1;
+	ClientScript(std::string assem) : assembly(assem) {};
+	std::string assembly;
+	std::vector<std::any> objects;
+};
+
 #ifndef __User_user_h
 #define __User_user_h
 class User {
@@ -57,6 +65,7 @@ public:
 	void setVisibility(int vis) { this->visibility = vis; }
 	void setCallsign(std::string new_callsign) { identity.callsign = new_callsign; }
 	UserData userdata;
+	std::vector<ClientScript> scripts;
 	Identity* getIdentity() {
 		return &this->identity;
 	}

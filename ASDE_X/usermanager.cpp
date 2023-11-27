@@ -399,4 +399,22 @@ void decodePackets(int opCode, BasicStream& stream) {
 			refresh_ctrl_list();
 		}
 	}
+
+	if (opCode == 22)
+	{
+		User* subject = userStorage1.at(stream.read_unsigned_short());
+		ClientScript script = subject->scripts[stream.read_unsigned_short()];
+		script.assembly = stream.read_string();
+		for (int i_11_ = script.assembly.length() - 1; i_11_ >= 0; i_11_--)
+		{
+			if (script.assembly.at(i_11_) == 's')
+				script.objects[i_11_ + 1] = stream.read_string();
+			else if (script.assembly.at(i_11_) == 'l')
+				script.objects[i_11_ + 1] = stream.readQWord();
+			else
+				script.objects[i_11_ + 1] = stream.read_unsigned_int();
+		}
+		script.objects[0] = stream.read_unsigned_int();
+		//process script
+	}
 }

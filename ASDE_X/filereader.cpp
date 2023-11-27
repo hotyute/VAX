@@ -21,7 +21,7 @@ void open_adx(std::string path)
 		preFileRender();
 		resize = true;
 		rendererFlags["sector"] = true;
-		rendererFlags["renderSectorColours"] = true;
+		rendererFlags["sectorColours"] = true;
 		rendererFlags["buttons"] = true;
 		updateFlags[GBL_CALLSIGN] = true;
 		updateFlags[GBL_COLLISION_TAG] = true;

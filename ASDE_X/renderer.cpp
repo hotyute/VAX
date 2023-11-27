@@ -34,7 +34,7 @@ LineVis debug_vis;
 
 std::unordered_map<std::string, bool> rendererFlags = {
 	{"sector", false},
-	{"renderSectorColours", false},
+	{"sectorColours", false},
 	{"redrawClosures", false},
 	{"buttons", false},
 	{"legend", false},
@@ -268,11 +268,11 @@ void DrawGLScene() {
 		rendererFlags["sector"] = false;
 	}
 
-	if (rendererFlags["renderSectorColours"])
+	if (rendererFlags["sectorColours"])
 	{
 		glDeleteLists(sectorDl, 1);
 		CreateSectorColours();
-		rendererFlags["renderSectorColours"] = false;
+		rendererFlags["sectorColours"] = false;
 	}
 
 	glCallList(sectorDl);

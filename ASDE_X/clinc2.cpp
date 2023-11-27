@@ -17,7 +17,7 @@ tcpinterface* intter = new tcpinterface();
 const int packetSizes[256] =
 {
 -3, -3, -3, -3, -3, -3, -3, -1, -1, -2, 8, -2, 2, 0, 36,
--2, 3, -2, 19, 4, -1, 7, -3, -3, -3, -3, -3, -3, -3, -3,
+-2, 3, -2, 19, 4, -1, 7, -2, -3, -3, -3, -3, -3, -3, -3,
 -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
 -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
 -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
@@ -107,6 +107,7 @@ DWORD tcpinterface::run() {
 								const int index = in.read_unsigned_short();
 								const long long updateTimeInMillis = in.readQWord();
 								USER->setUserIndex(index);
+								userStorage1[index] = USER;
 								USER->setUpdateTime(updateTimeInMillis);
 								if (!this->position_updates)
 								{

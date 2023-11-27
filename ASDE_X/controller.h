@@ -1,5 +1,4 @@
-#ifndef _CONTROLLER_H
-#define _CONTROLLER_H
+#pragma once
 
 #include "user.h"
 
@@ -20,10 +19,8 @@ public:
 	void lock();
 	void unlock();
 private:
-	bool on_break;
+	bool on_break = false;
 };
 #endif
 
 extern std::unordered_map<std::string, Controller*> controller_map;
-
-#endif
