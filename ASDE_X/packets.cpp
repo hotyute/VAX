@@ -3,15 +3,13 @@
 #include "tools.h"
 #include "usermanager.h"
 
-void sendPositionUpdates(User &user) {
+void sendPositionUpdates(User& user) {
 	auto out = BasicStream(20);
 	out.create_frame_var_size(CONTROLLER_POS_UPDATE);
 	double lat = user.getLatitude();
 	double lon = user.getLongitude();
-	const long long latitude = *reinterpret_cast<long long*>(&lat);
-	const long long longitude = *reinterpret_cast<long long*>(&lon);
-	out.write_qword(latitude);
-    out.write_qword(longitude);
+	out.write_qword(*reinterpret_cast<long long*>(&lat));
+	out.write_qword(reinterpret_cast<long long>(&lon));
 	out.end_frame_var_size();
 	intter->sendMessage(&out);
 }
@@ -85,14 +83,38 @@ void sendPrimFreq() {
 	intter->sendMessage(&out);
 }
 
-void sendTempData(Aircraft& user, std::string& assembly, const void* data, ...) {
+void sendTempData(const std::vector<LatLon>& data) {
+	BasicStream out = BasicStream(256);
+	out.create_frame_var_size_word(_TEMP_DATA);
+	std::string assembly = "";
+	for (size_t i = 0; i < data.size(); ++i)
+		assembly += "ll";
+	out.write_string(assembly.c_str());
+
+	if (assembly.length() != data.size()) {
+		throw std::runtime_error("Assembly string length does not match data size");
+	}
+
+	for (size_t i = 0; i < data.size(); ++i) {
+		double lat = data[i].lat;
+		double lon = data[i].lon;
+		out.write_qword(*reinterpret_cast<long long*>(&lat));
+		out.write_qword(*reinterpret_cast<long long*>(&lon));
+	}
+
+	out.end_frame_var_size_word();
+	intter->sendMessage(&out);
+}
+
+
+void sendTempData(const std::string& assembly, const void* data, ...) {
 	BasicStream out = BasicStream(256);
 	out.create_frame_var_size_word(_TEMP_DATA);
 	out.write_string(assembly.c_str());
 	va_list args;
 	va_start(args, data);
 	int header = va_arg(args, int);
-	for (int i_11_ = assembly.length() - 1; i_11_ >= 0; i_11_--) 
+	for (int i_11_ = assembly.length() - 1; i_11_ >= 0; i_11_--)
 	{
 		if (assembly.at(i_11_) == 's')
 			out.write_string(va_arg(args, std::string).c_str());

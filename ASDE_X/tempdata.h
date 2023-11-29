@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <string>
+#include <any>
 
 struct LatLon {
     float lat, lon;
@@ -23,11 +25,22 @@ private:
     std::vector<LatLon> points;
 };
 
-class ClosureArea {
+struct ClientScript {
+    int idx = -1;
+    ClientScript(std::string assem) : assembly(assem) {};
+    std::string assembly;
+    std::vector<std::any> objects;
+};
+
+class ClosureArea : public ClientScript {
 public:
     bool opened = false;
     void addPoint(float lat, float lon) {
         points.push_back({ lat, lon });
+    }
+
+    void transfer(std::vector<LatLon>& source) {
+        points = std::move(source);
     }
 
     const std::vector<LatLon>& getPoints() const {
@@ -38,12 +51,5 @@ private:
     std::vector<LatLon> points;
 };
 
-extern std::vector<ClosureArea> closureAreas;
-
-void startNewClosureArea();
-
-void addPointToActiveArea(float lat, float lon);
-
-void removePointFromActiveArea();
-
-void finishDefiningArea();
+extern LineVis debug_vis;
+extern std::vector<ClosureArea*> closureAreas;

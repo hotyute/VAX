@@ -10,9 +10,9 @@ public:
 	Controller(std::string, int, int);
 	virtual ~Controller();
 	void setLatitude(double value);
-	double getLatitude();
+	double getLatitude() const;
 	void setLongitude(double value);
-	double getLongitude();
+	double getLongitude() const;
 	void setOnBreak(bool value) { on_break = value; }
 	bool isBreak() { return on_break; }
 	void WindowMove(InterfaceFrame *window, int x, int y);

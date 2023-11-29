@@ -1,5 +1,4 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -132,8 +131,3 @@ void HandleMessageQueue();
 
 void renderDebugLine();
 
-void clear_debug_lines();
-
-void pop_debug_vis();
-
-#endif

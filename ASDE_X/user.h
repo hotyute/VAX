@@ -3,10 +3,10 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include <any>
 
 #include "gui.h"
 #include "constants.h"
+#include "tempdata.h"
 
 class User;
 
@@ -41,13 +41,6 @@ struct UserData {
 };
 #endif
 
-struct ClientScript {
-	int idx = -1;
-	ClientScript(std::string assem) : assembly(assem) {};
-	std::string assembly;
-	std::vector<std::any> objects;
-};
-
 #ifndef __User_user_h
 #define __User_user_h
 class User {
@@ -55,9 +48,9 @@ public:
 	User(std::string, int, int);
 	virtual ~User();
 	virtual void setLatitude(double value) = 0;
-	virtual double getLatitude() = 0;
+	virtual double getLatitude() const = 0;
 	virtual void setLongitude(double value) = 0;
-	virtual double getLongitude() = 0;
+	virtual double getLongitude() const = 0;
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
 	std::string getCallsign() { return identity.callsign; }

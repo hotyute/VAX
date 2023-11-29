@@ -1,6 +1,8 @@
-#ifndef PACKETS_H
-#define PACKETS_H
+#pragma once
 
+#include <vector>
+
+#include "tempdata.h"
 #include "user.h"
 #include "aircraft.h"
 
@@ -18,7 +20,9 @@ void sendFlightPlan(Aircraft& user);
 
 void sendPrimFreq();
 
-void sendTempData(Aircraft& user, std::string& assembly, const void*& data, ...);
+void sendTempData(const std::vector<LatLon>& data);
+
+void sendTempData(const std::string& assembly, const void*& data, ...);
 
 const int _AIRCRAFT_POS_UPDATE = 1,
 _UPDATE_TRANSPONDER = 2,
@@ -34,6 +38,3 @@ _FLIGHT_PLAN_REQ = 11,
 _PRIVATE_MESSAGE = 12,
 _PRIMARY_FREQ = 13,
 _TEMP_DATA = 14;
-
-
-#endif

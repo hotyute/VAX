@@ -104,7 +104,7 @@ void Aircraft::setSquawkCode(std::string value) {
 	Aircraft::squawkCode = value;
 }
 
-double Aircraft::getLatitude() {
+double Aircraft::getLatitude() const {
 	return Aircraft::latitude;
 }
 
@@ -112,7 +112,7 @@ void Aircraft::setLatitude(double value) {
 	Aircraft::latitude = value;
 }
 
-double Aircraft::getLongitude() {
+double Aircraft::getLongitude() const {
 	return Aircraft::longitude;
 }
 

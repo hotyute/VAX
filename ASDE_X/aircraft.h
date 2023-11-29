@@ -1,5 +1,4 @@
-#ifndef AIRCRAFT_H
-#define AIRCRAFT_H
+#pragma once
 
 #include <Windows.h>
 #include <iostream>
@@ -34,7 +33,6 @@ public:
 
 #ifndef Aircraft_aircraft_h
 #define Aircraft_aircraft_h
-class Aircraft;
 class Aircraft : public User {
 private:
 	bool collision, heavy;
@@ -61,9 +59,9 @@ public:
 	void setUpdateFlag(int flag, bool val) { update_flags[flag] = val; }
 	FlightPlan* getFlightPlan();
 	void setLatitude(double value);
-	double getLatitude();
+	double getLatitude() const;
 	void setLongitude(double value);
-	double getLongitude();
+	double getLongitude() const;
 	std::string getTextTag();
 	void setTextTag(std::string value);
 	std::string getCollText();
@@ -95,6 +93,4 @@ public:
 extern std::unordered_map<std::string, Aircraft*> acf_map;
 
 extern Aircraft *getAircraftByIndex(int);
-
-#endif
 

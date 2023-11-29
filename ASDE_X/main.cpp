@@ -895,26 +895,21 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				std::wstring msg = DUMP_CLOSURE ? L"Dumping Closure Points" : L"No Longer dumping Closure Points";
 				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
 				if (DUMP_CLOSURE) {
-					//if (closureAreas.empty())
-					startNewClosureArea();
 					sendSystemMessage("Dumping Closure Points.");
 				}
 				else {
-					if (!closureAreas.empty() && closureAreas.back().opened) {
-						finishDefiningArea();
-						rendererFlags["redrawClosures"] = true;
-						sendSystemMessage("Finished Closure Points.");
-						clear_debug_lines();
-						rendererFlags["renderLineVis"] = true;
-					}
+					rendererFlags["redrawClosures"] = true;
+					sendSystemMessage("Finished Closure Points.");
+					sendTempData(debug_vis.getPoints());
+					debug_vis.clear();
+					rendererFlags["renderLineVis"] = true;
 				}
 				break;
 			}
 			case 'Z':
 			{
 				if (DUMP_CLOSURE) {
-					removePointFromActiveArea();
-					pop_debug_vis();
+					debug_vis.pop_back();
 					rendererFlags["renderLineVis"] = true;
 				}
 				break;

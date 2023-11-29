@@ -23,14 +23,11 @@
 #include "flightplan.h"
 #include "interfaces.h"
 #include "tempdata.h"
-#include "tempdata.h"
 
 std::unordered_map<std::string, Mirror*> mirrors_storage;
 std::vector<Mirror*> mirrors;
 
 std::vector<double*> closures;
-
-LineVis debug_vis;
 
 std::unordered_map<std::string, bool> rendererFlags = {
 	{"sector", false},
@@ -2448,7 +2445,6 @@ void HandleMessageQueue()
 					filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
 				}
 				if (DUMP_CLOSURE) {
-					addPointToActiveArea(coords[0], coords[1]);
 					debug_vis.addPoint(coords[0], coords[1]);
 					rendererFlags["renderLineVis"] = true;
 				}
@@ -2660,13 +2656,5 @@ void renderClosureArea(const ClosureArea& area, float spacing) {
 	// Clean up
 	delete[] polygons[0];
 	delete[] polygons;
-}
-
-void clear_debug_lines() {
-	debug_vis.clear();
-}
-
-void pop_debug_vis() {
-	debug_vis.pop_back();
 }
 

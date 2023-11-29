@@ -30,6 +30,8 @@ const double EARTH_RADIUS_NM = 3437.670013352;
 #define MAX_EVENTS 1536
 #define MAX_PMCHATS 10
 
+#define MAX_CLIENTSCRIPTS 1024
+
 // if a display box is editable you need to leave the next slot free for the inputfield
 
 //Children Interfaces
