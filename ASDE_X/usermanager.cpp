@@ -233,7 +233,6 @@ void decodePackets(int opCode, BasicStream& stream) {
 			{
 				auto* cur = dynamic_cast<Aircraft*>(user1);
 				cur->lock();
-				cur->setHeavy(false);
 				cur->setSpeed((double)groundSpeed);
 				cur->setThreeFactor(heading, pitch, roll);
 				cur->unlock();
@@ -261,7 +260,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 
 	if (opCode == 16) {
 		int index = stream.read_unsigned_short();
-		int mode = stream.read_unsigned_byte();
+		int i = stream.read_unsigned_byte();
+		int mode = i >> 4, heavy = i & 0xF;
 		if (User* user1 = userStorage1.at(index))
 		{
 			CLIENT_TYPES type = user1->getIdentity()->type;
@@ -270,6 +270,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 				auto* acf = dynamic_cast<Aircraft*>(user1);
 				if (acf)
 				{
+					acf->setHeavy(heavy);
 					acf->handleModeChange(mode);
 					acf->setMode(mode);
 				}

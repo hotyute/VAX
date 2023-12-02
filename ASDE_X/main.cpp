@@ -1479,7 +1479,7 @@ void connect() {
 			stream.write_byte(0);
 			stream.write_string("King Air 350");
 			stream.write_string("0000");
-			stream.write_byte(0);
+			stream.write_byte(0 << 4 | 0);
 			stream.write_qword(0);//info hash
 		}
 		stream.end_frame_var_size_word();

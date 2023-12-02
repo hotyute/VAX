@@ -2020,13 +2020,9 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 	else
 	{
 		if (!heavy)
-		{
 			glCallList(aircraftDl);
-		}
 		else
-		{
 			glCallList(heavyDl);
-		}
 	}
 	glPopMatrix();
 }
