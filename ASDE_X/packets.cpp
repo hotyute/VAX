@@ -9,7 +9,7 @@ void sendPositionUpdates(User& user) {
 	double lat = user.getLatitude();
 	double lon = user.getLongitude();
 	out.write_qword(*reinterpret_cast<long long*>(&lat));
-	out.write_qword(reinterpret_cast<long long>(&lon));
+	out.write_qword(*reinterpret_cast<long long*>(&lon));
 	out.end_frame_var_size();
 	intter->sendMessage(&out);
 }
@@ -91,17 +91,17 @@ void sendTempData(const std::vector<LatLon>& data) {
 		assembly += "ll";
 	out.write_string(assembly.c_str());
 
-	if (assembly.length() != data.size()) {
+	if ((assembly.length() / 2) != data.size()) {
 		throw std::runtime_error("Assembly string length does not match data size");
 	}
 
-	for (size_t i = 0; i < data.size(); ++i) {
-		double lat = data[i].lat;
-		double lon = data[i].lon;
-		out.write_qword(*reinterpret_cast<long long*>(&lat));
+	for (int i_11_ = data.size() - 1; i_11_ >= 0; i_11_--) {
+		double lon = data[i_11_].lon;
+		double lat = data[i_11_].lat;
 		out.write_qword(*reinterpret_cast<long long*>(&lon));
+		out.write_qword(*reinterpret_cast<long long*>(&lat));
 	}
-
+	out.write_int(299);
 	out.end_frame_var_size_word();
 	intter->sendMessage(&out);
 }

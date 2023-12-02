@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <limits>
 #include <cstdarg>
+#include <unordered_map>
 
 #define NOMINMAX
 
@@ -72,7 +73,7 @@ int RenderUnknown(bool, int&);
 int RenderCallsign(Aircraft&, bool, float, float);
 int RenderCollisionTag(Aircraft& aircraft, bool heavy, float latitude, float longitude);
 void deleteFrame(InterfaceFrame*);
-void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas);
+void compileClosureAreaList(const std::unordered_map<int, ClosureArea>& closureAreas);
 void renderClosureArea(const ClosureArea& area, float spacing);
 
 void set_projection(int clientWidth, int clientHeight, double c_lat, double c_lon, double zoom, double rotate, bool top_bar);
@@ -2506,7 +2507,7 @@ void renderDebugLine() {
 	glCallList(lineVisDl);
 }
 
-void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas) {
+void compileClosureAreaList(const std::unordered_map<int, ClosureArea>& closureAreas) {
 	// If the list already exists, delete it
 	if (glIsList(closureAreaList)) {
 		glDeleteLists(closureAreaList, 1);
@@ -2517,8 +2518,8 @@ void compileClosureAreaList(const std::vector<ClosureArea>& closureAreas) {
 	glNewList(closureAreaList, GL_COMPILE);
 
 	// Render each closure area
-	for (const ClosureArea& area : closureAreas) {
-		renderClosureArea(area, 0.001f);
+	for (const auto& area : closureAreas) {
+		renderClosureArea(area.second, 0.001f);
 	}
 
 	glEndList();

@@ -58,10 +58,6 @@ public:
 	bool getUpdateFlag(int flag) { return update_flags[flag]; }
 	void setUpdateFlag(int flag, bool val) { update_flags[flag] = val; }
 	FlightPlan* getFlightPlan();
-	void setLatitude(double value);
-	double getLatitude() const;
-	void setLongitude(double value);
-	double getLongitude() const;
 	std::string getTextTag();
 	void setTextTag(std::string value);
 	std::string getCollText();

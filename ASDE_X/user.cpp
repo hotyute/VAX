@@ -4,7 +4,7 @@
 #include "aircraft.h"
 #include "tools.h"
 
-User::User(std::string callSign, int controllerRating, int pilotRating) {
+User::User(std::string callSign, int controllerRating, int pilotRating) : scripts(MAX_CLIENTSCRIPTS, nullptr) {
 	this->userIndex = -1;
 	User::identity.callsign = callSign;
 	User::identity.controller_rating = controllerRating;
@@ -51,4 +51,49 @@ UserData::UserData()
 		window_positions[i][0] = -1;
 		window_positions[i][1] = -1;
 	}
+}
+
+void User::registerScript(User* subject, int index, const ClientScript& proposed) {
+	int script_id = std::any_cast<int>(proposed.objects[0]);
+
+	auto& script = subject->scripts[index];
+	if (script_id == 299) {
+		ClosureArea clArea = ClosureArea(proposed.assembly);
+		clArea.copy(proposed);
+		for (int i_11_ = proposed.assembly.length() - 1; i_11_ >= 0; i_11_--)
+		{
+			if (proposed.assembly.at(i_11_) == 's') {
+				std::string s = std::any_cast<std::string>(proposed.objects[i_11_ + 1]);
+			}
+			else if (proposed.assembly.at(i_11_) == 'l') {
+				long long varLon = std::any_cast<long long>(proposed.objects[i_11_ + 1]);
+				long long varLat = std::any_cast<long long>(proposed.objects[i_11_--]);
+				double lon = *reinterpret_cast<double*>(&varLon);
+				double lat = *reinterpret_cast<double*>(&varLat);
+				clArea.addPoint(lat, lon);
+			}
+			else {
+				int i = std::any_cast<int>(proposed.objects[i_11_ + 1]);
+			}
+		}
+		script = std::make_shared<ClosureArea>(clArea);
+		closureAreas.emplace(index, clArea);
+		rendererFlags["redrawClosures"] = true;
+	}
+}
+
+double User::getLatitude() const {
+	return User::latitude;
+}
+
+void User::setLatitude(double value) {
+	User::latitude = value;
+}
+
+double User::getLongitude() const {
+	return User::longitude;
+}
+
+void User::setLongitude(double value) {
+	User::longitude = value;
 }

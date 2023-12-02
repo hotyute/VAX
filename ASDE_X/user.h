@@ -47,10 +47,10 @@ class User {
 public:
 	User(std::string, int, int);
 	virtual ~User();
-	virtual void setLatitude(double value) = 0;
-	virtual double getLatitude() const = 0;
-	virtual void setLongitude(double value) = 0;
-	virtual double getLongitude() const = 0;
+	void setLatitude(double value);
+	double getLatitude() const;
+	void setLongitude(double value);
+	double getLongitude() const;
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
 	std::string getCallsign() { return identity.callsign; }
@@ -58,7 +58,7 @@ public:
 	void setVisibility(int vis) { this->visibility = vis; }
 	void setCallsign(std::string new_callsign) { identity.callsign = new_callsign; }
 	UserData userdata;
-	std::vector<ClientScript> scripts;
+	std::vector<std::shared_ptr<ClientScript>> scripts;
 	Identity* getIdentity() {
 		return &this->identity;
 	}
@@ -78,6 +78,7 @@ public:
 		return private_messages;
 	}
 	void handleMovement(double n_lat, double n_lon);
+	void registerScript(User* subject, int index, const ClientScript& proposed);
 private:
 	PrivateMessages private_messages;
 	long long update_time;

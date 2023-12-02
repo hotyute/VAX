@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <any>
 
@@ -27,13 +28,24 @@ private:
 
 struct ClientScript {
     int idx = -1;
-    ClientScript(std::string assem) : assembly(assem) {};
+    int user_idx = -1;
+    ClientScript(std::string assem) : assembly(assem) { objects.resize(assem.length() + 1); }
     std::string assembly;
     std::vector<std::any> objects;
+
+    void copy(const ClientScript& script)
+    {
+        this->idx = script.idx;
+        this->user_idx = script.user_idx;
+        this->objects = script.objects;
+        this->assembly = script.assembly;
+    }
 };
 
 class ClosureArea : public ClientScript {
 public:
+    ClosureArea(std::string assem) : ClientScript(assem) {}
+
     bool opened = false;
     void addPoint(float lat, float lon) {
         points.push_back({ lat, lon });
@@ -52,4 +64,4 @@ private:
 };
 
 extern LineVis debug_vis;
-extern std::vector<ClosureArea*> closureAreas;
+extern std::unordered_map<int, ClosureArea> closureAreas;

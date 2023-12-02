@@ -2,4 +2,4 @@
 #include "constants.h"
 
 LineVis debug_vis;
-std::vector<ClosureArea*> closureAreas(MAX_CLIENTSCRIPTS, nullptr);
+std::unordered_map<int, ClosureArea> closureAreas;

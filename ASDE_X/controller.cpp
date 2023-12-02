@@ -12,23 +12,6 @@ Controller::~Controller()
 {
 }
 
-// we implements these functions incase we want to do anything on a type basis
-double Controller::getLatitude() const {
-	return Controller::latitude;
-}
-
-void Controller::setLatitude(double value) {
-	Controller::latitude = value;
-}
-
-double Controller::getLongitude() const {
-	return Controller::longitude;
-}
-
-void Controller::setLongitude(double value) {
-	Controller::longitude = value;
-}
-
 void Controller::WindowMove(InterfaceFrame* window, int x, int y)
 {
 	int wind = -1;

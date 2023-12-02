@@ -1462,6 +1462,7 @@ void connect() {
 		stream.write_string(id.username.c_str());
 		stream.write_string(id.password.c_str());
 		stream.write_qword(1000);//request time
+		printf("lat/lon %f %f\n", USER->getLatitude(), USER->getLongitude());
 		stream.write_qword(doubleToRawBits(USER->getLatitude()));
 		stream.write_qword(doubleToRawBits(USER->getLongitude()));
 		stream.write_short(USER->getVisibility());

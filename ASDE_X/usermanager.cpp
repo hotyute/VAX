@@ -102,6 +102,44 @@ void decodePackets(int opCode, BasicStream& stream) {
 		//update Cycle Change
 		USER->setUpdateTime(stream.readQWord());
 	}
+
+	if (opCode == 11) {// recieve private message
+		char _callsign[25];
+		stream.readString(_callsign);
+		char msg[2048];
+		stream.readString(msg);
+		std::string callsign = std::string(_callsign);
+		capitalize(callsign);
+
+		auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
+		bool unset = false;
+		if (it == pm_callsigns.end())
+		{
+			it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");
+			unset = true;
+		}
+
+		if (it != pm_callsigns.end())
+		{
+			InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
+			if (unset)
+			{
+				frame.title = "PRIVATE CHAT: " + callsign;
+				pm_callsigns[it - pm_callsigns.begin()] = callsign;
+			}
+			DisplayBox& box = *dynamic_cast<DisplayBox*>(frame.children[PRIVATE_MESSAGE_BOX]);
+			box.resetReaderIdx();
+			auto c = std::make_shared<ChatLine>(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT, &box);
+			box.addLine(c);
+			c->playChatSound();
+		}
+		else
+		{
+
+		}
+		rendererFlags["drawings"] = true;
+	}
+
 	if (opCode == 12)
 	{//delete user packet
 		int index = stream.read_unsigned_short();
@@ -204,29 +242,6 @@ void decodePackets(int opCode, BasicStream& stream) {
 		}
 	}
 
-	if (opCode == 18)
-	{
-		//Controller Update Packet
-		int index = stream.read_unsigned_short();
-		User* user1 = userStorage1.at(index);
-		long long lat = stream.readQWord();
-		long long lon = stream.readQWord();
-		double latitude = *reinterpret_cast<double*>(&lat);
-		double longitude = *reinterpret_cast<double*>(&lon);
-		int flags = stream.read_unsigned_byte();
-		if (user1)
-		{
-			if (user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT)
-			{
-				auto* cur = dynamic_cast<Controller*>(user1);
-				cur->lock();
-				cur->setOnBreak(false);
-				cur->unlock();
-			}
-			user1->handleMovement(latitude, longitude);
-		}
-	}
-
 	if (opCode == 15)
 	{
 		int index = stream.read_unsigned_short();
@@ -259,54 +274,6 @@ void decodePackets(int opCode, BasicStream& stream) {
 					acf->setMode(mode);
 				}
 			}
-		}
-	}
-
-	if (opCode == 11) {// recieve private message
-		char _callsign[25];
-		stream.readString(_callsign);
-		char msg[2048];
-		stream.readString(msg);
-		std::string callsign = std::string(_callsign);
-		capitalize(callsign);
-
-		auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
-		bool unset = false;
-		if (it == pm_callsigns.end())
-		{
-			it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");
-			unset = true;
-		}
-
-		if (it != pm_callsigns.end())
-		{
-			InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
-			if (unset)
-			{
-				frame.title = "PRIVATE CHAT: " + callsign;
-				pm_callsigns[it - pm_callsigns.begin()] = callsign;
-			}
-			DisplayBox& box = *dynamic_cast<DisplayBox*>(frame.children[PRIVATE_MESSAGE_BOX]);
-			box.resetReaderIdx();
-			auto c = std::make_shared<ChatLine>(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT, &box);
-			box.addLine(c);
-			c->playChatSound();
-		}
-		else
-		{
-
-		}
-		rendererFlags["drawings"] = true;
-	}
-
-	if (opCode == 19)
-	{//update visibility packet
-		int index = stream.read_unsigned_short();
-		User* user1 = userStorage1.at(index);
-		int vis_range = stream.read_unsigned_short();
-		if (user1)
-		{
-			user1->setVisibility(vis_range);
 		}
 	}
 
@@ -366,6 +333,40 @@ void decodePackets(int opCode, BasicStream& stream) {
 		}
 	}
 
+	if (opCode == 18)
+	{
+		//Controller Update Packet
+		int index = stream.read_unsigned_short();
+		User* user1 = userStorage1.at(index);
+		long long lat = stream.readQWord();
+		long long lon = stream.readQWord();
+		double latitude = *reinterpret_cast<double*>(&lat);
+		double longitude = *reinterpret_cast<double*>(&lon);
+		int flags = stream.read_unsigned_byte();
+		if (user1)
+		{
+			if (user1->getIdentity()->type == CLIENT_TYPES::CONTROLLER_CLIENT)
+			{
+				auto* cur = dynamic_cast<Controller*>(user1);
+				cur->lock();
+				cur->setOnBreak(false);
+				cur->unlock();
+			}
+			user1->handleMovement(latitude, longitude);
+		}
+	}
+
+	if (opCode == 19)
+	{//update visibility packet
+		int index = stream.read_unsigned_short();
+		User* user1 = userStorage1.at(index);
+		int vis_range = stream.read_unsigned_short();
+		if (user1)
+		{
+			user1->setVisibility(vis_range);
+		}
+	}
+
 	if (opCode == 20)
 	{
 		int index = stream.read_unsigned_short();
@@ -403,8 +404,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 	if (opCode == 22)
 	{
 		User* subject = userStorage1.at(stream.read_unsigned_short());
-		ClientScript script = subject->scripts[stream.read_unsigned_short()];
-		script.assembly = stream.read_string();
+		int index = stream.read_unsigned_short();
+		ClientScript script = ClientScript(stream.read_string());
 		for (int i_11_ = script.assembly.length() - 1; i_11_ >= 0; i_11_--)
 		{
 			if (script.assembly.at(i_11_) == 's')
@@ -412,9 +413,10 @@ void decodePackets(int opCode, BasicStream& stream) {
 			else if (script.assembly.at(i_11_) == 'l')
 				script.objects[i_11_ + 1] = stream.readQWord();
 			else
-				script.objects[i_11_ + 1] = stream.read_unsigned_int();
+				script.objects[i_11_ + 1] = (int)stream.read_unsigned_int();
 		}
-		script.objects[0] = stream.read_unsigned_int();
+		script.objects[0] = (int)stream.read_unsigned_int();
 		//process script
+		USER->registerScript(subject, index, script);
 	}
 }
