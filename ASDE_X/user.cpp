@@ -82,6 +82,19 @@ void User::registerScript(User* subject, int index, const ClientScript& proposed
 	}
 }
 
+void User::unregisterScript(User* subject, int index)
+{
+	auto& script_ptr = subject->scripts[index];
+	if (script_ptr != nullptr) {
+		auto& script = *script_ptr;
+		int script_id = std::any_cast<int>(script.objects[0]);
+		if (script_id == 299) {
+			auto it = closureAreas.erase(index);			
+		}
+		script_ptr.reset();
+	}
+}
+
 double User::getLatitude() const {
 	return User::latitude;
 }

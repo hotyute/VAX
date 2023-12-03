@@ -79,6 +79,7 @@ public:
 	}
 	void handleMovement(double n_lat, double n_lon);
 	void registerScript(User* subject, int index, const ClientScript& proposed);
+	void unregisterScript(User* subject, int index);
 private:
 	PrivateMessages private_messages;
 	long long update_time;

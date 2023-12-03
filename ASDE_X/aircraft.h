@@ -35,7 +35,7 @@ public:
 #define Aircraft_aircraft_h
 class Aircraft : public User {
 private:
-	bool collision, heavy;
+	bool collision = false, heavy = false;
 	int mode;
 	bool render_flags[ACF_FLAG_COUNT];
 	bool update_flags[ACF_FLAG_COUNT];

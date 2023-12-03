@@ -26,10 +26,9 @@ void decodePackets(int opCode, BasicStream& stream) {
 		//create new user packet
 		int index = stream.read_unsigned_short();
 		CLIENT_TYPES type = static_cast<CLIENT_TYPES>(stream.read_unsigned_byte());
-		char callSign1[1024], full_name[1024], username[1024];
-		stream.readString(callSign1);
-		stream.readString(username);
-		stream.readString(full_name);
+		const char* callSign1 = stream.read_string();
+		const char* username = stream.read_string();
+		const char* full_name = stream.read_string();
 		int vis_range = stream.read_unsigned_short();
 		long long lat = stream.readQWord();
 		long long lon = stream.readQWord();
@@ -72,6 +71,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 			aircraft1->setUpdateFlag(ACF_CALLSIGN, true);
 			aircraft1->setUpdateFlag(ACF_COLLISION, true);
 			aircraft1->setMode(squawkMode);
+			aircraft1->setHeavy(heavy);
 			aircraft1->setSquawkCode(trans_code);
 			aircraft1->setThreeFactor(heading, pitch, roll);
 			aircraft1->unlock();
@@ -419,5 +419,13 @@ void decodePackets(int opCode, BasicStream& stream) {
 		script.objects[0] = (int)stream.read_unsigned_int();
 		//process script
 		USER->registerScript(subject, index, script);
+	}
+
+	if (opCode == 23)
+	{
+		User* subject = userStorage1.at(stream.read_unsigned_short());
+		int index = stream.read_unsigned_short();
+		//process script
+		USER->unregisterScript(subject, index);
 	}
 }

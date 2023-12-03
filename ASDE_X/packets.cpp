@@ -128,3 +128,10 @@ void sendTempData(const std::string& assembly, const void* data, ...) {
 	out.end_frame_var_size_word();
 	intter->sendMessage(&out);
 }
+
+void sendRemoveTempData(ClientScript &script) {
+	BasicStream out = BasicStream(20);
+	out.create_frame(_TEMP_DATA_REMOVE);
+	out.write_short(script.idx);
+	intter->sendMessage(&out);
+}

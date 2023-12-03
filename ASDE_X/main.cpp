@@ -459,14 +459,16 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			ZeroMemory(&ofn, sizeof(ofn));
 
+			auto wideParam = LOWORD(wParam);
+
 			ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
 			ofn.hwndOwner = hwnd;
-			ofn.lpstrFilter = ID_FILE_OPENC ? L"Collision Path Files (*.cpf)\0*.cpf\0All Files (*.*)\0*.*\0" :
+			ofn.lpstrFilter = (wideParam == ID_FILE_OPENC) ? L"Collision Path Files (*.cpf)\0*.cpf\0All Files (*.*)\0*.*\0" :
 				L"ASDE-X Files (*.adx)\0*.adx\0All Files (*.*)\0*.*\0";
 			ofn.lpstrFile = szFileName;
 			ofn.nMaxFile = MAX_PATH;
 			ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-			ofn.lpstrDefExt = ID_FILE_OPENC ? L"cpf" : L"adx";
+			ofn.lpstrDefExt = (wideParam == ID_FILE_OPENC) ? L"cpf" : L"adx";
 
 			if (GetOpenFileName(&ofn))
 			{
@@ -497,7 +499,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		case ID_HELP_ABOUT:
 		{
 			int ret = DialogBox(GetModuleHandle(NULL),
-				MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
+				MAKEINTRESOURCE(IDD_ABOUT), hwnd, (DLGPROC)AboutDlgProc);
 			if (ret == IDOK) {
 				//MessageBox(hwnd, L"Dialog exited with IDOK.", L"Notice",
 				//MB_OK | MB_ICONINFORMATION);
