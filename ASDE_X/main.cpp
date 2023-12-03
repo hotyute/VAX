@@ -1174,7 +1174,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			}
 		}
 
-		if (GetKeyState(VK_SHIFT) < 0) {
+		if (GetKeyState(VK_CONTROL) < 0) {
 			switch (wParam)
 			{
 			case 'D':
