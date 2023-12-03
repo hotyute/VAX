@@ -878,46 +878,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			else
 				CAPS = false;
 		}
-		else if (GetKeyState(VK_SHIFT) < 0) {
-			switch (wParam)
-			{
-			case 'D':
-			{
-				// SHIFT+D is pressed
-				DUMP_COLLISION = !DUMP_COLLISION;
-				std::wstring msg = DUMP_COLLISION ? L"Dumping Collision Paths" : L"No Longer dumping Collision Paths";
-				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
-				if (!DUMP_COLLISION)
-					filerdr.DumpCollisionsToFile();
-				break;
-			}
-			case 'C':
-			{
-				DUMP_CLOSURE = !DUMP_CLOSURE;
-				std::wstring msg = DUMP_CLOSURE ? L"Dumping Closure Points" : L"No Longer dumping Closure Points";
-				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
-				if (DUMP_CLOSURE) {
-					sendSystemMessage("Dumping Closure Points.");
-				}
-				else {
-					rendererFlags["redrawClosures"] = true;
-					sendSystemMessage("Finished Closure Points.");
-					sendTempData(debug_vis.getPoints());
-					debug_vis.clear();
-					rendererFlags["renderLineVis"] = true;
-				}
-				break;
-			}
-			case 'Z':
-			{
-				if (DUMP_CLOSURE) {
-					debug_vis.pop_back();
-					rendererFlags["renderLineVis"] = true;
-				}
-				break;
-			}
-			}
-		}
 		else if (wParam == VK_TAB) {
 			if (focusChild) {
 				CHILD_TYPE type = focusChild->type;
@@ -1211,6 +1171,47 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						}
 					}
 				}
+			}
+		}
+
+		if (GetKeyState(VK_SHIFT) < 0) {
+			switch (wParam)
+			{
+			case 'D':
+			{
+				// SHIFT+D is pressed
+				DUMP_COLLISION = !DUMP_COLLISION;
+				std::wstring msg = DUMP_COLLISION ? L"Dumping Collision Paths" : L"No Longer dumping Collision Paths";
+				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
+				if (!DUMP_COLLISION)
+					filerdr.DumpCollisionsToFile();
+				break;
+			}
+			case 'C':
+			{
+				DUMP_CLOSURE = !DUMP_CLOSURE;
+				std::wstring msg = DUMP_CLOSURE ? L"Dumping Closure Points" : L"No Longer dumping Closure Points";
+				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
+				if (DUMP_CLOSURE) {
+					sendSystemMessage("Dumping Closure Points.");
+				}
+				else {
+					rendererFlags["redrawClosures"] = true;
+					sendSystemMessage("Finished Closure Points.");
+					sendTempData(debug_vis.getPoints());
+					debug_vis.clear();
+					rendererFlags["renderLineVis"] = true;
+				}
+				break;
+			}
+			case 'Z':
+			{
+				if (DUMP_CLOSURE) {
+					debug_vis.pop_back();
+					rendererFlags["renderLineVis"] = true;
+				}
+				break;
+			}
 			}
 		}
 	}
