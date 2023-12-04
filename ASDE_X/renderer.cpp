@@ -2484,12 +2484,8 @@ void HandleMessageQueue()
 					}
 				}
 				else {
-					if (DUMP_COLLISION)
-					{
-						filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
-					}
-					if (DUMP_CLOSURE) {
-						printf("\nBoundaries For Closure: %f %f\n", coords[0], coords[1]);
+					if (DUMP_CLOSURE || DUMP_COLLISION) {
+						printf("\nBoundaries: %f %f\n", coords[0], coords[1]);
 						debug_vis.addPoint(coords[0], coords[1]);
 						rendererFlags["renderLineVis"] = true;
 					}

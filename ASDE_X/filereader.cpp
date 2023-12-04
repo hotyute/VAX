@@ -500,7 +500,7 @@ void FileReader::DumpCollisionsToFile() {
 		return;
 	}
 
-	outputFile << std::fixed << std::setprecision(6);
+	outputFile << std::fixed << std::setprecision(15);
 
 	for (const auto& point : clickPoints) {
 		outputFile << point.y_ << " " << point.x_ << std::endl;

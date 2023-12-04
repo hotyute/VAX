@@ -1151,8 +1151,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					DUMP_COLLISION = !DUMP_COLLISION;
 					std::wstring msg = DUMP_COLLISION ? L"Dumping Collision Paths" : L"No Longer dumping Collision Paths";
 					MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
-					if (!DUMP_COLLISION)
+					if (!DUMP_COLLISION) {
+						for (auto& latlon : debug_vis.getPoints())
+							filerdr.clickPoints.push_back(Point2(latlon.lat, latlon.lat));
 						filerdr.DumpCollisionsToFile();
+					}
 					break;
 				}
 				case 'C':
