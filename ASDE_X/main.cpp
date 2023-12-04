@@ -765,13 +765,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				if (focus->type == CHILD_TYPE::DISPLAY_BOX) {
 					BasicInterface& bdr = *focus->border;
 					if (bdr.isBounds()) {
-						if (val < 0) {
+						if (val < 0)
 							dynamic_cast<DisplayBox*>(focus)->doActionDown();
-						}
-
-						if (val > 0) {
+						else if (val > 0)
 							dynamic_cast<DisplayBox*>(focus)->doActionUp();
-						}
 						used_focused = true;
 					}
 				}
@@ -796,8 +793,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 											dynamic_cast<DisplayBox*>(children)->doActionDown();
 											break;
 										}
-
-										if (val > 0) {
+										else if (val > 0) {
 											dynamic_cast<DisplayBox*>(children)->doActionUp();
 											break;
 										}
