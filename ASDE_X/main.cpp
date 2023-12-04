@@ -24,7 +24,6 @@
 #include "comms.h"
 #include "calc_cycles.h"
 #include "flightplan.h"
-#include "raiiclipboard.h"
 #include "save.h"
 #include "thread_pool.h"
 #include "tempdata.h"
@@ -78,8 +77,6 @@ ChildFrame* position_cursor_pop(const InterfaceFrame& frame, InputField* input_f
 void wrap_and_clip(InputField* focusField);
 
 void open_chat(std::string call_sign);
-
-std::string GetClipboardText();
 
 /* Components */
 
@@ -170,7 +167,8 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 		if (messages.message == WM_LBUTTONDOWN
 			|| messages.message == WM_RBUTTONDOWN
 			|| messages.message == WM_LBUTTONUP
-			|| messages.message == WM_MOUSEMOVE)
+			|| messages.message == WM_MOUSEMOVE
+			|| messages.message == WM_RBUTTONDBLCLK)
 		{
 			auto it = std::find(message_queue.begin(), message_queue.end(), nullptr);
 			if (it != message_queue.end())
@@ -264,6 +262,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		logic.push_back("08R");
 		logic.push_back("09");
+
+#ifdef _DEBUG
+		loadVisualPoints(filerdr.visualization);
+#endif
 
 		/*Aircraft* cur = new Aircraft("AAL2", 0, 0);
 		if (cur != NULL) {
@@ -1126,6 +1128,61 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				}
 			}
 		}
+		else if (GetKeyState(VK_CONTROL) < 0 && GetKeyState(VK_SHIFT) < 0) {
+			if (GetKeyState(VK_MENU) < 0) {
+				switch (wParam)
+				{
+				case 'V':
+				{
+					SHOW_POINTS = !SHOW_POINTS;
+					if (SHOW_POINTS) {
+						rendererFlags["pointvis"] = true;
+					}
+					break;
+				}
+				}
+			}
+			else {
+				switch (wParam)
+				{
+				case 'D':
+				{
+					// SHIFT+D is pressed
+					DUMP_COLLISION = !DUMP_COLLISION;
+					std::wstring msg = DUMP_COLLISION ? L"Dumping Collision Paths" : L"No Longer dumping Collision Paths";
+					MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
+					if (!DUMP_COLLISION)
+						filerdr.DumpCollisionsToFile();
+					break;
+				}
+				case 'C':
+				{
+					DUMP_CLOSURE = !DUMP_CLOSURE;
+					std::wstring msg = DUMP_CLOSURE ? L"Dumping Closure Points" : L"No Longer dumping Closure Points";
+					MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
+					if (DUMP_CLOSURE) {
+						sendSystemMessage("Dumping Closure Points.");
+					}
+					else {
+						rendererFlags["redrawClosures"] = true;
+						sendSystemMessage("Finished Closure Points.");
+						sendTempData(debug_vis.getPoints());
+						debug_vis.clear();
+						rendererFlags["renderLineVis"] = true;
+					}
+					break;
+				}
+				case 'Z':
+				{
+					if (DUMP_CLOSURE) {
+						debug_vis.pop_back();
+						rendererFlags["renderLineVis"] = true;
+					}
+					break;
+				}
+				}
+			}
+		}
 		else {
 			char c = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
@@ -1167,47 +1224,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 						}
 					}
 				}
-			}
-		}
-
-		if (GetKeyState(VK_CONTROL) < 0 && GetKeyState(VK_SHIFT) < 0) {
-			switch (wParam)
-			{
-			case 'D':
-			{
-				// SHIFT+D is pressed
-				DUMP_COLLISION = !DUMP_COLLISION;
-				std::wstring msg = DUMP_COLLISION ? L"Dumping Collision Paths" : L"No Longer dumping Collision Paths";
-				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
-				if (!DUMP_COLLISION)
-					filerdr.DumpCollisionsToFile();
-				break;
-			}
-			case 'C':
-			{
-				DUMP_CLOSURE = !DUMP_CLOSURE;
-				std::wstring msg = DUMP_CLOSURE ? L"Dumping Closure Points" : L"No Longer dumping Closure Points";
-				MessageBox(hwnd, msg.c_str(), L"Key Pressed", MB_OK | MB_ICONINFORMATION);
-				if (DUMP_CLOSURE) {
-					sendSystemMessage("Dumping Closure Points.");
-				}
-				else {
-					rendererFlags["redrawClosures"] = true;
-					sendSystemMessage("Finished Closure Points.");
-					sendTempData(debug_vis.getPoints());
-					debug_vis.clear();
-					rendererFlags["renderLineVis"] = true;
-				}
-				break;
-			}
-			case 'Z':
-			{
-				if (DUMP_CLOSURE) {
-					debug_vis.pop_back();
-					rendererFlags["renderLineVis"] = true;
-				}
-				break;
-			}
 			}
 		}
 	}
@@ -1938,16 +1954,5 @@ void open_chat(std::string call_sign)
 
 }
 
-std::string GetClipboardText()
-{
-	RaiiClipboard clipboard;
 
-	HANDLE hData = GetClipboardData(CF_TEXT);
-	if (hData == nullptr)
-		throw std::runtime_error("Can't get clipboard text.");
 
-	RaiiTextGlobalLock textGlobalLock(hData);
-	std::string text(textGlobalLock.Get());
-
-	return text;
-}

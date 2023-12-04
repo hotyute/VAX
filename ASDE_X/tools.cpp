@@ -6,6 +6,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "interfaces.h"
+#include "raiiclipboard.h"
 
 const int TRANSITION = 18000;
 
@@ -1051,5 +1052,30 @@ std::vector<Point2> getPolygonForPoint(const Point2& point) {
 	}
 
 	return {};  // Return empty vector if no matching polygon is found.
+}
+
+std::string GetClipboardText()
+{
+	RaiiClipboard clipboard;
+
+	HANDLE hData = GetClipboardData(CF_TEXT);
+	if (hData == nullptr)
+		throw std::runtime_error("Can't get clipboard text.");
+
+	RaiiTextGlobalLock textGlobalLock(hData);
+	std::string text(textGlobalLock.Get());
+
+	return text;
+}
+
+void copyToClipboard(const char* output) {
+	const size_t len = strlen(output) + 1;
+	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
+	memcpy(GlobalLock(hMem), output, len);
+	GlobalUnlock(hMem);
+	OpenClipboard(0);
+	EmptyClipboard();
+	SetClipboardData(CF_TEXT, hMem);
+	CloseClipboard();
 }
 

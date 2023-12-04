@@ -513,6 +513,21 @@ void FileReader::DumpCollisionsToFile() {
 	clickPoints.clear();
 }
 
+void loadVisualPoints(std::vector<Point2>& visualization) {
+	std::ifstream file("Visual.txt");
+	if (!file) {
+		std::cerr << "Unable to open file Visual.txt";
+		exit(1); // terminate with error
+	}
+
+	Point2 point;
+	while (file >> point.y_ >> point.x_) { // assuming latitude and longitude are space separated in the file
+		visualization.push_back(point);
+	}
+
+	file.close();
+}
+
 void sort_beziers() {
 	for (size_t i = 0; i < ALL.size(); i++)
 	{

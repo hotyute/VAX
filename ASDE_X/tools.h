@@ -151,6 +151,10 @@ bool doSegmentsIntersect(Point2 p1, Point2 q1, Point2 p2, Point2 q2);
 
 bool onSegment(Point2 p, Point2 q, Point2 r);
 
+std::string GetClipboardText();
+
+void copyToClipboard(const char* output);
+
 std::vector<Point2> getPolygonForPoint(const Point2& point);
 
 template<typename T>

@@ -30,7 +30,7 @@ extern double u_aircraft_size;
 extern double elevation;
 extern std::string icao;
 
-extern bool DAY, DB_BLOCK, SHOW_VECTORS, CAPS, DUMP_COLLISION, DUMP_CLOSURE, CONTROL;
+extern bool DAY, DB_BLOCK, SHOW_VECTORS, CAPS, DUMP_COLLISION, DUMP_CLOSURE, CONTROL, SHOW_POINTS;
 
 extern char input_cursor;
 

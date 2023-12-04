@@ -45,7 +45,8 @@ std::unordered_map<std::string, bool> rendererFlags = {
 	{"renderDepartures", false},
 	{"renderAllInputText", false},
 	{"renderLineVis", false},
-	{"renderCoordinates", false}
+	{"renderCoordinates", false},
+	{"pointvis", false}
 };
 
 bool updateFlags[NUM_FLAGS];
@@ -53,7 +54,7 @@ bool renderFlags[NUM_FLAGS];
 
 bool isPanning = false;
 bool resize = false;
-GLint sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, lineVisDl = 0, closureAreaList, coordinateDl;
+GLint sectorDl, runwaysDl, taxiwaysDl, parkingDl, apronDl, holesDl, legendDl, buttonsDl, confDl, dateDl, aircraftDl, heavyDl, unkTarDl, departuresDl, lineVisDl = 0, closureAreaList, coordinateDl, pointVisDl = 0;
 unsigned int callSignBase, topButtonBase, confBase, legendBase, titleBase, labelBase, errorBase;
 HFONT callSignFont = NULL, topBtnFont = NULL, confFont = NULL, legendFont = NULL, titleFont = NULL, labelFont = NULL,
 errorFont = NULL;
@@ -313,7 +314,7 @@ void DrawGLScene() {
 
 		glColor3f(1.0f, 1.0f, 1.0f);
 
-		glBegin(GL_LINE_LOOP);
+		glBegin(GL_LINE_STRIP);
 		for (const LatLon& point : debug_vis.getPoints()) {
 			glVertex2f(point.lon, point.lat);
 		}
@@ -326,6 +327,32 @@ void DrawGLScene() {
 	}
 
 	renderDebugLine();
+
+	if (rendererFlags["pointvis"])
+	{
+		if (glIsList(pointVisDl)) {
+			glDeleteLists(pointVisDl, 1);
+		}
+
+		pointVisDl = glGenLists(1);
+
+		glNewList(pointVisDl, GL_COMPILE);
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+
+		glBegin(GL_LINE_STRIP);
+		for (const auto& point : filerdr.visualization) {
+			glVertex2f(point.x_, point.y_);
+		}
+		glEnd();
+
+		glEndList();
+
+		rendererFlags["pointvis"] = false;
+	}
+
+	if (SHOW_POINTS)
+		renderPointVis();
 }
 
 void DrawData()
@@ -2441,17 +2468,31 @@ void HandleMessageQueue()
 			switch (msg.message)
 			{
 			case WM_RBUTTONDOWN:
+			case WM_RBUTTONDBLCLK:
 			{
 				double coords[3];
 				GetOGLPos(LOWORD(msg.lParam), HIWORD(msg.lParam), coords);
-				printf("\nBoundaries For Closure: %f %f\n", coords[0], coords[1]);
-				if (DUMP_COLLISION)
+				if (msg.message == WM_RBUTTONDBLCLK)
 				{
-					filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
+					if (GetKeyState(VK_CONTROL) < 0 && GetKeyState(VK_SHIFT) < 0) {
+						if (GetKeyState(VK_MENU) < 0) {
+							std::stringstream ss;
+							ss << std::fixed << std::setprecision(15) << coords[0] << " " << coords[1];
+							copyToClipboard(ss.str().c_str());
+							sendSystemMessage("Coordinates copies to Clipboard.");
+						}
+					}
 				}
-				if (DUMP_CLOSURE) {
-					debug_vis.addPoint(coords[0], coords[1]);
-					rendererFlags["renderLineVis"] = true;
+				else {
+					if (DUMP_COLLISION)
+					{
+						filerdr.clickPoints.push_back(Point2(coords[1], coords[0]));
+					}
+					if (DUMP_CLOSURE) {
+						printf("\nBoundaries For Closure: %f %f\n", coords[0], coords[1]);
+						debug_vis.addPoint(coords[0], coords[1]);
+						rendererFlags["renderLineVis"] = true;
+					}
 				}
 			}
 			break;
@@ -2509,6 +2550,10 @@ void renderAllClosureAreas() {
 
 void renderDebugLine() {
 	glCallList(lineVisDl);
+}
+
+void renderPointVis() {
+	glCallList(pointVisDl);
 }
 
 void compileClosureAreaList(const std::unordered_map<int, ClosureArea>& closureAreas) {

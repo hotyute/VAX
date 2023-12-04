@@ -23,6 +23,7 @@ public:
 	static int LoadADX(std::string);
 	std::vector<Path> collisionPaths;
 	std::vector<Point2> clickPoints;
+	std::vector<Point2> visualization;
 	void LoadCollisionPaths(const std::string& path);
 	void DumpCollisionsToFile();
 };
@@ -30,6 +31,8 @@ public:
 void open_adx(std::string path);
 
 void parseCpfFile(const std::string& filename, std::vector<Path>& paths);
+
+void loadVisualPoints(std::vector<Point2>& visualization);
 
 void sort_beziers();
 
