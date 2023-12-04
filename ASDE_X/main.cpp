@@ -265,7 +265,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		logic.push_back("08R");
 		logic.push_back("09");
 
-		Aircraft* cur = new Aircraft("AAL2", 0, 0);
+		/*Aircraft* cur = new Aircraft("AAL2", 0, 0);
 		if (cur != NULL) {
 			cur->lock();
 			cur->setHeavy(true);
@@ -305,7 +305,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			cur2->setSquawkCode(std::to_string(random(2000, 5200)));
 		}
-		userStorage1[1] = dynamic_cast<User*>(cur2);
+		userStorage1[1] = dynamic_cast<User*>(cur2);*/
 
 		break;
 	}

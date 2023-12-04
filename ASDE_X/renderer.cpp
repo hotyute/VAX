@@ -86,6 +86,8 @@ int DrawCollisionLine(Mirror* mirror, Collision& collision, unsigned int& line_d
 
 int DrawVectorLines(Aircraft& aircraft, unsigned int& base, Mirror* mirror, double zoom);
 
+void generic_window_data(Mirror* mirror);
+
 void aircraft_window_data(Aircraft& aircraft, Mirror* mirror);
 
 void aircraft_graphics(Aircraft& aircraft, Mirror* mirror);
@@ -328,6 +330,7 @@ void DrawGLScene() {
 
 void DrawData()
 {
+	generic_window_data(nullptr);
 
 	if (acf_map.size() > 0)
 	{
@@ -339,7 +342,6 @@ void DrawData()
 			if (acf_ptr != NULL)
 			{
 				Aircraft& aircraft = *acf_ptr;
-
 				if (within_boundary(aircraft))//TODO Synch as mentioned above as this triggered breaking point
 					aircraft_window_data(aircraft, nullptr);
 			}
@@ -391,6 +393,9 @@ void DrawMirrorScenes(Mirror& mirror)
 
 void DrawMirrorData(Mirror& mirror)
 {
+
+	generic_window_data(&mirror);
+
 	if (acf_map.size() > 0) {
 		for (auto iter = acf_map.begin(); iter != acf_map.end(); iter++)
 		{
@@ -1853,6 +1858,22 @@ int DrawVectorLines(Aircraft& aircraft, unsigned int& base, Mirror* mirror, doub
 	return 1;
 }
 
+void generic_window_data(Mirror* mirror) {
+	bool is_mirror = mirror ? true : false;
+	if (!is_mirror)
+	{
+		if (renderFlags[GBL_AIRCRAFT]) {
+			//We use default zoom because they all get downsized by glScale anyway
+			glDeleteLists(aircraftDl, 1);
+			RenderAircraft(false, aircraftDl);
+			glDeleteLists(heavyDl, 1);
+			RenderAircraft(true, heavyDl);
+			glDeleteLists(unkTarDl, 1);
+			RenderUnknown(false, unkTarDl);
+		}
+	}
+}
+
 void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 {
 	bool is_mirror = mirror ? true : false;
@@ -1984,19 +2005,6 @@ void aircraft_window_data(Aircraft& aircraft, Mirror* mirror)
 	}
 
 	glPopMatrix();
-
-	if (!is_mirror)
-	{
-		if (renderFlags[GBL_AIRCRAFT]) {
-			//We use default zoom because they all get downsized by glScale anyway
-			glDeleteLists(aircraftDl, 1);
-			RenderAircraft(false, aircraftDl);
-			glDeleteLists(heavyDl, 1);
-			RenderAircraft(true, heavyDl);
-			glDeleteLists(unkTarDl, 1);
-			RenderUnknown(false, unkTarDl);
-		}
-	}
 
 	//move the aircraft first so we have proper movement along the map scale
 	glPushMatrix();
