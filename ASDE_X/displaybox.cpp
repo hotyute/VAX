@@ -308,7 +308,7 @@ bool DisplayBox::placeEdit(InputField* input_field) const
 		input_field->setFocus();
 		RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 		rendererFlags["renderInterfaces"] = true;
-		rendererFlags["renderDrawings"] = true;
+		rendererFlags["drawings"] = true;
 		return true;
 	}
 	return false;
@@ -557,7 +557,7 @@ int DisplayBox::handleClick(ChildFrame* clicked, int x, int y)
 
 						}
 
-						rendererFlags["renderDrawings"] = true;
+						rendererFlags["drawings"] = true;
 						clicked = this;
 						return 1;
 					}
@@ -639,7 +639,7 @@ void DisplayBox::doActionUp()
 {
 	if ((read_index - 1) >= 0) {
 		--read_index;
-		rendererFlags["renderDrawings"] = true;
+		rendererFlags["drawings"] = true;
 	}
 }
 
@@ -647,7 +647,7 @@ void DisplayBox::doActionDown()
 {
 	if ((read_index + 1) <= ((chat_lines.end() - numBlocks) - chat_lines.begin())) {
 		++read_index;
-		rendererFlags["renderDrawings"] = true;
+		rendererFlags["drawings"] = true;
 	}
 }
 
