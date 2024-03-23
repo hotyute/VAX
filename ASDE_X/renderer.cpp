@@ -2523,7 +2523,7 @@ void HandleMessageQueue()
 				}
 				DISPLAY_MOUSE_POS->x_ = coords[1];
 				DISPLAY_MOUSE_POS->y_ = coords[0];
-				if (DUMP_CLOSURE)
+				if (DUMP_CLOSURE || DUMP_COLLISION)
 					rendererFlags["renderLineVis"] = true;
 				rendererFlags["renderCoordinates"] = true;
 			}
