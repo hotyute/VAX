@@ -1,5 +1,3 @@
-// --- START OF FILE window_widget.cpp ---
-
 #define NOMINMAX
 #include <windows.h>
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "ui_common.h"
+#include "../ui_windows/flight_plan_window.h"
 #include <vector>
 #include <memory>
 #include <string> // For GetWindowById
@@ -8,6 +9,7 @@
 class WindowWidget;
 class Widget;
 class UIRenderer;
+class FlightPlanWindow;
 
 class UIManager {
 public:
@@ -40,6 +42,8 @@ public:
     bool LastEventHandled() const { return lastEventHandledByUI_INTERNAL; } // So external code can query
 
     void MarkAllWindowsDirty();
+
+    FlightPlanWindow* GetFlightPlanWindowForAircraft(Aircraft* aircraft);
 
 private:
     UIManager() = default;

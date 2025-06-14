@@ -40,6 +40,9 @@ public:
 
     int GetLineHeight() const; // Declaration
 
+    std::vector<std::string> GetAllLogicalLinesText() const;
+    std::string GetConcatenatedText(const std::string& delimiter = "\n") const;
+
 private:
     std::deque<StyledTextLine> logicalLines; // Original lines added
     std::vector<std::pair<const StyledTextLine*, int>> displayLines; // Pointers to logical lines and segment index

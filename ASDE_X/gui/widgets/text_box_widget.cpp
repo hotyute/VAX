@@ -202,6 +202,25 @@ void TextBoxWidget::ScrollDelta(int deltaPixels) {
     MarkDirty(false);
 }
 
+std::vector<std::string> TextBoxWidget::GetAllLogicalLinesText() const {
+    std::vector<std::string> texts;
+    for (const auto& line : logicalLines) {
+        texts.push_back(line.text);
+    }
+    return texts;
+}
+
+std::string TextBoxWidget::GetConcatenatedText(const std::string& delimiter) const {
+    std::string fullText;
+    for (size_t i = 0; i < logicalLines.size(); ++i) {
+        fullText += logicalLines[i].text;
+        if (i < logicalLines.size() - 1) {
+            fullText += delimiter;
+        }
+    }
+    return fullText;
+}
+
 void TextBoxWidget::EnsureScrollBounds() {
     Rect screenBounds = GetScreenBounds();
     int clientHeight = screenBounds.height - (style.padding.top + style.padding.bottom);

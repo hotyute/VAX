@@ -5,6 +5,8 @@
 #include "calc_cycles.h"
 #include "flightplan.h"
 #include "interfaces.h"
+#include "gui/widgets/ui_manager.h"
+#include "gui/ui_windows/flight_plan_window.h"
 
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
@@ -299,38 +301,64 @@ void decodePackets(int opCode, BasicStream& stream) {
 			stream.readString(route);
 			stream.readString(remarks);
 
-			if (user1)
-			{
+			if (user1) { // user1 is the Aircraft*
 				CLIENT_TYPES type = user1->getIdentity()->type;
 				if (type == CLIENT_TYPES::PILOT_CLIENT) {
-					Aircraft& acf = *dynamic_cast<Aircraft*>(user1);
+					Aircraft& acf = *static_cast<Aircraft*>(user1);
 					FlightPlan& fp = *acf.getFlightPlan();
+					// ... (existing code to populate fp members) ...
 
-					fp.cycle = cur_cycle;
-
-					fp.flightRules = fr;
-
-					fp.squawkCode = assigned_squawk;
-					fp.departure = departure;
-					fp.arrival = arrival;
-					fp.alternate = alternate;
-					fp.cruise = cruise;
-					fp.acType = ac_type;
-					fp.scratchPad = scratch;
-					fp.route = route;
-					fp.remarks = remarks;
-
-					//TODO open Flight Plan
-					if (opened_fp == user1 && cur_cycle)
-					{
-						int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
-						Load_FlightPlan_Interface(wdata[0], wdata[1], acf, true);
+					// Now, try to update an open FlightPlanWindow
+					FlightPlanWindow* fpWin = UIManager::Instance().GetFlightPlanWindowForAircraft(&acf);
+					if (fpWin && fpWin->visible) {
+						// Check if this fpWin is for the aircraft whose FP was updated
+						// This check needs to access fpWin's targetAircraft or initialCallsign
+						// For simplicity, let's assume a method like IsForAircraft(Aircraft* aircraft)
+						// Or directly call an update method that does the check:
+						fpWin->UpdateData(&acf); // UpdateData will check if it's the right window
 					}
 
-					if (fp.squawkCode != acf.getSquawkCode())
+					if (fp.squawkCode != acf.getSquawkCode()) { // This check should be here or within Aircraft::setSquawkCode
+						acf.setSquawkCode(fp.squawkCode); // Use setter if it exists and handles dirty flags
 						acf.setUpdateFlag(ACF_CALLSIGN, true);
+					}
 				}
 			}
+
+			// -- BEGIN LEGACY CODE --
+			//if (user1)
+			//{
+			//	CLIENT_TYPES type = user1->getIdentity()->type;
+			//	if (type == CLIENT_TYPES::PILOT_CLIENT) {
+			//		Aircraft& acf = *dynamic_cast<Aircraft*>(user1);
+			//		FlightPlan& fp = *acf.getFlightPlan();
+
+			//		fp.cycle = cur_cycle;
+
+			//		fp.flightRules = fr;
+
+			//		fp.squawkCode = assigned_squawk;
+			//		fp.departure = departure;
+			//		fp.arrival = arrival;
+			//		fp.alternate = alternate;
+			//		fp.cruise = cruise;
+			//		fp.acType = ac_type;
+			//		fp.scratchPad = scratch;
+			//		fp.route = route;
+			//		fp.remarks = remarks;
+
+			//		//TODO open Flight Plan
+			//		if (opened_fp == user1 && cur_cycle)
+			//		{
+			//			int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
+			//			Load_FlightPlan_Interface(wdata[0], wdata[1], acf, true);
+			//		}
+
+			//		if (fp.squawkCode != acf.getSquawkCode())
+			//			acf.setUpdateFlag(ACF_CALLSIGN, true);
+			//	}
+			//}
+			// -- END LEGACY CODE --
 		}
 	}
 

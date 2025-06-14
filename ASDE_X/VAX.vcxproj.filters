@@ -195,6 +195,9 @@
     <ClCompile Include="gui\ui_windows\settings_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gui\ui_windows\flight_plan_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -387,6 +390,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gui\ui_windows\settings_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\ui_windows\flight_plan_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

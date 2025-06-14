@@ -161,6 +161,7 @@
     <ClCompile Include="clinc.cpp" />
     <ClCompile Include="clinc2.cpp" />
     <ClCompile Include="gui\ui_windows\connect_window.cpp" />
+    <ClCompile Include="gui\ui_windows\flight_plan_window.cpp" />
     <ClCompile Include="gui\ui_windows\settings_window.cpp" />
     <ClCompile Include="gui\widgets\button_widget.cpp" />
     <ClCompile Include="gui\widgets\combo_box_widget.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="gui.h" />
     <ClInclude Include="guicon.h" />
     <ClInclude Include="gui\ui_windows\connect_window.h" />
+    <ClInclude Include="gui\ui_windows\flight_plan_window.h" />
     <ClInclude Include="gui\ui_windows\settings_window.h" />
     <ClInclude Include="gui\widgets\button_widget.h" />
     <ClInclude Include="gui\widgets\combo_box_widget.h" />

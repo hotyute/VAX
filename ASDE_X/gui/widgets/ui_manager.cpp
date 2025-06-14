@@ -5,6 +5,7 @@
 #include "ui_manager.h"
 #include "window_widget.h" // For WindowWidget
 #include "ui_renderer.h"   // For UIRenderer
+#include "../../aircraft.h"
 #include <algorithm>    // For std::remove, std::find_if
 
 UIManager& UIManager::Instance() {
@@ -534,6 +535,14 @@ void UIManager::ProcessSystemEvent(HWND hwnd, UINT message, WPARAM wParam, LPARA
     // if (uiEvent.handled) {
     //    this->lastEventHandledByUI_INTERNAL = true;
     // }
+}
+
+FlightPlanWindow* UIManager::GetFlightPlanWindowForAircraft(Aircraft* aircraft) {
+    if (!aircraft) return nullptr;
+    std::string targetCallsign = aircraft->getCallsign(); // Or however you get it
+    std::string targetId = "FPWindow_" + targetCallsign; // Assuming consistent ID scheme
+    WindowWidget* win = GetWindowById(targetId);
+    return dynamic_cast<FlightPlanWindow*>(win);
 }
 
 

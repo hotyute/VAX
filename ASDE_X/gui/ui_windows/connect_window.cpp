@@ -51,7 +51,7 @@ ConnectWindow::ConnectWindow() : WindowWidget("CONNECT") {
         auto contentAreaLayout = std::make_unique<VerticalStackLayout>();
         contentAreaLayout->spacing = 10;
         contentAreaLayout->padding = { 20, 40, 10, 40 };
-        contentAreaLayout->childAlignment = HorizontalAlignment::Center; // <--- ADD THIS LINE
+        contentAreaLayout->childAlignment = HorizontalAlignment::Center;
         ca->SetLayout(std::move(contentAreaLayout));
     }
     // All children (rows) will be added to 'contentArea' (which is 'ca', and is equivalent to this->contentArea)
@@ -113,7 +113,7 @@ ConnectWindow::ConnectWindow() : WindowWidget("CONNECT") {
     auto row3 = std::make_unique<ContainerWidget>(std::make_unique<HorizontalStackLayout>());
     static_cast<HorizontalStackLayout*>(row3->layout.get())->spacing = 10; // Minimal spacing
     static_cast<HorizontalStackLayout*>(row3->layout.get())->alignment = HorizontalAlignment::Center; // For later
-    static_cast<HorizontalStackLayout*>(row3->layout.get())->padding = { 2, 0, 5, 0 };
+    static_cast<HorizontalStackLayout*>(row3->layout.get())->padding = { 2, 10, 5, 10 };
     {
         ratingCombo = new ComboBoxWidget();
         ratingCombo->id = "connect_rating";
