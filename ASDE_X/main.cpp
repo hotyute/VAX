@@ -27,6 +27,16 @@
 #include "save.h"
 #include "thread_pool.h"
 #include "tempdata.h"
+#include "gui/widgets/font_manager.h" // Add this
+
+#include "gui/widgets/ui_manager.h"
+#include "gui/widgets/opengl_ui_renderer.h" // Your concrete renderer
+#include "gui/ui_windows/connect_window.h" // The first window you'll test
+#include "gui/ui_windows/settings_window.h"
+#include "gui/widgets/font_keys.h"
+// Potentially others as you convert them:
+// #include "ui_windows/main_chat_window.h"
+// ...
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
@@ -72,7 +82,7 @@ void conn_clean();
 void pull_data(InterfaceFrame& _f, CHILD_TYPE _fc);
 
 void pop_split_line(const InterfaceFrame& frame, InputField* focusField);
-ChildFrame* position_cursor_pop(const InterfaceFrame& frame, InputField* input_field);
+ChildFrame* position_cursor_pop(InterfaceFrame& frame, InputField* input_field);
 
 void wrap_and_clip(InputField* focusField);
 
@@ -211,6 +221,21 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (UIManager::Instance().IsInitialized()) { // Only process if UIManager is ready
+		UIManager::Instance().ProcessSystemEvent(hwnd, message, wParam, lParam);
+		// If ProcessSystemEvent sets a flag indicating it handled the event,
+		// you might choose to return 0 immediately for certain messages.
+		// For example:
+		// if (UIManager::Instance().LastEventHandled()) {
+		//     switch (message) {
+		//         case WM_LBUTTONDOWN:
+		//         case WM_LBUTTONUP:
+		//         // ... other messages fully consumed by UI ...
+		//             return 0; // Event handled by UI, no further processing needed by DefWindowProc
+		//     }
+		// }
+	}
+
 	switch (message)                  /* handle the messages */
 	{
 	case WM_CREATE: {
@@ -232,6 +257,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(hFile, MF_STRING, ID_FILE_EXIT, L"&Exit");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_DEPARTS, L"&Show/Hide Departures...");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_SQUAWKS, L"&Show/Hide All Squawk Codes...");
+		AppendMenu(hSettings, MF_STRING, ID_SETTINGS, L"&Settings...");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_CLIST, L"&Controller List...");
 		AppendMenu(hSettings, MF_STRING, ID_SETTINGS_COMMS, L"&Communications Panel...");
 		AppendMenu(hHelp, MF_STRING, ID_HELP_ABOUT, L"&About...");
@@ -405,7 +431,61 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		{
 		case ID_FILE_CONNECT:
 		{
-			handleConnect();
+			//handleConnect();
+			if (UIManager::Instance().IsInitialized()) {
+				// Check if an instance already exists (optional, to prevent multiple)
+				if (!UIManager::Instance().GetWindowById("ConnectWindowInstance")) {
+					auto connectWin = std::make_unique<ConnectWindow>();
+					connectWin->id = "ConnectWindowInstance"; // Give it an ID for lookup
+
+					// Let UIManager position it or set a default position
+					// UIManager::AddWindow will call Measure and Arrange
+					Size prefSize = connectWin->Measure(); // Measure to get its preferred size
+					// Center it (example positioning)
+					Rect initialBounds = {
+						(CLIENT_WIDTH - prefSize.width) / 2,
+						(CLIENT_HEIGHT - prefSize.height) / 2,
+						prefSize.width,
+						prefSize.height
+					};
+					// Ensure it's within screen bounds
+					initialBounds.x = std::max(0, std::min(initialBounds.x, CLIENT_WIDTH - initialBounds.width));
+					initialBounds.y = std::max(0, std::min(initialBounds.y, CLIENT_HEIGHT - initialBounds.height));
+
+					connectWin->Arrange(initialBounds); // Set its initial bounds
+
+					UIManager::Instance().AddWindow(std::move(connectWin));
+
+					// Optionally, set focus to the window or its first input field
+					Widget* connectWindowPtr = UIManager::Instance().GetWindowById("ConnectWindowInstance");
+					if (connectWindowPtr) {
+						// connectWindowPtr->RequestFocus(); // Focus the window itself
+						// Or, find the first input field and focus that:
+						Widget* firstInput = connectWindowPtr->GetChildById("connect_callsign"); // Assuming you set this ID in ConnectWindow.cpp
+						if (firstInput) {
+							firstInput->RequestFocus();
+						}
+						else {
+							connectWindowPtr->RequestFocus(); // Fallback to window
+						}
+					}
+				}
+				else {
+					// Window already exists, just bring it to front and focus
+					WindowWidget* existingWin = static_cast<WindowWidget*>(UIManager::Instance().GetWindowById("ConnectWindowInstance"));
+					if (existingWin) {
+						UIManager::Instance().BringWindowToFront(existingWin);
+						Widget* firstInput = existingWin->GetChildById("connect_callsign");
+						if (firstInput) firstInput->RequestFocus();
+						else existingWin->RequestFocus();
+					}
+				}
+			}
+			else {
+				// UIManager not ready, maybe log an error or show a system message box
+				MessageBox(hwnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
+			}
+			break;
 		}
 		break;
 		case ID_FILE_DISCONNECT:
@@ -427,6 +507,82 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		}
 		break;
+		case ID_SETTINGS: // Replace ID_SETTINGS with the actual menu ID you defined for settings
+		{
+			if (UIManager::Instance().IsInitialized()) {
+				// Check if an instance of SettingsWindow already exists by its ID
+				WindowWidget* existingWin = UIManager::Instance().GetWindowById("SettingsWindowInstance");
+
+				if (!existingWin) {
+					// Create a new SettingsWindow if one doesn't exist
+					auto settingsWin = std::make_unique<SettingsWindow>();
+					settingsWin->id = "SettingsWindowInstance"; // Assign a unique ID
+
+					// Measure the window to get its preferred size based on its content
+					Size prefSize = settingsWin->Measure();
+
+					// Calculate initial position (e.g., centered on screen)
+					// Ensure CLIENT_WIDTH and CLIENT_HEIGHT are up-to-date screen/client dimensions
+					Rect initialBounds = {
+						(CLIENT_WIDTH - prefSize.width) / 2,
+						(CLIENT_HEIGHT - prefSize.height) / 2,
+						prefSize.width,
+						prefSize.height
+					};
+
+					// Optional: Clamp to screen boundaries if necessary, though centering usually handles this.
+					initialBounds.x = std::max(0, std::min(initialBounds.x, CLIENT_WIDTH - initialBounds.width));
+					if (initialBounds.x + initialBounds.width > CLIENT_WIDTH) initialBounds.x = CLIENT_WIDTH - initialBounds.width;
+					if (initialBounds.x < 0) initialBounds.x = 0;
+
+					initialBounds.y = std::max(0, std::min(initialBounds.y, CLIENT_HEIGHT - initialBounds.height));
+					if (initialBounds.y + initialBounds.height > CLIENT_HEIGHT) initialBounds.y = CLIENT_HEIGHT - initialBounds.height;
+					if (initialBounds.y < 0) initialBounds.y = 0;
+
+
+					// Arrange the window with its calculated initial bounds
+					settingsWin->Arrange(initialBounds);
+
+					// Add the window to the UIManager
+					UIManager::Instance().AddWindow(std::move(settingsWin));
+
+					// Optionally, request focus for the newly created window
+					// UIManager::AddWindow might already bring it to front and focus it,
+					// but explicit request ensures it if that behavior changes.
+					WindowWidget* newWinPtr = UIManager::Instance().GetWindowById("SettingsWindowInstance");
+					if (newWinPtr) {
+						newWinPtr->RequestFocus();
+					}
+				}
+				else {
+					// Window already exists, just bring it to the front and focus it
+					UIManager::Instance().BringWindowToFront(existingWin);
+					if (existingWin->focusable && !existingWin->hasFocus) { // Check if it can be focused and doesn't already have it
+						// Check if a child of existingWin has focus
+						bool childHasFocus = false;
+						Widget* currentFocused = UIManager::Instance().GetFocusedWidget();
+						if (currentFocused && currentFocused != existingWin) {
+							Widget* p = currentFocused->parent;
+							while (p) {
+								if (p == existingWin) {
+									childHasFocus = true;
+									break;
+								}
+								p = p->parent;
+							}
+						}
+						if (!childHasFocus) {
+							existingWin->RequestFocus();
+						}
+					}
+				}
+			}
+			else {
+				// UIManager not ready, maybe log an error or show a system message box
+				MessageBox(hWnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
+			}
+			break;
+		}
 		case ID_SETTINGS_CLIST:
 		{
 			if (controller_list == NULL) {
@@ -1110,19 +1266,21 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			if (focusChild && focusChild->type == CHILD_TYPE::INPUT_FIELD) {
 				auto* focusField = dynamic_cast<InputField*>(focusChild);
 				InterfaceFrame& frame = *focusField->getFrame();
-				CHILD_TYPE type = focusField->type;
 				if (focusField->editable) {
 					if (!focusField->input.empty()) {
 						bool popped = focusField->popInput();
 						focusField->setCursor();
-						//if (!popped)
+						// Optional: Handle splitting if needed
 						pop_split_line(frame, focusField);
 						RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
 						focusField->history_index = 0;
-					}
-					else {
-						if (ChildFrame* split_prev = position_cursor_pop(frame, focusField)) {
-
+					} else if (focusField->cursor_pos == 0) {
+						if (position_cursor_pop(frame, focusField)) {
+							// Successfully merged with the previous line
+							// Rendered inside position_cursor_pop
+						}
+						else {
+							// At the first line, do nothing or provide feedback
 						}
 					}
 				}
@@ -1578,8 +1736,10 @@ DWORD WINAPI EventThread1(LPVOID lpParameter) {
 }
 
 DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
-	boost::posix_time::ptime start;
-	boost::posix_time::ptime end;
+	boost::posix_time::ptime frameStart, frameEnd;
+	// Initialize frameEnd to a value that makes the first deltaTime sensible
+	frameEnd = boost::posix_time::microsec_clock::local_time() - boost::posix_time::milliseconds(16); // Approx 16ms ago
+	long long desiredFrameTimeMillis = 1000 / 60; // Target 60 FPS
 
 	hDC = BeginPaint(hWnd, &ps);
 	// Setup pixel format for the device context
@@ -1601,6 +1761,38 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	}
 
 	InitOpenGL();
+
+	// 1. Initialize FontManager *after* GL context is current
+	FontManager::Instance().Initialize(hDC);
+
+	// 2. Load your default/existing fonts into the FontManager
+	//    Match these to the parameters of your old BuildFont calls.
+	//    BuildFont(LPCWSTR font_name, int font_height, bool bold, unsigned int* base, HFONT* oldfont1)
+
+	// Old: BuildFont(L"SansSerif", -15, true, &legendBase, &legendFont);
+	FontManager::Instance().LoadFont(FONT_KEY_LEGEND, L"SansSerif", -15, true, false);
+
+	// Old: BuildFont(L"Consolas", -11, false, &topButtonBase, &topBtnFont);
+	FontManager::Instance().LoadFont(FONT_KEY_TOP_BUTTON, L"Consolas", -11, false, false);
+
+	// Old: BuildFont(L"Times New Roman", -15, true, &titleBase, &titleFont);
+	FontManager::Instance().LoadFont(FONT_KEY_TITLE, L"Times New Roman", -15, true, false);
+
+	// Old: BuildFont(L"Consolas", -13, false, &confBase, &confFont);
+	FontManager::Instance().LoadFont(FONT_KEY_CONFIG, L"Consolas", -13, false, false);
+
+	// Old: BuildFont(L"Courier New", -12, false, &callSignBase, &callSignFont);
+	FontManager::Instance().LoadFont(FONT_KEY_CALLSIGN, L"Courier New", -12, false, false);
+
+	// Old: BuildFont(L"Times New Roman", -11, true, &labelBase, &labelFont);
+	FontManager::Instance().LoadFont(FONT_KEY_UI_LABEL, L"Times New Roman", -11, true, false);
+
+	// Old: BuildFont(L"Consolas", -11, false, &errorBase, &errorFont);
+	FontManager::Instance().LoadFont(FONT_KEY_ERROR, L"Consolas", -11, false, false);
+
+	// 3. Initialize UIManager (it can now use FontManager indirectly via renderer/style)
+	UIManager::Instance().Initialize(std::make_unique<OpenGLUIRenderer>(hDC), CLIENT_WIDTH, CLIENT_HEIGHT);
+
 	LoadMainChatInterface(false);
 	RenderControllerList(false, -1, -1);
 	int id = 0, items_opened = 0, c_id = -1;
@@ -1621,7 +1813,16 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 	event_manager1->addEvent(&position_updates);
 	read_info();
 	while (!done) {
-		start = boost::posix_time::microsec_clock::local_time();
+		frameStart = boost::posix_time::microsec_clock::local_time();
+		boost::posix_time::time_duration td = frameStart - frameEnd; // Calculate delta time
+		float deltaTime = static_cast<float>(td.total_milliseconds()) / 1000.0f;
+		if (deltaTime <= 0.0f) deltaTime = 1.0f / 60.0f; // Prevent zero or negative dt on first frame
+
+		// --- UI UPDATE ---
+		if (UIManager::Instance().IsInitialized()) {
+			UIManager::Instance().Update(deltaTime);
+		}
+
 		preFlags();
 
 		//Draw Main Scene
@@ -1654,21 +1855,31 @@ DWORD WINAPI OpenGLThread(LPVOID lpParameter) {
 		ResizeInterfaceGLScene();
 		DrawInterfaces();
 
+		// 2. New UI System Rendering (On Top)
+		// UIManager::Render() will set up its own orthographic projection.
+		if (UIManager::Instance().IsInitialized()) {
+			UIManager::Instance().Render();
+		}
+
 		resetFlags();
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR) {
 			std::cerr << "OpenGL error: " << err << std::endl;
 		}
 		SwapBuffers(hDC);
-		end = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration time2 = end - start;
-		long long time1 = (1000 / LOCKED_FPS);
-		long long time = time1 - time2.total_milliseconds();
-		if (time < 1) {
-			time = 1;
+		frameEnd = boost::posix_time::microsec_clock::local_time();
+		boost::posix_time::time_duration frameDuration = frameEnd - frameStart;
+		long long sleepTimeMillis = desiredFrameTimeMillis - frameDuration.total_milliseconds();
+		if (sleepTimeMillis > 0) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(sleepTimeMillis));
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(time));
 	}
+	FontManager::Instance().Cleanup(); // Before deleting context
+	UIManager::Instance().Shutdown();
+
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hRC);
+	ReleaseDC(hWnd, hDC);
 	return 0;
 }
 
@@ -1854,34 +2065,51 @@ void pop_split_line(const InterfaceFrame& frame, InputField* focusField)
 	}
 }
 
-ChildFrame* position_cursor_pop(const InterfaceFrame& frame, InputField* focusField) {
+ChildFrame* position_cursor_pop(InterfaceFrame& frame, InputField* focusField) {
 	if (focusField->line_ptr) {
 		const std::shared_ptr<ChatLine>& line = focusField->line_ptr;
 		if (frame.id == FP_INTERFACE) {
-			std::shared_ptr<ChatLine> nf = nullptr;
 			auto* display_box = dynamic_cast<DisplayBox*>(frame.children[FP_ROUTE_BOX]);
-			const auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), line);
-			auto i = display_box->chat_lines.begin();
-			while (i != display_box->chat_lines.end()) {
-				if (const std::shared_ptr<ChatLine>& c2 = *i; c2->split == line) {
-					focusField->history_index = 0;
-					focusField->removeFocus();
-					if (display_box->handleClick(nullptr, c2->get_x(), c2->get_y())) {
-						if (display_box->getFrame()->children[display_box->index + 1]) {
-							dynamic_cast<InputField*>(display_box->getFrame()->children[display_box->index + 1])->setCursorAtStart();
-							RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
-						}
-					}
-					printf("pop_position_split: %s\n", c2->getText().c_str());
-					nf = c2;
-					break;
-				}
-				++i;
+			if (!display_box) return nullptr;
+
+			auto it = std::find(display_box->chat_lines.begin(), display_box->chat_lines.end(), line);
+			if (it != display_box->chat_lines.end() && it != display_box->chat_lines.begin()) {
+				// Not at the first line
+				auto prev_it = std::prev(it);
+				std::shared_ptr<ChatLine>& prev_line = *prev_it;
+
+				// Store the length of the previous line before merging
+				size_t prev_line_length = prev_line->getText().length();
+
+				// Merge texts
+				std::string merged_text = prev_line->getText() + line->getText();
+				prev_line->setText(merged_text);
+
+				// Remove current line
+				it = display_box->chat_lines.erase(it);
+
+				// Update focusField
+				focusField->line_ptr = prev_line;
+				focusField->setInput(merged_text);
+				focusField->setCursor(prev_line_length);
+
+				// Recalculate line wrapping
+				display_box->consolidate_lines();
+				display_box->gen_points();
+
+				// Refresh display
+				RenderFocusChild(CHILD_TYPE::INPUT_FIELD);
+				return focusField;
+			}
+			else {
+				// Already at the first line, cannot merge
+				return nullptr;
 			}
 		}
 	}
 	return nullptr;
 }
+
 
 void wrap_and_clip(InputField* focusField)
 {

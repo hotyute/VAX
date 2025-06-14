@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include <windows.h>
 #include "gui.h"
 #include "displaybox.h"
@@ -25,6 +26,7 @@
 #define ID_SETTINGS_CLIST 40009
 #define ID_SETTINGS_COMMS 40011
 #define ID_FILE_OPENC 40014
+#define ID_SETTINGS 40015
 
 #define IDW_SOUND1 1000
 #define IDW_SOUND2 1001
