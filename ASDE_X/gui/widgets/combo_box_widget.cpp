@@ -237,44 +237,49 @@ void ComboBoxWidget::ToggleDropdown() {
 
 // ComboBoxWidget::Draw
 // combo_box_widget.cpp
-void ComboBoxWidget::Draw(UIRenderer& renderer, float inheritedAlpha) { // Added inheritedAlpha
+// In combo_box_widget.cpp
+
+void ComboBoxWidget::Draw(UIRenderer& renderer, float inheritedAlpha) {
     if (!visible) return;
 
     // ContainerWidget::Draw will handle its own background (if any) and drawing children (displayButton)
     // It will pass down the inheritedAlpha to displayButton.
-    ContainerWidget::Draw(renderer, inheritedAlpha);
+    ContainerWidget::Draw(renderer, inheritedAlpha); // This draws the displayButton
 
-    // The displayButton is drawn by the above call. Now draw the arrow on top.
-    // We need the arrow's color to be modulated by the overall inheritedAlpha for the ComboBox.
-
-    Rect buttonScreenBounds = displayButton->GetScreenBounds();
+    // --- ARROW DRAWING LOGIC ---
+    Rect buttonScreenBounds = displayButton->GetScreenBounds(); // Overall bounds of the button
     const Style& btnStyle = displayButton->style; // displayButton's own style
 
-    Rect buttonClientScreenBounds = {
-        buttonScreenBounds.x + btnStyle.padding.left,
-        buttonScreenBounds.y + btnStyle.padding.top,
-        buttonScreenBounds.width - (btnStyle.padding.left + btnStyle.padding.right),
-        buttonScreenBounds.height - (btnStyle.padding.top + btnStyle.padding.bottom)
-    };
+    // Arrow properties (from your original logic)
+    // Base the arrow size on the button's total height, not just client area, for consistency
+    int arrowBaseSizeCalculation = std::min(8, buttonScreenBounds.height / 2);
+    arrowBaseSizeCalculation = std::max(4, arrowBaseSizeCalculation); // Ensure min size
 
-    if (buttonClientScreenBounds.width <= 0 || buttonClientScreenBounds.height <= 0) return;
+    int arrowBoxWidth = arrowBaseSizeCalculation;       // Width of the arrow's horizontal base
+    int arrowBoxHeight = arrowBaseSizeCalculation / 2;  // Height of the arrow from base to tip
+    int arrowPaddingFromRightEdge = 5;                // Desired space from the absolute right edge of the button
+
+    // Calculate position for the arrow's top-left point of its bounding box
+    Point arrowBoundingBoxTopLeft;
+
+    // X position: Start from the button's right edge and move left
+    arrowBoundingBoxTopLeft.x = buttonScreenBounds.x + buttonScreenBounds.width - arrowPaddingFromRightEdge - arrowBoxWidth;
+
+    // Y position: Vertically center the arrow's *bounding box* within the button's *overall height*.
+    // The original arrow pointed down, so its bounding box top-left Y is (total height - arrow box height)/2
+    arrowBoundingBoxTopLeft.y = buttonScreenBounds.y + (buttonScreenBounds.height - arrowBoxHeight) / 2;
+
 
     Color arrowColor = btnStyle.foregroundColor; // Get base arrow color from button's style
     arrowColor.a *= inheritedAlpha;             // Modulate by the alpha inherited by the ComboBoxWidget
 
     if (arrowColor.a > 0.001f) {
-        Point arrow[3];
-        int arrowSize = std::min(8, buttonClientScreenBounds.height / 2);
-        int arrowPaddingFromRight = 5;
-        int arrowBoxWidth = arrowSize;
-        int arrowBoxHeight = arrowSize / 2;
-        Point arrowTopLeft;
-        arrowTopLeft.x = buttonClientScreenBounds.x + buttonClientScreenBounds.width - arrowBoxWidth - arrowPaddingFromRight;
-        arrowTopLeft.y = buttonClientScreenBounds.y + (buttonClientScreenBounds.height - arrowBoxHeight) / 2;
+        Point arrow[3]; // Your original points for a downward-pointing triangle
 
-        arrow[0] = { arrowTopLeft.x, arrowTopLeft.y };
-        arrow[1] = { arrowTopLeft.x + arrowBoxWidth, arrowTopLeft.y };
-        arrow[2] = { arrowTopLeft.x + arrowBoxWidth / 2, arrowTopLeft.y + arrowBoxHeight };
+        // These points are relative to arrowBoundingBoxTopLeft
+        arrow[0] = { arrowBoundingBoxTopLeft.x, arrowBoundingBoxTopLeft.y };
+        arrow[1] = { arrowBoundingBoxTopLeft.x + arrowBoxWidth, arrowBoundingBoxTopLeft.y };
+        arrow[2] = { arrowBoundingBoxTopLeft.x + arrowBoxWidth / 2, arrowBoundingBoxTopLeft.y + arrowBoxHeight };
 
         renderer.DrawLine(arrow[0], arrow[1], arrowColor);
         renderer.DrawLine(arrow[1], arrow[2], arrowColor);

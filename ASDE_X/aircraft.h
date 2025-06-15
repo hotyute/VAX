@@ -18,21 +18,14 @@ class History {
 };
 #endif
 
-#ifndef FlightPlan_aircraft_h
-#define FlightPlan_aircraft_h
-class FlightPlan {
-public:
+struct FlightPlan {
 	std::string departure, arrival, alternate, squawkCode = "0000";
 	std::string acType, scratchPad, cruise, route, remarks;
 	int flightRules = 0;
 	int cycle = 0;
 };
-#endif
 
 
-
-#ifndef Aircraft_aircraft_h
-#define Aircraft_aircraft_h
 class Aircraft : public User {
 private:
 	bool collision = false, heavy = false;
@@ -83,7 +76,6 @@ public:
 	int getMode();
 	void setMode(int);
 };
-#endif
 
 
 extern std::unordered_map<std::string, Aircraft*> acf_map;

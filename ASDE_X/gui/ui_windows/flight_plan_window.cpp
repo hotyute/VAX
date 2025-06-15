@@ -138,7 +138,7 @@ void FlightPlanWindow::SetupUI() {
 		// Flight Rules
 		flightRulesCombo = new ComboBoxWidget();
 		flightRulesCombo->AddItems({ "IFR", "VFR", "SVFR" });
-		flightRulesCombo->minSize = { 60, 22 }; flightRulesCombo->maxSize = { 60, 22 };
+		flightRulesCombo->minSize = { 40, 22 }; flightRulesCombo->maxSize = { 40, 22 };
 		flightRulesCombo->style.fontKey = FONT_KEY_UI_LABEL; // Ensure ComboBox's button part gets a font
 		line1Controls->AddChild(createLabelWidgetRow("Flight Rules:", std::unique_ptr<ComboBoxWidget>(flightRulesCombo), 65));
 	}
