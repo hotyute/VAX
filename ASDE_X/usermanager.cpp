@@ -306,7 +306,18 @@ void decodePackets(int opCode, BasicStream& stream) {
 				if (type == CLIENT_TYPES::PILOT_CLIENT) {
 					Aircraft& acf = *static_cast<Aircraft*>(user1);
 					FlightPlan& fp = *acf.getFlightPlan();
-					// ... (existing code to populate fp members) ...
+					fp.cycle = cur_cycle;
+
+					fp.flightRules = fr;
+					fp.squawkCode = assigned_squawk;
+					fp.departure = departure;
+					fp.arrival = arrival;
+					fp.alternate = alternate;
+					fp.cruise = cruise;
+					fp.acType = ac_type;
+					fp.scratchPad = scratch;
+					fp.route = route;
+					fp.remarks = remarks;
 
 					// Now, try to update an open FlightPlanWindow
 					FlightPlanWindow* fpWin = UIManager::Instance().GetFlightPlanWindowForAircraft(&acf);
@@ -324,41 +335,6 @@ void decodePackets(int opCode, BasicStream& stream) {
 					}
 				}
 			}
-
-			// -- BEGIN LEGACY CODE --
-			//if (user1)
-			//{
-			//	CLIENT_TYPES type = user1->getIdentity()->type;
-			//	if (type == CLIENT_TYPES::PILOT_CLIENT) {
-			//		Aircraft& acf = *dynamic_cast<Aircraft*>(user1);
-			//		FlightPlan& fp = *acf.getFlightPlan();
-
-			//		fp.cycle = cur_cycle;
-
-			//		fp.flightRules = fr;
-
-			//		fp.squawkCode = assigned_squawk;
-			//		fp.departure = departure;
-			//		fp.arrival = arrival;
-			//		fp.alternate = alternate;
-			//		fp.cruise = cruise;
-			//		fp.acType = ac_type;
-			//		fp.scratchPad = scratch;
-			//		fp.route = route;
-			//		fp.remarks = remarks;
-
-			//		//TODO open Flight Plan
-			//		if (opened_fp == user1 && cur_cycle)
-			//		{
-			//			int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
-			//			Load_FlightPlan_Interface(wdata[0], wdata[1], acf, true);
-			//		}
-
-			//		if (fp.squawkCode != acf.getSquawkCode())
-			//			acf.setUpdateFlag(ACF_CALLSIGN, true);
-			//	}
-			//}
-			// -- END LEGACY CODE --
 		}
 	}
 

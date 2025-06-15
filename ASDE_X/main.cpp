@@ -1513,34 +1513,82 @@ void handleDisconnect() {
 
 bool processCommands(std::string command)
 {
-	if (boost::istarts_with(command, ".SS")) {
+	if (boost::istarts_with(command, ".SS")) { // Assuming 'command' is the string from input
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
-			int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN];
+			int* wdata = USER->userdata.window_positions[_WINPOS_FLIGHTPLAN]; // For potential default positioning
 			capitalize(array3[1]);
-			std::string call_sign = array3[1];
-			auto got = acf_map.find(call_sign);
-			if (got != acf_map.end()) {
-				Aircraft& user = *got->second;
-				if (user.getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) {
-					FlightPlan& fp = *user.getFlightPlan();
-					sendFlightPlanRequest(user);
-					if (fp.cycle)
-					{
-						Load_FlightPlan_Interface(wdata[0], wdata[1], user, true);
+			std::string call_sign_str = array3[1];
+			std::string fpWindowId = "FPWindow_" + call_sign_str;
+
+			WindowWidget* existingFpWin_widget = UIManager::Instance().GetWindowById(fpWindowId);
+			FlightPlanWindow* existingFpWin = dynamic_cast<FlightPlanWindow*>(existingFpWin_widget);
+
+			if (existingFpWin) {
+				UIManager::Instance().BringWindowToFront(existingFpWin);
+				// If aircraft data might have changed externally, tell the window to update
+				auto it_acf = acf_map.find(call_sign_str);
+				if (it_acf != acf_map.end()) {
+					existingFpWin->UpdateData(it_acf->second); // Refresh data
+				}
+				existingFpWin->RequestFocus(); // Or focus a specific field if desired
+			}
+			else {
+				// Window doesn't exist, create a new one
+				std::unique_ptr<FlightPlanWindow> fpWin_uptr;
+				Aircraft* target_aircraft = nullptr;
+
+				auto it_acf = acf_map.find(call_sign_str);
+				if (it_acf != acf_map.end()) {
+					target_aircraft = it_acf->second;
+					if (target_aircraft && target_aircraft->getIdentity() && target_aircraft->getIdentity()->type == CLIENT_TYPES::PILOT_CLIENT) {
+						// Aircraft known, has flight plan data or needs one requested
+						sendFlightPlanRequest(*target_aircraft); // Request latest data if needed
+						fpWin_uptr = std::make_unique<FlightPlanWindow>(target_aircraft);
 					}
-					else
-					{
-						Load_Known_No_FlightPlan_Interface(wdata[0], wdata[1], user, true);
+					else {
+						// Aircraft found but not a pilot type, or some other issue.
+						// Treat as new/unknown for now, or show error.
+						// For now, let's assume we open a blank FP window for the callsign.
+						fpWin_uptr = std::make_unique<FlightPlanWindow>(call_sign_str);
 					}
 				}
-			}
-			else
-			{
-				Load_Unknown_FlightPlan_Interface(wdata[0], wdata[1], (char*)call_sign.c_str(), true);
+				else {
+					// Callsign completely unknown to acf_map, open a "new" flight plan window
+					fpWin_uptr = std::make_unique<FlightPlanWindow>(call_sign_str);
+				}
+
+				if (fpWin_uptr) {
+					fpWin_uptr->id = fpWindowId;
+
+					Size prefSize = fpWin_uptr->Measure();
+					Rect initialBounds;
+
+					// Use saved position if valid, otherwise center
+					if (wdata[0] != -1 && wdata[1] != -1) {
+						initialBounds = { wdata[0], wdata[1], prefSize.width, prefSize.height };
+					}
+					else {
+						initialBounds = { (CLIENT_WIDTH - prefSize.width) / 2,
+										 (CLIENT_HEIGHT - prefSize.height) / 2,
+										 prefSize.width, prefSize.height };
+					}
+
+					// Clamp to screen boundaries
+					initialBounds.width = std::min(initialBounds.width, CLIENT_WIDTH);
+					initialBounds.height = std::min(initialBounds.height, CLIENT_HEIGHT);
+					initialBounds.x = std::max(0, std::min(initialBounds.x, CLIENT_WIDTH - initialBounds.width));
+					initialBounds.y = std::max(0, std::min(initialBounds.y, CLIENT_HEIGHT - initialBounds.height));
+
+					fpWin_uptr->Arrange(initialBounds);
+					UIManager::Instance().AddWindow(std::move(fpWin_uptr));
+
+					WindowWidget* newWin = UIManager::Instance().GetWindowById(fpWindowId);
+					if (newWin) newWin->RequestFocus();
+				}
 			}
 		}
-		return true;
+		return true; // Command was processed (or attempted)
 	}
 	if (boost::istarts_with(command, ".AN")) {
 		return true;
