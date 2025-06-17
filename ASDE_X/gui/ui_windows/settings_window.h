@@ -14,6 +14,7 @@ public:
     static float GetGlobalWindowOpacity();
     static void SetGlobalWindowOpacity(float opacity);
 
+    void OnShowOrBringToFront() override { }
 
 private:
     void OnOpacitySliderChanged(SliderWidget* slider, float newValue);

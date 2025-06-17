@@ -23,11 +23,9 @@ void CalcDepartures();
 
 void CalcControllerList();
 
-void refresh_ctrl_list();
+void NotifyControllerListUIDirty();
 
 //void check_del_ctrl_list(Controller &controller);
-
-//void refresh_ctrl_list();
 
 void clear_ctrl_list(std::unordered_map<std::string, std::shared_ptr<ChatLine>>& store);
 

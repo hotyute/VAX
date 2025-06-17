@@ -8,6 +8,17 @@
 #include "../../aircraft.h"
 #include <algorithm>    // For std::remove, std::find_if
 
+// Potentially for USER and _WINPOS_ constants if used directly in the template
+// It's better if these are passed in or accessed via another layer, but if not:
+#include "../../usermanager.h" // For USER (if directly accessing USER->userdata)
+#include "../../constants.h"   // For _WINPOS_ constants
+
+#include "../ui_windows/comms_window_widget.h"
+#include "../ui_windows/connect_window.h"
+#include "../ui_windows/settings_window.h"
+#include "../ui_windows/controller_list_window.h"
+#include "../ui_windows/private_chat_window.h"
+
 UIManager& UIManager::Instance() {
     static UIManager instance;
     return instance;
@@ -172,6 +183,7 @@ void UIManager::ProcessSystemEvent(HWND hwnd, UINT message, WPARAM wParam, LPARA
     if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
         uiEvent.eventType = UIEvent::Type::Mouse;
         uiEvent.mouse.position = screenPos; // Screen coordinates for UIManager level
+        uiEvent.mouse.raw_position = screenPos;
         uiEvent.mouse.shiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
         uiEvent.mouse.ctrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
         uiEvent.mouse.altPressed = (GetKeyState(VK_MENU) & 0x8000) != 0;
@@ -199,7 +211,7 @@ void UIManager::ProcessSystemEvent(HWND hwnd, UINT message, WPARAM wParam, LPARA
         if (message == WM_LBUTTONDOWN) leftMouseDown = true;
         lastMousePosition = screenPos;
 
-        // --- MODIFIED click-outside-dropdown logic ---
+
         ComboBoxWidget* currentActiveDropdownOwner = ComboBoxWidget::GetActiveDropdownOwner_Static();
         WindowWidget* dropdownWindowAssociatedWithActiveComboBox = nullptr; // Store the dropdown window itself
 
@@ -231,7 +243,35 @@ void UIManager::ProcessSystemEvent(HWND hwnd, UINT message, WPARAM wParam, LPARA
             // The event is *not* handled here by the dropdown closing.
             // The click should still be processed by whatever was actually clicked.
         }
-        // --- END click-outside-dropdown logic MODIFICATION ---
+
+        if (!windows.empty()) {
+            WindowWidget* topmostWindow = windows.back().get();
+            // A convention for popup IDs could be useful, e.g., ending with "_popup" or "_ctx_menu"
+            bool isLikelyAPopup = (topmostWindow->id.find("_popup") != std::string::npos ||
+                topmostWindow->id.find("_ctx_menu") != std::string::npos);
+
+            if (isLikelyAPopup && !topmostWindow->GetScreenBounds().Contains(screenPos)) {
+                // Click was outside the current topmost window, and it's a popup.
+                // Check if the click was on the window that *owns* this popup.
+                // This is complex without a clear owner<->popup relationship.
+                // For simplicity now: if it's a popup and click is outside, close it.
+
+                // To prevent closing if the click is on the widget that opened the popup:
+                bool clickOnOpener = false;
+                if (mouseHoverWidget) { // mouseHoverWidget is the widget under the cursor *before* this click
+                    // If ControllerListWindow::contextMenu is a child of ControllerListWindow, this check is different.
+                    // But we added it to UIManager, so it's a sibling.
+                    // This logic is tricky. A better way is if popups register their "opener".
+                }
+
+                if (!clickOnOpener) { // Simplified: just close if click outside popup
+                    // OutputDebugStringA(("UIManager: Click outside topmost popup '" + topmostWindow->id + "'. Closing.\n").c_str());
+                    // RemoveWindow will also handle focus changes.
+                    RemoveWindow(topmostWindow);
+                    // Event is NOT handled by the popup closing. It should proceed to the clicked target.
+                }
+            }
+        }
 
 
         WindowWidget* topWindowUnderCursor = nullptr;
@@ -324,7 +364,7 @@ void UIManager::ProcessSystemEvent(HWND hwnd, UINT message, WPARAM wParam, LPARA
         uiEvent.mouse.type = MouseEventType::Move;
         Widget* newHoverTarget = nullptr;
         WindowWidget* topHitWindow = nullptr; // The window the mouse is currently over
-        uiEvent.mouse.screen_position = screenPos; // Store raw screen position ALWAYS
+        uiEvent.mouse.raw_position = screenPos; // Store raw screen position ALWAYS
 
         if (capturedWidget) {
             newHoverTarget = capturedWidget;
@@ -648,6 +688,98 @@ Widget* UIManager::WidgetAtScreenPoint(const Point& screenPos, Widget* context) 
 
     return nullptr;
 }
+
+template<typename TWindowWidget, typename ...Args>
+inline TWindowWidget* UIManager::ShowOrCreateInstance(const std::string& windowId, int windowPosConstant, Args && ...args)
+{
+    UIManager& manager = UIManager::Instance();
+    if (!manager.IsInitialized()) {
+        return nullptr;
+    }
+
+    WindowWidget* existingWin = manager.GetWindowById(windowId);
+    TWindowWidget* targetWindow = nullptr;
+
+    if (existingWin) {
+        targetWindow = dynamic_cast<TWindowWidget*>(existingWin);
+        if (targetWindow) {
+            manager.BringWindowToFront(targetWindow);
+            if (targetWindow->focusable && !targetWindow->hasFocus) {
+                bool childHasFocus = false;
+                Widget* currentFocused = manager.GetFocusedWidget();
+                if (currentFocused && currentFocused != targetWindow) {
+                    Widget* p = currentFocused->parent;
+                    while (p) { if (p == targetWindow) { childHasFocus = true; break; } p = p->parent; }
+                }
+                if (!childHasFocus) targetWindow->RequestFocus();
+            }
+
+            if (targetWindow) {
+                targetWindow->OnShowOrBringToFront();
+            }
+
+            targetWindow->MarkDirty(true);
+        }
+        else {
+            return nullptr; // ID collision with wrong type
+        }
+    }
+    else {
+        auto newWin = std::make_unique<TWindowWidget>(std::forward<Args>(args)...);
+        newWin->id = windowId;
+        targetWindow = newWin.get();
+
+        Size prefSize = targetWindow->Measure();
+        Rect initialBounds;
+
+        int* wdata = nullptr;
+        if (windowPosConstant != -1 && USER) { // USER must be valid to access userdata
+            wdata = USER->userdata.window_positions[windowPosConstant];
+        }
+
+        if (wdata && wdata[0] != -1 && wdata[1] != -1) {
+            initialBounds = {
+               wdata[0], wdata[1],
+               std::max(prefSize.width, targetWindow->minSize.width),
+               std::max(prefSize.height, targetWindow->minSize.height)
+            };
+        }
+        else {
+            initialBounds = {
+                (CLIENT_WIDTH - prefSize.width) / 2,
+                (CLIENT_HEIGHT - prefSize.height) / 2,
+                prefSize.width, prefSize.height
+            };
+        }
+
+        // Clamp to screen boundaries
+        initialBounds.width = std::min(initialBounds.width, CLIENT_WIDTH);
+        initialBounds.height = std::min(initialBounds.height, CLIENT_HEIGHT);
+        initialBounds.x = std::max(0, std::min(initialBounds.x, CLIENT_WIDTH - initialBounds.width));
+        initialBounds.y = std::max(0, std::min(initialBounds.y, CLIENT_HEIGHT - initialBounds.height));
+        if (initialBounds.x + initialBounds.width > CLIENT_WIDTH) initialBounds.x = CLIENT_WIDTH - initialBounds.width;
+        if (initialBounds.x < 0) initialBounds.x = 0;
+        if (initialBounds.y + initialBounds.height > CLIENT_HEIGHT) initialBounds.y = CLIENT_HEIGHT - initialBounds.height;
+        if (initialBounds.y < 0) initialBounds.y = 0;
+
+        targetWindow->Arrange(initialBounds);
+        manager.AddWindow(std::move(newWin));
+
+        if (targetWindow && targetWindow->focusable) {
+            targetWindow->RequestFocus();
+        }
+    }
+    return targetWindow;
+}
+
+// Explicit instantiations if you define the template in .cpp (helps with linking and compile times)
+// You need to do this for every (WindowType, ConstructorArgs...) combination you use.
+template CommsWindowWidget* UIManager::ShowOrCreateInstance<CommsWindowWidget>(const std::string&, int);
+template ConnectWindow* UIManager::ShowOrCreateInstance<ConnectWindow>(const std::string&, int);
+template SettingsWindow* UIManager::ShowOrCreateInstance<SettingsWindow>(const std::string&, int);
+template ControllerListWindow* UIManager::ShowOrCreateInstance<ControllerListWindow>(const std::string&, int);
+template PrivateChatWindow* UIManager::ShowOrCreateInstance<PrivateChatWindow, std::string&>(
+    const std::string&, int, std::string&);
 
 void UIManager::SetCapture(Widget* widget) {
     capturedWidget = widget;

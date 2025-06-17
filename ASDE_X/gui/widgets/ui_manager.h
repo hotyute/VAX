@@ -3,7 +3,7 @@
 #include "../ui_windows/flight_plan_window.h"
 #include <vector>
 #include <memory>
-#include <string> // For GetWindowById
+#include <string>
 
 // Forward declarations
 class WindowWidget;
@@ -44,6 +44,9 @@ public:
     void MarkAllWindowsDirty();
 
     FlightPlanWindow* GetFlightPlanWindowForAircraft(Aircraft* aircraft);
+
+    template <typename TWindowWidget, typename... Args>
+    static TWindowWidget* ShowOrCreateInstance(const std::string& windowId, int windowPosConstant = -1, Args&&... args);
 
 private:
     UIManager() = default;

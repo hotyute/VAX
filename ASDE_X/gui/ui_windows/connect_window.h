@@ -14,6 +14,12 @@ class ConnectWindow : public WindowWidget {
 public:
     ConnectWindow();
 
+    void OnShowOrBringToFront() override {
+        WindowWidget::OnShowOrBringToFront();
+        // if (USER) LoadDataFromIdentity(*USER->getIdentity()); // If needed
+        MarkDirty(true);
+    }
+
 private:
     void OnConnectClicked(Widget* sender);
     void OnCancelClicked(Widget* sender);

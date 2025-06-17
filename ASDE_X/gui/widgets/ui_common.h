@@ -117,7 +117,7 @@ enum class KeyCode {
 struct MouseEvent {
     MouseEventType type;
     Point position;
-    Point screen_position;
+    Point raw_position;
     MouseButton button = MouseButton::None;
     int scrollDelta = 0;
     // Modifiers:

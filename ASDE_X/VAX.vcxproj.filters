@@ -198,6 +198,18 @@
     <ClCompile Include="gui\ui_windows\flight_plan_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gui\ui_windows\comms_window_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="global_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\ui_windows\controller_list_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\ui_windows\private_chat_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -393,6 +405,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gui\ui_windows\flight_plan_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\ui_windows\comms_window_widget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="app_events.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="global_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\ui_windows\controller_list_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\ui_windows\private_chat_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

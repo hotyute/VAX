@@ -7,6 +7,7 @@
 #include "interfaces.h"
 #include "gui/widgets/ui_manager.h"
 #include "gui/ui_windows/flight_plan_window.h"
+#include "gui/ui_windows/private_chat_window.h"
 
 std::vector<User*> userStorage1;
 std::unordered_map<std::string, User*> users_map;
@@ -96,7 +97,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 
 			if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
-				refresh_ctrl_list();
+				NotifyControllerListUIDirty();
 			}
 		}
 	}
@@ -105,42 +106,52 @@ void decodePackets(int opCode, BasicStream& stream) {
 		USER->setUpdateTime(stream.readQWord());
 	}
 
-	if (opCode == 11) {// recieve private message
-		char _callsign[25];
-		stream.readString(_callsign);
-		char msg[2048];
-		stream.readString(msg);
-		std::string callsign = std::string(_callsign);
-		capitalize(callsign);
+	if (opCode == 11) { // recieve private message
+		char _senderCallsign_c[25];
+		stream.readString(_senderCallsign_c);
+		char msg_c[2048];
+		stream.readString(msg_c);
 
-		auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
-		bool unset = false;
-		if (it == pm_callsigns.end())
-		{
-			it = find(pm_callsigns.begin(), pm_callsigns.end(), "NOT_LOGGED");
-			unset = true;
-		}
+		std::string senderCallsign = std::string(_senderCallsign_c);
+		capitalize(senderCallsign);
+		std::string messageContent = std::string(msg_c);
 
-		if (it != pm_callsigns.end())
-		{
-			InterfaceFrame& frame = *frames_def[it - pm_callsigns.begin()];
-			if (unset)
-			{
-				frame.title = "PRIVATE CHAT: " + callsign;
-				pm_callsigns[it - pm_callsigns.begin()] = callsign;
+		if (UIManager::Instance().IsInitialized()) {
+			std::string windowId = "PrivChat_" + senderCallsign;
+			PrivateChatWindow* pmWin = UIManager::ShowOrCreateInstance<PrivateChatWindow>(
+				windowId,
+				-1, // No specific _WINPOS_, will center or use default
+				senderCallsign // Argument for PrivateChatWindow constructor
+			);
+
+			if (pmWin) {
+				pmWin->AddMessage(senderCallsign, messageContent, false);
+				// UIManager::ShowOrCreateInstance already brings to front and requests focus
+				// if it was just created. If it existed, BringWindowToFront was called.
+				// We might want an explicit BringWindowToFront here if it was already open but not front.
+				UIManager::Instance().BringWindowToFront(pmWin);
+				// If the window was not focused, and the app is active, consider flashing title or taskbar icon
 			}
-			DisplayBox& box = *dynamic_cast<DisplayBox*>(frame.children[PRIVATE_MESSAGE_BOX]);
-			box.resetReaderIdx();
-			auto c = std::make_shared<ChatLine>(callsign + std::string(": ") + msg, CHAT_TYPE::CHAT, &box);
-			box.addLine(c);
-			c->playChatSound();
+			else if (!UIManager::Instance().IsInitialized()) {
+				// This case is unlikely if UIManager is checked before calling ShowOrCreateInstance
+				// but good for robustness.
+				// Maybe log an error "UI not ready to display PM".
+			}
 		}
-		else
-		{
+		else {
+			// UI not ready, perhaps queue the message or log it.
+			// For now, it might be lost if the UI isn't up.
+			// Consider a fallback like logging to main chat box.
+			// sendSystemMessage("PM from " + senderCallsign + ": " + messageContent);
+		}
 
-		}
-		rendererFlags["drawings"] = true;
+		// Old logic to remove:
+		// auto it = find(pm_callsigns.begin(), pm_callsigns.end(), callsign);
+		// ... (rest of old pm_callsigns and direct frame manipulation) ...
+		// rendererFlags["drawings"] = true; // Now handled by MarkDirty in AddMessage
+		return; // Ensure this packet doesn't fall through to other logic
 	}
+
 
 	if (opCode == 12)
 	{//delete user packet
@@ -203,7 +214,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 			}
 			else if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 			{
-				refresh_ctrl_list();
+				NotifyControllerListUIDirty();
 			}
 		}
 	}
@@ -402,7 +413,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 		if (subject)
 		{
 			subject->userdata.frequency[0] = freq;
-			refresh_ctrl_list();
+			NotifyControllerListUIDirty();
 		}
 	}
 

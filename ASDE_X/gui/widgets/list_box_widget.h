@@ -25,6 +25,8 @@ public:
     Size Measure() override;
     void HandleEvent(UIEvent& event) override;
 
+    std::function<void(ListBoxWidget*, int, const std::string&, Point)> OnRightClickItem;
+
     void SetScrollOffset(int newOffset);
     int GetContentHeight() const; // To inform scrollbar
 };

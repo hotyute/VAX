@@ -6,7 +6,12 @@
 enum class CLIENT_TYPES { CONTROLLER_CLIENT = 0, PILOT_CLIENT = 1 };
 enum class POSITIONS { OBSERVER = 0, DELIVERY = 1, GROUND = 2, TOWER = 3, DEPARTURE = 4, APPROACH = 5, CENTER = 6, OCEANIC = 7, FSS = 8 };
 
-extern const char* PILOT_RATINGS[], * CONTROLLER_RATINGS[];
+
+extern const char* PILOT_RATINGS[];
+extern const int NUM_PILOT_RATINGS;
+
+extern const char* CONTROLLER_RATINGS[];
+extern const int NUM_CONTROLLER_RATINGS;
 
 const double NM_PER_DEG = 60.0;
 

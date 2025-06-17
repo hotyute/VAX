@@ -11,6 +11,7 @@
 
 #include <gl/GLU.h>
 
+#include "global_data.h"
 #include "later.h"
 #include "renderer.h"
 #include "guicon.h"
@@ -25,6 +26,7 @@
 #include "calc_cycles.h"
 #include "flightplan.h"
 #include "save.h"
+#include "app_events.h"
 #include "thread_pool.h"
 #include "tempdata.h"
 #include "gui/widgets/font_manager.h" // Add this
@@ -33,7 +35,10 @@
 #include "gui/widgets/opengl_ui_renderer.h" // Your concrete renderer
 #include "gui/ui_windows/connect_window.h" // The first window you'll test
 #include "gui/ui_windows/settings_window.h"
+#include "gui/ui_windows/comms_window_widget.h"
+#include "gui/ui_windows/controller_list_window.h"
 #include "gui/widgets/font_keys.h"
+#include "gui/ui_windows/private_chat_window.h"
 // Potentially others as you convert them:
 // #include "ui_windows/main_chat_window.h"
 // ...
@@ -238,6 +243,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 	switch (message)                  /* handle the messages */
 	{
+	case WM_APP_REFRESH_CONTROLLER_LIST:
+	{
+		if (UIManager::Instance().IsInitialized()) {
+			ControllerListWindow* ctrlListWin = dynamic_cast<ControllerListWindow*>(
+				UIManager::Instance().GetWindowById("ControllerListWindowInstance")
+				);
+			if (ctrlListWin && ctrlListWin->visible) {
+				// Call the new public notification method
+				ctrlListWin->NotifyDataMightHaveChanged();
+			}
+		}
+		return 0;
+	}
 	case WM_CREATE: {
 		HMENU hMenuBar = CreateMenu();
 		hFile = CreateMenu();
@@ -432,57 +450,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		case ID_FILE_CONNECT:
 		{
 			//handleConnect();
-			if (UIManager::Instance().IsInitialized()) {
-				// Check if an instance already exists (optional, to prevent multiple)
-				if (!UIManager::Instance().GetWindowById("ConnectWindowInstance")) {
-					auto connectWin = std::make_unique<ConnectWindow>();
-					connectWin->id = "ConnectWindowInstance"; // Give it an ID for lookup
-
-					// Let UIManager position it or set a default position
-					// UIManager::AddWindow will call Measure and Arrange
-					Size prefSize = connectWin->Measure(); // Measure to get its preferred size
-					// Center it (example positioning)
-					Rect initialBounds = {
-						(CLIENT_WIDTH - prefSize.width) / 2,
-						(CLIENT_HEIGHT - prefSize.height) / 2,
-						prefSize.width,
-						prefSize.height
-					};
-					// Ensure it's within screen bounds
-					initialBounds.x = std::max(0, std::min(initialBounds.x, CLIENT_WIDTH - initialBounds.width));
-					initialBounds.y = std::max(0, std::min(initialBounds.y, CLIENT_HEIGHT - initialBounds.height));
-
-					connectWin->Arrange(initialBounds); // Set its initial bounds
-
-					UIManager::Instance().AddWindow(std::move(connectWin));
-
-					// Optionally, set focus to the window or its first input field
-					Widget* connectWindowPtr = UIManager::Instance().GetWindowById("ConnectWindowInstance");
-					if (connectWindowPtr) {
-						// connectWindowPtr->RequestFocus(); // Focus the window itself
-						// Or, find the first input field and focus that:
-						Widget* firstInput = connectWindowPtr->GetChildById("connect_callsign"); // Assuming you set this ID in ConnectWindow.cpp
-						if (firstInput) {
-							firstInput->RequestFocus();
-						}
-						else {
-							connectWindowPtr->RequestFocus(); // Fallback to window
-						}
-					}
-				}
-				else {
-					// Window already exists, just bring it to front and focus
-					WindowWidget* existingWin = static_cast<WindowWidget*>(UIManager::Instance().GetWindowById("ConnectWindowInstance"));
-					if (existingWin) {
-						UIManager::Instance().BringWindowToFront(existingWin);
-						Widget* firstInput = existingWin->GetChildById("connect_callsign");
-						if (firstInput) firstInput->RequestFocus();
-						else existingWin->RequestFocus();
-					}
-				}
-			}
-			else {
-				// UIManager not ready, maybe log an error or show a system message box
+			ConnectWindow* connectWin = UIManager::ShowOrCreateInstance<ConnectWindow>("ConnectWindowInstance", _WINPOS_CONNECT);
+			if (!connectWin && !UIManager::Instance().IsInitialized()) {
 				MessageBox(hwnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
 			}
 			break;
@@ -509,105 +478,49 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		break;
 		case ID_SETTINGS: // Replace ID_SETTINGS with the actual menu ID you defined for settings
 		{
-			if (UIManager::Instance().IsInitialized()) {
-				// Check if an instance of SettingsWindow already exists by its ID
-				WindowWidget* existingWin = UIManager::Instance().GetWindowById("SettingsWindowInstance");
-
-				if (!existingWin) {
-					// Create a new SettingsWindow if one doesn't exist
-					auto settingsWin = std::make_unique<SettingsWindow>();
-					settingsWin->id = "SettingsWindowInstance"; // Assign a unique ID
-
-					// Measure the window to get its preferred size based on its content
-					Size prefSize = settingsWin->Measure();
-
-					// Calculate initial position (e.g., centered on screen)
-					// Ensure CLIENT_WIDTH and CLIENT_HEIGHT are up-to-date screen/client dimensions
-					Rect initialBounds = {
-						(CLIENT_WIDTH - prefSize.width) / 2,
-						(CLIENT_HEIGHT - prefSize.height) / 2,
-						prefSize.width,
-						prefSize.height
-					};
-
-					// Optional: Clamp to screen boundaries if necessary, though centering usually handles this.
-					initialBounds.x = std::max(0, std::min(initialBounds.x, CLIENT_WIDTH - initialBounds.width));
-					if (initialBounds.x + initialBounds.width > CLIENT_WIDTH) initialBounds.x = CLIENT_WIDTH - initialBounds.width;
-					if (initialBounds.x < 0) initialBounds.x = 0;
-
-					initialBounds.y = std::max(0, std::min(initialBounds.y, CLIENT_HEIGHT - initialBounds.height));
-					if (initialBounds.y + initialBounds.height > CLIENT_HEIGHT) initialBounds.y = CLIENT_HEIGHT - initialBounds.height;
-					if (initialBounds.y < 0) initialBounds.y = 0;
-
-
-					// Arrange the window with its calculated initial bounds
-					settingsWin->Arrange(initialBounds);
-
-					// Add the window to the UIManager
-					UIManager::Instance().AddWindow(std::move(settingsWin));
-
-					// Optionally, request focus for the newly created window
-					// UIManager::AddWindow might already bring it to front and focus it,
-					// but explicit request ensures it if that behavior changes.
-					WindowWidget* newWinPtr = UIManager::Instance().GetWindowById("SettingsWindowInstance");
-					if (newWinPtr) {
-						newWinPtr->RequestFocus();
-					}
-				}
-				else {
-					// Window already exists, just bring it to the front and focus it
-					UIManager::Instance().BringWindowToFront(existingWin);
-					if (existingWin->focusable && !existingWin->hasFocus) { // Check if it can be focused and doesn't already have it
-						// Check if a child of existingWin has focus
-						bool childHasFocus = false;
-						Widget* currentFocused = UIManager::Instance().GetFocusedWidget();
-						if (currentFocused && currentFocused != existingWin) {
-							Widget* p = currentFocused->parent;
-							while (p) {
-								if (p == existingWin) {
-									childHasFocus = true;
-									break;
-								}
-								p = p->parent;
-							}
-						}
-						if (!childHasFocus) {
-							existingWin->RequestFocus();
-						}
-					}
-				}
-			}
-			else {
-				// UIManager not ready, maybe log an error or show a system message box
-				MessageBox(hWnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
+			SettingsWindow* settingsWin = UIManager::ShowOrCreateInstance<SettingsWindow>("SettingsWindowInstance"); // No specific _WINPOS_ for this one yet
+			if (!settingsWin && !UIManager::Instance().IsInitialized()) {
+				MessageBox(hwnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
 			}
 			break;
 		}
 		case ID_SETTINGS_CLIST:
 		{
-			if (controller_list == NULL) {
-				//TODO save X and Y positions when moved
-				int* wdata = USER->userdata.window_positions[_WINPOS_CTRLLIST];
-				RenderControllerList(true, wdata[0], wdata[1]);
+			ControllerListWindow* ctrlListWin = UIManager::ShowOrCreateInstance<ControllerListWindow>(
+				"ControllerListWindowInstance",
+				_WINPOS_CTRLLIST // Make sure this constant is defined and used for saving positions
+			);
+			if (ctrlListWin) {
+				// The window is now shown or created.
+				// The actual content update will happen via refresh_ctrl_list -> UpdateDisplay.
+				// You might trigger an initial refresh here if needed.
+				// refresh_ctrl_list(); // This will find the window and update it
 			}
-			else if (!controller_list->render)
-			{
-				controller_list->doOpen(true, true);
+			else if (!UIManager::Instance().IsInitialized()) {
+				MessageBox(hwnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
 			}
+			break;
 		}
-		break;
 		case ID_SETTINGS_COMMS:
 		{
-			if (communications == NULL) {
-				//TODO save X and Y positions when moved
-				int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
-				RenderCommunications(true, wdata[0], wdata[1], 0);
+			CommsWindowWidget* commsWin = UIManager::ShowOrCreateInstance<CommsWindowWidget>("CommsWindowInstance", _WINPOS_COMMS);
+			if (!commsWin && !UIManager::Instance().IsInitialized()) {
+				MessageBox(hwnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
 			}
-			else if (!communications->render)
-			{
-				communications->doOpen(true, true);
-			}
+			break;
 		}
+		//case ID_SETTINGS_COMMS:
+		//{
+		//	if (communications == NULL) {
+		//		//TODO save X and Y positions when moved
+		//		int* wdata = USER->userdata.window_positions[_WINPOS_COMMS];
+		//		RenderCommunications(true, wdata[0], wdata[1], 0);
+		//	}
+		//	else if (!communications->render)
+		//	{
+		//		communications->doOpen(true, true);
+		//	}
+		//}
 		break;
 		case ID_FILE_OPEN:
 		case ID_FILE_OPENC:
@@ -1597,9 +1510,27 @@ bool processCommands(std::string command)
 		std::vector<std::string> array3 = split(command, " ");
 		if (array3.size() == 2) {
 			capitalize(array3[1]);
-			std::string call_sign = array3[1];
+			std::string targetCallsign = array3[1];
 
-			open_chat(call_sign);
+			if (USER && USER->getIdentity() && USER->getIdentity()->callsign == targetCallsign) {
+				sendErrorMessage("Cannot open private chat with yourself.");
+				return true;
+			}
+
+			std::string windowId = "PrivChat_" + targetCallsign;
+
+			PrivateChatWindow* pmWin = UIManager::ShowOrCreateInstance<PrivateChatWindow>(
+				windowId,
+				-1, // No specific _WINPOS_ constant for PMs, will center or use default
+				targetCallsign // Argument for PrivateChatWindow constructor
+			);
+
+			if (!pmWin && !UIManager::Instance().IsInitialized()) {
+				MessageBox(hWnd, L"UI System not ready.", L"Error", MB_OK | MB_ICONERROR);
+			}
+			else if (pmWin) {
+				// Window is shown/created, focus should be handled by ShowOrCreateInstance or constructor
+			}
 		}
 		return true;
 	}

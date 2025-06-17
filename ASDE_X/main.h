@@ -2,6 +2,7 @@
 
 #define NOMINMAX
 #include <windows.h>
+
 #include "gui.h"
 #include "displaybox.h"
 #include "point2d.h"

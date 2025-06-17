@@ -149,27 +149,57 @@ Size ListBoxWidget::Measure() {
 }
 
 void ListBoxWidget::HandleEvent(UIEvent& event) {
-    if (!visible || !enabled) return;
-    // Widget::HandleEvent(event); // Base handles OnClick etc., which we might not want for ListBox directly
+    if (!visible || !enabled) {
+        event.handled = false; // Ensure not handled if widget is inactive
+        return;
+    }
 
-    if (event.handled) return;
+    // If already handled by a more specific derived class or a previously checked sibling, bail.
+    if (event.handled) {
+        return;
+    }
 
-    Rect localClientBounds = GetClientBounds(); // Relative to ListBox's (0,0) + padding
+    Rect localBounds = { 0, 0, bounds.width, bounds.height }; // Bounds of the ListBox itself
+    Rect localClientBounds = GetClientBounds(); // Area inside padding where items are drawn
 
     if (event.eventType == UIEvent::Type::Mouse) {
-        Point mousePosInWidget = event.mouse.position; // Mouse pos relative to ListBox's (0,0)
+        // event.mouse.position is ALREADY LOCAL to this ListBoxWidget's (0,0)
+        // because UIManager/ContainerWidget would have translated it.
+        Point mousePosInWidget = event.mouse.position;
 
-        // Mouse position relative to the client area (where items are drawn)
+
+
+        // Calculate mouse position relative to the client area (where items are actually drawn)
         Point mousePosInClient = {
             mousePosInWidget.x - localClientBounds.x,
             mousePosInWidget.y - localClientBounds.y
         };
 
-        if (event.mouse.type == MouseEventType::Move) {
-            if (mousePosInClient.x >= 0 && mousePosInClient.x < localClientBounds.width &&
-                mousePosInClient.y >= 0 && mousePosInClient.y < localClientBounds.height)
-            {
-                // Item index calculation needs to account for scrollOffset
+        // Check if mouse is within the overall bounds of the ListBox widget first
+        if (!localBounds.Contains(mousePosInWidget)) {
+            // If mouse isn't even over the widget, but it somehow got the event (e.g., capture),
+            // we might still want to handle specific things like a Leave event if it was previously hovered.
+            if (event.mouse.type == MouseEventType::Leave) {
+                if (hoverIndex != -1) {
+                    hoverIndex = -1;
+                    MarkDirty(false);
+                }
+            }
+            // For other events, if not within bounds, usually don't handle.
+            // However, UIManager's dispatch logic should prevent non-capture events from reaching here
+            // if the mouse isn't over.
+            // Widget::HandleEvent(event); // Call base for generic non-hit events if any
+            return;
+        }
+
+        // At this point, the mouse IS over the ListBoxWidget.
+        // Now check if it's specifically within the client area for item interactions.
+        bool mouseOverClientArea = localClientBounds.Contains(mousePosInWidget);
+
+
+        switch (event.mouse.type) {
+        case MouseEventType::Move:
+            if (mouseOverClientArea) {
                 int idx = (mousePosInClient.y + scrollOffsetY) / itemHeight;
                 if (idx >= 0 && idx < (int)items.size()) {
                     if (hoverIndex != idx) {
@@ -181,85 +211,184 @@ void ListBoxWidget::HandleEvent(UIEvent& event) {
                     if (hoverIndex != -1) { hoverIndex = -1; MarkDirty(false); }
                 }
             }
-            else {
+            else { // Mouse is over padding/border of the ListBox, not items
                 if (hoverIndex != -1) { hoverIndex = -1; MarkDirty(false); }
             }
+            // ListBox often consumes Move events over it to manage hover, even if no specific callback.
             event.handled = true;
-        }
-        else if (event.mouse.type == MouseEventType::Press && event.mouse.button == MouseButton::Left) {
-            if (mousePosInClient.x >= 0 && mousePosInClient.x < localClientBounds.width &&
-                mousePosInClient.y >= 0 && mousePosInClient.y < localClientBounds.height)
-            {
-                int idx = (mousePosInClient.y + scrollOffsetY) / itemHeight; // Account for scroll
+            break;
+
+        case MouseEventType::Press:
+            if (mouseOverClientArea) { // Click must be on the item area
+                int idx = (mousePosInClient.y + scrollOffsetY) / itemHeight;
                 if (idx >= 0 && idx < (int)items.size()) { // Clicked on a valid item
-                    selectedIndex = idx;
-                    hoverIndex = idx; // Update hover to selected
-                    if (OnItemSelected) {
-                        OnItemSelected(this, selectedIndex, items[selectedIndex]);
+                    if (event.mouse.button == MouseButton::Left) {
+                        if (selectedIndex != idx) {
+                            selectedIndex = idx;
+                            // hoverIndex = idx; // Already handled by move or will be updated
+                            if (OnItemSelected) {
+                                OnItemSelected(this, selectedIndex, items[selectedIndex]);
+                            }
+                            MarkDirty(false);
+                        }
+                        else { // Clicked on already selected item
+                            if (OnItemSelected) { // Some might want to re-trigger selection
+                                OnItemSelected(this, selectedIndex, items[selectedIndex]);
+                            }
+                        }
+                        RequestFocus();
+                        event.handled = true;
                     }
-                    MarkDirty(false);
-                    RequestFocus(); // ListBox should get focus on click
+                    else if (event.mouse.button == MouseButton::Right) {
+                        // Select the item on right-click as well (common behavior)
+                        if (selectedIndex != idx) {
+                            selectedIndex = idx;
+                            // hoverIndex = idx;
+                            // Optionally call OnItemSelected for right-click selection consistency:
+                            // if (OnItemSelected) {
+                            //    OnItemSelected(this, selectedIndex, items[selectedIndex]);
+                            // }
+                            MarkDirty(false);
+                        }
+                        RequestFocus();
+
+                        if (OnRightClickItem) {
+                            // event.mouse.screen_position should have been populated by UIManager
+                            OnRightClickItem(this, idx, items[idx], event.mouse.raw_position);
+                        }
+                        event.handled = true;
+                    }
                 }
-                event.handled = true;
             }
-        }
-        else if (event.mouse.type == MouseEventType::Scroll) {
-            // This event is relative to the ListBox widget itself.
-            // The ScrollableListBoxWidget's HandleEvent should capture this if mouse is over ListBox.
-        }
-        else if (event.mouse.type == MouseEventType::Leave) {
-            if (hoverIndex != -1) { hoverIndex = -1; MarkDirty(false); }
+            else { // Click on padding/border
+                RequestFocus(); // Focus the ListBox even if click is not on an item
+                event.handled = true; // Consume click on non-item area if ListBox is focusable
+            }
+            break;
+
+        case MouseEventType::Release:
+            // Standard OnClick from base Widget::HandleEvent might be called if not handled here.
+            // If you want specific release logic inside an item:
+            // if (mouseOverClientArea && event.mouse.button == MouseButton::Left) {
+            //    int idx = (mousePosInClient.y + scrollOffsetY) / itemHeight;
+            //    if (idx == selectedIndex && idx != -1) {
+            //        // Potentially trigger an action if release is on the selected item
+            //    }
+            // }
+            // For now, let base handle generic clicks or specific mouse up.
+            break;
+
+        case MouseEventType::Scroll:
+            if (mouseOverClientArea || localBounds.Contains(mousePosInWidget)) { // Scroll if mouse is anywhere over the ListBox
+                int oldOffset = scrollOffsetY;
+                int scrollAmount = (event.mouse.scrollDelta / WHEEL_DELTA) * itemHeight; // Scroll by item height units
+                SetScrollOffset(scrollOffsetY - scrollAmount);
+                if (scrollOffsetY != oldOffset) {
+                    // If ListBox is part of ScrollableListBox, the parent needs to know
+                    // to update its scrollbar. This might be done via an OnScroll callback
+                    // from ListBox or by parent polling.
+                    // For now, ListBox handles its own scroll state.
+                    event.handled = true;
+                }
+            }
+            break;
+
+        case MouseEventType::Leave:
+            if (hoverIndex != -1) {
+                hoverIndex = -1;
+                MarkDirty(false);
+            }
+            // event.handled = true; // Usually, leave events are informational
+            break;
+
+        default:
+            break;
         }
     }
     else if (event.eventType == UIEvent::Type::Keyboard && hasFocus) {
-        // Keyboard navigation should also account for scrolling and ensure selected item is visible
         if (event.keyboard.type == KeyEventType::Press) {
             int newIndex = selectedIndex;
-            if (items.empty()) { event.handled = true; return; }
+            if (items.empty() && event.keyboard.keyCode != KeyCode::Escape) { // Allow Escape even if empty
+                event.handled = true;
+                return;
+            }
 
-            if (event.keyboard.keyCode == KeyCode::UpArrow) {
+            switch (event.keyboard.keyCode) {
+            case KeyCode::UpArrow:
                 newIndex = (selectedIndex <= 0) ? 0 : selectedIndex - 1;
-            }
-            else if (event.keyboard.keyCode == KeyCode::DownArrow) {
-                newIndex = (selectedIndex < 0) ? 0 : std::min((int)items.size() - 1, selectedIndex + 1);
-            }
-            else if (event.keyboard.keyCode == KeyCode::Home) {
-                newIndex = 0;
-            }
-            else if (event.keyboard.keyCode == KeyCode::End) {
-                newIndex = (int)items.size() - 1;
-            }
-            else if (event.keyboard.keyCode == KeyCode::PageUp) {
-                int itemsPerPage = localClientBounds.height / itemHeight;
-                newIndex = std::max(0, selectedIndex - itemsPerPage);
-            }
-            else if (event.keyboard.keyCode == KeyCode::PageDown) {
-                int itemsPerPage = localClientBounds.height / itemHeight;
-                newIndex = std::min((int)items.size() - 1, selectedIndex + itemsPerPage);
-                if (selectedIndex < 0) newIndex = std::min((int)items.size() - 1, itemsPerPage - 1);
-            }
-            else if (event.keyboard.keyCode == KeyCode::Enter && selectedIndex != -1) {
-                if (OnItemSelected) OnItemSelected(this, selectedIndex, items[selectedIndex]);
+                if (items.empty()) newIndex = -1;
+                break;
+            case KeyCode::DownArrow:
+                newIndex = (selectedIndex < 0 && !items.empty()) ? 0 : std::min((int)items.size() - 1, selectedIndex + 1);
+                if (items.empty()) newIndex = -1;
+                break;
+            case KeyCode::Home:
+                newIndex = items.empty() ? -1 : 0;
+                break;
+            case KeyCode::End:
+                newIndex = items.empty() ? -1 : (int)items.size() - 1;
+                break;
+            case KeyCode::PageUp:
+                if (!items.empty()) {
+                    int itemsPerPage = localClientBounds.height > 0 ? (localClientBounds.height / itemHeight) : 1;
+                    itemsPerPage = std::max(1, itemsPerPage);
+                    newIndex = (selectedIndex < 0) ? 0 : std::max(0, selectedIndex - itemsPerPage);
+                }
+                else {
+                    newIndex = -1;
+                }
+                break;
+            case KeyCode::PageDown:
+                if (!items.empty()) {
+                    int itemsPerPage = localClientBounds.height > 0 ? (localClientBounds.height / itemHeight) : 1;
+                    itemsPerPage = std::max(1, itemsPerPage);
+                    newIndex = (selectedIndex < 0) ? (std::min((int)items.size() - 1, itemsPerPage - 1)) : std::min((int)items.size() - 1, selectedIndex + itemsPerPage);
+                }
+                else {
+                    newIndex = -1;
+                }
+                break;
+            case KeyCode::Enter:
+            case KeyCode::Space: // Often Space also selects in lists
+                if (selectedIndex != -1 && OnItemSelected) {
+                    OnItemSelected(this, selectedIndex, items[selectedIndex]);
+                }
+                break;
+            default: // Unhandled key press for ListBox
+                event.handled = false; // Explicitly mark unhandled if not processed
+                break; // Important to prevent event.handled = true below for these keys
             }
 
-            if (newIndex != selectedIndex || (selectedIndex == -1 && newIndex == 0 && !items.empty())) {
+            // If a key was handled above (other than default), event.handled should be true by now
+            // or will be set true after this block.
+            if (newIndex != selectedIndex && !items.empty()) {
                 selectedIndex = newIndex;
-                hoverIndex = newIndex; // Keep hover consistent
-                // Ensure selected item is visible
+                hoverIndex = newIndex;
+
                 int itemTopY = selectedIndex * itemHeight;
                 int itemBottomY = itemTopY + itemHeight;
-                if (itemTopY < scrollOffsetY) { // Item is above visible area
-                    SetScrollOffset(itemTopY);
-                }
-                else if (itemBottomY > scrollOffsetY + localClientBounds.height) { // Item is below
-                    SetScrollOffset(itemBottomY - localClientBounds.height);
+                if (localClientBounds.height > 0) { // Ensure client bounds are valid for scrolling
+                    if (itemTopY < scrollOffsetY) {
+                        SetScrollOffset(itemTopY);
+                    }
+                    else if (itemBottomY > scrollOffsetY + localClientBounds.height) {
+                        SetScrollOffset(itemBottomY - localClientBounds.height);
+                    }
                 }
                 MarkDirty(false);
             }
-            event.handled = true;
+            // If any keyboard navigation happened, or Enter/Space was pressed, mark handled.
+            if (event.keyboard.keyCode == KeyCode::UpArrow || event.keyboard.keyCode == KeyCode::DownArrow ||
+                event.keyboard.keyCode == KeyCode::Home || event.keyboard.keyCode == KeyCode::End ||
+                event.keyboard.keyCode == KeyCode::PageUp || event.keyboard.keyCode == KeyCode::PageDown ||
+                event.keyboard.keyCode == KeyCode::Enter || event.keyboard.keyCode == KeyCode::Space) {
+                event.handled = true;
+            }
         }
     }
-    if (!event.handled) { // If not handled by specific listbox logic, pass to base
+
+    // If the event was not handled by specific ListBox logic, pass it to the base Widget
+    if (!event.handled) {
         Widget::HandleEvent(event);
     }
 }

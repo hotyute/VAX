@@ -35,7 +35,7 @@ void open_adx(std::string path)
 		updateFlags[GBL_COLLISION_LINE] = true;
 		zoom_phase = 2;
 		rangeb->refreshOption2();
-		refresh_ctrl_list();
+		NotifyControllerListUIDirty();
 	}
 }
 
