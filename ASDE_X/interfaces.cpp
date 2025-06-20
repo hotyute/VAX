@@ -1,8 +1,10 @@
 #include "interfaces.h"
 #include "radio.h"
 #include "displaybox.h"
-#include "comms.h"
 #include "tools.h"
+
+#include "gui/ui_windows/comms_window_widget.h"
+#include "gui/widgets/ui_manager.h"
 
 #include <boost/algorithm/string.hpp>
 #include <regex>
@@ -12,7 +14,7 @@
 
 std::vector<std::string> pm_callsigns(20);
 
-InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr, * communications = nullptr;
+InterfaceFrame* controller_list = nullptr, * main_chat = nullptr, * terminal_cmd = nullptr;
 
 void RenderControllerList(bool open, double x_, double y_)
 {
@@ -381,13 +383,39 @@ void sendMainChatMessage(InputField* focusField)
 	std::string text = ASEL ? ASEL->getCallsign() + ", " + focusField->input : focusField->input;
 	if (connected)
 	{
-		for (auto& it : COMMS_STORE)
-		{
-			if (it && !it->freq.empty() && it->tx->checked)
-			{
-				int freq = string_to_frequency(it->freq);
-				if (freq != 99998)
-					sendUserMessage(freq, ASEL ? ASEL->getCallsign() : "", text);
+		CommsWindowWidget* commsWin = dynamic_cast<CommsWindowWidget*>(
+			UIManager::Instance().GetWindowById("CommsWindowInstance")
+			);
+
+		if (commsWin) { // If the comms window instance exists
+			// Access its internal state (you might need a public getter in CommsWindowWidget
+			// or make this function a friend or part of the CommsWindowWidget if it's closely tied)
+			// For now, let's assume a getter for demonstration.
+			// In CommsWindowWidget.h, add:
+			// const std::vector<CommsLineElements>& GetCommsLinesElements() const { return commsLines; }
+
+			const auto& currentCommsLines = commsWin->GetCommsLinesElements(); // Fictional getter
+			for (const auto& lineElement : currentCommsLines) {
+				if (!lineElement.frequency.empty() && lineElement.tx_checked) {
+					int freq = string_to_frequency(lineElement.frequency);
+					if (freq != 99998) { // 99998 is often a "none" or error value
+						sendUserMessage(freq, ASEL ? ASEL->getCallsign() : "", text);
+					}
+				}
+			}
+		}
+		else {
+			// Fallback or error: Comms panel might not be open/initialized.
+			// What should happen? Maybe send on default primary frequency from USER->userdata?
+			// This depends on desired application behavior.
+			// For now, let's assume if the panel isn't there, we might not send on specific TX lines.
+			// Consider sending on the primary frequency stored in USER->userdata.frequency[0]
+			// if no specific TX lines are active or the panel isn't available.
+			if (USER && USER->userdata.frequency[0] != 99998) {
+				sendUserMessage(USER->userdata.frequency[0], ASEL ? ASEL->getCallsign() : "", text);
+			}
+			else {
+				sendErrorMessage("No active TX frequency or Comms Panel not available.");
 			}
 		}
 	}

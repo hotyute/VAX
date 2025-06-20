@@ -10,16 +10,11 @@
 
 class User;
 
-#ifndef __Pmessages_h
-#define __Pmessages_h
 struct PrivateMessages
 {
 	std::unordered_map<User*, ChatLine*> message_history;
 };
-#endif
 
-#ifndef __Identity_user_h
-#define __Identity_user_h
 struct Identity {
 	std::string callsign;
 	std::string login_name;
@@ -31,18 +26,33 @@ struct Identity {
 	int pilot_rating = 0;
 	CLIENT_TYPES type;
 };
-#endif
 
-#ifndef __UserData_user_h
-#define __UserData_user_h
+// Define this struct before UserData
+struct CommsLinePersistentData {
+	std::string pos;
+	std::string freq;
+	bool tx_checked = false;
+	bool rx_checked = false;
+	bool hdst_checked = false;
+	bool spkr_checked = false;
+	// No isPrimary here; primary is an index stored separately.
+
+	CommsLinePersistentData() : pos("----"), freq("") {} // Default constructor
+};
+
 struct UserData {
-	int frequency[2], window_positions[4][2];
+	int frequency[2];
+	int window_positions[4][2];
+
+	// New comms configuration data
+	static const int NUM_SAVED_COMMS_LINES = 3;
+	CommsLinePersistentData commsConfig[NUM_SAVED_COMMS_LINES];
+	int primaryCommsLineIndex = -1; // -1 for no primary
+
+
 	UserData();
 };
-#endif
 
-#ifndef __User_user_h
-#define __User_user_h
 class User {
 public:
 	User(std::string, int, int);
@@ -91,5 +101,4 @@ protected:
 	double longitude;
 	HANDLE aMutex;
 };
-#endif
 

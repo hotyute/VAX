@@ -114,9 +114,6 @@
     <ClCompile Include="save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="comms.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="basic_stream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -315,9 +312,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="save.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="comms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="basic_stream.h">

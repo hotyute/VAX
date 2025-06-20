@@ -768,6 +768,10 @@ inline TWindowWidget* UIManager::ShowOrCreateInstance(const std::string& windowI
         if (targetWindow && targetWindow->focusable) {
             targetWindow->RequestFocus();
         }
+
+        if (targetWindow) {
+            targetWindow->OnShowOrBringToFront();
+        }
     }
     return targetWindow;
 }

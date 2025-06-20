@@ -189,7 +189,6 @@
     <ClCompile Include="gui\widgets\window_widget.cpp" />
     <ClCompile Include="tempdata.cpp" />
     <ClCompile Include="collision.cpp" />
-    <ClCompile Include="comms.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="constants.cpp" />
     <ClCompile Include="controller.cpp" />
@@ -229,7 +228,6 @@
     <ClInclude Include="clinc.h" />
     <ClInclude Include="clinc2.h" />
     <ClInclude Include="collision.h" />
-    <ClInclude Include="comms.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="controller.h" />

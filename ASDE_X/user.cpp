@@ -51,6 +51,12 @@ UserData::UserData()
 		window_positions[i][0] = -1;
 		window_positions[i][1] = -1;
 	}
+
+	// Initialize new comms data
+	primaryCommsLineIndex = -1;
+	for (int i = 0; i < NUM_SAVED_COMMS_LINES; ++i) {
+		// commsConfig[i] is default constructed (pos="----", freq="", bools=false)
+	}
 }
 
 void User::registerScript(User* subject, int index, const ClientScript& proposed) {

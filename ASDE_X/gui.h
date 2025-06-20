@@ -1,5 +1,4 @@
-#ifndef GUI_H
-#define GUI_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -179,7 +178,3 @@ extern std::vector<InterfaceFrame*> rendered_frames;
 extern ChildFrame* focusChild, * lastFocus;
 extern std::vector<InterfaceFrame*> deleteInterfaces, updateInterfaces;
 extern InterfaceFrame* _openedframe;
-
-
-
-#endif

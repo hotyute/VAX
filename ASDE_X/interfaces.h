@@ -1,5 +1,4 @@
-#ifndef __INTERFACES_H
-#define __INTERFACES_H
+#pragma once
 
 #include "main.h"
 #include "packets.h"
@@ -27,6 +26,4 @@ void sendPrivateChatMessage(InterfaceFrame& frame, InputField* focusField);
 
 void sendATCMessage(std::string message);
 
-extern InterfaceFrame* controller_list, *main_chat, *terminal_cmd, *communications;
-
-#endif
+extern InterfaceFrame* controller_list, *main_chat, *terminal_cmd;

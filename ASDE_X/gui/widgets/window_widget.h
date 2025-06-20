@@ -19,6 +19,8 @@ public:
     void SetDraggable(bool canDrag) { draggable = canDrag; }
     void SetClosable(bool canClose) { closable = canClose; }
 
+    virtual void LoadState() { }
+    virtual void SaveState() { }
     virtual void OnShowOrBringToFront() { }
 
     ContainerWidget* GetContentArea() const { return contentArea; } // <<< ADDED THIS GETTER

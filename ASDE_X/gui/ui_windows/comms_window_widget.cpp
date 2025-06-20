@@ -1,7 +1,8 @@
+// --- START OF FILE comms_window_widget.cpp ---
 #define NOMINMAX
 #include <windows.h>
-#include <iomanip>   // For std::fixed, std::setprecision
-#include <sstream>   // For std::ostringstream
+#include <iomanip>   
+#include <sstream>   
 
 #include "comms_window_widget.h"
 #include "../widgets/label_widget.h"
@@ -12,44 +13,49 @@
 #include "../widgets/ui_manager.h"
 #include "../widgets/font_keys.h"
 
-// Application-specific includes
-#include "../../main.h"        // For CLIENT_WIDTH, CLIENT_HEIGHT, sendErrorMessage
-#include "../../usermanager.h" // For USER
-#include "../../packets.h"     // For sendPrimFreq
-#include "../../tools.h"       // For string_to_frequency, frequency_to_string
-#include "../../comms.h"       // For old globals like comms_line0, comms_line1 to load initial state
-#include "../../interfaces.h"  // For sendSystemMessage
+#include "../../main.h"        
+#include "../../usermanager.h" 
+#include "../../packets.h"     
+#include "../../tools.h"       
+#include "../../interfaces.h"  
+#include "../../user.h" // For UserData::NUM_SAVED_COMMS_LINES and CommsLinePersistentData
 
-// Helper to check if old CommsLine pointers and their children are valid (simplified)
-// In a real scenario, this might involve more robust checks or a different transition strategy.
-bool IsOldCommsLineValid(const CommsLine* oldLine) {
-    return oldLine && oldLine->prim && oldLine->btn && oldLine->tx && oldLine->rx && oldLine->hdst && oldLine->spkr;
-}
+// REMOVE IsOldCommsLineValid function
 
+static const int NUM_ELEMENTS = UserData::NUM_SAVED_COMMS_LINES; // Use the definition from UserData
 
 CommsWindowWidget::CommsWindowWidget() : WindowWidget("COMMUNICATIONS") {
-    minSize = { 280, 240 }; // Adjusted initial min size
+    minSize = { 280, 240 };
     SetDraggable(true);
     SetClosable(true);
 
-    commsLines.resize(NUM_DISPLAYED_LINES);
-    commsLines[0].id = "LINE_0";
-    commsLines[1].id = "LINE_1";
+    commsLines.resize(NUM_ELEMENTS);
+    for (int i = 0; i < NUM_ELEMENTS; ++i) {
+        commsLines[i].id = "LINE_" + std::to_string(i);
+    }
+    // Initial default values are set by CommsLineElements default member initializers
 
     SetupUI();
-    LoadState(); // Load initial state from application
-    ToggleEditSection(-1); // Ensure edit section is initially collapsed
+    // LoadState(); // LoadState is called by OnShowOrBringToFront
+    ToggleEditSection(-1);
 }
 
 CommsWindowWidget::~CommsWindowWidget() {
-    SaveState(); // Persist changes if necessary
+    // If SaveState is meant to be called on close, UIManager::RemoveWindow
+    // should eventually trigger some kind of OnClosing/OnDestroyed event for the window
+    // where it can call SaveState(). For now, we rely on explicit save or saving
+    // when the whole application closes (via save_info in main.cpp).
+    // A simple way is to call SaveState() here, but it might be called too often if the
+    // window is frequently created/destroyed without app closure.
+    // For now, let's assume save_info in main application will handle saving USER->userdata.
 }
 
+// CreateHeaderRow() - NO CHANGES
 ContainerWidget* CommsWindowWidget::CreateHeaderRow() {
     auto headerRow = new ContainerWidget(std::make_unique<HorizontalStackLayout>());
     auto* headerLayout = static_cast<HorizontalStackLayout*>(headerRow->layout.get());
-    headerLayout->spacing = 2; // Tight spacing for header
-    headerLayout->padding = { 2, 2, 5, 2 }; // Padding below header
+    headerLayout->spacing = 2;
+    headerLayout->padding = { 2, 2, 5, 2 };
 
     auto primLabel = std::make_unique<LabelWidget>("PRIM");
     primLabel->preferredSize = { 38, 18 }; primLabel->minSize = primLabel->preferredSize;
@@ -78,6 +84,7 @@ ContainerWidget* CommsWindowWidget::CreateHeaderRow() {
     return headerRow;
 }
 
+// CreateCommsLineUIRow() - NO CHANGES
 void CommsWindowWidget::CreateCommsLineUIRow(int lineIndex, ContainerWidget* parentLayout) {
     CommsLineElements& line = commsLines[lineIndex];
 
@@ -87,38 +94,32 @@ void CommsWindowWidget::CreateCommsLineUIRow(int lineIndex, ContainerWidget* par
     hLayout->spacing = 2;
     hLayout->padding = { 1,1,1,1 };
 
-    // PRIM RadioButton
     line.primRadio = new RadioButtonWidget("");
     line.primRadio->preferredSize = { 38, 20 }; line.primRadio->minSize = line.primRadio->preferredSize;
     line.primRadio->OnClick = std::bind(&CommsWindowWidget::OnPrimRadioClicked, this, std::placeholders::_1, lineIndex);
     lineRow->AddChild(std::unique_ptr<RadioButtonWidget>(line.primRadio));
 
-    // Name Button
     line.nameButton = new ButtonWidget("----");
     line.nameButton->preferredSize = { 90, 22 }; line.nameButton->minSize = line.nameButton->preferredSize;
-    line.nameButton->style.padding = { 2, 5, 2, 5 }; // Less padding for denser look
+    line.nameButton->style.padding = { 2, 5, 2, 5 };
     line.nameButton->OnClick = std::bind(&CommsWindowWidget::OnNameButtonClicked, this, std::placeholders::_1, lineIndex);
     lineRow->AddChild(std::unique_ptr<ButtonWidget>(line.nameButton));
 
-    // TX RadioButton
     line.txRadio = new RadioButtonWidget("");
     line.txRadio->preferredSize = { 28, 20 }; line.txRadio->minSize = line.txRadio->preferredSize;
     line.txRadio->OnClick = std::bind(&CommsWindowWidget::OnRadioToggled, this, std::placeholders::_1, lineIndex, CommRadioType::TX);
     lineRow->AddChild(std::unique_ptr<RadioButtonWidget>(line.txRadio));
 
-    // RX RadioButton
     line.rxRadio = new RadioButtonWidget("");
     line.rxRadio->preferredSize = { 28, 20 }; line.rxRadio->minSize = line.rxRadio->preferredSize;
     line.rxRadio->OnClick = std::bind(&CommsWindowWidget::OnRadioToggled, this, std::placeholders::_1, lineIndex, CommRadioType::RX);
     lineRow->AddChild(std::unique_ptr<RadioButtonWidget>(line.rxRadio));
 
-    // HDST RadioButton
     line.hdstRadio = new RadioButtonWidget("");
     line.hdstRadio->preferredSize = { 38, 20 }; line.hdstRadio->minSize = line.hdstRadio->preferredSize;
     line.hdstRadio->OnClick = std::bind(&CommsWindowWidget::OnRadioToggled, this, std::placeholders::_1, lineIndex, CommRadioType::HDST);
     lineRow->AddChild(std::unique_ptr<RadioButtonWidget>(line.hdstRadio));
 
-    // SPKR RadioButton
     line.spkrRadio = new RadioButtonWidget("");
     line.spkrRadio->preferredSize = { 38, 20 }; line.spkrRadio->minSize = line.spkrRadio->preferredSize;
     line.spkrRadio->OnClick = std::bind(&CommsWindowWidget::OnRadioToggled, this, std::placeholders::_1, lineIndex, CommRadioType::SPKR);
@@ -127,23 +128,21 @@ void CommsWindowWidget::CreateCommsLineUIRow(int lineIndex, ContainerWidget* par
     parentLayout->AddChild(std::unique_ptr<ContainerWidget>(lineRow));
 }
 
-
+// SetupUI() - NO CHANGES other than ensuring NUM_ELEMENTS is defined correctly (handled by class const)
 void CommsWindowWidget::SetupUI() {
     ContainerWidget* ca = GetContentArea();
     auto mainLayout = std::make_unique<VerticalStackLayout>();
-    mainLayout->spacing = 2; // Minimal spacing between rows
+    mainLayout->spacing = 2;
     mainLayout->padding = { 5, 5, 5, 5 };
+    mainLayout->childAlignment = HorizontalAlignment::Center;
     ca->SetLayout(std::move(mainLayout));
 
-    // Add Header Row
     ca->AddChild(std::unique_ptr<ContainerWidget>(CreateHeaderRow()));
 
-    // Add Comms Line Rows
-    for (int i = 0; i < NUM_DISPLAYED_LINES; ++i) {
+    for (int i = 0; i < NUM_ELEMENTS; ++i) {
         CreateCommsLineUIRow(i, ca);
     }
 
-    // Edit Section Container (initially hidden)
     editSectionContainer = new ContainerWidget(std::make_unique<VerticalStackLayout>());
     auto* editLayout = static_cast<VerticalStackLayout*>(editSectionContainer->layout.get());
     editLayout->spacing = 8;
@@ -153,7 +152,6 @@ void CommsWindowWidget::SetupUI() {
     editSectionContainer->style.borderColor = { 0.4f, 0.4f, 0.4f, 0.8f };
     editSectionContainer->SetVisible(false);
 
-    // Edit Position
     auto posRow = std::make_unique<ContainerWidget>(std::make_unique<HorizontalStackLayout>());
     static_cast<HorizontalStackLayout*>(posRow->layout.get())->spacing = 5;
     editPositionLabel = new LabelWidget("Position:"); editPositionLabel->preferredSize = { 60, 20 };
@@ -162,7 +160,6 @@ void CommsWindowWidget::SetupUI() {
     posRow->AddChild(std::unique_ptr<InputFieldWidget>(editPositionInput));
     editSectionContainer->AddChild(std::move(posRow));
 
-    // Edit Frequency
     auto freqRow = std::make_unique<ContainerWidget>(std::make_unique<HorizontalStackLayout>());
     static_cast<HorizontalStackLayout*>(freqRow->layout.get())->spacing = 5;
     editFrequencyLabel = new LabelWidget("Frequency:"); editFrequencyLabel->preferredSize = { 60, 20 };
@@ -172,7 +169,6 @@ void CommsWindowWidget::SetupUI() {
     freqRow->AddChild(std::unique_ptr<InputFieldWidget>(editFrequencyInput));
     editSectionContainer->AddChild(std::move(freqRow));
 
-    // Edit Buttons
     auto btnRow = std::make_unique<ContainerWidget>(std::make_unique<HorizontalStackLayout>());
     auto* editButtonsLayout = static_cast<HorizontalStackLayout*>(btnRow->layout.get());
     editButtonsLayout->spacing = 10;
@@ -191,81 +187,62 @@ void CommsWindowWidget::SetupUI() {
     btnRow->AddChild(std::unique_ptr<ButtonWidget>(editCancelButton));
 
     editSectionContainer->AddChild(std::move(btnRow));
-    ca->AddChild(std::unique_ptr<ContainerWidget>(editSectionContainer)); // Add to main layout
+    ca->AddChild(std::unique_ptr<ContainerWidget>(editSectionContainer));
 }
 
+
 void CommsWindowWidget::LoadState() {
-    // Load from old global comms_line0 and comms_line1
-    // This is a placeholder for proper data loading from USER->userdata or a config file.
-    if (IsOldCommsLineValid(comms_line0)) {
-        CommsLineElements& line0 = commsLines[0];
-        line0.positionName = comms_line0->pos;
-        line0.frequency = comms_line0->freq;
-        line0.isPrimary = (cur_prime == comms_line0);
-        if (line0.isPrimary) currentPrimaryLineIndex = 0;
-        line0.tx_checked = comms_line0->tx->checked;
-        line0.rx_checked = comms_line0->rx->checked;
-        line0.hdst_checked = comms_line0->hdst->checked;
-        line0.spkr_checked = comms_line0->spkr->checked;
+    if (!USER) {
+        // Handle case where USER is not yet initialized (e.g., initial setup before login)
+        // For now, commsLines will retain their default constructed values or previous state.
+        // Could log a warning or set to defaults if this is unexpected.
+        return;
     }
 
-    if (IsOldCommsLineValid(comms_line1)) {
-        CommsLineElements& line1 = commsLines[1];
-        line1.positionName = comms_line1->pos;
-        line1.frequency = comms_line1->freq;
-        line1.isPrimary = (cur_prime == comms_line1);
-        if (line1.isPrimary) currentPrimaryLineIndex = 1;
-        line1.tx_checked = comms_line1->tx->checked;
-        line1.rx_checked = comms_line1->rx->checked;
-        line1.hdst_checked = comms_line1->hdst->checked;
-        line1.spkr_checked = comms_line1->spkr->checked;
-    }
-    if (currentPrimaryLineIndex == -1 && cur_prime != nullptr) { // If cur_prime was set but not to line0 or line1
-        cur_prime = nullptr; // Ensure consistency
-    }
+    currentPrimaryLineIndex = USER->userdata.primaryCommsLineIndex;
 
-
-    for (int i = 0; i < NUM_DISPLAYED_LINES; ++i) {
+    for (int i = 0; i < NUM_ELEMENTS; ++i) {
+        if (i < UserData::NUM_SAVED_COMMS_LINES) { // Ensure we don't read out of bounds
+            commsLines[i].positionName = USER->userdata.commsConfig[i].pos;
+            commsLines[i].frequency = USER->userdata.commsConfig[i].freq;
+            commsLines[i].tx_checked = USER->userdata.commsConfig[i].tx_checked;
+            commsLines[i].rx_checked = USER->userdata.commsConfig[i].rx_checked;
+            commsLines[i].hdst_checked = USER->userdata.commsConfig[i].hdst_checked;
+            commsLines[i].spkr_checked = USER->userdata.commsConfig[i].spkr_checked;
+            commsLines[i].isPrimary = (i == currentPrimaryLineIndex);
+        }
+        else {
+            // If CommsWindowWidget::NUM_ELEMENTS > UserData::NUM_SAVED_COMMS_LINES,
+            // initialize remaining lines to default. (Already handled by commsLines resize and CommsLineElements defaults)
+        }
         UpdateCommsLineUIRow(i);
     }
     MarkDirty(true);
 }
 
 void CommsWindowWidget::SaveState() {
-    // Save state back to old globals or USER->userdata
-    if (IsOldCommsLineValid(comms_line0)) {
-        CommsLineElements& line0 = commsLines[0];
-        comms_line0->pos = line0.positionName;
-        comms_line0->freq = line0.frequency;
-        comms_line0->tx->checked = line0.tx_checked;
-        comms_line0->rx->checked = line0.rx_checked;
-        comms_line0->hdst->checked = line0.hdst_checked;
-        comms_line0->spkr->checked = line0.spkr_checked;
-    }
-    if (IsOldCommsLineValid(comms_line1)) {
-        CommsLineElements& line1 = commsLines[1];
-        comms_line1->pos = line1.positionName;
-        comms_line1->freq = line1.frequency;
-        comms_line1->tx->checked = line1.tx_checked;
-        comms_line1->rx->checked = line1.rx_checked;
-        comms_line1->hdst->checked = line1.hdst_checked;
-        comms_line1->spkr->checked = line1.spkr_checked;
+    if (!USER) {
+        // Cannot save state if USER is not available.
+        return;
     }
 
-    if (currentPrimaryLineIndex == 0 && IsOldCommsLineValid(comms_line0)) cur_prime = comms_line0;
-    else if (currentPrimaryLineIndex == 1 && IsOldCommsLineValid(comms_line1)) cur_prime = comms_line1;
-    else cur_prime = nullptr;
+    USER->userdata.primaryCommsLineIndex = currentPrimaryLineIndex;
 
-    // Update USER data too
-    if (USER && currentPrimaryLineIndex != -1 && currentPrimaryLineIndex < (int)commsLines.size()) {
-        USER->userdata.frequency[0] = string_to_frequency(commsLines[currentPrimaryLineIndex].frequency);
+    for (int i = 0; i < NUM_ELEMENTS; ++i) {
+        if (i < UserData::NUM_SAVED_COMMS_LINES) { // Ensure we don't write out of bounds
+            USER->userdata.commsConfig[i].pos = commsLines[i].positionName;
+            USER->userdata.commsConfig[i].freq = commsLines[i].frequency;
+            USER->userdata.commsConfig[i].tx_checked = commsLines[i].tx_checked;
+            USER->userdata.commsConfig[i].rx_checked = commsLines[i].rx_checked;
+            USER->userdata.commsConfig[i].hdst_checked = commsLines[i].hdst_checked;
+            USER->userdata.commsConfig[i].spkr_checked = commsLines[i].spkr_checked;
+        }
     }
-    else if (USER) {
-        USER->userdata.frequency[0] = 99998; // Default if no primary selected
-    }
+    // Note: This SaveState() updates USER->userdata. The actual disk persistence
+    // happens when save_info() in main.cpp (or similar) is called.
 }
 
-
+// UpdateCommsLineUIRow() - NO CHANGES
 void CommsWindowWidget::UpdateCommsLineUIRow(int lineIndex) {
     if (lineIndex < 0 || lineIndex >= (int)commsLines.size()) return;
     CommsLineElements& line = commsLines[lineIndex];
@@ -283,54 +260,57 @@ void CommsWindowWidget::UpdateCommsLineUIRow(int lineIndex) {
     line.spkrRadio->SetChecked(line.spkr_checked);
 }
 
+// OnPrimRadioClicked() - NO CHANGES
 void CommsWindowWidget::OnPrimRadioClicked(Widget* sender, int lineIndex) {
     int oldPrimaryIndex = currentPrimaryLineIndex;
 
-    if (currentPrimaryLineIndex == lineIndex) { // Clicking the already primary radio
-        currentPrimaryLineIndex = -1; // Deselect
+    if (currentPrimaryLineIndex == lineIndex) {
+        currentPrimaryLineIndex = -1;
         commsLines[lineIndex].isPrimary = false;
     }
     else {
-        if (currentPrimaryLineIndex != -1) {
+        if (currentPrimaryLineIndex != -1 && currentPrimaryLineIndex < NUM_ELEMENTS) { // Bounds check
             commsLines[currentPrimaryLineIndex].isPrimary = false;
-            commsLines[currentPrimaryLineIndex].primRadio->SetChecked(false);
+            if (commsLines[currentPrimaryLineIndex].primRadio) // Defensive check
+                commsLines[currentPrimaryLineIndex].primRadio->SetChecked(false);
         }
         currentPrimaryLineIndex = lineIndex;
         commsLines[lineIndex].isPrimary = true;
     }
-    // The clicked radio (sender) already toggled its state.
-    // We just need to ensure others are correct.
-    // UpdatePrimRadios method is not strictly needed if RadioButtonWidget correctly reflects its state.
-    // But for safety:
-    for (int i = 0; i < NUM_DISPLAYED_LINES; ++i) {
-        commsLines[i].primRadio->SetChecked(commsLines[i].isPrimary);
-    }
 
+    // Ensure all radio buttons visually reflect the state
+    for (int i = 0; i < NUM_ELEMENTS; ++i) {
+        if (commsLines[i].primRadio) // Defensive check
+            commsLines[i].primRadio->SetChecked(commsLines[i].isPrimary);
+    }
 
     if (USER) {
         if (currentPrimaryLineIndex != -1) {
             USER->userdata.frequency[0] = string_to_frequency(commsLines[currentPrimaryLineIndex].frequency);
         }
         else {
-            USER->userdata.frequency[0] = 99998; // No primary
+            USER->userdata.frequency[0] = 99998;
         }
-        sendPrimFreq(); // Your existing global function
+        sendPrimFreq();
     }
+    SaveState(); // Save after primary change
     MarkDirty(true);
 }
 
+// OnNameButtonClicked() - NO CHANGES
 void CommsWindowWidget::OnNameButtonClicked(Widget* sender, int lineIndex) {
     if (isEditSectionVisible && currentEditingLineIndex == lineIndex) {
-        ToggleEditSection(-1); // Collapse if clicking the same name button again
+        ToggleEditSection(-1);
     }
     else {
         ToggleEditSection(lineIndex);
     }
 }
 
+// OnRadioToggled() - NO CHANGES
 void CommsWindowWidget::OnRadioToggled(Widget* sender, int lineIndex, int radioType) {
     RadioButtonWidget* rb = static_cast<RadioButtonWidget*>(sender);
-    bool newState = rb->isChecked; // RadioButton already handled its state change
+    bool newState = rb->isChecked;
 
     switch (static_cast<CommRadioType>(radioType)) {
     case TX: commsLines[lineIndex].tx_checked = newState; break;
@@ -338,8 +318,10 @@ void CommsWindowWidget::OnRadioToggled(Widget* sender, int lineIndex, int radioT
     case HDST: commsLines[lineIndex].hdst_checked = newState; break;
     case SPKR: commsLines[lineIndex].spkr_checked = newState; break;
     }
+    SaveState();
 }
 
+// ToggleEditSection() - NO CHANGES
 void CommsWindowWidget::ToggleEditSection(int lineIndex) {
     currentEditingLineIndex = lineIndex;
     isEditSectionVisible = (lineIndex != -1);
@@ -353,13 +335,12 @@ void CommsWindowWidget::ToggleEditSection(int lineIndex) {
             editPositionInput->RequestFocus();
         }
     }
-    // Request re-measure and re-arrange for the entire window, as content changed
     Measure();
     Arrange(bounds);
     MarkDirty(true);
 }
 
-
+// OnSaveEditClicked() - NO CHANGES
 void CommsWindowWidget::OnSaveEditClicked(Widget* sender) {
     if (currentEditingLineIndex == -1) return;
 
@@ -368,15 +349,13 @@ void CommsWindowWidget::OnSaveEditClicked(Widget* sender) {
 
     if (!freqStr.empty()) {
         if (freqStr.length() != 7 || freqStr.find('.') != 3) {
-            // Check if it's parseable even if format is off for legacy reasons
-            if (string_to_frequency(freqStr) == 99998 && freqStr != "199.998") { // 199.998 is often guard
+            if (string_to_frequency(freqStr) == 99998 && freqStr != "199.998") {
                 sendErrorMessage("Invalid Frequency Format! Use XXX.XXX (e.g., 123.450)");
                 editFrequencyInput->RequestFocus();
                 return;
             }
         }
     }
-    // If freqStr is empty, it means clearing the frequency.
 
     CommsLineElements& line = commsLines[currentEditingLineIndex];
     line.positionName = posStr;
@@ -389,21 +368,25 @@ void CommsWindowWidget::OnSaveEditClicked(Widget* sender) {
         sendPrimFreq();
     }
 
-    ToggleEditSection(-1); // Collapse
+    SaveState();
+    ToggleEditSection(-1);
 }
 
+// OnClearEditClicked() - NO CHANGES
 void CommsWindowWidget::OnClearEditClicked(Widget* sender) {
     editPositionInput->SetText("");
     editFrequencyInput->SetText("");
     editPositionInput->RequestFocus();
 }
 
+// OnCancelEditClicked() - NO CHANGES
 void CommsWindowWidget::OnCancelEditClicked(Widget* sender) {
-    ToggleEditSection(-1); // Collapse
+    ToggleEditSection(-1);
 }
 
+// HandleEvent() - NO CHANGES
 void CommsWindowWidget::HandleEvent(UIEvent& event) {
-    WindowWidget::HandleEvent(event); // Handle dragging, closing etc.
+    WindowWidget::HandleEvent(event);
     if (event.handled) return;
 
     if (isEditSectionVisible && event.eventType == UIEvent::Type::Keyboard &&

@@ -22,7 +22,6 @@
 #include "usermanager.h"
 #include "packets.h"
 #include "interfaces.h"
-#include "comms.h"
 #include "calc_cycles.h"
 #include "flightplan.h"
 #include "save.h"
