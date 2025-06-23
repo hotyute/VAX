@@ -31,8 +31,15 @@ ComboBoxWidget::ComboBoxWidget() : ContainerWidget() {
 
     // Initialize the callback for items selected in the dropdown
     onItemSelectedCallbackForDropdown = [this](ListBoxWidget* lb, int index, const std::string& text) {
-        this->SetSelectedIndex(index);
-        // ToggleDropdown(); // This will be called by SetSelectedIndex if it effectively closes the dropdown
+        this->SetSelectedIndex(index); // Update internal state and display text
+
+        // Defer closing the dropdown to avoid use-after-free
+        UIManager::Instance().DeferAction([this]() {
+            // Check if still visible and owned by this combo box, in case something else closed it
+            if (this->isDropdownVisible && ComboBoxWidget::activeDropdownOwner == this) {
+                this->ToggleDropdown();
+            }
+            });
         };
 
     // currentOpenDropdownListRawPtr is already initialized to nullptr

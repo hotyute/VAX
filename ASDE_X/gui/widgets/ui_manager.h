@@ -48,6 +48,8 @@ public:
     template <typename TWindowWidget, typename... Args>
     static TWindowWidget* ShowOrCreateInstance(const std::string& windowId, int windowPosConstant = -1, Args&&... args);
 
+    void DeferAction(std::function<void()> action);
+
 private:
     UIManager() = default;
     ~UIManager() = default;
@@ -68,4 +70,6 @@ private:
     // This helps the main WindowProcedure decide if it needs to do further default processing.
     bool lastEventHandledByUI_INTERNAL = false;
     friend class WindowProcedure; // Or make a public getter if preferred over friend
+
+    std::vector<std::function<void()>> m_deferredActions;
 };

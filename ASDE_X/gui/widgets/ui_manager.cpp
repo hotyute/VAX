@@ -571,6 +571,15 @@ void UIManager::ProcessSystemEvent(HWND hwnd, UINT message, WPARAM wParam, LPARA
         break;
     }
 
+    std::vector<std::function<void()>> actionsToRunNow = m_deferredActions;
+    m_deferredActions.clear(); // Clear before running to handle new deferrals from these actions
+
+    for (const auto& action : actionsToRunNow) {
+        if (action) { // Ensure the function object is valid
+            action();
+        }
+    }
+
     // This was at the end of the original. Moved it inside each case
     // if (uiEvent.handled) {
     //    this->lastEventHandledByUI_INTERNAL = true;
@@ -801,4 +810,8 @@ void UIManager::MarkAllWindowsDirty() {
             window->MarkDirty(true); // Mark self and children
         }
     }
+}
+
+void UIManager::DeferAction(std::function<void()> action) {
+    m_deferredActions.push_back(action);
 }
