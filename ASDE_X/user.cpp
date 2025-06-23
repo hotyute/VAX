@@ -57,6 +57,7 @@ UserData::UserData()
 	for (int i = 0; i < NUM_SAVED_COMMS_LINES; ++i) {
 		// commsConfig[i] is default constructed (pos="----", freq="", bools=false)
 	}
+	alwaysOnTop = false; // <<< INITIALIZE HERE
 }
 
 void User::registerScript(User* subject, int index, const ClientScript& proposed) {
@@ -95,7 +96,7 @@ void User::unregisterScript(User* subject, int index)
 		auto& script = *script_ptr;
 		int script_id = std::any_cast<int>(script.objects[0]);
 		if (script_id == 299) {
-			auto it = closureAreas.erase(index);			
+			auto it = closureAreas.erase(index);
 		}
 		script_ptr.reset();
 	}

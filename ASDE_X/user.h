@@ -49,6 +49,8 @@ struct UserData {
 	CommsLinePersistentData commsConfig[NUM_SAVED_COMMS_LINES];
 	int primaryCommsLineIndex = -1; // -1 for no primary
 
+	bool alwaysOnTop = false; // <<< ADDED THIS
+	float window_opacity = 0.8f;
 
 	UserData();
 };
@@ -101,4 +103,3 @@ protected:
 	double longitude;
 	HANDLE aMutex;
 };
-
