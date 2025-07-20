@@ -1,4 +1,7 @@
 #include "usermanager.h"
+
+#include <bit>
+
 #include "main.h"
 #include "renderer.h"
 #include "tools.h"
@@ -33,8 +36,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 		const char* username = stream.read_string();
 		const char* full_name = stream.read_string();
 		int vis_range = stream.read_unsigned_short();
-		long long lat = stream.readQWord();
-		long long lon = stream.readQWord();
+		double latitude = std::bit_cast<double>(stream.readQWord());
+		double longitude = std::bit_cast<double>(stream.readQWord());
 		User* user1 = nullptr;
 		if (type == CLIENT_TYPES::CONTROLLER_CLIENT)
 		{
@@ -88,8 +91,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 			user1->getIdentity()->username = username;
 			user1->setVisibility(vis_range);
 
-			user1->setLatitude((*reinterpret_cast<double*>(&lat)));
-			user1->setLongitude((*reinterpret_cast<double*>(&lon)));
+			user1->setLatitude(latitude);
+			user1->setLongitude(longitude);
 
 			users_map.emplace(user1->getCallsign(), user1);
 			user1->setUserIndex(index);
@@ -226,10 +229,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 		//Pilot  Update Packet
 		int index = stream.read_unsigned_short();
 		User* user1 = userStorage1.at(index);
-		long long lat = stream.readQWord();
-		long long lon = stream.readQWord();
-		double latitude = *reinterpret_cast<double*>(&lat);
-		double longitude = *reinterpret_cast<double*>(&lon);
+		double latitude = std::bit_cast<double>(stream.readQWord());
+		double longitude = std::bit_cast<double>(stream.readQWord());
 		long long hash = stream.readQWord();
 		unsigned long long num2 = hash >> 22;
 		unsigned int num3 = hash >> 12 & 1023u;
@@ -354,10 +355,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 		//Controller Update Packet
 		int index = stream.read_unsigned_short();
 		User* user1 = userStorage1.at(index);
-		long long lat = stream.readQWord();
-		long long lon = stream.readQWord();
-		double latitude = *reinterpret_cast<double*>(&lat);
-		double longitude = *reinterpret_cast<double*>(&lon);
+		double latitude = std::bit_cast<double>(stream.readQWord());
+		double longitude = std::bit_cast<double>(stream.readQWord());
 		int flags = stream.read_unsigned_byte();
 		if (user1)
 		{
