@@ -12,17 +12,39 @@ class Collision;
 #include "user.h"
 #include "collision.h"
 
-#ifndef History_aircraft_h
-#define History_aircraft_h
 class History {
 };
-#endif
 
-struct FlightPlan {
+class FlightPlan {
+public:
 	std::string departure, arrival, alternate, squawkCode = "0000";
 	std::string acType, scratchPad, cruise, route, remarks;
 	int flightRules = 0;
 	int cycle = 0;
+	template<typename... Args>
+	void updateFlightPlan(Args&&... args) {
+		static_assert((std::is_convertible_v<Args, std::string> && ...),
+			"All arguments must be convertible to std::string");
+
+		std::vector<std::string> values{ std::forward<Args>(args)... };
+
+		for (size_t i = 0; i < values.size(); ++i) {
+			switch (i) {
+			case 0: FlightPlan::squawkCode = values[i]; break;
+			case 1: FlightPlan::departure = values[i]; break;
+			case 2: FlightPlan::arrival = values[i]; break;
+			case 3: FlightPlan::alternate = values[i]; break;
+			case 4: FlightPlan::cruise = values[i]; break;
+			case 5: FlightPlan::acType = values[i]; break;
+			case 6: FlightPlan::scratchPad = values[i]; break;
+			case 7: FlightPlan::route = values[i]; break;
+			case 8: FlightPlan::remarks = values[i]; break;
+			default: break;
+			}
+		}
+
+		if (!values.empty()) ++cycle;
+	}
 };
 
 

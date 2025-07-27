@@ -302,16 +302,8 @@ void decodePackets(int opCode, BasicStream& stream) {
 #endif
 		if (type == CLIENT_TYPES::PILOT_CLIENT) {
 			int fr = stream.read_unsigned_byte();
-			char assigned_squawk[5], departure[5], arrival[5], alternate[5], cruise[6], ac_type[9], scratch[6], route[128], remarks[128];
-			stream.readString(assigned_squawk);
-			stream.readString(departure);
-			stream.readString(arrival);
-			stream.readString(alternate);
-			stream.readString(cruise);
-			stream.readString(ac_type);
-			stream.readString(scratch);
-			stream.readString(route);
-			stream.readString(remarks);
+			std::vector<std::string> vars(9);
+			for (auto& var : vars) { var = stream.read_std_string(); }
 
 			if (user1) { // user1 is the Aircraft*
 				CLIENT_TYPES type = user1->getIdentity()->type;
@@ -321,15 +313,7 @@ void decodePackets(int opCode, BasicStream& stream) {
 					fp.cycle = cur_cycle;
 
 					fp.flightRules = fr;
-					fp.squawkCode = assigned_squawk;
-					fp.departure = departure;
-					fp.arrival = arrival;
-					fp.alternate = alternate;
-					fp.cruise = cruise;
-					fp.acType = ac_type;
-					fp.scratchPad = scratch;
-					fp.route = route;
-					fp.remarks = remarks;
+					fp.updateFlightPlan(vars[0], vars[1], vars[2], vars[3], vars[4], vars[5], vars[6], vars[7], vars[8]);
 
 					// Now, try to update an open FlightPlanWindow
 					FlightPlanWindow* fpWin = UIManager::Instance().GetFlightPlanWindowForAircraft(&acf);

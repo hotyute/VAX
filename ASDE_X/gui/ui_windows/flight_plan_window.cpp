@@ -315,10 +315,10 @@ void FlightPlanWindow::PopulateWidgetsFromFlightPlan(const FlightPlan& fp, const
 	squawkInput->SetText(fp.squawkCode);
 
 	routeBox->Clear();
-	if (!fp.route.empty()) routeBox->AddLine(fp.route, style.foregroundColor); else routeBox->AddLine(" ", style.foregroundColor);
+	if (!fp.route.empty()) routeBox->AddLine(fp.route, routeBox->style.foregroundColor); else routeBox->AddLine(" ", routeBox->style.foregroundColor);
 
 	remarksBox->Clear();
-	if (!fp.remarks.empty()) remarksBox->AddLine(fp.remarks, style.foregroundColor); else remarksBox->AddLine(" ", style.foregroundColor);
+	if (!fp.remarks.empty()) remarksBox->AddLine(fp.remarks, remarksBox->style.foregroundColor); else remarksBox->AddLine(" ", remarksBox->style.foregroundColor);
 }
 
 void FlightPlanWindow::PopulateEmptyForCallsign(const std::string& callsign_str) {

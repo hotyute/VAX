@@ -1,3 +1,6 @@
+#include <any>
+#include <bit>
+
 #include "packets.h"
 #include "clinc2.h"
 #include "tools.h"
@@ -6,10 +9,8 @@
 void sendPositionUpdates(User& user) {
 	auto out = BasicStream(20);
 	out.create_frame_var_size(CONTROLLER_POS_UPDATE);
-	double lat = user.getLatitude();
-	double lon = user.getLongitude();
-	out.write_qword(*reinterpret_cast<long long*>(&lat));
-	out.write_qword(*reinterpret_cast<long long*>(&lon));
+	out.write_qword(std::bit_cast<long long>(user.getLatitude()));
+	out.write_qword(std::bit_cast<long long>(user.getLongitude()));
 	out.end_frame_var_size();
 	intter->sendMessage(&out);
 }
@@ -98,8 +99,8 @@ void sendTempData(const std::vector<LatLon>& data) {
 	for (int i_11_ = data.size() - 1; i_11_ >= 0; i_11_--) {
 		double lon = data[i_11_].lon;
 		double lat = data[i_11_].lat;
-		out.write_qword(*reinterpret_cast<long long*>(&lon));
-		out.write_qword(*reinterpret_cast<long long*>(&lat));
+		out.write_qword(std::bit_cast<long long>(lon));
+		out.write_qword(std::bit_cast<long long>(lat));
 	}
 	out.write_int(299);
 	out.end_frame_var_size_word();
