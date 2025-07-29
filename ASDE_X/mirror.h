@@ -49,6 +49,10 @@ public:
 	void setBoundaries(double minX, double maxX, double minY, double maxY);
 	bool within_boundary(Aircraft& aircraft);
 	void handleMovement(double n_x, double n_y);
+	double getMinX() const { return minX; }
+	double getMaxX() const { return maxX; }
+	double getMinY() const { return minY; }
+	double getMaxY() const { return maxY; }
 };
 #endif
 
